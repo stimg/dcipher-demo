@@ -284,7 +284,8 @@
         this.user = {};
         this.sessionId = '';
         this.sessionRec = '';
-        this.recMode = false;
+        this.eventIndex = 0;
+        this.appMode = '';
         this.eventsUnderMouse = [];
         this.clickDelay = 200;
 
@@ -292,13 +293,13 @@
 
             var self = this;
 
-            self.restoreState();
             self.db.init();
             self.db.getAllRecords().done(function () {
 
                 var recList = self.getDomElement('records');
 
                 self.createRecordList();
+                self.restoreState();
 
                 $(recList).on('mouseout', function () {
 
@@ -340,11 +341,11 @@
 
             }
 
-            this.recMode = !this.recMode;
 
-            if (this.recMode) {
+            if (this.appMode === '') {
 
                 // Turn on record mode
+                this.appMode = 'record';
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -374,6 +375,7 @@
             } else {
 
                 // Turn off record mode
+                this.appMode = '';
 
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
 
@@ -419,7 +421,7 @@
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
 
-            if (this.recMode && !$(this.getDomElement('container')).find(etarget).length) {
+            if (this.appMode && !$(this.getDomElement('container')).find(etarget).length) {
 
                 var rec = this.sessionRec,
                     events = rec.events,
@@ -1062,20 +1064,20 @@
 
         };
 
-        this.showSpiderGraph = function showSpiderGraph(sId) {
+        this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
 
-            var rec = this.getRecordById(sId);
+            var rec = this.getRecordById(sId),
+                cnvh = this.getDomElement('canvasHolder');
+
+            $(cnvh).show();
 
             if (rec.drawn) {
 
-                var cnvh = this.getDomElement('canvasHolder');
-
-                $(cnvh).show();
                 $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
 
             } else {
 
-                this.drawSpiderGraph(sId);
+                this.drawSpiderGraph(sId, start, end);
 
             }
 
@@ -1330,18 +1332,19 @@
 
         };
 
-        this.playSession = function playSession(sId) {
+        this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
+                cnt = eventIndex || 0,
+                delay = 20, speed = 2,
                 rec = this.getRecordById(sId),
                 sData = rec.events,
-                pars = this.getTargetScreenPars(sData[0]),
+                pars = this.getTargetScreenPars(sData[cnt]),
                 el = pars.element,
                 cnvh = this.getDomElement('canvasHolder'),
                 cnv = $('#cnvId-' + rec.id, cnvh)[0],
                 ctx = cnv.getContext('2d'),
                 $cur = $(self.getDomElement('cursor')),
-                cnt = 0, delay = 20, speed = 2,
                 clickDelay = this.clickDelay,
                 mOverElement,
                 mOverClass = self.domId['mouseOverClass'];
@@ -1353,6 +1356,7 @@
 
                 pars = pars || self.getTargetScreenPars(e);
                 el = pars.element;
+                self.eventIndex = cnt;
 
                 //console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
                 /*
@@ -1628,8 +1632,21 @@
                     self.removeMouseOverStyle();
                     $(cnv).css('cursor', 'default');
                     self.drawSpiderGraph(rec.id, 0, cnt);
+                    self.appMode = '';
 
                 }
+
+            }
+
+            this.appMode = 'play';
+            this.sessionId = sId;
+            this.sessionRec = rec;
+
+            // Reload initial session location on replay start
+            if (!cnt) {
+
+                window.location = sData.location;
+                return;
 
             }
 
@@ -1654,9 +1671,18 @@
             this.setActiveRecord(sId);
             ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
             ctx.strokeStyle = rec.color;
+
             setTimeout(function () {
 
-                playEvent(pars);
+                if (cnt) {
+
+                    playEvent(pars);
+
+                } else {
+
+                    moveCursor(pars);
+
+                }
 
             }, clickDelay);
 
@@ -1937,7 +1963,7 @@
                 ctx.strokeStyle = r.color;
                 ctx.lineCap = 'square';
                 ctx.lineJoin = 'miter';
-                ctx.miterLimit = 16.0;
+                ctx.miterLimit = 4.0;
                 ctx.shadowOffsetX = 0;
                 ctx.shadowOffsetY = 3.0;
                 ctx.shadowBlur = 4.0;
@@ -2299,9 +2325,10 @@
             sessionStorage.setItem('dcipherState', JSON.stringify({
 
                 user: this.user,
-                recMode: this.recMode,
+                appMode: this.appMode,
                 sessionRec: this.sessionRec,
-                sessionId: this.sessionId
+                sessionId: this.sessionId,
+                eventIndex: this.eventIndex
 
             }))
 
@@ -2321,13 +2348,16 @@
 
             }
 
-            if (this.recMode) {
+            if (this.appMode === 'record') {
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                //$(cnvh).hide();
                 $(this.getDomElement('butList')).hide();
                 $(this.getDomElement('stat')).data('tid', setInterval(updateStats, 100)).fadeIn();
-                //this.hideRecList();
+
+            } else if (this.appMode === 'play') {
+
+                this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex);
+                this.playSession(this.sessionRec.id, this.eventIndex);
 
             }
 
