@@ -249,9 +249,7 @@
     // DCipher class
     var DCipher = function () {
 
-        //this.baseURL = 'http://dev.smart-image.eu/UX-FLO/d-cipher/';
-        //this.baseURL = 'http://dcipher.eu/';
-        this.baseURL = '/D-Cipher/';
+        this.baseURL = '/dcipher-demo/';
         this.cssURL = 'css/d-cipher.css';
         this.lang = 'en';
         this.loc = Strings[this.lang];
@@ -294,6 +292,7 @@
 
             var self = this;
 
+            self.restoreState();
             self.db.init();
             self.db.getAllRecords().done(function () {
 
@@ -2295,7 +2294,44 @@
 
         };
 
-        this.saveState = function saveState() {};
+        this.saveState = function saveState() {
+
+            sessionStorage.setItem('dcipherState', JSON.stringify({
+
+                user: this.user,
+                recMode: this.recMode,
+                sessionRec: this.sessionRec,
+                sessionId: this.sessionId
+
+            }))
+
+        };
+
+        this.restoreState = function restoreState() {
+
+            var state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+
+            for (var k in state) {
+
+                if (state[k]) {
+
+                    this[k] = state[k];
+
+                }
+
+            }
+
+            if (this.recMode) {
+
+                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                //$(cnvh).hide();
+                $(this.getDomElement('butList')).hide();
+                $(this.getDomElement('stat')).data('tid', setInterval(updateStats, 100)).fadeIn();
+                //this.hideRecList();
+
+            }
+
+        };
 
     }; // End of DCipher class
 
