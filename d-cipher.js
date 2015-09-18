@@ -315,6 +315,7 @@
 
                     clearTimeout($(recList).data('tid'));
 
+                    console.debug('---> mouseover');
                 });
 
                 $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
@@ -362,7 +363,7 @@
                     created: ts,
                     modified: ts,
                     author: this.user.fullname || this.loc._Anonym,
-                    color: 'rgba(0, 0, 0, 0.3)',
+                    color: 'rgba(255, 0, 255, 1)',
                     duration: 0,
                     mouseMilesTotal: 0,
                     events: [],
@@ -424,6 +425,8 @@
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
 
             if (this.appMode === 'record' && !$(this.getDomElement('container')).find(etarget).length) {
+
+                //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
                 var rec = this.sessionRec,
                     events = rec.events,
@@ -769,6 +772,7 @@
                 html += loc._Session_name + ': ' + rec.name + '<br />'
                         + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
                         + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
+                        + loc._Event + ': ' + loc[e.type] + '<br />'
                         + loc._KPI_event + ': ' + e.kpi.toFixed(2);
 
                 return html;
@@ -1308,6 +1312,11 @@
                 ctx.lineTo(x + 3, y + 2);
                 ctx.lineTo(x - 3, y + 2);
 
+            } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
+
+                ctx.moveTo(x + 1, y);
+                ctx.arc(x, y, 1, 0, endAngle, true);
+
             } else if (type.match(/wheel|scroll/i)) {
 
                 ctx.moveTo(x - 3, y - 1);
@@ -1414,6 +1423,10 @@
 
                     }
 
+                } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
+
+                    el.dispatchEvent(new MouseEvent(etype, e));
+
                 } else if (etype.match(/wheel|scroll/i)) {
 
                     //window.scrollTo(pars.winScrollX, pars.winScrollY);
@@ -1495,6 +1508,7 @@
 
                         if (!mouseDown) {
 
+/*
                             if (mOverElement !== el) {
 
                                 if (mOverElement) {
@@ -1521,6 +1535,7 @@
                                 mOverElement = el;
 
                             }
+*/
 
                         } else {
 
@@ -1682,15 +1697,15 @@
 
             setTimeout(function () {
 
-                if (cnt) {
+                //if (cnt) {
 
                     playEvent(pars);
 
-                } else {
+                //} else {
 
-                    moveCursor(pars);
+                    //moveCursor(pars);
 
-                }
+                //}
 
             }, clickDelay);
 
@@ -2383,10 +2398,15 @@
 
         this.resetState = function resetState() {
 
-            sessionStorage.setItem('dcipherState', '');
+            sessionStorage.removeItem('dcipherState');
             if (this.sessionRec) {
 
-                window.location = this.sessionRec.events[0].location;
+                var loc = this.sessionRec.events[0].location;
+
+                this.sessionRec = null;
+                this.appMode = '';
+                this.eventIndex = 0;
+                window.location = loc;
 
             }
 
@@ -2656,7 +2676,7 @@
 
                 node.eventListenerList[type] = [];
 
-                if (/*type !== 'click' && */type === 'mouseover' && handler.toString().match(/stopPropagation|preventDefault/)) {
+                if (handler.toString().match(/stopPropagation|preventDefault/) || type === 'mouseover' || type === 'mouseenter' || type === 'mouseout' || type === 'mouseleave') {
 
                     node._addEventListener(type, function (e) {
 
