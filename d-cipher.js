@@ -283,7 +283,7 @@
         this.db = new IDB();
         this.user = {};
         this.sessionId = '';
-        this.sessionRec = '';
+        this.sessionRec = null;
         this.eventIndex = 0;
         this.appMode = '';
         this.eventsUnderMouse = [];
@@ -403,6 +403,8 @@
                         self.toggleRecList();
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId);
+                        self.showSpiderGraph(self.sessionId);
+                        self.sessionRec = null;
 
                     });
 
@@ -421,7 +423,7 @@
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
 
-            if (this.appMode && !$(this.getDomElement('container')).find(etarget).length) {
+            if (this.appMode === 'record' && !$(this.getDomElement('container')).find(etarget).length) {
 
                 var rec = this.sessionRec,
                     events = rec.events,
@@ -1067,9 +1069,11 @@
         this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
 
             var rec = this.getRecordById(sId),
-                cnvh = this.getDomElement('canvasHolder');
+                cnvh = this.getDomElement('canvasHolder'),
+                cnv = $('#cnvId-' + rec.id, cnvh)[0];
 
             $(cnvh).show();
+            $(cnv).show();
 
             if (rec.drawn) {
 
@@ -1446,7 +1450,7 @@
 
                     function drawStep() {
 
-                        var x, y, el;
+                        var x0, y0, x, y, el;
 
                         x0 = pars1.x + dx * step;
                         y0 = pars1.y + dy * step;
@@ -1627,12 +1631,15 @@
 
                 } else {
 
+                    // End of play
                     $cur.hide();
                     $(mOverElement).removeClass(mOverClass);
                     self.removeMouseOverStyle();
                     $(cnv).css('cursor', 'default');
                     self.drawSpiderGraph(rec.id, 0, cnt);
                     self.appMode = '';
+                    self.sessionRec = null;
+                    sessionStorage.removeItem('dcipherState');
 
                 }
 
@@ -1643,9 +1650,10 @@
             this.sessionRec = rec;
 
             // Reload initial session location on replay start
-            if (!cnt) {
+            if (!cnt && window.location.toString() !== sData[0].location) {
 
-                window.location = sData.location;
+                this.eventIndex = 1;
+                window.location = sData[0].location;
                 return;
 
             }
@@ -1669,7 +1677,7 @@
             $cur.show();
             this.hideRecList();
             this.setActiveRecord(sId);
-            ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+            //ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
             ctx.strokeStyle = rec.color;
 
             setTimeout(function () {
@@ -2100,10 +2108,13 @@
 
                 rec.addEventListener('click', function (e) {
 
-                    var $el = $(e.target);
+                    var $el = $(e.target),
+                        id = $el.attr('data-dcipher-rec-id');
+
                     if ($el.attr('type') === 'text') {
 
-                        self.setActiveRecord($el.attr('data-dcipher-rec-id'));
+                        self.setActiveRecord(id);
+                        self.showSpiderGraph(id);
 
                     }
 
@@ -2130,7 +2141,7 @@
                     customClass: 'cp-pos',
                     colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
 
-                }).on('hidePicker.colorpicker', function () {
+                }).on('hidePicker.bs-colorpicker', function () {
                     //
                     var $el = $(this);
 
@@ -2171,7 +2182,6 @@
             if (!$chkb.prop('checked')) {
 
                 $chkb.prop('checked', true);
-                this.showSpiderGraph(id);
 
             }
 
@@ -2212,6 +2222,7 @@
 
                 self.createRecordList();
                 self.setActiveRecord(id);
+                self.showSpiderGraph(id);
 
             }, function (e, msg) {
 
@@ -2322,16 +2333,23 @@
 
         this.saveState = function saveState() {
 
-            sessionStorage.setItem('dcipherState', JSON.stringify({
+            if (this.appMode) {
 
-                user: this.user,
-                appMode: this.appMode,
-                sessionRec: this.sessionRec,
-                sessionId: this.sessionId,
-                eventIndex: this.eventIndex
+                sessionStorage.setItem('dcipherState', JSON.stringify({
 
-            }))
+                    user: this.user,
+                    appMode: this.appMode,
+                    sessionRec: this.sessionRec,
+                    sessionId: this.sessionId,
+                    eventIndex: this.eventIndex
 
+                }));
+
+            } else {
+
+                sessionStorage.removeItem('dcipherState');
+
+            }
         };
 
         this.restoreState = function restoreState() {
@@ -2356,8 +2374,19 @@
 
             } else if (this.appMode === 'play') {
 
-                this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex);
+                this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
                 this.playSession(this.sessionRec.id, this.eventIndex);
+
+            }
+
+        };
+
+        this.resetState = function resetState() {
+
+            sessionStorage.setItem('dcipherState', '');
+            if (this.sessionRec) {
+
+                window.location = this.sessionRec.events[0].location;
 
             }
 
@@ -2518,7 +2547,15 @@
 
         window.addEventListener('keydown', function (e) {
 
-            dCipher.saveEvent(e);
+            if (e.keyCode === 27) {
+
+                dCipher.resetState();
+
+            } else {
+
+                dCipher.saveEvent(e);
+
+            }
 
         });
 
@@ -3823,12 +3860,12 @@ function initColorPicker() {
                 callTop: false
             }
         },
-        template: '<div class="colorpicker dropdown-menu">' +
-                  '<div class="colorpicker-saturation"><i><b></b></i></div>' +
-                  '<div class="colorpicker-hue"><i></i></div>' +
-                  '<div class="colorpicker-alpha"><i></i></div>' +
-                  '<div class="colorpicker-color"><div /></div>' +
-                  '<div class="colorpicker-selectors"></div>' +
+        template: '<div class="bs-colorpicker dropdown-menu">' +
+                  '<div class="bs-colorpicker-saturation"><i><b></b></i></div>' +
+                  '<div class="bs-colorpicker-hue"><i></i></div>' +
+                  '<div class="bs-colorpicker-alpha"><i></i></div>' +
+                  '<div class="bs-colorpicker-color"><div /></div>' +
+                  '<div class="bs-colorpicker-selectors"></div>' +
                   '</div>',
         align: 'right',
         customClass: null,
@@ -3836,7 +3873,7 @@ function initColorPicker() {
     };
 
     var Colorpicker = function (element, options) {
-        this.element = $(element).addClass('colorpicker-element');
+        this.element = $(element).addClass('bs-colorpicker-element');
         this.options = $.extend(true, {}, defaults, this.element.data(), options);
         this.component = this.options.component;
         this.component = (this.component !== false) ? this.element.find(this.component) : false;
@@ -3862,18 +3899,18 @@ function initColorPicker() {
             this.picker.addClass(this.options.customClass);
         }
         if (this.options.inline) {
-            this.picker.addClass('colorpicker-inline colorpicker-visible');
+            this.picker.addClass('bs-colorpicker-inline bs-colorpicker-visible');
         } else {
-            this.picker.addClass('colorpicker-hidden');
+            this.picker.addClass('bs-colorpicker-hidden');
         }
         if (this.options.horizontal) {
-            this.picker.addClass('colorpicker-horizontal');
+            this.picker.addClass('bs-colorpicker-horizontal');
         }
         if (this.format === 'rgba' || this.format === 'hsla' || this.options.format === false) {
-            this.picker.addClass('colorpicker-with-alpha');
+            this.picker.addClass('bs-colorpicker-with-alpha');
         }
         if (this.options.align === 'right') {
-            this.picker.addClass('colorpicker-right');
+            this.picker.addClass('bs-colorpicker-right');
         }
         if (this.options.colorSelectors) {
             var colorpicker = this;
@@ -3882,42 +3919,42 @@ function initColorPicker() {
                 $btn.click(function () {
                     colorpicker.setValue($(this).css('background-color'));
                 });
-                colorpicker.picker.find('.colorpicker-selectors').append($btn);
+                colorpicker.picker.find('.bs-colorpicker-selectors').append($btn);
             });
-            this.picker.find('.colorpicker-selectors').show();
+            this.picker.find('.bs-colorpicker-selectors').show();
         }
-        this.picker.on('mousedown.colorpicker touchstart.colorpicker', $.proxy(this.mousedown, this));
+        this.picker.on('mousedown.bs-colorpicker touchstart.bs-colorpicker', $.proxy(this.mousedown, this));
         this.picker.appendTo(this.container ? this.container : $('body'));
 
         // Bind events
         if (this.input !== false) {
             this.input.on({
-                'keyup.colorpicker': $.proxy(this.keyup, this)
+                'keyup.bs-colorpicker': $.proxy(this.keyup, this)
             });
             this.input.on({
-                'change.colorpicker': $.proxy(this.change, this)
+                'change.bs-colorpicker': $.proxy(this.change, this)
             });
             if (this.component === false) {
                 this.element.on({
-                    'focus.colorpicker': $.proxy(this.show, this)
+                    'focus.bs-colorpicker': $.proxy(this.show, this)
                 });
             }
             if (this.options.inline === false) {
                 this.element.on({
-                    'focusout.colorpicker': $.proxy(this.hide, this)
+                    'focusout.bs-colorpicker': $.proxy(this.hide, this)
                 });
             }
         }
 
         if (this.component !== false) {
             this.component.on({
-                'click.colorpicker': $.proxy(this.show, this)
+                'click.bs-colorpicker': $.proxy(this.show, this)
             });
         }
 
         if ((this.input === false) && (this.component === false)) {
             this.element.on({
-                'click.colorpicker': $.proxy(this.show, this)
+                'click.bs-colorpicker': $.proxy(this.show, this)
             });
         }
 
@@ -3925,8 +3962,8 @@ function initColorPicker() {
         if ((this.input !== false) && (this.component !== false) && (this.input.attr('type') === 'color')) {
 
             this.input.on({
-                'click.colorpicker': $.proxy(this.show, this),
-                'focus.colorpicker': $.proxy(this.show, this)
+                'click.bs-colorpicker': $.proxy(this.show, this),
+                'focus.bs-colorpicker': $.proxy(this.show, this)
             });
         }
         this.update();
@@ -3942,14 +3979,14 @@ function initColorPicker() {
         constructor: Colorpicker,
         destroy: function () {
             this.picker.remove();
-            this.element.removeData('colorpicker').off('.colorpicker');
+            this.element.removeData('colorpicker').off('.bs-colorpicker');
             if (this.input !== false) {
-                this.input.off('.colorpicker');
+                this.input.off('.bs-colorpicker');
             }
             if (this.component !== false) {
-                this.component.off('.colorpicker');
+                this.component.off('.bs-colorpicker');
             }
-            this.element.removeClass('colorpicker-element');
+            this.element.removeClass('bs-colorpicker-element');
             this.element.trigger({
                 type: 'destroy'
             });
@@ -3973,9 +4010,9 @@ function initColorPicker() {
             if (this.isDisabled()) {
                 return false;
             }
-            this.picker.addClass('colorpicker-visible').removeClass('colorpicker-hidden');
+            this.picker.addClass('bs-colorpicker-visible').removeClass('bs-colorpicker-hidden');
             this.reposition();
-            $(window).on('resize.colorpicker', $.proxy(this.reposition, this));
+            $(window).on('resize.bs-colorpicker', $.proxy(this.reposition, this));
             if (e && (!this.hasInput() || this.input.attr('type') === 'color')) {
                 if (e.stopPropagation && e.preventDefault) {
                     e.stopPropagation();
@@ -3984,7 +4021,7 @@ function initColorPicker() {
             }
             if (this.options.inline === false) {
                 $(window.document).on({
-                    'mousedown.colorpicker': $.proxy(this.hide, this)
+                    'mousedown.bs-colorpicker': $.proxy(this.hide, this)
                 });
             }
             this.element.trigger({
@@ -3993,10 +4030,10 @@ function initColorPicker() {
             });
         },
         hide: function () {
-            this.picker.addClass('colorpicker-hidden').removeClass('colorpicker-visible');
-            $(window).off('resize.colorpicker', this.reposition);
+            this.picker.addClass('bs-colorpicker-hidden').removeClass('bs-colorpicker-visible');
+            $(window).off('resize.bs-colorpicker', this.reposition);
             $(document).off({
-                'mousedown.colorpicker': this.hide
+                'mousedown.bs-colorpicker': this.hide
             });
             this.update();
             this.element.trigger({
@@ -4045,9 +4082,9 @@ function initColorPicker() {
                 'top': sl.saturation.maxTop - this.color.value.b * sl.saturation.maxTop,
                 'left': this.color.value.s * sl.saturation.maxLeft
             });
-            this.picker.find('.colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
-            this.picker.find('.colorpicker-alpha').css('backgroundColor', this.color.toHex());
-            this.picker.find('.colorpicker-color, .colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
+            this.picker.find('.bs-colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
+            this.picker.find('.bs-colorpicker-alpha').css('backgroundColor', this.color.toHex());
+            this.picker.find('.bs-colorpicker-color, .bs-colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
             return val;
         },
         updateComponent: function (val) {
@@ -4152,12 +4189,12 @@ function initColorPicker() {
             //detect the slider and set the limits and callbacks
             var zone = target.closest('div');
             var sl = this.options.horizontal ? this.options.slidersHorz : this.options.sliders;
-            if (!zone.is('.colorpicker')) {
-                if (zone.is('.colorpicker-saturation')) {
+            if (!zone.is('.bs-colorpicker')) {
+                if (zone.is('.bs-colorpicker-saturation')) {
                     this.currentSlider = $.extend({}, sl.saturation);
-                } else if (zone.is('.colorpicker-hue')) {
+                } else if (zone.is('.bs-colorpicker-hue')) {
                     this.currentSlider = $.extend({}, sl.hue);
-                } else if (zone.is('.colorpicker-alpha')) {
+                } else if (zone.is('.bs-colorpicker-alpha')) {
                     this.currentSlider = $.extend({}, sl.alpha);
                 } else {
                     return false;
@@ -4173,10 +4210,10 @@ function initColorPicker() {
                 };
                 //trigger mousemove to move the guide to the current position
                 $(document).on({
-                    'mousemove.colorpicker': $.proxy(this.mousemove, this),
-                    'touchmove.colorpicker': $.proxy(this.mousemove, this),
-                    'mouseup.colorpicker': $.proxy(this.mouseup, this),
-                    'touchend.colorpicker': $.proxy(this.mouseup, this)
+                    'mousemove.bs-colorpicker': $.proxy(this.mousemove, this),
+                    'touchmove.bs-colorpicker': $.proxy(this.mousemove, this),
+                    'mouseup.bs-colorpicker': $.proxy(this.mouseup, this),
+                    'touchend.bs-colorpicker': $.proxy(this.mouseup, this)
                 }).trigger('mousemove');
             }
             return false;
@@ -4239,10 +4276,10 @@ function initColorPicker() {
             e.stopPropagation();
             e.preventDefault();
             $(document).off({
-                'mousemove.colorpicker': this.mousemove,
-                'touchmove.colorpicker': this.mousemove,
-                'mouseup.colorpicker': this.mouseup,
-                'touchend.colorpicker': this.mouseup
+                'mousemove.bs-colorpicker': this.mousemove,
+                'touchmove.bs-colorpicker': this.mousemove,
+                'mouseup.bs-colorpicker': this.mouseup,
+                'touchend.bs-colorpicker': this.mouseup
             });
             return false;
         },

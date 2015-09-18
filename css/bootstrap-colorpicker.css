@@ -8,7 +8,7 @@
  *
  */
 
-.colorpicker-saturation {
+.bs-colorpicker-saturation {
   float: left;
   width: 100px;
   height: 100px;
@@ -16,7 +16,7 @@
   background-image: url("images/bootstrap-colorpicker/saturation.png");
 }
 
-.colorpicker-saturation i {
+.bs-colorpicker-saturation i {
   position: absolute;
   top: 0;
   left: 0;
@@ -30,7 +30,7 @@
           border-radius: 5px;
 }
 
-.colorpicker-saturation i b {
+.bs-colorpicker-saturation i b {
   display: block;
   width: 5px;
   height: 5px;
@@ -40,8 +40,8 @@
           border-radius: 5px;
 }
 
-.colorpicker-hue,
-.colorpicker-alpha {
+.bs-colorpicker-hue,
+.bs-colorpicker-alpha {
   float: left;
   width: 15px;
   height: 100px;
@@ -50,8 +50,8 @@
   cursor: row-resize;
 }
 
-.colorpicker-hue i,
-.colorpicker-alpha i {
+.bs-colorpicker-hue i,
+.bs-colorpicker-alpha i {
   position: absolute;
   top: 0;
   left: 0;
@@ -63,22 +63,22 @@
   border-top: 1px solid #fff;
 }
 
-.colorpicker-hue {
+.bs-colorpicker-hue {
   background-image: url("images/bootstrap-colorpicker/hue.png");
 }
 
-.colorpicker-alpha {
+.bs-colorpicker-alpha {
   display: none;
   background-image: url("images/bootstrap-colorpicker/alpha.png");
 }
 
-.colorpicker-saturation,
-.colorpicker-hue,
-.colorpicker-alpha {
+.bs-colorpicker-saturation,
+.bs-colorpicker-hue,
+.bs-colorpicker-alpha {
   background-size: contain;
 }
 
-.colorpicker {
+.bs-colorpicker {
   top: 0;
   left: 0;
   z-index: 2500;
@@ -91,18 +91,18 @@
   *zoom: 1;
 }
 
-.colorpicker:before,
-.colorpicker:after {
+.bs-colorpicker:before,
+.bs-colorpicker:after {
   display: table;
   line-height: 0;
   content: "";
 }
 
-.colorpicker:after {
+.bs-colorpicker:after {
   clear: both;
 }
 
-.colorpicker:before {
+.bs-colorpicker:before {
   position: absolute;
   top: -7px;
   left: 6px;
@@ -114,7 +114,7 @@
   content: '';
 }
 
-.colorpicker:after {
+.bs-colorpicker:after {
   position: absolute;
   top: -6px;
   left: 7px;
@@ -125,19 +125,19 @@
   content: '';
 }
 
-.colorpicker div {
+.bs-colorpicker div {
   position: relative;
 }
 
-.colorpicker.colorpicker-with-alpha {
+.bs-colorpicker.bs-colorpicker-with-alpha {
   min-width: 140px;
 }
 
-.colorpicker.colorpicker-with-alpha .colorpicker-alpha {
+.bs-colorpicker.bs-colorpicker-with-alpha .bs-colorpicker-alpha {
   display: block;
 }
 
-.colorpicker-color {
+.bs-colorpicker-color {
   height: 10px;
   margin-top: 5px;
   clear: both;
@@ -145,30 +145,30 @@
   background-position: 0 100%;
 }
 
-.colorpicker-color div {
+.bs-colorpicker-color div {
   height: 10px;
 }
 
-.colorpicker-selectors {
+.bs-colorpicker-selectors {
   display: none;
   height: 10px;
   margin-top: 5px;
   clear: both;
 }
 
-.colorpicker-selectors i {
+.bs-colorpicker-selectors i {
   float: left;
   width: 10px;
   height: 10px;
   cursor: pointer;
 }
 
-.colorpicker-selectors i + i {
+.bs-colorpicker-selectors i + i {
   margin-left: 3px;
 }
 
-.colorpicker-element .input-group-addon i,
-.colorpicker-element .add-on i {
+.bs-colorpicker-element .input-group-addon i,
+.bs-colorpicker-element .add-on i {
   display: inline-block;
   width: 16px;
   height: 16px;
@@ -176,29 +176,29 @@
   cursor: pointer;
 }
 
-.colorpicker.colorpicker-inline {
+.bs-colorpicker.bs-colorpicker-inline {
   position: relative;
   z-index: auto;
   display: inline-block;
   float: none;
 }
 
-.colorpicker.colorpicker-horizontal {
+.bs-colorpicker.bs-colorpicker-horizontal {
   width: 110px;
   height: auto;
   min-width: 110px;
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-saturation {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-saturation {
   margin-bottom: 4px;
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-color {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-color {
   width: 100px;
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-hue,
-.colorpicker.colorpicker-horizontal .colorpicker-alpha {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-hue,
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-alpha {
   float: left;
   width: 100px;
   height: 15px;
@@ -207,8 +207,8 @@
   cursor: col-resize;
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-hue i,
-.colorpicker.colorpicker-horizontal .colorpicker-alpha i {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-hue i,
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-alpha i {
   position: absolute;
   top: 0;
   left: 0;
@@ -220,32 +220,32 @@
   border: none;
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-hue {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-hue {
   background-image: url("images/bootstrap-colorpicker/hue-horizontal.png");
 }
 
-.colorpicker.colorpicker-horizontal .colorpicker-alpha {
+.bs-colorpicker.bs-colorpicker-horizontal .bs-colorpicker-alpha {
   background-image: url("images/bootstrap-colorpicker/alpha-horizontal.png");
 }
 
-.colorpicker.colorpicker-hidden {
+.bs-colorpicker.bs-colorpicker-hidden {
   display: none;
 }
 
-.colorpicker.colorpicker-visible {
+.bs-colorpicker.bs-colorpicker-visible {
   display: block;
 }
 
-.colorpicker-inline.colorpicker-visible {
+.bs-colorpicker-inline.bs-colorpicker-visible {
   display: inline-block;
 }
 
-.colorpicker-right:before {
+.bs-colorpicker-right:before {
   right: 6px;
   left: auto;
 }
 
-.colorpicker-right:after {
+.bs-colorpicker-right:after {
   right: 7px;
   left: auto;
 }
