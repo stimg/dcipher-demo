@@ -349,7 +349,7 @@
                                     <div class="notification column xsmall-12 small-8">
                                         <div class="text">
                                             <span class="icon icon-basket-large"></span>
-                                            <p>Bugaboo Cameleon³, Bugaboo cup holder, Bugaboo Runner base, Bugaboo Cameleon adapter for Bugaboo Stand/Bugaboo Runner has been added to your cart.</p>
+                                            <p id="basketPopupText"></p>
                                         </div>
                                     </div>
                                     <div class="optional-elements column xsmall-12 small-4">
@@ -478,7 +478,7 @@
                                         var addAccessory = "add accessory";
                                         $(".add .price").html(addAccessory);
                                     }
-                                }
+                                };
 
                                 function updateCookies(sId) {
                                     var itemSKU;
@@ -494,6 +494,34 @@
                                     }
                                     var currentAnchorTag = document.getElementById("myAccountredirect");
 //                                    currentAnchorTag.setAttribute("href", "https://www.bugaboo.com/US/en_US/strollers/create?p_auth=cpEuLlHG&p_p_id=configuratorversion2_WAR_configuratorversion2portlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_configuratorversion2_WAR_configuratorversion2portlet_javax.portlet.action=sendToMyAccount&sId=" + sId + "&bVpc=" + itemSKU);
+
+                                };
+
+                                function showBasketPopup() {
+
+                                    var msg = [],
+                                            t;
+                                    $('img', 'div.basket').each(function (i, el) {
+
+                                        t = $(el).attr('title');
+                                        if (t) {
+
+                                            msg.push(t);
+//                                            console.log('--> el: ', el);
+//                                            console.log('---> title: ', $(el).attr('title'));
+
+                                        }
+
+                                    });
+
+                                    $('#cart_icon > .cart-items').text(msg.length);
+                                    msg = msg.join(', ') + ' has been added to your cart.';
+                                    $('#basketPopupText').html(msg);
+
+                                    $('#NotificationCart').show().animate({'top': +129});
+                                    $('#NotificationCart').data('tid', setTimeout(function () {
+                                        $('#NotificationCart').fadeOut('fast').css('top', 0);
+                                    }, 5000));
 
                                 }
 
@@ -538,7 +566,7 @@
 
                                         <div id="" class="action"><a class="button type5" id="buy_url"
                                                                            data-notification="NotificationCart"> <span
-                                                id="action_add" onclick="$('#NotificationCart').show().animate({'top': +129}); $('#NotificationCart').data('tid', setTimeout(function () {$('#NotificationCart').fadeOut('fast').css('top', 0);}, 5000)); $('#cart_icon > .cart-items').text('3')">Add to cart</span> <span
+                                                id="action_add" onclick="showBasketPopup();">Add to cart</span> <span
                                                 id="action_save">Save changes</span> </a>
                                             <!-- <a id="buy_url" href="" ></a> --> <a href="#" class="icon-button type1"
                                                                                       id="reset_url"

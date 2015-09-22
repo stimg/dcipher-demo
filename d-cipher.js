@@ -249,7 +249,8 @@
     // DCipher class
     var DCipher = function () {
 
-        this.baseURL = '/dcipher-demo/';
+        //this.baseURL = '/dcipher-demo/';
+        this.baseURL = '/';
         this.cssURL = 'css/d-cipher.css';
         this.lang = 'en';
         this.loc = Strings[this.lang];
@@ -497,9 +498,7 @@
                             localX: e.pageX - left,
                             localY: e.pageY - top,
                             relX: (e.pageX - left) / $el.outerWidth(),
-                            relY: (e.pageY - top) / $el.outerHeight(),
-                            dcipherName: etarget.dataset.dcipherName,
-                            dcipherAction: etarget.dataset.dcipherAction
+                            relY: (e.pageY - top) / $el.outerHeight()
                         },
                         duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
                         time: e.timeStamp - rec.modified
@@ -510,6 +509,12 @@
                 event.drag = event.milesLast && etype === 'mouseup';
                 event.miles = milesTotal + event.milesLast;
 
+                if (etarget.dataset) {
+
+                    event.target.dcipherName = etarget.dataset.dcipherName;
+                    event.target.dcipherAction = etarget.dataset.dcipherAction;
+
+                }
                 if (etype === 'mouseup' && event.milesLast === 0) {
 
                     event = events.pop();
@@ -1244,11 +1249,11 @@
                 if (i) {
 
                     ctx.beginPath();
-                    if (!pe.type.match(/wheel|scroll/i)) {
+                    if (!e.type.match(/wheel|scroll/i)) {
 
                         self.drawEventPict(ctx, pe.type, posx0, offsetTop);
 
-                    } else if (!e.type.match(/wheel|scroll/i)) {
+                    } else if (!pe.type.match(/wheel|scroll/i)) {
 
                         self.drawEventPict(ctx, 'wheel', posx0, offsetTop);
 
@@ -1322,7 +1327,8 @@
                 ctx.moveTo(x - 3, y - 1);
                 ctx.lineTo(x, y - 4);
                 ctx.lineTo(x + 3, y - 1);
-                ctx.lineTo(x - 3, y - 1);
+                //ctx.lineTo(x - 3, y - 1);
+                ctx.closePath();
 
 /*
                 ctx.moveTo(x + 2, y);
@@ -1332,7 +1338,8 @@
                 ctx.moveTo(x - 3, y + 1);
                 ctx.lineTo(x, y + 4);
                 ctx.lineTo(x + 3, y + 1);
-                ctx.lineTo(x - 3, y + 1);
+                //ctx.lineTo(x - 3, y + 1);
+                ctx.closePath();
 
 /*
                 ctx.strokeRect(x - 3, y - 2, 1.5, 4);
@@ -1430,6 +1437,7 @@
                 } else if (etype.match(/wheel|scroll/i)) {
 
                     //window.scrollTo(pars.winScrollX, pars.winScrollY);
+                    window.scrollTo(e.pageXOffset, e.pageYOffset);
                     el.dispatchEvent(new WheelEvent(etype, e));
                     //$(el).offset({top: pars.top, left: pars.left});
 
@@ -1562,8 +1570,8 @@
 
                             ctx.beginPath();
                             self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
-                            ctx.fill();
                             ctx.stroke();
+                            ctx.fill();
 
                         }
 
@@ -1737,8 +1745,8 @@
             if ($el && etarget.tagName === el.tagName
                 && etarget.id === el.id
                 && etarget.title === el.title
-                && etarget.dcipherName === el.dataset.dcipherName
-                && etarget.dcipherAction === el.dataset.dcipherAction
+                //&& etarget.dcipherName === el.dataset.dcipherName
+                //&& etarget.dcipherAction === el.dataset.dcipherAction
                 && $(el).is(':visible')
                 && !e.type.match(/wheel|scroll/i)
             ) {
@@ -1754,8 +1762,10 @@
                     cpy = 20;
 
                 etarget.element = el;
+/*
                 x = elX + locX;
                 y = elY + locY;
+*/
 
                 if (x + cpx > pageXOffset + winW) {
 
@@ -1771,12 +1781,14 @@
 
                 }
 
+/*
                 e.pageX += x - e.x;
                 e.pageY += y - e.y;
                 e.clientX = x;
                 e.clientY = y;
                 e.x = x;
                 e.y = y;
+*/
 
             }
 
@@ -2369,7 +2381,8 @@
 
         this.restoreState = function restoreState() {
 
-            var state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+            var self = this,
+                state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
 
             for (var k in state) {
 
@@ -2385,7 +2398,11 @@
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(this.getDomElement('butList')).hide();
-                $(this.getDomElement('stat')).data('tid', setInterval(updateStats, 100)).fadeIn();
+                $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+
+                    self.updateStatString();
+
+                }, 100)).fadeIn();
 
             } else if (this.appMode === 'play') {
 
