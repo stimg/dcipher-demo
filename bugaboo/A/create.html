@@ -500,12 +500,15 @@
                                 function showBasketPopup() {
 
                                     var msg = [],
-                                            t;
+                                            imgs = [],
+                                            t, s;
                                     $('img', 'div.basket').each(function (i, el) {
 
                                         t = $(el).attr('title');
                                         if (t) {
 
+                                            s = el.src;
+                                            imgs.push(s.substring(s.indexOf('=') + 1, s.indexOf('&')));
                                             msg.push(t);
 //                                            console.log('--> el: ', el);
 //                                            console.log('---> title: ', $(el).attr('title'));
@@ -514,7 +517,10 @@
 
                                     });
 
-                                    $('#cart_icon > .cart-items').text(msg.length);
+//                                    console.debug('--> basket: ', imgs);
+                                    sessionStorage.setItem('basket', JSON.stringify(imgs));
+
+                                    $('.cart-items', '#cart_icon').text(msg.length);
                                     msg = msg.join(', ') + ' has been added to your cart.';
                                     $('#basketPopupText').html(msg);
 

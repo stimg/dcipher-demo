@@ -861,13 +861,17 @@
                                                      data-itemcode="CAM3STD_231110ZW04_230111ZW02" data-price="1149.00"
                                                      data-quantity="1" data-total="1149.00">
                                                 <div class="product-wrapper">
-                                                    <div class="product-img column xsmall-4 small-3 medium-2">
+                                                    <div id="strollerImage" class="product-img column xsmall-4 small-3 medium-2">
 
                                                         <a href="#">
-                                                            <!--<img src="assets/studio">-->
-                                                            <img src="https://api.bugaboo.com/v1/studio?code=CAM_C_SP_(AL)_(ZW)(IB)&width=250">
+                                                            <img src="assets/studio">
+                                                            <!--<img src="https://api.bugaboo.com/v1/studio?code=CAM_C_SP_(AL)_(ZW)(IB)&width=250">-->
                                                         </a>
                                                     </div>
+                                                    <script type="text/javascript">
+                                                        var b = sessionStorage.getItem('basket');
+                                                        document.getElementById('strollerImage').src = 'https://api.bugaboo.com/v1/studio?code=' + b[0] + '&width=250';
+                                                    </script>
 
 
                                                     <h4 class="column xsmall-8">Bugaboo Cameleon³
