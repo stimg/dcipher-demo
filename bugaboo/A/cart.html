@@ -295,9 +295,9 @@
                     <li><a href="#">Find a store</a></li>
 
                     <li><a href="#" data-id="localePopup"><img class=""
-                                                                                                               data-base="/dot-com-origional-theme/images/custom/flags/"
-                                                                                                               data-src="en_US.png"
-                                                                                                               src="assets/en_US.png">EN</a>
+                                                               data-base="/dot-com-origional-theme/images/custom/flags/"
+                                                               data-src="en_US.png"
+                                                               src="assets/en_US.png">EN</a>
                     </li>
 
                     <li><a href="#">My account</a></li>
@@ -568,8 +568,11 @@
                                         <!-- start products -->
                                         <section class="products clearfix">
 
-                                            <section class="product column" data-itemcode="600110PC01"
-                                                     data-price="400.00" data-quantity="1" data-total="400.00">
+                                            <section id="cartProdRunner" class="product column"
+                                                     data-itemcode="600110PC01"
+                                                     data-price="400.00" data-quantity="1" data-total="400.00"
+                                                     style="display: none;">
+
                                                 <div class="product-wrapper">
                                                     <div class="product-img column xsmall-4 small-3 medium-2">
 
@@ -651,8 +654,9 @@
                                             </section>
 
 
-                                            <section class="product column" data-itemcode="80403PC01" data-price="25.00"
-                                                     data-quantity="1" data-total="75.00">
+                                            <section id="cartProdAdapter" class="product column"
+                                                     data-itemcode="80403PC01" data-price="25.00"
+                                                     data-quantity="1" data-total="75.00" style="display: none;">
                                                 <div class="product-wrapper">
                                                     <div class="product-img column xsmall-4 small-3 medium-2">
 
@@ -719,22 +723,22 @@
                                                                 <div class="stock">2 In stock</div>
 
 
-<!--
-                                                                <select class="unit-quantity"
-                                                                        name="_Cart_WAR_Cartportlet_unit-quantity"
-                                                                        id="80403PC01">
+                                                                <!--
+                                                                                                                                <select class="unit-quantity"
+                                                                                                                                        name="_Cart_WAR_Cartportlet_unit-quantity"
+                                                                                                                                        id="80403PC01">
 
 
-                                                                </select>
+                                                                                                                                </select>
 
-                                                                <a class="icon-button type3 sand" id="80403PC01"><span
-                                                                        class="icon-delete"></span></a>
+                                                                                                                                <a class="icon-button type3 sand" id="80403PC01"><span
+                                                                                                                                        class="icon-delete"></span></a>
 
-                                                                &lt;!&ndash; Stock notification will get added if product stock<10 &ndash;&gt;
+                                                                                                                                &lt;!&ndash; Stock notification will get added if product stock<10 &ndash;&gt;
 
 
-                                                                <div class="stock out-of-stock">Out of stock</div>
--->
+                                                                                                                                <div class="stock out-of-stock">Out of stock</div>
+                                                                -->
 
                                                             </div>
 
@@ -755,8 +759,9 @@
                                             </section>
 
 
-                                            <section class="product column" data-itemcode="80500CH02" data-price="24.95"
-                                                     data-quantity="1" data-total="24.95">
+                                            <section id="cartProdCupHolder" class="product column"
+                                                     data-itemcode="80500CH02" data-price="24.95"
+                                                     data-quantity="1" data-total="24.95" style="display: none;">
                                                 <div class="product-wrapper">
                                                     <div class="product-img column xsmall-4 small-3 medium-2">
 
@@ -857,26 +862,12 @@
 
                                             </section>
 
-                                            <section class="product column"
+                                            <section id="cartProdBassinet" class="product column"
                                                      data-itemcode="CAM3STD_231110ZW04_230111ZW02" data-price="1149.00"
-                                                     data-quantity="1" data-total="1149.00">
+                                                     data-quantity="1" data-total="1149.00" style="display: none;">
                                                 <div class="product-wrapper">
-                                                    <div id="strollerImage" class="product-img column xsmall-4 small-3 medium-2">
-
-                                                        <a href="#">
-                                                            <img src="assets/studio">
-                                                            <!--<img src="https://api.bugaboo.com/v1/studio?code=CAM_C_SP_(AL)_(ZW)(IB)&width=250">-->
-                                                        </a>
-                                                    </div>
-                                                    <script type="text/javascript">
-                                                        var b = sessionStorage.getItem('basket');
-                                                        document.getElementById('strollerImage').src = 'https://api.bugaboo.com/v1/studio?code=' + b[0] + '&width=250';
-                                                    </script>
-
-
-                                                    <h4 class="column xsmall-8">Bugaboo Cameleon³
-                                                        <span class="price right">$ 1149.00</span>
-                                                    </h4>
+                                                    <div id="strollerImage"
+                                                         class="product-img column xsmall-4 small-3 medium-2"></div>
 
                                                     <div class="product-summary column xsmall-12 small-9 medium-6">
                                                         <h4>Bugaboo Cameleon³
@@ -888,18 +879,17 @@
 
 
                                                             <li>
-                                                                <span class="label">Color seat and bassinet: </span><span>black</span><span> (In stock)</span>
+                                                                <span class="label">Color seat and bassinet: </span><span id="cartItemBassinetColor"></span><span> (In stock)</span>
                                                             </li>
 
 
                                                             <li>
-                                                                <span class="label">Color tailored fabric set: </span><span>black</span><span> (In stock)</span>
+                                                                <span class="label">Color tailored fabric set: </span><span id="cartItemCanopyColor"></span><span> (In stock)</span>
                                                             </li>
 
 
                                                             <li>
-                                                                <span class="label">item code: </span><span
-                                                                    id="sel_item_0">CAM3STD_231110ZW04_230111ZW02 </span>
+                                                                <span id="cartItemCode" class="label">item code: </span><span id="sel_item_0"></span>
                                                             </li>
 
                                                             <li>
@@ -1059,7 +1049,8 @@
                                                         <li>
                                                             <span class="title">Subtotal</span>
                                                             <!-- Code 2: Actual price from service need to be repleace -->
-                                                            <span class="price summary-subtotal">$ 1648.95</span>
+                                                            <span id="priceSummarySubtotal"
+                                                                  class="price summary-subtotal">$ 0.00</span>
                                                             <!-- Code 2 end -->
                                                         </li>
                                                         <li>
@@ -1084,7 +1075,7 @@
                                                         <li class="total">
                                                             <span class="title">Total</span>
                                                             <!-- Code 6: Actual price from service need to be repleace -->
-                                                            <span class="price summary-total">$ 1648.95</span>
+                                                            <span id="priceSummaryTotal" class="price summary-total">$ 0.00</span>
                                                             <!-- Code 6 end -->
                                                         </li>
                                                     </ul>
@@ -1270,7 +1261,8 @@
                             <div class="portlet-borderless-container" style="">
                                 <div class="portlet-body">
                                     <form id="form"
-                                          method="post" onsubmit="return false;"><label for="newsletter">Newsletter</label>
+                                          method="post" onsubmit="return false;"><label
+                                            for="newsletter">Newsletter</label>
                                         <fieldset><input id="email" name="email"
                                                          placeholder="Please enter your e-mail address" type="email">
                                         </fieldset>
@@ -1315,5 +1307,160 @@
                                                             style="background-color:#333333  !important"></a></div>
     </div>
 </div>
+<script type="text/javascript">
+    var b = JSON.parse(sessionStorage.getItem('basket')) || [''],
+            div = document.getElementById('strollerImage'),
+            img = new Image(),
+            total = 0,
+            code = b[0].replace(/^CAM_C_SP_|_|\(|\)/g, ''),
+            colors = {
+                "Base": {
+/*
+                    "ZW": {
+                        "id": "ZW",
+                        "model": "231110ZW04_ZW",
+                        "label": "Black",
+                        "price": "1029.05"
+                    },
+*/
+                    "ZW": {
+                        "id": "ZW",
+                        "model": "231130ZW02",
+                        "label": "Black",
+                        "price": "1099.05"
+                    },
+                    "AN": {
+                        "id": "AN",
+                        "model": "231110AN04",
+                        "label": "Dark grey",
+                        "price": "1029.05"
+                    }
+                },
+                "Frame": {
+                    "AL": {
+                        "id": "AL",
+                        "label": "Aluminium"
+                    },
+                    "AB": {
+                        "id": "AB",
+                        "label": "Black"
+                    },
+                    "D3": {
+                        "id": "D3",
+                        "label": "Bugaboo by Diesel"
+                    }
+                },
+                "Special": {
+                    "CN": {
+                        "id": "CN",
+                        "model": "231110NV02",
+                        "label": "classic collection navy blue",
+                        "price": "1189"
+                    },
+                    "CK": {
+                        "id": "CK",
+                        "model": "231110DK02",
+                        "label": "classic collection dark khaki",
+                        "price": "1189"
+                    },
+                    "CS": {
+                        "id": "CS",
+                        "model": "231110SA03",
+                        "label": "classic collection sand",
+                        "price": "1189"
+                    },
+                    "DL": {
+                        "id": "DL",
+                        "model": "231110DL01",
+                        "label": "Bugaboo by Diesel",
+                        "price": "1359"
+                    }
+                },
+                "TF": {
+                    "ZW": {
+                        "id": "ZW",
+                        "model": "230111ZW02",
+                        "label": "Black",
+                        "price": "119.95"
+                    },
+                    "IB": {
+                        "id": "IB",
+                        "model": "230111IB02",
+                        "label": "Ice blue",
+                        "price": "119.95"
+                    },
+                    "SP": {
+                        "id": "SP",
+                        "model": "230111SP02",
+                        "label": "Soft pink",
+                        "price": "119.95"
+                    },
+                    "WH": {
+                        "id": "WH",
+                        "model": "230111WH02",
+                        "label": "Off white",
+                        "price": "119.95"
+                    },
+                    "OR": {
+                        "id": "OR",
+                        "model": "230111OR02",
+                        "label": "Orange",
+                        "price": "119.95"
+                    },
+                    "PB": {
+                        "id": "PB",
+                        "model": "230111PB02",
+                        "label": "Petrol Blue",
+                        "price": "119.95"
+                    },
+                    "RD": {
+                        "id": "RD",
+                        "model": "230111RD02",
+                        "label": "Red",
+                        "price": "119.95"
+                    },
+                    "SC": {
+                        "id": "SC",
+                        "model": "230111CB01",
+                        "label": "shiny chevron black intense",
+                        "price": "144.95"
+                    }
+                }
+
+            };
+
+    if (code) {
+
+        console.debug('--->', b);
+
+        if (b.indexOf('400XX-X') !== -1) {
+            document.getElementById('cartProdRunner').style.display = 'block';
+            document.getElementById('cartProdAdapter').style.display = 'block';
+            total += 475.0;
+        }
+        if (b.indexOf('020ZW-X') !== -1) {
+            document.getElementById('cartProdCupHolder').style.display = 'block';
+            total += 24.95;
+        }
+        if (b[0].match('CAM_C_SP_')) {
+            document.getElementById('cartProdBassinet').style.display = 'block';
+            total += 1149.00;
+        }
+
+        img.src = 'https://api.bugaboo.com/v1/studio?code=' + b[0] + '&width=250';
+        document.getElementById('strollerImage').appendChild(img);
+
+        document.getElementById('priceSummarySubtotal').innerHTML = '$ ' + total;
+        document.getElementById('priceSummaryTotal').innerHTML = '$ ' + total;
+
+        var base = (colors.Base[code.substr(2, 2)] || colors.Special[code.substr(2, 2)]);
+        var canopy = (colors.TF[code.substr(4, 2)] || colors.Special[code.substr(4, 2)]);
+        document.getElementById('cartItemBassinetColor').innerHTML = base.label;
+        document.getElementById('cartItemCanopyColor').innerHTML = canopy.label;
+        document.getElementById('sel_item_0').innerHTML = 'cam3std_' + base.model + '_' + canopy.model;
+
+    }
+</script>
+
 </body>
 </html>

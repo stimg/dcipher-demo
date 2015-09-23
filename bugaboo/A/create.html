@@ -495,30 +495,22 @@
                                     var currentAnchorTag = document.getElementById("myAccountredirect");
 //                                    currentAnchorTag.setAttribute("href", "https://www.bugaboo.com/US/en_US/strollers/create?p_auth=cpEuLlHG&p_p_id=configuratorversion2_WAR_configuratorversion2portlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_configuratorversion2_WAR_configuratorversion2portlet_javax.portlet.action=sendToMyAccount&sId=" + sId + "&bVpc=" + itemSKU);
 
-                                };
+                                }
 
                                 function showBasketPopup() {
 
                                     var msg = [],
-                                            imgs = [],
                                             t, s;
                                     $('img', 'div.basket').each(function (i, el) {
 
                                         t = $(el).attr('title');
                                         if (t) {
 
-                                            s = el.src;
-                                            imgs.push(s.substring(s.indexOf('=') + 1, s.indexOf('&')));
                                             msg.push(t);
-//                                            console.log('--> el: ', el);
-//                                            console.log('---> title: ', $(el).attr('title'));
 
                                         }
 
                                     });
-
-//                                    console.debug('--> basket: ', imgs);
-                                    sessionStorage.setItem('basket', JSON.stringify(imgs));
 
                                     $('.cart-items', '#cart_icon').text(msg.length);
                                     msg = msg.join(', ') + ' has been added to your cart.';
@@ -530,6 +522,29 @@
                                     }, 5000));
 
                                 }
+
+                                function saveBasket() {
+
+                                    var imgs = [],
+                                            t, s;
+                                    $('img', 'div.basket').each(function (i, el) {
+
+                                        t = $(el).attr('title');
+                                        if (t) {
+
+                                            s = el.src;
+                                            imgs.push(s.substring(s.indexOf('=') + 1, s.indexOf('&')));
+
+                                        }
+
+                                    });
+
+//                                    console.debug('--> basket: ', imgs);
+                                    alert('--> basket: ', imgs);
+                                    sessionStorage.setItem('basket', JSON.stringify(imgs));
+
+                                }
+                                window.addEventListener('unload', saveBasket);
 
                             </script>
 
