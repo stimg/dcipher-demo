@@ -8229,7 +8229,7 @@ input.error, textarea.error {
   font-family: Arial,sans-serif;
   position: fixed;
   z-index: 50;
-  top: 0;
+  /*top: 48px;*/
   left: 0;
   width: 100%; }
 
@@ -9937,7 +9937,8 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
   position: relative;
   z-index: 30;
   background: #141414;
-  color: #696867; }
+  color: #696867;
+}
 
 .b3-breadcrumbs ul {
   *zoom: 1;
@@ -12981,3 +12982,17 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
 
   .c9-choose-a-stroller ul > li:nth-of-type(5n+1) {
     clear: both; } }
+
+/*AZ task manager*/
+body {
+  margin-top: 42px;
+  padding: 0 !important;
+}
+
+#main-content{
+  margin-top: 88px;
+}
+
+.b3-breadcrumbs {
+  top: 88px;
+}

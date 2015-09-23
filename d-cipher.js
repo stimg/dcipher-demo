@@ -263,6 +263,7 @@
             canvasHolder: 'd-cipher-canvas-holder',
             menu: 'd-cipher-menu',
             butRecord: 'd-cipher-menu-but-record',
+            butPlay: 'd-cipher-menu-but-play',
             butList: 'd-cipher-menu-but-list',
             stat: 'd-cipher-stat',
             timeline: 'd-cipher-timeline',
@@ -270,7 +271,8 @@
             dblClick: 'd-cipher-dblclick',
             records: 'd-cipher-rec-list',
             mTooltip: 'd-cipher-m-tooltip',
-            eventInfo: 'd-cipher-event-info'
+            eventInfo: 'd-cipher-event-info',
+            topMenu: 'd-cipher-topmenu'
 
         };
 
@@ -394,7 +396,7 @@
 
                 }
 
-                if (rec.events.length) {
+                if (rec.events.length > 1) {
 
                     rec.mouseMilesTotal = this.getNDCMousePath(rec);
 
@@ -425,7 +427,7 @@
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
 
-            if (this.appMode === 'record' && !$(this.getDomElement('container')).find(etarget).length) {
+            if (this.appMode === 'record' && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)) {
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
@@ -1700,7 +1702,7 @@
             $cur.show();
             this.hideRecList();
             this.setActiveRecord(sId);
-            //ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
             ctx.strokeStyle = rec.color;
 
             setTimeout(function () {
@@ -1931,9 +1933,10 @@
 
             }
 
+/*
             $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
                 .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
-
+*/
             if (hidden) {
 
                 $rl.css('visibility', 'visible')
@@ -2061,12 +2064,14 @@
                 rec.appendChild(butCp);
 
                 // Play record button
+/*
                 butPlay = document.createElement('div');
                 butPlay.setAttribute('data-dcipher-rec-id', r.id);
                 butPlay.id = 'playRecId-' + r.id;
                 butPlay.className = 'play';
                 butPlay.title = dCipher.loc._Play_record;
                 rec.appendChild(butPlay);
+*/
 
                 // Edit name field
                 inpName = document.createElement('input');
@@ -2105,11 +2110,13 @@
 
                 });
 
+/*
                 butPlay.addEventListener('click', function () {
 
                     self.playSession($(this).attr('data-dcipher-rec-id'));
 
                 });
+*/
 
                 inpName.addEventListener('change', function () {
 
@@ -2197,6 +2204,8 @@
                     r.active = true;
                     r.visible = true;
                     self.drawTimeline(r);
+                    self.sessionRec = r;
+                    self.sessionId = r.id;
 
                 } else {
 
@@ -2454,6 +2463,7 @@
             mTT = document.createElement('div'),
             eInf = document.createElement('div'),
             tLine = document.createElement('div'),
+            topMenu = document.createElement('div'),
             tlCnv = document.createElement('canvas'),
             tlCtx = tlCnv.getContext('2d');
 
@@ -2461,12 +2471,16 @@
         dMain.id = dCipher.domId.container;
         bdy.appendChild(dMain);
 
+        // Top menu
+        topMenu.id = dCipher.domId.topMenu;
+        bdy.insertBefore(topMenu, bdy.firstChild);
+
         // Init styles
         link.rel = 'stylesheet';
         link.type = 'text/css';
         link.media = 'all';
         link.href = dCipher.baseURL + dCipher.cssURL;
-        document.body.insertBefore(link, document.getElementById(dMain.id));
+        bdy.insertBefore(link, document.getElementById(dMain.id));
 
         // Init canvas holder
         cnvDiv.id = dCipher.domId.canvasHolder;
@@ -2505,16 +2519,20 @@
 
         // Record button
         butRec.id = dCipher.domId.butRecord;
-        butRec.className = 'btn';
+        butRec.className = 'btn rec';
         butRec.title = dCipher.loc._Record_session;
         rec.className = 'rec';
         butRec.appendChild(rec);
+        topMenu.appendChild(butRec);
 
         // Play button
-        butPlay.className = 'btn';
+        butPlay.id = dCipher.domId.butPlay;
+        butPlay.className = 'btn play';
+        butPlay.title = dCipher.loc._Play_record;
         play.className = 'play';
-        butPlay.style.display = 'none';
+        //butPlay.style.display = 'none';
         butPlay.appendChild(play);
+        topMenu.appendChild(butPlay);
 
         // Record list button
         butList.id = dCipher.domId.butList;
@@ -2528,8 +2546,8 @@
 
         // D-Cipher menu
         menu.id = dCipher.domId.menu;
-        menu.appendChild(butRec);
-        menu.appendChild(butPlay);
+        //menu.appendChild(butRec);
+        //menu.appendChild(butPlay);
         menu.appendChild(butList);
         dMain.appendChild(menu);
         dMain.appendChild(recList);
@@ -2548,7 +2566,13 @@
 
         butPlay.addEventListener('click', function () {
 
-            dCipher.playSession();
+            var sId = dCipher.sessionId;
+
+            if (sId) {
+
+                dCipher.playSession(sId);
+
+            }
 
         });
 

@@ -1,4 +1,5 @@
 @import "bootstrap-colorpicker.css";
+
 #d-cipher-container {
   font: normal 14px Helvetica, Tahoma sans-serif;
   color: #333;
@@ -23,9 +24,11 @@
   left: 0;
   bottom: 0;
   .btn {
-    border: solid 2px white;
-    background-color: magenta;
-    padding: 0.5em;
+    //border: solid 2px white;
+    //background-color: gray;
+    width: 42px;
+    height: 42px;
+    padding: 7px 15px 10px 15px;
     cursor: pointer;
     .rec {
       width: 1em;
@@ -42,30 +45,78 @@
     }
     .recs:before{
       position: relative;
-      top: 3px;
+      top: 8px;
       content: '';
       display: block;
-      width: 1em;
-      height: 2px;
-      background-color: magenta;
+      width: 21px;
+      height: 5px;
+      background-color: white;
     }
     .recs{
       display: block;
-      width: 1em;
-      height: 13px;
-      margin: 1px auto;
+      width: 21px;
+      height: 5px;
+      //margin: 10px;
       background-color: white;
     }
     .recs:after{
       position: relative;
-      top: 6px;
+      top: 11px;
       content: '';
       display: block;
-      width: 1em;
-      height: 2px;
-      background-color: magenta;
+      width: 21px;
+      height: 5px;
+      background-color: white;
     }
   }
+}
+#d-cipher-topmenu{
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 42px;
+  background: linear-gradient(#C0C0C0, #808080);
+  z-index: 1000100;
+  .btn{
+    width: 42px;
+    height: 42px;
+    background-color: gray;
+    padding: 10px;
+    cursor: pointer;
+    display: inline-block;
+    .play{
+      width: 0;
+      height: 0;
+      border: solid 12px transparent;
+      border-left-color: white;
+      transform: scale(1.5, 1) translate(7px, 0);
+    }
+    .rec {
+      //width: 1em;
+      //height: 1em;
+      margin: auto;
+      background-color: white;
+      border-radius: 1em;
+      padding: 11px;
+    }
+    .stop {
+      margin: auto;
+      background-color: white;
+      width: 20px;
+      height: 20px;
+    }
+  }
+  .btn:hover{
+    background-color: silver;
+    .rec, .stop{
+      background-color: black;
+    }
+    .play{
+      border-left-color: black;
+    }
+  }
+
 }
 
 #d-cipher-canvas-holder {
@@ -220,6 +271,7 @@
 }
 */
 
+/*
 #d-cipher-rec-list:before{
   position: absolute;
   top: 50%;
@@ -232,23 +284,24 @@
   border: solid 12px transparent;
   border-right-color: whitesmoke;
 }
+*/
 #d-cipher-rec-list{
   .shadow;
-  display: none;
+  //display: none;
   position: fixed;
   z-index: 1000010;
-  top:45%;
-  left: 52px;
+  bottom: 52px;
+  left: 1px;
   width: 18em;
   max-height: 400px;
   padding: 0.5em 0;
   //overflow-x: hidden;
   //overflow-y: auto;
-  background-color: whitesmoke;
+  background-color: silver;
   text-overflow: ellipsis;
   cursor: default;
   .rec:hover, .rec.active{
-    background-color: magenta;
+    background-color: #999999;
     color: white;
     input.rec-name{
       color: white;
@@ -269,10 +322,11 @@
     border: solid 2px white;
   }
   .rec{
+    padding: 2px;
     .del{
       display: inline-block;
       position: absolute;
-      right: 2.7em;
+      right: 5px;
       margin: 0.35em;
       color: transparent;
       cursor: pointer;
@@ -309,8 +363,10 @@
       background-color: magenta;
     }
     input.rec-name{
+      color: white;
       background-color: transparent;
       border: solid 1px transparent;
+      margin: 0 0 0 41px;
     }
     input.rec-name:focus{
       background-color: white;
@@ -319,33 +375,36 @@
     }
     .cp-container{
       position: absolute;
-      right: 3.1em;
+      left: 22px;
       width: 0;
       height: 0;
+      margin-top: -2px;
+      margin-left: 3px;
     }
     .cp-span{
       display: block;
-      width: 18px;
-      height: 18px;
+      width: 7px;
+      height: 21px;
       margin: 0.3em;
-      border: solid 2px white;
-      border-radius: 1em;
+      border: solid 1px white;
+      //border-radius: 1em;
       background-color: white;
       .cp-i{
         display: block;
-        width: 14px;
-        height: 14px;
+        width: 8px;
+        height: 21px;
+        margin-left: -1px;
         //margin: 0.3em;
         //border: solid 2px white;
-        border-radius: 1em;
+        //border-radius: 1em;
       }
     }
     .cp-pos{
       .shadow;
       position: relative;
       box-sizing: content-box;
-      top: 2px;
-      left: 1px;
+      top: 5px;
+      left: -5px;
       text-align: left;
       background-color: white;
     }
