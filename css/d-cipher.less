@@ -238,11 +238,11 @@
   display: none;
   position: fixed;
   z-index: 10000015;
-  max-height: 5em;
-  overflow: hidden;
+  //max-height: 5em;
+  //overflow: hidden;
   text-overflow: ellipsis;
-  padding: 5px;
-  background-color: rgba(255, 0, 255, 0.5);
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.3);
   color: white;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
 }
@@ -287,7 +287,7 @@
 */
 #d-cipher-rec-list{
   .shadow;
-  //display: none;
+  display: none;
   position: fixed;
   z-index: 1000010;
   bottom: 52px;
@@ -332,6 +332,7 @@
       cursor: pointer;
     }
     .show{
+      /*
       display: inline-block;
       float: left;
       width: 1em;
@@ -342,6 +343,18 @@
       margin: 0.3em;
       color: transparent;
       cursor: pointer;
+      */
+      display: inline-block;
+      float: left;
+      width: 1em;
+      height: 1em;
+      border-radius: 1em;
+      border: solid 1px transparent;
+      margin: .3em;
+      color: transparent;
+      cursor: pointer;
+      border-bottom-color: white;
+      transform: scale(1.5, 1.8) translate(0, -5px);
     }
     .play{
       display: block;
@@ -360,7 +373,16 @@
     }
     .chckb-show:checked + label{
       border: solid 2px white;
-      background-color: magenta;
+      transform: scale(1, 0.6);
+    }
+    .chckb-show:checked + label:before{
+      content: '';
+      display: block;
+      width: 6px;
+      height: 6px;
+      border-radius: 8px;
+      background-color: white;
+      transform: translate(3px, 3px) scale(1, 1.7);
     }
     input.rec-name{
       color: white;
@@ -370,8 +392,8 @@
     }
     input.rec-name:focus{
       background-color: white;
-      color: magenta;
-      border: solid 1px magenta;
+      color: gray;
+      border: solid 1px gray;
     }
     .cp-container{
       position: absolute;
@@ -383,16 +405,16 @@
     }
     .cp-span{
       display: block;
-      width: 7px;
-      height: 21px;
-      margin: 0.3em;
+      width: 6px;
+      height: 18px;
+      margin: 6px;
       border: solid 1px white;
       //border-radius: 1em;
       background-color: white;
       .cp-i{
         display: block;
-        width: 8px;
-        height: 21px;
+        width: 7px;
+        height: 18px;
         margin-left: -1px;
         //margin: 0.3em;
         //border: solid 2px white;
@@ -403,11 +425,21 @@
       .shadow;
       position: relative;
       box-sizing: content-box;
-      top: 5px;
-      left: -5px;
+      top: -133px;
+      left: 21px;
       text-align: left;
       background-color: white;
     }
+  }
+  .bs-colorpicker:after{
+    position: absolute;
+    display: block;
+    top: 113px;
+    left: -14px;
+    right: auto;
+    border: solid 7px transparent;
+    border-right-color: white;
+    margin: 0;
   }
 }
 

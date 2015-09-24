@@ -42,6 +42,7 @@
             _KPI_event: "KPI Event",
 
             mouseover: 'Mouse over',
+            mouseout: 'Mouse out',
             mousedown: 'Mouse down',
             mousemove: 'Mouse move',
             mouseup: 'Mouse up',
@@ -276,6 +277,37 @@
 
         };
 
+        this.registerEventList = [
+
+            'mouseover',
+            'mouseout',
+            'mousedown',
+            'mouseup',
+            'click',
+            'dblclick',
+            'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
+
+        ];
+
+        this.drawEventList = [
+
+            'start',
+            'mouseover',
+            //'mouseout',
+            'mousedown',
+            'mouseup',
+            'click',
+            'dblclick',
+            'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
+
+        ];
+
         this.mouse = {
 
             x: 0,
@@ -344,7 +376,6 @@
                 self.updateStatString();
 
             }
-
 
             if (this.appMode === '') {
 
@@ -427,7 +458,8 @@
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
 
-            if (this.appMode === 'record' && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)) {
+            if (this.appMode === 'record' &&
+                this.registerEventList.indexOf(etype) > -1 && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)) {
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
@@ -454,7 +486,7 @@
                             pageXOffset: pageOffsetNDC.x,
                             pageYOffset: pageOffsetNDC.y
                         },
-                        bubbles: !etype.match(/wheel|scroll/i),
+                        bubbles: !etype.match(/wheel|scroll/i) && etype !== 'mouseover',
                         cancelBubble: e.cancelBubble,
                         cancelable: e.cancelable,
                         defaultPrevented: e.defaultPrevented,
@@ -490,7 +522,7 @@
                             name: etarget.name,
                             title: etarget.title,
                             id: etarget.id,
-                            className: etarget.className,
+                            className: etarget.className, //.toString(),
                             width: $el.outerWidth(),
                             height: $el.outerHeight(),
                             x: left,
@@ -779,8 +811,8 @@
                 html += loc._Session_name + ': ' + rec.name + '<br />'
                         + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
                         + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
-                        + loc._Event + ': ' + loc[e.type] + '<br />'
-                        + loc._KPI_event + ': ' + e.kpi.toFixed(2);
+                        + loc._Event + ': ' + loc[e.type]/* + '<br />'
+                        + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
 
                 return html;
             }
@@ -939,7 +971,8 @@
 
         this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
 
-            var recs = this.db.records,
+            var self = this,
+                recs = this.db.records,
                 abs = Math.abs,
                 th = 5,
                 evts = [];
@@ -950,10 +983,9 @@
 
                     var ea = r.events.filter(function (e, i, arr) {
 
-                        console.log();
-
                         return abs(x - e.x) < th && abs(y - e.y) < th
-                               && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i));
+                               && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
+                            && self.drawEventList.indexOf(e.type) > -1;
 
                     });
 
@@ -1086,13 +1118,13 @@
             $(cnvh).show();
             $(cnv).show();
 
-            if (rec.drawn) {
+            if (!rec.drawn || start || end) {
 
-                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+                this.drawSpiderGraph(sId, start, end);
 
             } else {
 
-                this.drawSpiderGraph(sId, start, end);
+                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
 
             }
 
@@ -1122,8 +1154,6 @@
                     ey = pos.y;
 
                 if (e.type === 'start') {
-
-
 
                 } else if (e.drag) {
 
@@ -1268,7 +1298,7 @@
 
             });
 
-             e = events[events.length - 1];
+            e = events[events.length - 1];
             if (!e.type.match(/wheel|scroll/i)) {
 
                 self.drawEventPict(ctx, e.type, posx, offsetTop);
@@ -1286,69 +1316,73 @@
 
         this.drawEventPict = function (ctx, type, x, y) {
 
-            var endAngle = 2 * Math.PI, d = 3;
+            if (this.drawEventList.indexOf(type) > -1) {
 
-            if (type === 'start') {
+                var endAngle = 2 * Math.PI, d = 3;
 
-                ctx.moveTo(x - 1, y - 3);
-                ctx.lineTo(x - 1, y + 3);
+                if (type === 'start') {
 
-            } else if (type === 'click') {
+                    ctx.moveTo(x - 1, y - 3);
+                    ctx.lineTo(x - 1, y + 3);
 
-                ctx.moveTo(x + d, y);
-                ctx.arc(x, y, d, 0, endAngle, true);
+                } else if (type === 'click') {
 
-            } else if (type === 'dblclick') {
+                    ctx.moveTo(x + d, y);
+                    ctx.arc(x, y, d, 0, endAngle, true);
 
-                ctx.moveTo(x + d, y);
-                ctx.arc(x, y, d, 0, endAngle, true);
-                ctx.moveTo(x + 2 * d, y);
-                ctx.arc(x, y, 2 * d, 0, endAngle, true);
+                } else if (type === 'dblclick') {
 
-            } else if (type === 'mousedown') {
+                    ctx.moveTo(x + d, y);
+                    ctx.arc(x, y, d, 0, endAngle, true);
+                    ctx.moveTo(x + 2 * d, y);
+                    ctx.arc(x, y, 2 * d, 0, endAngle, true);
 
-                ctx.moveTo(x + 3, y - 2);
-                ctx.lineTo(x, y + 3);
-                ctx.lineTo(x - 3, y - 2);
-                ctx.lineTo(x + 3, y - 2);
+                } else if (type === 'mousedown') {
 
-            } else if (type === 'mouseup') {
+                    ctx.moveTo(x + 3, y - 2);
+                    ctx.lineTo(x, y + 3);
+                    ctx.lineTo(x - 3, y - 2);
+                    ctx.lineTo(x + 3, y - 2);
 
-                ctx.moveTo(x - 3, y + 2);
-                ctx.lineTo(x, y - 3);
-                ctx.lineTo(x + 3, y + 2);
-                ctx.lineTo(x - 3, y + 2);
+                } else if (type === 'mouseup') {
 
-            } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
+                    ctx.moveTo(x - 3, y + 2);
+                    ctx.lineTo(x, y - 3);
+                    ctx.lineTo(x + 3, y + 2);
+                    ctx.lineTo(x - 3, y + 2);
 
-                ctx.moveTo(x + 1, y);
-                ctx.arc(x, y, 1, 0, endAngle, true);
+                } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
 
-            } else if (type.match(/wheel|scroll/i)) {
+                    ctx.moveTo(x + 1, y);
+                    ctx.arc(x, y, 1, 0, endAngle, true);
 
-                ctx.moveTo(x - 3, y - 1);
-                ctx.lineTo(x, y - 4);
-                ctx.lineTo(x + 3, y - 1);
-                //ctx.lineTo(x - 3, y - 1);
-                ctx.closePath();
+                } else if (type.match(/wheel|scroll/i)) {
 
-/*
-                ctx.moveTo(x + 2, y);
-                ctx.arc(x, y, 2, 0, endAngle, true);
-*/
+                    ctx.moveTo(x - 3, y - 1);
+                    ctx.lineTo(x, y - 4);
+                    ctx.lineTo(x + 3, y - 1);
+                    //ctx.lineTo(x - 3, y - 1);
+                    ctx.closePath();
 
-                ctx.moveTo(x - 3, y + 1);
-                ctx.lineTo(x, y + 4);
-                ctx.lineTo(x + 3, y + 1);
-                //ctx.lineTo(x - 3, y + 1);
-                ctx.closePath();
+                    /*
+                     ctx.moveTo(x + 2, y);
+                     ctx.arc(x, y, 2, 0, endAngle, true);
+                     */
 
-/*
-                ctx.strokeRect(x - 3, y - 2, 1.5, 4);
-                ctx.fillRect(x - 3, y - 2, 1.5, 4);
-                ctx.strokeRect(x, y - 2, 1.5, 4);
-                ctx.fillRect(x, y - 2, 1.5, 4);
-*/
+                    ctx.moveTo(x - 3, y + 1);
+                    ctx.lineTo(x, y + 4);
+                    ctx.lineTo(x + 3, y + 1);
+                    //ctx.lineTo(x - 3, y + 1);
+                    ctx.closePath();
+
+                    /*
+                     ctx.strokeRect(x - 3, y - 2, 1.5, 4);
+                     ctx.fillRect(x - 3, y - 2, 1.5, 4);
+                     ctx.strokeRect(x, y - 2, 1.5, 4);
+                     ctx.fillRect(x, y - 2, 1.5, 4);
+                     */
+
+                }
 
             }
 
@@ -1518,34 +1552,34 @@
 
                         if (!mouseDown) {
 
-/*
-                            if (mOverElement !== el) {
+                            /*
+                             if (mOverElement !== el) {
 
-                                if (mOverElement) {
+                             if (mOverElement) {
 
-                                    mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                                    $(mOverElement).removeClass(mOverClass);
+                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                             $(mOverElement).removeClass(mOverClass);
 
-                                }
-                                if (self.addMouseOverClass(el, ':hover')) {
+                             }
+                             if (self.addMouseOverClass(el, ':hover')) {
 
-                                    $(el).addClass(mOverClass);
+                             $(el).addClass(mOverClass);
 
-                                }
+                             }
 
-                                el.dispatchEvent(new MouseEvent('mouseover', {
+                             el.dispatchEvent(new MouseEvent('mouseover', {
 
-                                    clientX: x,
-                                    clientY: y,
-                                    pageX: x,
-                                    pageY: y,
-                                    view: window
+                             clientX: x,
+                             clientY: y,
+                             pageX: x,
+                             pageY: y,
+                             view: window
 
-                                }));
-                                mOverElement = el;
+                             }));
+                             mOverElement = el;
 
-                            }
-*/
+                             }
+                             */
 
                         } else {
 
@@ -1661,9 +1695,17 @@
                     $(mOverElement).removeClass(mOverClass);
                     self.removeMouseOverStyle();
                     $(cnv).css('cursor', 'default');
-                    self.drawSpiderGraph(rec.id, 0, cnt);
+                    if (cnt === sData.length) {
+
+                        self.drawSpiderGraph(rec.id);
+
+                    } else {
+
+                        self.drawSpiderGraph(rec.id, 0, cnt);
+
+                    }
                     self.appMode = '';
-                    self.sessionRec = null;
+                    //self.sessionRec = null;
                     sessionStorage.removeItem('dcipherState');
 
                 }
@@ -1704,16 +1746,21 @@
             this.setActiveRecord(sId);
             ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
             ctx.strokeStyle = rec.color;
+            if (eventIndex !== undefined) {
+
+                this.showSpiderGraph(sId, 0, eventIndex + 1);
+
+            }
 
             setTimeout(function () {
 
                 //if (cnt) {
 
-                    playEvent(pars);
+                playEvent(pars);
 
                 //} else {
 
-                    //moveCursor(pars);
+                //moveCursor(pars);
 
                 //}
 
@@ -1764,10 +1811,10 @@
                     cpy = 20;
 
                 etarget.element = el;
-/*
-                x = elX + locX;
-                y = elY + locY;
-*/
+                /*
+                 x = elX + locX;
+                 y = elY + locY;
+                 */
 
                 if (x + cpx > pageXOffset + winW) {
 
@@ -1783,14 +1830,14 @@
 
                 }
 
-/*
-                e.pageX += x - e.x;
-                e.pageY += y - e.y;
-                e.clientX = x;
-                e.clientY = y;
-                e.x = x;
-                e.y = y;
-*/
+                /*
+                 e.pageX += x - e.x;
+                 e.pageY += y - e.y;
+                 e.clientX = x;
+                 e.clientY = y;
+                 e.x = x;
+                 e.y = y;
+                 */
 
             }
 
@@ -1832,7 +1879,7 @@
 
             }
 
-            if (el.className) {
+            if (el.className && typeof el.className === 'string') {
 
                 el.className.split(" ").forEach(function (s) {
 
@@ -1933,10 +1980,10 @@
 
             }
 
-/*
-            $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
-                .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
-*/
+            /*
+             $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
+             .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
+             */
             if (hidden) {
 
                 $rl.css('visibility', 'visible')
@@ -2064,14 +2111,14 @@
                 rec.appendChild(butCp);
 
                 // Play record button
-/*
-                butPlay = document.createElement('div');
-                butPlay.setAttribute('data-dcipher-rec-id', r.id);
-                butPlay.id = 'playRecId-' + r.id;
-                butPlay.className = 'play';
-                butPlay.title = dCipher.loc._Play_record;
-                rec.appendChild(butPlay);
-*/
+                /*
+                 butPlay = document.createElement('div');
+                 butPlay.setAttribute('data-dcipher-rec-id', r.id);
+                 butPlay.id = 'playRecId-' + r.id;
+                 butPlay.className = 'play';
+                 butPlay.title = dCipher.loc._Play_record;
+                 rec.appendChild(butPlay);
+                 */
 
                 // Edit name field
                 inpName = document.createElement('input');
@@ -2110,13 +2157,13 @@
 
                 });
 
-/*
-                butPlay.addEventListener('click', function () {
+                /*
+                 butPlay.addEventListener('click', function () {
 
-                    self.playSession($(this).attr('data-dcipher-rec-id'));
+                 self.playSession($(this).attr('data-dcipher-rec-id'));
 
-                });
-*/
+                 });
+                 */
 
                 inpName.addEventListener('change', function () {
 
@@ -2171,7 +2218,7 @@
 
                     format: 'rgba',
                     container: butCp,
-                    align: 'left',
+                    //align: 'right',
                     customClass: 'cp-pos',
                     colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
 
@@ -2717,7 +2764,11 @@
 
                 node.eventListenerList[type] = [];
 
-                if (handler.toString().match(/stopPropagation|preventDefault/) || type === 'mouseover' || type === 'mouseenter' || type === 'mouseout' || type === 'mouseleave') {
+                if (handler.toString().match(/stopPropagation|preventDefault/)
+                    || type === 'mouseover'
+                    || type === 'mouseout'
+                    || type === 'mouseenter'
+                    || type === 'mouseleave') {
 
                     node._addEventListener(type, function (e) {
 
