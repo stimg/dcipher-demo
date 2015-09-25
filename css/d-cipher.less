@@ -210,6 +210,27 @@
   border: solid 2px rgba(255, 0, 255, 0.5);
   background-color: transparent;
 }
+#d-cipher-highlight-event {
+  display: none;
+  position: absolute;
+  z-index: 1000001;
+  top: 100px;
+  left: 100px;
+  width: 24px;
+  height: 24px;
+  border-radius: 20px;
+  border: solid 4px white;
+  background-color: transparent;
+}
+#d-cipher-highlight-event:before{
+  content: '';
+  display: block;
+  width: 22px;
+  height: 22px;
+  border: solid 2px red;
+  border-radius: 22px;
+  margin: -3px;
+}
 #d-cipher-dblclick:after {
   /*
   content: '';
@@ -255,6 +276,18 @@
   line-height: 1.6em;
   background-color: whitesmoke;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+}
+
+#d-cipher-event-info:after{
+  position: relative;
+  bottom: -20px;
+  margin: auto;
+  content: '';
+  display: block;
+  width: 0;
+  height: 0;
+  border: solid 5px transparent;
+  border-top-color: whitesmoke;
 }
 /*
 #d-cipher-event-info:before{

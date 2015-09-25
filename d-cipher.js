@@ -41,6 +41,7 @@
             _KPI: "KPI",
             _KPI_event: "KPI Event",
 
+            start: 'Start',
             mouseover: 'Mouse over',
             mouseout: 'Mouse out',
             mousedown: 'Mouse down',
@@ -270,6 +271,7 @@
             timeline: 'd-cipher-timeline',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
+            highlightEvent: 'd-cipher-highlight-event',
             records: 'd-cipher-rec-list',
             mTooltip: 'd-cipher-m-tooltip',
             eventInfo: 'd-cipher-event-info',
@@ -279,6 +281,7 @@
 
         this.registerEventList = [
 
+            'start',
             'mouseover',
             'mouseout',
             'mousedown',
@@ -322,6 +325,7 @@
         this.eventIndex = 0;
         this.appMode = '';
         this.eventsUnderMouse = [];
+        this.timeLineEvents = [];
         this.clickDelay = 200;
 
         this.init = function init() {
@@ -456,16 +460,19 @@
             var etype = e.type,
                 etarget = e.target || document.getElementsByTagName('body')[0];
 
-            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, !$(this.getDomElement('container')).find(etarget).length);
+            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, this.registerEventList.indexOf(etype) > -1
+                                                                                    && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length/* || etarget.viewportElement*/));
 
             if (this.appMode === 'record' &&
-                this.registerEventList.indexOf(etype) > -1 && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)) {
+                this.registerEventList.indexOf(etype) > -1
+                && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length/* || etarget.viewportElement*/)) {
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
                 var rec = this.sessionRec,
                     events = rec.events,
-                    lastEvent = events[events.length - 1] || null,
+                    elen = events.length,
+                    lastEvent = events[elen - 1] || null,
                     milesTotal = this.getNDCMousePath(rec),
                     clientNDC = this.getNDC(e.clientX, e.clientY),
                     pageNDC = this.getNDC(e.pageX, e.pageY),
@@ -477,6 +484,7 @@
                     event = {
                         recId: this.sessionId,
                         timeStamp: e.timeStamp,
+                        index: elen,
                         location: document.location.href,
                         ndc: {
                             x: clientNDC.x,
@@ -522,7 +530,7 @@
                             name: etarget.name,
                             title: etarget.title,
                             id: etarget.id,
-                            className: etarget.className, //.toString(),
+                            className: typeof etarget.className === 'string' ? etarget.className : '', //.toString(),
                             width: $el.outerWidth(),
                             height: $el.outerHeight(),
                             x: left,
@@ -554,7 +562,7 @@
                     event = events.pop();
                     event.type = etype = 'click';
 
-                    lastEvent = events[events.length - 1];
+                    lastEvent = events[elen - 1];
                     if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
 
                         events.pop();
@@ -778,6 +786,94 @@
 
         };
 
+        this.showTLTooltip = function showTLTooltip(e) {
+
+            var self = this,
+                event = this.getTimelineEvent(e),
+                $tt = $(this.getDomElement('eventInfo')),
+                $he = $(this.getDomElement('highlightEvent')),
+                hw2 = $he.outerWidth() / 2,
+                $cnv = $('canvas', '#' + this.domId['timeline']);
+
+            function getEventInfo(e) {
+
+                var rId = e.recId,
+                    rec = self.getRecordById(rId),
+                    etarget = e.target,
+                    html = '';
+
+                if (etarget.dcipherName) {
+
+                    html += loc._Target + ': ' + etarget.dcipherName + '<br />';
+
+                }
+
+                if (etarget.dcipherAction) {
+
+                    html += loc._Action + ': ' + etarget.dcipherAction + '<br />';
+
+                }
+
+                html += loc._Session_name + ': ' + rec.name + '<br />'
+                        + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
+                        + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
+                        + loc._Event + ': ' + loc[e.type]/* + '<br />'
+                        + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
+
+                return html;
+            }
+
+            if (event) {
+
+                var loc = this.loc,
+                    pos = $cnv.offset(),
+                    x = event.x + pos.left, y = event.y + pos.top,
+                    html = '', w, h, top, left;
+
+                $cnv.css('cursor', 'pointer');
+                $he.show().css({ 'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
+                html += getEventInfo(event.event);
+                $tt.html(html);
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
+
+                if (y + 20 + h < window.innerHeight) {
+
+                    top = y + 20;
+
+                } else {
+
+                    top = y - h - 10;
+
+                }
+
+                if (x - w / 2 - 5 < 0) {
+
+                    left = 5;
+
+                } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                    left = window.innerWidth - w - 5;
+
+                } else {
+
+                    left = x - w / 2;
+
+                }
+
+                $tt.css('top', top).css('left', left)
+                    .show();
+
+            } else {
+
+                $cnv.css('cursor', 'default');
+                $tt.hide();
+                $he.hide();
+
+            }
+
+        };
+
         this.showMouseTooltip = function showMouseTooltip(event) {
 
             var self = event.data.self,
@@ -871,7 +967,7 @@
                 $tt.css('top', top).css('left', left)
                     .show();
 
-            } else {
+            } else if (event.target.parentNode.id !== self.domId['timeline']) {
 
                 $(self.getDomElement('eventInfo')).hide();
                 $(cnvh).css('cursor', 'default');
@@ -1247,6 +1343,7 @@
                 pxs = width / rec.duration,
                 posx = offsetLeft, posx0, pe;
 
+            this.timeLineEvents = [];
             cnv.width = cw;
             cnv.height = ch;
             $(cnv).width(cw);
@@ -1257,6 +1354,9 @@
             ctx.strokeStyle = rec.color;
             ctx.clearRect(0, 0, cw, ch);
             ctx.moveTo(offsetLeft, offsetTop);
+            self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
+            ctx.stroke();
+
             events.forEach(function (e, i, arr) {
 
                 //console.debug('---> posx:', posx);
@@ -1266,6 +1366,19 @@
                 pe = arr[i - 1];
                 posx0 = posx;
                 posx = offsetLeft + pxs * e.time;
+
+                self.timeLineEvents.push({
+
+                    type: 'timeline',
+                    clientX: posx,
+                    clientY: offsetTop,
+                    target: $('canvas', '#' + self.domId.timeline)[0],
+                    x: posx,
+                    y: offsetTop,
+                    event: e
+
+                });
+
                 ctx.beginPath();
                 ctx.moveTo(posx0, offsetTop);
                 //if (ne && ne.drag) {
@@ -1311,6 +1424,50 @@
 
             ctx.stroke();
             ctx.fill();
+
+        };
+
+        this.getTimelineEvent = function getTimelineEvent(e) {
+
+            var te = this.timeLineEvents,
+                pos = $(e.target).offset(),
+                abs = Math.abs,
+                x = e.clientX - pos.left,
+                y = e.clientY - pos.top,
+                th = 5, evt, event = null,
+                i, il = te.length;
+
+            for (i = 0; i < il; i++) {
+
+                evt = te[i];
+                if (abs(x - evt.x) < th && abs(y - evt.y)) {
+
+                    event = evt;
+                    break;
+
+                }
+
+            }
+
+            return event;
+
+        };
+
+        this.showTimelineEvent = function showTimelineEvent(e) {
+
+            var evt = this.getTimelineEvent(e),
+                event = evt ? evt.event : null;
+
+
+            if (event) {
+
+                this.sessionId = event.recId;
+                this.sessionRec = this.getRecordById(event.recId);
+                this.eventIndex = this.sessionRec.events.indexOf(event);
+                this.appMode = 'timeline';
+                window.location = event.location;
+
+            }
 
         };
 
@@ -1414,7 +1571,7 @@
                 el = pars.element;
                 self.eventIndex = cnt;
 
-                //console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
+                console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
                 /*
                  if (pars.winScrollX || pars.winScrollY) {
 
@@ -1680,11 +1837,11 @@
 
                     } else {
 
-                        setTimeout(function () {
+                        //setTimeout(function () {
 
                             playEvent(pars2);
 
-                        }, 10);
+                        //}, 0);
 
                     }
 
@@ -2465,6 +2622,14 @@
                 this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
                 this.playSession(this.sessionRec.id, this.eventIndex);
 
+            } else if (this.appMode === 'timeline') {
+
+                this.setActiveRecord(this.sessionRec.id);
+                this.showSpiderGraph(this.sessionRec.id);
+                this.showTLTooltip(this.timeLineEvents[this.eventIndex]);
+                sessionStorage.removeItem('dcipherState');
+                this.appMode = '';
+
             }
 
         };
@@ -2506,6 +2671,7 @@
             recList = document.createElement('div'),
             click = document.createElement('div'),
             dblclick = document.createElement('div'),
+            evtHlt = document.createElement('div'),
             cursor = document.createElement('div'),
             mTT = document.createElement('div'),
             eInf = document.createElement('div'),
@@ -2546,6 +2712,10 @@
         // Double click spot
         dblclick.id = dCipher.domId.dblClick;
         cnvDiv.appendChild(dblclick);
+
+        // Highlight event spot
+        evtHlt.id = dCipher.domId.highlightEvent;
+        cnvDiv.appendChild(evtHlt);
 
         // Cursor
         cursor.id = dCipher.domId.cursor;
@@ -2602,6 +2772,18 @@
         cnvDiv.addEventListener('click', function (e) {
 
             dCipher.canvasHolderClickHandler(e, dCipher);
+
+        });
+
+        tlCnv.addEventListener('mousemove', function (e) {
+
+            dCipher.showTLTooltip(e);
+
+        });
+
+        tlCnv.addEventListener('click', function (e) {
+
+            dCipher.showTimelineEvent(e);
 
         });
 
@@ -2765,10 +2947,9 @@
                 node.eventListenerList[type] = [];
 
                 if (handler.toString().match(/stopPropagation|preventDefault/)
-                    || type === 'mouseover'
-                    || type === 'mouseout'
-                    || type === 'mouseenter'
-                    || type === 'mouseleave') {
+                    || type === 'mouseover' || type === 'mouseout'
+                    || type === 'mouseenter' || type === 'mouseleave'
+                ) {
 
                     node._addEventListener(type, function (e) {
 
