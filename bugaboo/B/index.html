@@ -79,7 +79,7 @@
 
                         <li data-submenu="Strollers" class="strollers submenu-trigger">
 
-                            <a id="strollers">STROLLERS
+                            <a id="strollers" onmouseover="$(this).trigger('click');">STROLLERS
                                 <span class="icon-arrow-simple-down"></span>
                                 <span class="icon-arrow-simple-right-small"></span>
 
@@ -140,11 +140,6 @@
 
         <div class="submenus-container">
 
-            <ul class="submenu-generic">
-                <li class="back"><span class="icon-arrow-simple-left-small"></span>Back</li>
-                <li class="close-submenu"><span class="icon-close"></span></li>
-            </ul>
-
             <div class="submenu-container strollers" id="submenuStrollers">
 
                 <div class="align-submenu row">
@@ -153,44 +148,47 @@
 
                         <ul class="submenu-products small-block-grid-6">
 
-                            <li><a href="#" id="sel_overview"><span class="product-name">STROLLER OVERVIEW</span></a>
-                            </li>
-
                             <li>
-                                <a href="bugaboo-cameleon3.html" id="sel_cameleon">
-                                    <img src="assets/bugaboo-cameleon.png">
+                                <a href="bugaboo-cameleon3.html">
+                                    <img src="assets/bugaboo-cameleon.jpg">
                                     <span class="product-name">BUGABOO CAMELEON³</span>
+                                    <span class="product-description">iconic</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" id="sel_bee">
-                                    <img src="assets/bugaboo-bee.png">
+                                <a href="#">
+                                    <img src="assets/bugaboo-bee.jpg">
                                     <span class="product-name">BUGABOO BEE³</span>
+                                    <span class="product-description">urban</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" id="sel_donkey">
-                                    <img src="assets/bugaboo-donkey.png">
+                                <a href="#">
+                                    <img src="assets/bugaboo-donkey.jpg">
                                     <span class="product-name">BUGABOO DONKEY</span>
+                                    <span class="product-description">convertible</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" id="sel_buffalo">
-                                    <img src="assets/bugaboo-buffalo.png">
+                                <a href="#">
+                                    <img src="assets/bugaboo-buffalo.jpg">
                                     <span class="product-name">BUGABOO BUFFALO</span>
+                                    <span class="product-description">all-terrain</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="#" id="sel_runner">
-                                    <img src="assets/bugaboo-runner.png">
+                                <a href="#">
+                                    <img src="assets/bugaboo-runner.jpg">
                                     <span class="product-name">BUGABOO RUNNER</span>
+                                    <span class="product-description">jogging</span>
                                 </a>
                             </li>
                             <li>
-                                <a href="accessories.html" id="sel_accessories">
+                                <a href="#">
 
-                                    <img src="assets/strollers-img-07-acessories-1.jpg">
+                                    <img src="assets/strollers-img-07-acessories.jpg">
                                     <span class="product-name">BUGABOO ACCESSORIES</span>
+                                    <span class="product-description">customize</span>
                                 </a>
                             </li>
                         </ul>
@@ -199,55 +197,122 @@
 
                 </div>
 
-                <div class="submenu-sand">
-                    <div class="align-submenu row">
-                        <div class="column">
-                            <ul class="submenu-list">
-                                <li><a href="#"><span class="icon-special-editions"></span>SPECIAL
-                                    EDITIONS</a></li>
-                                <li><a href="#choose-a-stroller" id="sel_createandbuy"><span
-                                        class="icon-create-and-buy"></span>CREATE AND BUY</a></li>
-                                <li><a href="#car-seat-adapters" id="sel_carseatadapters"><span
-                                        class="icon-carseat"></span>car seat adapters</a></li>
-                                <li><a href="#parts" id="sel_parts"><span class="icon-parts"></span>PARTS</a>
-                                </li>
-                                <li><a href="#outlet" id="sel_outlet"><span
-                                        class="icon-outlet"></span>OUTLET</a></li>
-                            </ul>
-                        </div>
-                    </div>
-                </div>
-
             </div>
 
-
-            <div class="submenu-container about" id="submenuAbout">
-
-                <div class="align-submenu row">
-
-                    <div class="column">
-
-                        <ul class="submenu-list">
-                            <li><a href="#"><span class="icon-overview"></span>About Bugaboo</a></li>
-                            <li><a href="#"><span class="icon-logo"></span>bugaboo
-                                stores</a></li>
-                            <li><a href="#"><span class="icon-work-at-bugaboo"></span>Work
-                                at Bugaboo</a></li>
-                            <li><a href="#"><span
-                                    class="icon-design-engineering"></span>product development</a></li>
-                            <li><a href="#"><span class="icon-logo"></span>more bugaboo</a>
-                            </li>
-                            <li><a href="#"><span class="icon-press"></span>Press</a></li>
-                            <li><a href="#"><span
-                                    class="icon-contact"></span>Contact</a></li>
-                        </ul>
-                    </div>
-
-                </div>
-
-            </div>
 
         </div>
+
+        <!--
+                <div class="submenus-container">
+
+                    <ul class="submenu-generic">
+                        <li class="back"><span class="icon-arrow-simple-left-small"></span>Back</li>
+                        <li class="close-submenu"><span class="icon-close"></span></li>
+                    </ul>
+
+                    <div class="submenu-container show" id="submenuStrollers">
+
+                        <div class="align-submenu row">
+
+                            <div class="column">
+
+                                <ul class="submenu-products small-block-grid-6">
+
+                                    <li><a href="#" id="sel_overview"><span class="product-name">STROLLER OVERVIEW</span></a>
+                                    </li>
+
+                                    <li>
+                                        <a href="bugaboo-cameleon3.html" id="sel_cameleon">
+                                            <img src="assets/bugaboo-cameleon.png">
+                                            <span class="product-name">BUGABOO CAMELEON³</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" id="sel_bee">
+                                            <img src="assets/bugaboo-bee.png">
+                                            <span class="product-name">BUGABOO BEE³</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" id="sel_donkey">
+                                            <img src="assets/bugaboo-donkey.png">
+                                            <span class="product-name">BUGABOO DONKEY</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" id="sel_buffalo">
+                                            <img src="assets/bugaboo-buffalo.png">
+                                            <span class="product-name">BUGABOO BUFFALO</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="#" id="sel_runner">
+                                            <img src="assets/bugaboo-runner.png">
+                                            <span class="product-name">BUGABOO RUNNER</span>
+                                        </a>
+                                    </li>
+                                    <li>
+                                        <a href="accessories.html" id="sel_accessories">
+
+                                            <img src="assets/strollers-img-07-acessories-1.jpg">
+                                            <span class="product-name">BUGABOO ACCESSORIES</span>
+                                        </a>
+                                    </li>
+                                </ul>
+
+                            </div>
+
+                        </div>
+
+                        <div class="submenu-sand">
+                            <div class="align-submenu row">
+                                <div class="column">
+                                    <ul class="submenu-list">
+                                        <li><a href="#"><span class="icon-special-editions"></span>SPECIAL
+                                            EDITIONS</a></li>
+                                        <li><a href="#choose-a-stroller" id="sel_createandbuy"><span
+                                                class="icon-create-and-buy"></span>CREATE AND BUY</a></li>
+                                        <li><a href="#car-seat-adapters" id="sel_carseatadapters"><span
+                                                class="icon-carseat"></span>car seat adapters</a></li>
+                                        <li><a href="#parts" id="sel_parts"><span class="icon-parts"></span>PARTS</a>
+                                        </li>
+                                        <li><a href="#outlet" id="sel_outlet"><span
+                                                class="icon-outlet"></span>OUTLET</a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+
+                    </div>
+
+                    <div class="submenu-container about" id="submenuAbout">
+
+                        <div class="align-submenu row">
+
+                            <div class="column">
+
+                                <ul class="submenu-list">
+                                    <li><a href="#"><span class="icon-overview"></span>About Bugaboo</a></li>
+                                    <li><a href="#"><span class="icon-logo"></span>bugaboo
+                                        stores</a></li>
+                                    <li><a href="#"><span class="icon-work-at-bugaboo"></span>Work
+                                        at Bugaboo</a></li>
+                                    <li><a href="#"><span
+                                            class="icon-design-engineering"></span>product development</a></li>
+                                    <li><a href="#"><span class="icon-logo"></span>more bugaboo</a>
+                                    </li>
+                                    <li><a href="#"><span class="icon-press"></span>Press</a></li>
+                                    <li><a href="#"><span
+                                            class="icon-contact"></span>Contact</a></li>
+                                </ul>
+                            </div>
+
+                        </div>
+
+                    </div>
+
+                </div>
+        -->
 
     </div>
 
@@ -255,7 +320,7 @@
 
         <img class="homepage background-image current"
              data-base="assets/"
-             id="backgroundImage" data-src="background-img-011.jpg" src="assets/background-img-011.jpg">
+             id="backgroundImage" data-src="background-img-011.jpg">
         <img class="homepagehidden background-image"
              data-base="assets/"
              id="backgroundImageStrollers" data-src="background-img-022.jpg">
@@ -334,7 +399,6 @@
 </style>
 -->
 
-</body>
 <section class="b4-footer">
 
     <footer>
@@ -470,6 +534,8 @@
         </div>
     </footer>
 </section>
+
+</body>
 <script src="assets/libs.min.js"></script>
 <script src="assets/gs_raphael.momkai.min.js"></script>
 <script src="assets/components.min.js"></script>

@@ -1,0 +1,1552 @@
+{
+  "virtualProductId": "CAM",
+  "modules": {
+    "Base": {
+      "colours": {
+        "231110ZW04_ZW": {
+          "id": "ZW",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 15,
+          "available": true,
+          "price": "1029.05",
+          "frameColor": "AL"
+        },
+        "231130ZW02_ZW": {
+          "id": "ZW",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 4,
+          "available": true,
+          "price": "1099.05",
+          "frameColor": "AB"
+        },
+        "231110AN04_AN": {
+          "id": "AN",
+          "label": "Dark grey",
+          "pattern": null,
+          "rgb": "#2f3233",
+          "atp": 0,
+          "available": false,
+          "price": "1029.05",
+          "frameColor": "AL"
+        }
+      },
+      "icons": {
+        "default": "assets/cameleon_base.svg"
+      },
+      "wheel": "3"
+    },
+    "Frame": {
+      "colours": {
+        "AL": {
+          "id": "AL",
+          "label": "Aluminium",
+          "rgb": "#dee1e2",
+          "pattern": null,
+          "atp": 15,
+          "available": true,
+          "special": false
+        },
+        "AB": {
+          "id": "AB",
+          "label": "Black",
+          "rgb": "#000001",
+          "pattern": null,
+          "atp": 4,
+          "available": true,
+          "special": false
+        },
+        "D3": {
+          "id": "D3",
+          "label": "Bugaboo by Diesel",
+          "rgb": "#65695b",
+          "pattern": null,
+          "atp": 1,
+          "available": true,
+          "special": true
+        }
+      },
+      "icons": {
+        "default": "assets/cameleon_frame.svg"
+      },
+      "wheel": "1"
+    },
+    "Special": {
+      "colours": {
+        "231110NV02_CN": {
+          "id": "CN",
+          "label": "classic collection navy blue",
+          "pattern": "assets/navyblue.jpg",
+          "rgb": "",
+          "atp": 4,
+          "available": true,
+          "price": "1189",
+          "frameColor": "AL"
+        },
+        "231110DK02_CK": {
+          "id": "CK",
+          "label": "classic collection dark khaki",
+          "pattern": "assets/darkkhaki.jpg",
+          "rgb": "",
+          "atp": 10,
+          "available": true,
+          "price": "1189",
+          "frameColor": "AL"
+        },
+        "231110SA03_CS": {
+          "id": "CS",
+          "label": "classic collection sand",
+          "pattern": "assets/sand.jpg",
+          "rgb": "",
+          "atp": 4,
+          "available": true,
+          "price": "1189",
+          "frameColor": "AL"
+        },
+        "231110DL01_DL": {
+          "id": "DL",
+          "label": "Bugaboo by Diesel",
+          "pattern": "assets/diesel-stroller-35x35.jpg",
+          "rgb": "",
+          "atp": 1,
+          "available": true,
+          "price": "1359",
+          "frameColor": "D3"
+        }
+      },
+      "icons": {}
+    },
+    "TF": {
+      "colours": {
+        "230111ZW02_ZW": {
+          "id": "ZW",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 30,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111IB02_IB": {
+          "id": "IB",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 6,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111SP02_SP": {
+          "id": "SP",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 10,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111WH02_WH": {
+          "id": "WH",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 6,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111OR02_OR": {
+          "id": "OR",
+          "label": "Orange",
+          "pattern": null,
+          "rgb": "#f04d22",
+          "atp": 4,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111PB02_PB": {
+          "id": "PB",
+          "label": "Petrol Blue",
+          "pattern": null,
+          "rgb": "#2b777e",
+          "atp": 5,
+          "available": true,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111RD02_RD": {
+          "id": "RD",
+          "label": "Red",
+          "pattern": null,
+          "rgb": "#e21838",
+          "atp": 0,
+          "available": false,
+          "price": "119.95",
+          "frameColor": null
+        },
+        "230111CB01_SC": {
+          "id": "SC",
+          "label": "shiny chevron black intense",
+          "pattern": "assets/bgb_shinychevron-swatch-50x502.jpg",
+          "rgb": "",
+          "atp": 5,
+          "available": true,
+          "price": "144.95",
+          "frameColor": null
+        }
+      },
+      "icons": {
+        "default": "assets/cameleon_fabric.svg"
+      },
+      "wheel": "2"
+    }
+  },
+  "setup": {
+    "1": {
+      "id": 1,
+      "moduleType": "S",
+      "label": "S",
+      "icon": "cameleon-city",
+      "position": "C",
+      "facing": "P",
+      "colours": {
+        "Frame": "AL",
+        "Base": "ZW",
+        "TF": "OR"
+      }
+    },
+    "2": {
+      "id": 2,
+      "moduleType": "C",
+      "label": "C",
+      "icon": "cameleon-carrycot",
+      "position": "C",
+      "facing": "P",
+      "colours": {
+        "Frame": "AL",
+        "Base": "ZW",
+        "TF": "OR"
+      }
+    }
+  },
+  "label": "Bugaboo Cameleon³",
+  "type": "",
+  "accessories": {
+    "MI001129": {
+      "label": "Bugaboo Comfort Wheeled Board",
+      "vpcode": "031",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/wheeled_board.svg"
+      },
+      "colours": {
+        "85510WB01_XX": {
+          "id": "XX",
+          "itemcode": "85510WB01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 0,
+          "available": false,
+          "price": "125"
+        }
+      },
+      "included": [
+        "MI001345"
+      ]
+    },
+    "MI001310": {
+      "label": "Bugaboo Cameleon³ Tailored Fabric Set (extendable sun canopy)",
+      "vpcode": "903",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/cameleon_sun_canopy.svg"
+      },
+      "colours": {
+        "230111ZW02_ZW": {
+          "id": "ZW",
+          "itemcode": "230111ZW02",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 30,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111IB02_IB": {
+          "id": "IB",
+          "itemcode": "230111IB02",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 6,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111SP02_SP": {
+          "id": "SP",
+          "itemcode": "230111SP02",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 10,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111WH02_WH": {
+          "id": "WH",
+          "itemcode": "230111WH02",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 6,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111OR02_OR": {
+          "id": "OR",
+          "itemcode": "230111OR02",
+          "label": "Orange",
+          "pattern": null,
+          "rgb": "#f04d22",
+          "atp": 4,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111PB02_PB": {
+          "id": "PB",
+          "itemcode": "230111PB02",
+          "label": "Petrol Blue",
+          "pattern": null,
+          "rgb": "#2b777e",
+          "atp": 5,
+          "available": true,
+          "price": "119.95"
+        },
+        "230111RD02_RD": {
+          "id": "RD",
+          "itemcode": "230111RD02",
+          "label": "Red",
+          "pattern": null,
+          "rgb": "#e21838",
+          "atp": 0,
+          "available": false,
+          "price": "119.95"
+        }
+      },
+      "included": []
+    },
+    "MI001249": {
+      "label": "Bugaboo Runner Chassis",
+      "vpcode": "400",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/tbd.svg"
+      },
+      "colours": {
+        "600110PC01_XX": {
+          "id": "XX",
+          "itemcode": "600110PC01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 4,
+          "available": true,
+          "price": "400"
+        }
+      },
+      "included": [
+        "MI001245"
+      ]
+    },
+    "MI001150": {
+      "label": "Bugaboo Stand",
+      "vpcode": "300",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/tbd.svg"
+      },
+      "colours": {
+        "80500ST01_XX": {
+          "id": "XX",
+          "itemcode": "80500ST01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 7,
+          "available": true,
+          "price": "104.95"
+        }
+      },
+      "included": [
+        "MI001245"
+      ]
+    },
+    "MI001118": {
+      "label": "Bugaboo Wool Blanket",
+      "vpcode": "181",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/wool_blanket.svg"
+      },
+      "colours": {
+        "80151GH01_GM": {
+          "id": "GM",
+          "itemcode": "80151GH01",
+          "label": "Grey Melange",
+          "pattern": "grey-melange.jpg",
+          "rgb": "",
+          "atp": 2,
+          "available": true,
+          "price": "109.95"
+        },
+        "80151IV01_IV": {
+          "id": "IV",
+          "itemcode": "80151IV01",
+          "label": "Ivory",
+          "pattern": null,
+          "rgb": "#f0e8d3",
+          "atp": 4,
+          "available": true,
+          "price": "109.95"
+        },
+        "80151RS01_RS": {
+          "id": "RS",
+          "itemcode": "80151RS01",
+          "label": "Rose",
+          "pattern": null,
+          "rgb": "#d9acab",
+          "atp": 1,
+          "available": true,
+          "price": "109.95"
+        }
+      },
+      "included": []
+    },
+    "MI001120": {
+      "label": "Bugaboo Wool Mattress Cover",
+      "vpcode": "182",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/wool_matrass_cover.svg"
+      },
+      "colours": {
+        "80160XX01_GM": {
+          "id": "GM",
+          "itemcode": "80160XX01",
+          "label": "Grey Melange",
+          "pattern": "grey-melange.jpg",
+          "rgb": "",
+          "atp": 0,
+          "available": false,
+          "price": "49.95"
+        }
+      },
+      "included": []
+    },
+    "MI001119": {
+      "label": "Bugaboo Wool Seat Liner",
+      "vpcode": "180",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/seat_liner.svg"
+      },
+      "colours": {
+        "81532XX01_WH": {
+          "id": "WH",
+          "itemcode": "81532XX01",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 0,
+          "available": false,
+          "price": "109.95"
+        }
+      },
+      "included": []
+    },
+    "MI000620": {
+      "label": "Bugaboo Comfort Transport Bag",
+      "vpcode": "055",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/transport_bag.svg"
+      },
+      "colours": {
+        "80560TB02_ZW": {
+          "id": "ZW",
+          "itemcode": "80560TB02",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 10,
+          "available": true,
+          "price": "169.95"
+        }
+      },
+      "included": []
+    },
+    "MI000032": {
+      "label": "Bugaboo Cup Holder",
+      "vpcode": "020",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/cup_holder.svg"
+      },
+      "colours": {
+        "80500CH02_ZW": {
+          "id": "ZW",
+          "itemcode": "80500CH02",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 72,
+          "available": true,
+          "price": "24.95"
+        }
+      },
+      "included": []
+    },
+    "MI000045": {
+      "label": "bugaboo parasol",
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "85300BR01_DARKBROWN": {
+          "id": "DARKBROWN",
+          "itemcode": "85300BR01",
+          "label": "Dark brown",
+          "pattern": null,
+          "rgb": "#412a22",
+          "atp": 13,
+          "available": true,
+          "price": false
+        },
+        "85300DB01_DB": {
+          "id": "DB",
+          "itemcode": "85300DB01",
+          "label": "Dark blue",
+          "pattern": null,
+          "rgb": "#002056",
+          "atp": 4,
+          "available": true,
+          "price": false
+        },
+        "85300BL01_BL": {
+          "id": "BL",
+          "itemcode": "85300BL01",
+          "label": "Blue",
+          "pattern": null,
+          "rgb": "#0068ad",
+          "atp": 1,
+          "available": true,
+          "price": false
+        },
+        "85300PI01_P7": {
+          "id": "P7",
+          "itemcode": "85300PI01",
+          "label": "Pink",
+          "pattern": null,
+          "rgb": "#e10086",
+          "atp": 0,
+          "available": false,
+          "price": false
+        }
+      },
+      "included": []
+    },
+    "MI001258": {
+      "label": "Bugaboo Cameleon3 Breezy Sun Canopy",
+      "vpcode": "113",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/cameleon_breezy_sun_canopy.svg"
+      },
+      "colours": {
+        "230312DK01_DK": {
+          "id": "DK",
+          "itemcode": "230312DK01",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 6,
+          "available": true,
+          "price": "79.95"
+        },
+        "230312IB01_IB": {
+          "id": "IB",
+          "itemcode": "230312IB01",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 9,
+          "available": true,
+          "price": "79.95"
+        },
+        "230312SP01_SP": {
+          "id": "SP",
+          "itemcode": "230312SP01",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 9,
+          "available": true,
+          "price": "79.95"
+        },
+        "230312AG01_AG": {
+          "id": "AG",
+          "itemcode": "230312AG01",
+          "label": "Arctic Grey",
+          "pattern": null,
+          "rgb": "#c8c4be",
+          "atp": 44,
+          "available": true,
+          "price": "79.95"
+        }
+      },
+      "included": []
+    },
+    "CI000023": {
+      "label": "Bugaboo Mosquito Net",
+      "vpcode": "115",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/bee_babycocon.svg"
+      },
+      "colours": {
+        "80500MN01_XX": {
+          "id": "XX",
+          "itemcode": "80500MN01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 26,
+          "available": true,
+          "price": "14.95"
+        },
+        "80500MNDL01_D2": {
+          "id": "D2",
+          "itemcode": "80500MNDL01",
+          "label": "Bugaboo by Diesel accessories",
+          "pattern": "diesel-ftmf-stlnr-prsl-35x35.jpg",
+          "rgb": "",
+          "atp": 7,
+          "available": true,
+          "price": "19.95"
+        }
+      },
+      "included": []
+    },
+    "CI000022": {
+      "label": "Bugaboo Parasol",
+      "vpcode": "010",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/parasol.svg"
+      },
+      "colours": {
+        "85300AN01_AN": {
+          "id": "AN",
+          "itemcode": "85300AN01",
+          "label": "Dark grey",
+          "pattern": null,
+          "rgb": "#2f3233",
+          "atp": 5,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300IB01_IB": {
+          "id": "IB",
+          "itemcode": "85300IB01",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 6,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300BY01_BY": {
+          "id": "BY",
+          "itemcode": "85300BY01",
+          "label": "bright yellow",
+          "pattern": null,
+          "rgb": "#ffde2f",
+          "atp": 2,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300DK02_DK": {
+          "id": "DK",
+          "itemcode": "85300DK02",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 5,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300RB01_RB": {
+          "id": "RB",
+          "itemcode": "85300RB01",
+          "label": "Royal blue",
+          "pattern": null,
+          "rgb": "#004c83",
+          "atp": 2,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300RD01_RD": {
+          "id": "RD",
+          "itemcode": "85300RD01",
+          "label": "Red",
+          "pattern": null,
+          "rgb": "#e21838",
+          "atp": 6,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300PB01_PB": {
+          "id": "PB",
+          "itemcode": "85300PB01",
+          "label": "Petrol Blue",
+          "pattern": null,
+          "rgb": "#2b777e",
+          "atp": 4,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300ZW01_ZW": {
+          "id": "ZW",
+          "itemcode": "85300ZW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 4,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300NV01_NY": {
+          "id": "NY",
+          "itemcode": "85300NV01",
+          "label": "Navy Blue",
+          "pattern": null,
+          "rgb": "#000739",
+          "atp": 1,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300OR01_O7": {
+          "id": "O7",
+          "itemcode": "85300OR01",
+          "label": "orange",
+          "pattern": null,
+          "rgb": "#f04d22",
+          "atp": 1,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300SP01_SP": {
+          "id": "SP",
+          "itemcode": "85300SP01",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 1,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300WH01_WH": {
+          "id": "WH",
+          "itemcode": "85300WH01",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 3,
+          "available": true,
+          "price": "44.95"
+        },
+        "85300DL01_D2": {
+          "id": "D2",
+          "itemcode": "85300DL01",
+          "label": "Bugaboo by Diesel accessories",
+          "pattern": "diesel-ftmf-stlnr-prsl-35x35.jpg",
+          "rgb": "",
+          "atp": 9,
+          "available": true,
+          "price": "59.95"
+        },
+        "85300SA02_SA": {
+          "id": "SA",
+          "itemcode": "85300SA02",
+          "label": "Sand",
+          "pattern": null,
+          "rgb": "#b7a487",
+          "atp": 0,
+          "available": false,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "CI000021": {
+      "label": "Bugaboo Seat Liner",
+      "vpcode": "140",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/seat_liner.svg"
+      },
+      "colours": {
+        "80532IB01_IB": {
+          "id": "IB",
+          "itemcode": "80532IB01",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 7,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532NV01_NY": {
+          "id": "NY",
+          "itemcode": "80532NV01",
+          "label": "Navy Blue",
+          "pattern": null,
+          "rgb": "#000739",
+          "atp": 5,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532OR01_O7": {
+          "id": "O7",
+          "itemcode": "80532OR01",
+          "label": "orange",
+          "pattern": null,
+          "rgb": "#f04d22",
+          "atp": 4,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532SP01_SP": {
+          "id": "SP",
+          "itemcode": "80532SP01",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 14,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532WH01_WH": {
+          "id": "WH",
+          "itemcode": "80532WH01",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 10,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532ZW01_ZW": {
+          "id": "ZW",
+          "itemcode": "80532ZW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 1,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532AN01_AN": {
+          "id": "AN",
+          "itemcode": "80532AN01",
+          "label": "Dark grey",
+          "pattern": null,
+          "rgb": "#2f3233",
+          "atp": 8,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532BY01_BY": {
+          "id": "BY",
+          "itemcode": "80532BY01",
+          "label": "bright yellow",
+          "pattern": null,
+          "rgb": "#ffde2f",
+          "atp": 1,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532DK01_DK": {
+          "id": "DK",
+          "itemcode": "80532DK01",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 2,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532RD01_RD": {
+          "id": "RD",
+          "itemcode": "80532RD01",
+          "label": "Red",
+          "pattern": null,
+          "rgb": "#e21838",
+          "atp": 2,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532PB01_PB": {
+          "id": "PB",
+          "itemcode": "80532PB01",
+          "label": "Petrol Blue",
+          "pattern": null,
+          "rgb": "#2b777e",
+          "atp": 2,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532RB01_RB": {
+          "id": "RB",
+          "itemcode": "80532RB01",
+          "label": "Royal blue",
+          "pattern": null,
+          "rgb": "#004c83",
+          "atp": 4,
+          "available": true,
+          "price": "59.95"
+        },
+        "80532DL01_D2": {
+          "id": "D2",
+          "itemcode": "80532DL01",
+          "label": "Bugaboo by Diesel accessories",
+          "pattern": "diesel-ftmf-stlnr-prsl-35x35.jpg",
+          "rgb": "",
+          "atp": 6,
+          "available": true,
+          "price": "79.95"
+        }
+      },
+      "included": []
+    },
+    "MI001403": {
+      "label": "Bugaboo Bag",
+      "vpcode": "050",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/bag.svg"
+      },
+      "colours": {
+        "80220ZW02_ZW": {
+          "id": "ZW",
+          "itemcode": "80220ZW02",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 8,
+          "available": true,
+          "price": "99.95"
+        },
+        "80220DK02_DK": {
+          "id": "DK",
+          "itemcode": "80220DK02",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 3,
+          "available": true,
+          "price": "99.95"
+        }
+      },
+      "included": []
+    },
+    "MI001294": {
+      "label": "Bugaboo by Kaviar Gauche - The Madeleen",
+      "vpcode": "060",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/totebag.svg"
+      },
+      "colours": {
+        "80210KG01_XX": {
+          "id": "XX",
+          "itemcode": "80210KG01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 1,
+          "available": true,
+          "price": "1029"
+        }
+      },
+      "included": []
+    },
+    "MI000748": {
+      "label": "Bugaboo Cameleon3 Rough Terrain Wheels",
+      "vpcode": "040",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/rough_terrain_wheels.svg"
+      },
+      "colours": {
+        "230500SW01_ZW": {
+          "id": "ZW",
+          "itemcode": "230500SW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 0,
+          "available": false,
+          "price": "59.95"
+        }
+      },
+      "included": []
+    },
+    "CI000019": {
+      "label": "Bugaboo footmuff",
+      "vpcode": "120",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/footmuff.svg"
+      },
+      "colours": {
+        "80112IB01_IB": {
+          "id": "IB",
+          "itemcode": "80112IB01",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 8,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112NV01_NY": {
+          "id": "NY",
+          "itemcode": "80112NV01",
+          "label": "Navy Blue",
+          "pattern": null,
+          "rgb": "#000739",
+          "atp": 1,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112OR01_O7": {
+          "id": "O7",
+          "itemcode": "80112OR01",
+          "label": "orange",
+          "pattern": null,
+          "rgb": "#f04d22",
+          "atp": 4,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112AN01_AN": {
+          "id": "AN",
+          "itemcode": "80112AN01",
+          "label": "Dark grey",
+          "pattern": null,
+          "rgb": "#2f3233",
+          "atp": 3,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112DK02_DK": {
+          "id": "DK",
+          "itemcode": "80112DK02",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 6,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112WH01_WH": {
+          "id": "WH",
+          "itemcode": "80112WH01",
+          "label": "Off white",
+          "pattern": null,
+          "rgb": "#fef2d9",
+          "atp": 3,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112ZW01_ZW": {
+          "id": "ZW",
+          "itemcode": "80112ZW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 2,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112SP01_SP": {
+          "id": "SP",
+          "itemcode": "80112SP01",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 14,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112PB01_PB": {
+          "id": "PB",
+          "itemcode": "80112PB01",
+          "label": "Petrol Blue",
+          "pattern": null,
+          "rgb": "#2b777e",
+          "atp": 5,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112RB01_RB": {
+          "id": "RB",
+          "itemcode": "80112RB01",
+          "label": "Royal blue",
+          "pattern": null,
+          "rgb": "#004c83",
+          "atp": 11,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112RD01_RD": {
+          "id": "RD",
+          "itemcode": "80112RD01",
+          "label": "Red",
+          "pattern": null,
+          "rgb": "#e21838",
+          "atp": 6,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112SA02_SA": {
+          "id": "SA",
+          "itemcode": "80112SA02",
+          "label": "Sand",
+          "pattern": null,
+          "rgb": "#b7a487",
+          "atp": 2,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112BY01_BY": {
+          "id": "BY",
+          "itemcode": "80112BY01",
+          "label": "bright yellow",
+          "pattern": null,
+          "rgb": "#ffde2f",
+          "atp": 3,
+          "available": true,
+          "price": "129.95"
+        },
+        "80112VG01_V2": {
+          "id": "V2",
+          "itemcode": "80112VG01",
+          "label": "bugaboo + van gogh",
+          "pattern": "van-gogh-35x35.jpg",
+          "rgb": "",
+          "atp": 4,
+          "available": true,
+          "price": "159.95"
+        },
+        "80112DL01_D2": {
+          "id": "D2",
+          "itemcode": "80112DL01",
+          "label": "Bugaboo by Diesel accessories",
+          "pattern": "diesel-ftmf-stlnr-prsl-35x35.jpg",
+          "rgb": "",
+          "atp": 4,
+          "available": true,
+          "price": "175"
+        }
+      },
+      "included": []
+    },
+    "MI000516": {
+      "label": "Bugaboo Organizer",
+      "vpcode": "160",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/organizer.svg"
+      },
+      "colours": {
+        "80505AN01_AN": {
+          "id": "AN",
+          "itemcode": "80505AN01",
+          "label": "Dark grey",
+          "pattern": null,
+          "rgb": "#2f3233",
+          "atp": 22,
+          "available": true,
+          "price": "29.95"
+        }
+      },
+      "included": []
+    },
+    "MI001341": {
+      "label": "storksak + bugaboo leather bag",
+      "vpcode": "057",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/storksak.svg"
+      },
+      "colours": {
+        "80230SK01_ZW": {
+          "id": "ZW",
+          "itemcode": "80230SK01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 13,
+          "available": true,
+          "price": "445"
+        }
+      },
+      "included": []
+    },
+    "MI001342": {
+      "label": "Storksak + Bugaboo Nylon Bag",
+      "vpcode": "058",
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80210SK01_ZW": {
+          "id": "ZW",
+          "itemcode": "80210SK01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 0,
+          "available": false,
+          "price": "229"
+        }
+      },
+      "included": []
+    },
+    "MI000751": {
+      "label": "Bugaboo Tray",
+      "vpcode": "150",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/tray.svg"
+      },
+      "colours": {
+        "80502TR01_XX": {
+          "id": "XX",
+          "itemcode": "80502TR01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 4,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI001405": {
+      "label": "bugaboo cameleon adapter for Peg Pérego®",
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80401PP01_XX": {
+          "id": "XX",
+          "itemcode": "80401PP01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 8,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI000719": {
+      "label": "bugaboo cameleon adapter for Britax-Römer® car seat",
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80401BX01_XX": {
+          "id": "XX",
+          "itemcode": "80401BX01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 11,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI000372": {
+      "label": null,
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80401GC02_XX": {
+          "id": "XX",
+          "itemcode": "80401GC02",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 16,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI000715": {
+      "label": "bugaboo cameleon adapter for Chicco® car seat",
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80401CI01_XX": {
+          "id": "XX",
+          "itemcode": "80401CI01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 9,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI000839": {
+      "label": "bugaboo bag 3",
+      "vpcode": "050",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/bag.svg"
+      },
+      "colours": {
+        "80220ZW01_ZW": {
+          "id": "ZW",
+          "itemcode": "80220ZW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 1,
+          "available": true,
+          "price": false
+        },
+        "80220DK01_DK": {
+          "id": "DK",
+          "itemcode": "80220DK01",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 6,
+          "available": true,
+          "price": false
+        },
+        "80220SA01_SA": {
+          "id": "SA",
+          "itemcode": "80220SA01",
+          "label": "Sand",
+          "pattern": null,
+          "rgb": "#b7a487",
+          "atp": 17,
+          "available": true,
+          "price": false
+        }
+      },
+      "included": []
+    },
+    "MI000020": {
+      "label": null,
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80400PP02_XX": {
+          "id": "XX",
+          "itemcode": "80400PP02",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 16,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI000016a": {
+      "label": "bugaboo cameleon adapter for Maxi Cosi® car seat",
+      "vpcode": null,
+      "wheel": "1",
+      "icons": {
+        "default": ""
+      },
+      "colours": {
+        "80401MC02_ZW": {
+          "id": "ZW",
+          "itemcode": "80401MC02",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 17,
+          "available": true,
+          "price": "44.95"
+        }
+      },
+      "included": []
+    },
+    "MI001245": {
+      "label": "Bugaboo Cameleon³ adapter for Bugaboo Stand/Runner",
+      "vpcode": "403",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/tbd.svg"
+      },
+      "colours": {
+        "80403PC01_XX": {
+          "id": "XX",
+          "itemcode": "80403PC01",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 0,
+          "available": false,
+          "price": "25"
+        }
+      },
+      "included": []
+    },
+    "MI001392": {
+      "label": "Bugaboo Cameleon³ Shiny Chevron Tailored Fabric Set (extendable)",
+      "vpcode": "913",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/cameleon_fabric.svg"
+      },
+      "colours": {
+        "230111CB01_SC": {
+          "id": "SC",
+          "itemcode": "230111CB01",
+          "label": "shiny chevron black intense",
+          "pattern": "bgb_shinychevron-swatch-50x502.jpg",
+          "rgb": "",
+          "atp": 5,
+          "available": true,
+          "price": "144.95"
+        }
+      },
+      "included": []
+    },
+    "MI001345": {
+      "label": "Bugaboo Cameleon Adapter for Bugaboo Comfort Wheeled Board",
+      "vpcode": "033",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/tbd.svg"
+      },
+      "colours": {
+        "880591_XX": {
+          "id": "XX",
+          "itemcode": "880591",
+          "label": "XX",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 1,
+          "available": true,
+          "price": "19.95"
+        }
+      },
+      "included": []
+    },
+    "MI000900": {
+      "label": "Bugaboo High Performance Footmuff",
+      "vpcode": "130",
+      "wheel": "1",
+      "icons": {
+        "default": "assets/footmuff.svg"
+      },
+      "colours": {
+        "80114AN01_AG": {
+          "id": "AG",
+          "itemcode": "80114AN01",
+          "label": "Arctic Grey",
+          "pattern": null,
+          "rgb": "#c8c4be",
+          "atp": 4,
+          "available": true,
+          "price": "189.95"
+        },
+        "80114SP01_SP": {
+          "id": "SP",
+          "itemcode": "80114SP01",
+          "label": "Soft pink",
+          "pattern": null,
+          "rgb": "#e1a7b2",
+          "atp": 2,
+          "available": true,
+          "price": "189.95"
+        },
+        "80114ZW01_ZW": {
+          "id": "ZW",
+          "itemcode": "80114ZW01",
+          "label": "Black",
+          "pattern": null,
+          "rgb": "#000001",
+          "atp": 3,
+          "available": true,
+          "price": "189.95"
+        },
+        "80114DK01_DK": {
+          "id": "DK",
+          "itemcode": "80114DK01",
+          "label": "Dark khaki",
+          "pattern": null,
+          "rgb": "#8f907c",
+          "atp": 13,
+          "available": true,
+          "price": "189.95"
+        },
+        "80114IB01_IB": {
+          "id": "IB",
+          "itemcode": "80114IB01",
+          "label": "Ice blue",
+          "pattern": null,
+          "rgb": "#5994c5",
+          "atp": 4,
+          "available": true,
+          "price": "189.95"
+        }
+      },
+      "included": []
+    }
+  }
+}
