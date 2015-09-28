@@ -579,8 +579,9 @@
                                             </div>
                                         </div>
                                     </div>
-                                    <div id="selected" class="selected"><h1 id="selected-label"></h1> <h5
-                                            id="selected-special"></h5> <h5 id="selected-price"></h5></div>
+                                    <div id="selected" class="selected"><h1 id="selected-label"></h1>
+                                        <h5 id="selected-special"></h5>
+                                        <!--<h5 id="selected-price"></h5>--></div>
                                     <div id="total" class="total"><h5 id="total-label">total</h5>
 
                                         <h2 id="total-price"></h2>
@@ -730,7 +731,8 @@
                                                 <div class="nav up"><span class="icon-arrow-up-small"></span></div>
                                                 <div class="bg"></div>
                                                 <div class="items">
-                                                    <div class="itemscontainer"></div>
+                                                    <div id="productMenuItemsContainer" class="itemscontainer"></div>
+
                                                 </div>
                                                 <div class="overlay"></div>
                                                 <div class="nav down"><span class="icon-arrow-down-small"></span></div>
@@ -772,6 +774,7 @@
                                     <div class="product-explorer-container">
                                         <div class="d6-3d-product-explorer"
                                              data-module='[{"path":"d6-3d-product-explorer","options":{"colorSetting": "white", "configurator": "1", "miniconfigurator": "","studioImgVersion":"3"}}]'>
+<!--
                                             <div class="bg">
                                                 <div class="bg-left">
                                                     <div></div>
@@ -780,6 +783,7 @@
                                                     <div></div>
                                                 </div>
                                             </div>
+-->
                                             <div class="display"><img
                                                     src="assets/generator.png"/>
                                             </div>
@@ -793,7 +797,7 @@
                                                     class="icon-arrow-flip-ccw"></span></a></div>
                                         </div>
                                     </div>
-                                    <div class="sidebar">
+                                    <div id="sidebar" class="sidebar">
                                         <div class="toggle-position">
                                             <div class="toggle-position-slider"></div>
                                         </div>
@@ -801,6 +805,7 @@
                                             <li style="display:none"><span class="set-position-stroller"
                                                                            data-id=""></span></li>
                                         </ul>
+<!--
                                         <a href="#popup_whatyouget" data-id="popup_whatyouget"
                                            class="info-position"><span class="icon-question"></span></a>
                                         <ul class="options">
@@ -810,6 +815,7 @@
                                                       st_title="Lorem Ipsum" st_summary="Some more text..."><span
                                                     class="icon-share"></span></span></li>
                                         </ul>
+-->
                                     </div>
                                     <section class="b8-popup mfp-hide" id="popup1" data-module='[{"path":"popup"}]'>
                                         <div class="title-container"><h4>Edit stroller</h4></div>
@@ -1054,6 +1060,35 @@ fby.push(["onload", function () {
         </div>
     </footer>
 </section>
+<script type="text/javascript">
+
+//    $('#productMenuItemsContainer').children().first().on('mouseover', showBassinetSwitch);
+//    document.getElementById('productMenuItemsContainer').firstChild.addEventListener('mouseover', showBassinetSwitch);
+
+    window.addEventListener('load');
+
+    function showBassinetSwitch(e) {
+
+        var $sidebar = $('#sidebar');
+
+        clearTimeout($sidebar.data('tid'));
+        $sidebar.fadeIn().on('mouseout', hideBassinetSwitch);
+
+    }
+
+    function hideBassinetSwitch() {
+
+        var $sidebar = $('#sidebar');
+
+        $sidebar.data('tid', setTimeout(function () {
+
+            $sidebar.fadeOut();
+
+        }, 3000))
+
+    }
+
+</script>
 <script src="assets/libs.min.js"></script>
 <script src="assets/gs_raphael.momkai.min.js"></script>
 <script src="assets/components.min.js"></script> </html>
