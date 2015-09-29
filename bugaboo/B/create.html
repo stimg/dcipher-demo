@@ -1062,10 +1062,52 @@ fby.push(["onload", function () {
 </section>
 <script type="text/javascript">
 
-//    $('#productMenuItemsContainer').children().first().on('mouseover', showBassinetSwitch);
-//    document.getElementById('productMenuItemsContainer').firstChild.addEventListener('mouseover', showBassinetSwitch);
+    var target = document.getElementById('productMenuItemsContainer'),
+            observer1 = new MutationObserver(function (mutations) {
 
-    window.addEventListener('load');
+                for (var i = 0, len = mutations.length; i < len; i++) {
+
+                    for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+
+                        if (mutations[i].addedNodes[j].className.match(/stroller/)) {
+
+                            mutations[i].addedNodes[j].addEventListener('mouseover', showBassinetSwitch);
+                            observer1.disconnect();
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            }),
+            observer2 = new MutationObserver(function (mutations) {
+
+                for (var i = 0, len = mutations.length; i < len; i++) {
+
+                    for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+
+                        if (mutations[i].addedNodes[j].className.match(/add/)) {
+
+                            mutations[i].addedNodes[j].addEventListener('mouseover', function (e) {
+
+                                $(e.target).trigger('click');
+
+                            });
+                            observer2.disconnect();
+                            break;
+
+                        }
+
+                    }
+
+                }
+
+            });
+
+    observer1.observe(target, {childList: true});
+    observer2.observe(target, {childList: true});
 
     function showBassinetSwitch(e) {
 
@@ -1076,16 +1118,26 @@ fby.push(["onload", function () {
 
     }
 
-    function hideBassinetSwitch() {
+    function hideBassinetSwitch(e) {
 
-        var $sidebar = $('#sidebar');
+        var $sidebar = $('#sidebar'),
+                os = $sidebar.offset(),
+                w = $sidebar.outerWidth(),
+                h = $sidebar.outerHeight(),
+                x = e.clientX,
+                y = e.clientY;
 
-        $sidebar.data('tid', setTimeout(function () {
+        if (x < os.left || x > os.left + w
+            || y < os.top || y > os.top + h) {
 
-            $sidebar.fadeOut();
+            console.debug('--> MOUSE OUT');
+            $sidebar.data('tid', setTimeout(function () {
 
-        }, 3000))
+                $sidebar.fadeOut();
 
+            }, 1000))
+
+        }
     }
 
 </script>
