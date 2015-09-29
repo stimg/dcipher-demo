@@ -1328,6 +1328,7 @@ img {
     position: relative;
     padding-left: 30px;
     padding-right: 30px;
+    padding-bottom: 10px;
     float: left; }
 
   .medium-1 {
@@ -12389,7 +12390,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
 .c7-product-basket .product-wrapper {
   *zoom: 1;
   background-color: #efeee9;
-  padding: 30px 0;
+  padding: 0px 0;
   border: 1px solid #cac8c5;
   border-bottom: none; }
 

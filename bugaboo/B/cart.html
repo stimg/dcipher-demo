@@ -493,62 +493,64 @@
                                 -->
 
 
-                                <section class="a8-title ">
+                                <!--
+                                                                <section class="a8-title ">
 
-                                    <div class="row">
+                                                                    <div class="row">
 
-                                        <div class="padding-medium">
+                                                                        <div class="padding-medium">
 
-                                            <!-- <div class="column xsmall-12 large-7"> -->
-                                            <div class="column xsmall-12 small-12 medium-12 large-6">
-
-
-                                                <h2>Cart</h2>
+                                                                            &lt;!&ndash; <div class="column xsmall-12 large-7"> &ndash;&gt;
+                                                                            <div class="column xsmall-12 small-12 medium-12 large-6">
 
 
-                                            </div>
+                                                                                <h2>Cart</h2>
 
 
-                                            <!-- <div class="column xsmall-12 large-5"> -->
-                                            <div class="column xsmall-12 small-12 medium-12 large-6">
+                                                                            </div>
 
 
-                                                <div class="optional-elements">
+                                                                            &lt;!&ndash; <div class="column xsmall-12 large-5"> &ndash;&gt;
+                                                                            <div class="column xsmall-12 small-12 medium-12 large-6">
 
 
-                                                    <div class="button-container margin">
-                                                        <!-- Start: This button only need to show when user is coming from shopping page -->
+                                                                                <div class="optional-elements">
 
 
-                                                        <a id="sel_btn_continue" class="button type3"
-                                                           href="index.html"><span>Continue shopping</span></a>
+                                                                                    <div class="button-container margin">
+                                                                                        &lt;!&ndash; Start: This button only need to show when user is coming from shopping page &ndash;&gt;
 
 
-                                                        <a id="sel_btn_checkout" class="button type4"
-                                                           href="#"
-                                                           data-id="inventoryVirtualPopup"><span>Checkout</span></a>
+                                                                                        <a id="sel_btn_continue" class="button type3"
+                                                                                           href="index.html"><span>Continue shopping</span></a>
 
 
-                                                    </div>
+                                                                                        <a id="sel_btn_checkout" class="button type4"
+                                                                                           href="#"
+                                                                                           data-id="inventoryVirtualPopup"><span>Checkout</span></a>
 
 
-                                                    <!-- End -->
+                                                                                    </div>
 
 
-                                                </div>
-
-                                            </div>
+                                                                                    &lt;!&ndash; End &ndash;&gt;
 
 
-                                        </div>
+                                                                                </div>
+
+                                                                            </div>
 
 
-                                        <div class="column">
-                                            <div class="border-bottom"></div>
-                                        </div>
+                                                                        </div>
 
-                                    </div>
-                                </section>
+
+                                                                        <div class="column">
+                                                                            <div class="border-bottom"></div>
+                                                                        </div>
+
+                                                                    </div>
+                                                                </section>
+                                -->
 
                             </div>
                             <div>
@@ -879,17 +881,20 @@
 
 
                                                             <li>
-                                                                <span class="label">Color seat and bassinet: </span><span id="cartItemBassinetColor"></span><span> (In stock)</span>
+                                                                <span class="label">Color seat and bassinet: </span><span
+                                                                    id="cartItemBassinetColor"></span><span> (In stock)</span>
                                                             </li>
 
 
                                                             <li>
-                                                                <span class="label">Color tailored fabric set: </span><span id="cartItemCanopyColor"></span><span> (In stock)</span>
+                                                                <span class="label">Color tailored fabric set: </span><span
+                                                                    id="cartItemCanopyColor"></span><span> (In stock)</span>
                                                             </li>
 
 
                                                             <li>
-                                                                <span id="cartItemCode" class="label">item code: </span><span id="sel_item_0"></span>
+                                                                <span id="cartItemCode" class="label">item code: </span><span
+                                                                    id="sel_item_0"></span>
                                                             </li>
 
                                                             <li>
@@ -1007,7 +1012,20 @@
                                         <div class="column cart-wrapper">
                                             <div class="column column-left xsmall-12 small-6">
 
-                                                <p>All orders of $&nbsp;1.00 and higher are delivered free of charge.
+                                                <div class="button-container margin" style="margin: 0;">
+                                                    <!-- Start: This button only need to show when user is coming from shopping page -->
+
+
+                                                    <a id="sel_btn_checkout" class="button type4"  style="float: left;"
+                                                       href="#"
+                                                       data-id="inventoryVirtualPopup"><span>Checkout</span></a>
+                                                    <a id="sel_btn_continue" class="button type3"
+                                                       href="index.html" style="float: left;"><span>Continue shopping</span></a>
+
+
+                                                </div>
+
+                                                <p style="padding-top: 25px;">All orders of $&nbsp;1.00 and higher are delivered free of charge.
                                                     Returns are always free. <a
                                                             href="#" target="_blank">More
                                                         info</a></p>
@@ -1080,6 +1098,7 @@
                                                         </li>
                                                     </ul>
                                                 </div>
+<!--
                                                 <div class="button-container">
 
 
@@ -1089,6 +1108,7 @@
 
 
                                                 </div>
+-->
                                             </div>
                                         </div>
                                     </div>
@@ -1315,14 +1335,14 @@
             code = b[0].replace(/^CAM_C_SP_|_|\(|\)/g, ''),
             colors = {
                 "Base": {
-/*
-                    "ZW": {
-                        "id": "ZW",
-                        "model": "231110ZW04_ZW",
-                        "label": "Black",
-                        "price": "1029.05"
-                    },
-*/
+                    /*
+                     "ZW": {
+                     "id": "ZW",
+                     "model": "231110ZW04_ZW",
+                     "label": "Black",
+                     "price": "1029.05"
+                     },
+                     */
                     "ZW": {
                         "id": "ZW",
                         "model": "231130ZW02",
