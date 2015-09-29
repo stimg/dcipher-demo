@@ -11724,7 +11724,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
   width: 100px;
   height: 121px;
   background-color: #FFF;
-  z-index: 55;
+  z-index: 35;
   display: none;
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
