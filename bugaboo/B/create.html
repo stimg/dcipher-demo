@@ -747,9 +747,9 @@
                                             <div class="controls-mobile"><a class="next-mobile"><span
                                                     class="icon-arrow-flip-ccw"></span></a></div>
 
-                                            <div id="colorPickerHotSpotBase" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel3')"></div>
-                                            <div id="colorPickerHotSpotFrame" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel1')"></div>
-                                            <div id="colorPickerHotSpotCanopy" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel2')"></div>
+                                            <div id="colorPickerHotSpotBase" class="colorpicker-hot-spot" onmouseover="showColorpickerWheel('wheel3')"></div>
+                                            <div id="colorPickerHotSpotFrame" class="colorpicker-hot-spot" onmouseover="showColorpickerWheel('wheel1')"></div>
+                                            <div id="colorPickerHotSpotCanopy" class="colorpicker-hot-spot" onmouseover="showColorpickerWheel('wheel2')"></div>
 
                                         </div>
                                     </div>
@@ -1075,9 +1075,15 @@ fby.push(["onload", function () {
 
         var $wid = $('#' + wid);
 
+        $('#wheel1').fadeOut();
+        $('#wheel2').fadeOut();
+        $('#wheel3').fadeOut();
+        $('#' + wid).fadeIn();
+/*
         $('#wheel1').css('display', wid === 'wheel1' ? 'block' : 'none');
         $('#wheel2').css('display', wid === 'wheel2' ? 'block' : 'none');
         $('#wheel3').css('display', wid === 'wheel3' ? 'block' : 'none');
+*/
         $('.colorpickers-container').css('visibility', 'visible');
         $('path', $wid).one('click', function () {
             $wid.fadeOut();
@@ -1157,6 +1163,11 @@ fby.push(["onload", function () {
         });
 
         $('#total').css('top', $('#selected').outerHeight() + 16);
+        if ($sel.children().length > 1) {
+
+            $('.colorpicker-hot-spot').fadeOut();
+
+        }
 
     }
 

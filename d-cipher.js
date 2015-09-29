@@ -458,14 +458,16 @@
         this.saveEvent = function saveEvent(e) {
 
             var etype = e.type,
-                etarget = e.target || document.getElementsByTagName('body')[0];
+                etarget = e.target || document.getElementsByTagName('body')[0],
+                save = this.appMode === 'record' &&
+                       this.registerEventList.indexOf(etype) > -1
+                       && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
+                       && etarget.localName !== 'svg'
+                       && etarget.localName !== 'circle';
 
-            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, this.registerEventList.indexOf(etype) > -1
-                                                                                    && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length/* || etarget.viewportElement*/));
+            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
 
-            if (this.appMode === 'record' &&
-                this.registerEventList.indexOf(etype) > -1
-                && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length/* || etarget.viewportElement*/)) {
+            if (save) {
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
@@ -530,7 +532,7 @@
                             name: etarget.name,
                             title: etarget.title,
                             id: etarget.id,
-                            className: typeof etarget.className === 'string' ? etarget.className : '', //.toString(),
+                            className: typeof etarget.className === 'string' ? etarget.className : '',
                             width: $el.outerWidth(),
                             height: $el.outerHeight(),
                             x: left,
@@ -546,6 +548,14 @@
                         time: e.timeStamp - rec.modified
 
                     };
+
+                if (lastEvent && lastEvent.type === etype
+                    && lastEvent.target.treePath === event.target.treePath
+                    && !etype.match(/scroll|wheel/i)) {
+
+                    return;
+
+                }
 
                 event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
                 event.drag = event.milesLast && etype === 'mouseup';
@@ -818,7 +828,7 @@
                         + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
                         + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
                         + loc._Event + ': ' + loc[e.type]/* + '<br />'
-                        + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
+                 + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
 
                 return html;
             }
@@ -831,7 +841,7 @@
                     html = '', w, h, top, left;
 
                 $cnv.css('cursor', 'pointer');
-                $he.show().css({ 'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
+                $he.show().css({'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
                 html += getEventInfo(event.event);
                 $tt.html(html);
                 w = $tt.outerWidth();
@@ -908,7 +918,7 @@
                         + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
                         + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
                         + loc._Event + ': ' + loc[e.type]/* + '<br />'
-                        + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
+                 + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
 
                 return html;
             }
@@ -1081,7 +1091,7 @@
 
                         return abs(x - e.x) < th && abs(y - e.y) < th
                                && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
-                            && self.drawEventList.indexOf(e.type) > -1;
+                               && self.drawEventList.indexOf(e.type) > -1;
 
                     });
 
@@ -1458,7 +1468,6 @@
             var evt = this.getTimelineEvent(e),
                 event = evt ? evt.event : null;
 
-
             if (event) {
 
                 this.sessionId = event.recId;
@@ -1548,7 +1557,7 @@
         this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
-                cnt = eventIndex || 0,
+                cnt = eventIndex || 1,
                 delay = 20, speed = 2,
                 rec = this.getRecordById(sId),
                 sData = rec.events,
@@ -1839,7 +1848,7 @@
 
                         //setTimeout(function () {
 
-                            playEvent(pars2);
+                        playEvent(pars2);
 
                         //}, 0);
 
