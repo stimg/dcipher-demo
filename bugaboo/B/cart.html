@@ -1333,7 +1333,7 @@
             div = document.getElementById('strollerImage'),
             img = new Image(),
             total = 0,
-            code = b[0].replace(/^CAM_C_SP_|_|\(|\)/g, ''),
+            code = b[0].replace(/^CAM_C_(S|C)P_|_|\(|\)/g, ''),
             colors = {
                 "Base": {
                     /*
