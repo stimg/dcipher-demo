@@ -552,7 +552,7 @@
                                             <!-- <div class="alert-icon" title="There are items selected that are out of stock" data-module='[{"path":"tooltip","options":{"orientation":"right"}}]'> <img src="/dot-com-origional-theme/images/gfx/general/alert_icon.svg"/> </div>-->
                                         </div>
                                     </div>
-                                    <div class="colorpickers-container">
+                                    <div class="colorpickers-container" style="left: 55%; /*display: none;*/ visibility: hidden;">
                                         <div class="colorpicker-menu">
                                             <div class="container-outer">
                                                 <div class="container-inner">
@@ -565,13 +565,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div id="wheel1" class="colorpicker position1">
+                                        <div id="wheel1" class="colorpicker position1" style="left: 70px; top: -75px;">
                                             <div class="alert-icon" title="this color is out of stock"
                                                  data-module='[{"path":"tooltip","options":{"orientation":"top"}}]'><img
                                                     src="assets/alert_icon.svg"/>
                                             </div>
                                             <div class="pie">
-                                                <div class="line"></div>
+                                                <div class="line" style="display: none;"></div>
                                                 <div class="svg-container"></div>
                                                 <div>
                                                     <div class="info-label"></div>
@@ -601,13 +601,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div id="wheel2" class="colorpicker position2">
+                                        <div id="wheel2" class="colorpicker position2" style="left: 330px; top: 20px">
                                             <div class="alert-icon" title="this color is out of stock"
                                                  data-module='[{"path":"tooltip","options":{"orientation":"top"}}]'><img
                                                     src="assets/alert_icon.svg"/>
                                             </div>
                                             <div class="pie">
-                                                <div class="line"></div>
+                                                <div class="line" style="display: none;"></div>
                                                 <div class="svg-container"></div>
                                                 <div>
                                                     <div class="info-label"></div>
@@ -637,13 +637,13 @@
                                                 </div>
                                             </div>
                                         </div>
-                                        <div id="wheel3" class="colorpicker position3">
+                                        <div id="wheel3" class="colorpicker position3" style="left: 20px; top: 210px">
                                             <div class="alert-icon" title="this color is out of stock"
                                                  data-module='[{"path":"tooltip","options":{"orientation":"top"}}]'><img
                                                     src="assets/alert_icon.svg"/>
                                             </div>
                                             <div class="pie">
-                                                <div class="line"></div>
+                                                <div class="line" style="display: none;"></div>
                                                 <div class="svg-container"></div>
                                                 <div>
                                                     <div class="info-label"></div>
@@ -721,7 +721,7 @@
                                                  style="display:none"></div>
                                         </div>
                                     </div>
-                                    <div class="product-explorer-container">
+                                    <div class="product-explorer-container" style="left: 55%">
                                         <div class="d6-3d-product-explorer"
                                              data-module='[{"path":"d6-3d-product-explorer","options":{"colorSetting": "white", "configurator": "1", "miniconfigurator": "","studioImgVersion":"3"}}]'>
 <!--
@@ -746,6 +746,11 @@
                                             </div>
                                             <div class="controls-mobile"><a class="next-mobile"><span
                                                     class="icon-arrow-flip-ccw"></span></a></div>
+
+                                            <div id="colorPickerHotSpotBase" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel3')"></div>
+                                            <div id="colorPickerHotSpotFrame" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel1')"></div>
+                                            <div id="colorPickerHotSpotCanopy" class="colorpicker-hot-spot" onclick="showColorpickerWheel('wheel2')"></div>
+
                                         </div>
                                     </div>
                                     <div id="sidebar" class="sidebar">
@@ -1059,33 +1064,26 @@ fby.push(["onload", function () {
             observer3 = new MutationObserver(function (mutations) {
 
                 updateItems();
-/*
-                for (var i = 0, len = mutations.length; i < len; i++) {
-
-                    for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
-
-                        if (mutations[i].addedNodes[j].className.match(/add/)) {
-
-                            mutations[i].addedNodes[j].addEventListener('mouseover', function (e) {
-
-                                $(e.target).trigger('click');
-
-                            });
-                            observer2.disconnect();
-                            break;
-
-                        }
-
-                    }
-
-                }
-*/
 
             });
 
     observer1.observe(target, {childList: true});
     observer2.observe(target, {childList: true});
     observer3.observe(target, {childList: true});
+
+    function showColorpickerWheel(wid) {
+
+        var $wid = $('#' + wid);
+
+        $('#wheel1').css('display', wid === 'wheel1' ? 'block' : 'none');
+        $('#wheel2').css('display', wid === 'wheel2' ? 'block' : 'none');
+        $('#wheel3').css('display', wid === 'wheel3' ? 'block' : 'none');
+        $('.colorpickers-container').css('visibility', 'visible');
+        $('path', $wid).one('click', function () {
+            $wid.fadeOut();
+//            setTimeout($wid.fadeOut, 500);
+        })
+    }
 
     function showBassinetSwitch(e) {
 
@@ -1188,6 +1186,46 @@ fby.push(["onload", function () {
 
 
 </script>
+<style type="text/css">
+    .colorpicker-hot-spot:before {
+        font-family: bugaboo_icons;
+        font-size: 48px;
+        content: "\e601";
+        display: block;
+        margin: -11px;
+    }
+    .colorpicker-hot-spot:before:hover {
+        color: white;
+    }
+    .colorpicker-hot-spot{
+        width: 24px;
+        height: 24px;
+        display: block;
+        border-radius: 18px;
+        cursor: pointer;
+        color: white;
+        background-color: #ec5825;
+    }
+    .colorpicker-hot-spot:hover {
+        background-color: black;
+        color: white;
+    }
+    #colorPickerHotSpotBase {
+        position: absolute;
+        top: 243px;
+        left: 189px;
+    }
+    #colorPickerHotSpotFrame {
+        position: absolute;
+        top: 100px;
+        left: 190px;
+    }
+    #colorPickerHotSpotCanopy {
+        position: absolute;
+        top: 140px;
+        left: 290px;
+    }
+</style>
 <script src="assets/libs.min.js"></script>
 <script src="assets/gs_raphael.momkai.min.js"></script>
 <script src="assets/components.min.js"></script> </html>

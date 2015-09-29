@@ -11546,7 +11546,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
 
 .c3-configurator .selected {
   position: absolute;
-  width: 370px;
+  width: 320px;
   top: 50px;
   left: 175px; }
 
@@ -11636,7 +11636,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
 .c3-configurator .colorpickers-container {
   position: absolute;
   top: 50%;
-  left: 50%;
+  left: 55%;
   min-width: 280px; }
 
 .c3-configurator .colorpickers-container .colorpicker {
@@ -12010,7 +12010,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
   .c3-configurator .colorpickers-container {
     width: 537px;
     height: 448px;
-    margin-left: -268px;
+    margin-left: -218px;
     margin-top: -260px; }
 
   .c3-configurator .colorpickers-container .position1.accessory {
