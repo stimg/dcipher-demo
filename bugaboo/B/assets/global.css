@@ -1328,7 +1328,6 @@ img {
     position: relative;
     padding-left: 30px;
     padding-right: 30px;
-    padding-bottom: 10px;
     float: left; }
 
   .medium-1 {
@@ -12606,6 +12605,9 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
     margin: 15px 0;
     padding: 20px 0; }
 
+  .c7-product-basket .product-description {
+    padding-bottom: 20px; }
+
   .c7-product-basket .product-wrapper .product-updates .column {
     padding: 0; }
 
@@ -12652,7 +12654,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
     border-top: 1px solid #cac8c5; }
 
   .c7-product-basket .product-updates .product-quantity {
-    padding: 0; }
+    padding: 10px; }
 
   .c7-product-basket .product-updates .product-quantity .unit-quantity {
     width: 55px;

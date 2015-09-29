@@ -496,56 +496,6 @@
 //                                    currentAnchorTag.setAttribute("href", "https://www.bugaboo.com/US/en_US/strollers/create?p_auth=cpEuLlHG&p_p_id=configuratorversion2_WAR_configuratorversion2portlet&p_p_lifecycle=1&p_p_state=normal&p_p_mode=view&p_p_col_id=column-1&p_p_col_count=1&_configuratorversion2_WAR_configuratorversion2portlet_javax.portlet.action=sendToMyAccount&sId=" + sId + "&bVpc=" + itemSKU);
 
                                 }
-
-                                function showBasketPopup() {
-
-                                    var msg = [],
-                                            t, s;
-                                    $('img', 'div.basket').each(function (i, el) {
-
-                                        t = $(el).attr('title');
-                                        if (t) {
-
-                                            msg.push(t);
-
-                                        }
-
-                                    });
-
-                                    $('.cart-items', '#cart_icon').text(msg.length);
-                                    msg = msg.join(', ') + ' has been added to your cart.';
-                                    $('#basketPopupText').html(msg);
-
-                                    $('#NotificationCart').show().animate({'top': +171});
-                                    $('#NotificationCart').data('tid', setTimeout(function () {
-                                        $('#NotificationCart').fadeOut('fast').css('top', 0);
-                                    }, 5000));
-
-                                }
-
-                                function saveBasket() {
-
-                                    var imgs = [],
-                                            t, s;
-                                    $('img', 'div.basket').each(function (i, el) {
-
-                                        t = $(el).attr('title');
-                                        if (t) {
-
-                                            s = el.src;
-                                            imgs.push(s.substring(s.indexOf('=') + 1, s.indexOf('&')));
-
-                                        }
-
-                                    });
-
-//                                    console.debug('--> basket: ', imgs);
-                                    alert('--> basket: ', imgs);
-                                    sessionStorage.setItem('basket', JSON.stringify(imgs));
-
-                                }
-                                window.addEventListener('unload', saveBasket);
-
                             </script>
 
 
@@ -790,9 +740,10 @@
                                             <div class="hitfield"></div>
                                             <div class="controls">
                                                 <div id="d6ControlsLoader" class="loader"></div>
-                                                <a class="prev"><span></span></a> <a class="zoom"><span
-                                                    class="icon-zoom-large"></span></a> <a
-                                                    class="next"><span></span></a></div>
+                                                <!--<a class="prev"><span></span></a> -->
+                                                <a class="zoom"><span class="icon-zoom-large"></span></a>
+                                                <!--<a class="next"><span></span></a>-->
+                                            </div>
                                             <div class="controls-mobile"><a class="next-mobile"><span
                                                     class="icon-arrow-flip-ccw"></span></a></div>
                                         </div>
@@ -1104,10 +1055,37 @@ fby.push(["onload", function () {
 
                 }
 
+            }),
+            observer3 = new MutationObserver(function (mutations) {
+
+                updateItems();
+/*
+                for (var i = 0, len = mutations.length; i < len; i++) {
+
+                    for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+
+                        if (mutations[i].addedNodes[j].className.match(/add/)) {
+
+                            mutations[i].addedNodes[j].addEventListener('mouseover', function (e) {
+
+                                $(e.target).trigger('click');
+
+                            });
+                            observer2.disconnect();
+                            break;
+
+                        }
+
+                    }
+
+                }
+*/
+
             });
 
     observer1.observe(target, {childList: true});
     observer2.observe(target, {childList: true});
+    observer3.observe(target, {childList: true});
 
     function showBassinetSwitch(e) {
 
@@ -1139,6 +1117,75 @@ fby.push(["onload", function () {
 
         }
     }
+
+    function showBasketPopup() {
+
+        var msg = [],
+                t, s;
+        $('img', 'div.basket').each(function (i, el) {
+
+            t = $(el).attr('title');
+            if (t) {
+
+                msg.push(t);
+
+            }
+
+        });
+
+        $('.cart-items', '#cart_icon').text(msg.length);
+        msg = msg.join(', ') + ' has been added to your cart.';
+        $('#basketPopupText').html(msg);
+
+        $('#NotificationCart').show().animate({'top': +171}).data('tid', setTimeout(function () {
+            $('#NotificationCart').fadeOut('fast').css('top', 0);
+        }, 5000));
+
+    }
+
+    function updateItems() {
+
+        var $sel = $('#selected'), t;
+
+        $sel.children().remove();
+
+        $('img', 'div.basket').each(function (i, el) {
+
+            t = $(el).attr('title');
+            if (t) {
+
+                $sel.append('<h1 style="height: 110px; margin-top: 10px;">' + t + '</h1>')
+
+            }
+
+        });
+
+        $('#total').css('top', $('#selected').outerHeight() + 16);
+
+    }
+
+    function saveBasket() {
+
+        var imgs = [],
+                t, s;
+        $('img', 'div.basket').each(function (i, el) {
+
+            t = $(el).attr('title');
+            if (t) {
+
+                s = el.src;
+                imgs.push(s.substring(s.indexOf('=') + 1, s.indexOf('&')));
+
+            }
+
+        });
+
+//                                    console.debug('--> basket: ', imgs);
+        sessionStorage.setItem('basket', JSON.stringify(imgs));
+
+    }
+    window.addEventListener('unload', saveBasket);
+
 
 </script>
 <script src="assets/libs.min.js"></script>
