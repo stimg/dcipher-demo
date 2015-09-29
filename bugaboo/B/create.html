@@ -1081,7 +1081,6 @@ fby.push(["onload", function () {
         $('.colorpickers-container').css('visibility', 'visible');
         $('path', $wid).one('click', function () {
             $wid.fadeOut();
-//            setTimeout($wid.fadeOut, 500);
         })
     }
 
@@ -1106,12 +1105,11 @@ fby.push(["onload", function () {
         if (x < os.left || x > os.left + w
             || y < os.top || y > os.top + h) {
 
-            console.debug('--> MOUSE OUT');
             $sidebar.data('tid', setTimeout(function () {
 
                 $sidebar.fadeOut();
 
-            }, 1000))
+            }, 1000));
 
         }
     }
@@ -1198,6 +1196,7 @@ fby.push(["onload", function () {
         color: white;
     }
     .colorpicker-hot-spot{
+        pointer-events: all;
         width: 24px;
         height: 24px;
         display: block;
