@@ -549,6 +549,7 @@
 
                     };
 
+/*
                 if (lastEvent && lastEvent.type === etype
                     && lastEvent.target.treePath === event.target.treePath
                     && !etype.match(/scroll|wheel/i)) {
@@ -556,6 +557,7 @@
                     return;
 
                 }
+*/
 
                 event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
                 event.drag = event.milesLast && etype === 'mouseup';
