@@ -73,6 +73,46 @@
     }
   }
 }
+
+#d-cipher-taskbar{
+  display: inline-block;
+  height: 42px;
+  vertical-align: top;
+  color: white;
+  font-size: 19px;
+  padding: 10px 0 0 20px;
+  overflow: hidden;
+  white-space: nowrap;
+  .d-cipher-task{
+    position: absolute;
+    top: 0;
+    height: 42px;
+    width: 100%;
+    background: linear-gradient(#C0C0C0, #808080);
+    .step-number{
+      display: inline-block;
+      height: 42px;
+      width: 42px;
+      padding-top: 7px;
+      font-size: 24px;
+      text-align: center;
+      margin-right: 2px;
+      background-color: gray;
+      border-right: solid 2px darkgray;
+      cursor: pointer;
+    }
+    .task-description{
+      padding-left: 20px;
+    }
+  }
+  .d-cipher-task.active{
+
+  }
+  .d-cipher-task.done{
+
+  }
+}
+
 #d-cipher-topmenu{
   position: fixed;
   top: 0;
@@ -153,6 +193,24 @@
   padding: 0.5em 1em;
 }
 
+#d-cipher-timeline-info {
+  position: absolute;
+  right: 0;
+  bottom: 0;
+  height: 52px;
+  width: 300px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  text-align: right;
+  white-space: nowrap;
+  font-size: 18px;
+  padding: 15px 0 0 25px;
+  span{
+    font-size: 12px;
+    padding-right: 15px;
+    padding-left: 3px;
+  }
+}
 #d-cipher-timeline {
   position: fixed;
   left: 0;

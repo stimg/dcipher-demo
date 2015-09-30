@@ -40,6 +40,7 @@
             _Clicks_sec: 'Clicks in sec',
             _KPI: "KPI",
             _KPI_event: "KPI Event",
+            _Start_task: "Click first task to activate test mode",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -52,7 +53,13 @@
             keydown: 'Key down',
             wheel: 'Wheel',
             mousewheel: 'Wheel',
-            DOMMouseScroll: 'Wheel'
+            DOMMouseScroll: 'Wheel',
+            sec: 'sec',
+            mc: 'mc',
+            mm: 'mm',
+            mp: 'mp',
+            kpi: 'kpi',
+            cds: 'cds'
         },
 
         ru: {},
@@ -269,13 +276,15 @@
             butList: 'd-cipher-menu-but-list',
             stat: 'd-cipher-stat',
             timeline: 'd-cipher-timeline',
+            timelineInfo: 'd-cipher-timeline-info',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
             highlightEvent: 'd-cipher-highlight-event',
             records: 'd-cipher-rec-list',
             mTooltip: 'd-cipher-m-tooltip',
             eventInfo: 'd-cipher-event-info',
-            topMenu: 'd-cipher-topmenu'
+            topMenu: 'd-cipher-topmenu',
+            taskBar: 'd-cipher-taskbar'
 
         };
 
@@ -318,6 +327,65 @@
 
         };
 
+        this.testCase = [
+            {
+                step: 1,
+                description: 'Find Cameleon stroller and configure to order',
+                events: [
+                    {
+                        type: 'click',
+                        treePath:  "0-2-0-2-0-0-0-0-0-0-0",
+                        tagName: "IMG",
+                        done: false
+                    }
+                ]
+            },
+            {
+                step: 2,
+                description: 'Choose bassinet and select black canopy color',
+                events: [
+                    {
+                        type: 'click',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                        tagName: "path",
+                        done: false
+                    }
+                ]
+            },
+            {
+                step: 3,
+                description: ' Add running accessory, and a cup holder',
+                events: [
+                    {
+                        type: 'click',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0-0-0",
+                        tagName: "SPAN",
+                        done: false
+                    },
+                    {
+                        type: 'click',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                        tagName: "SPAN",
+                        done: false
+                    }
+                ]
+            },
+            {
+                step: 4,
+                description: 'Purchase stroller, checking final cost total before completing',
+                events: [
+                    {
+                        type: 'click',
+                        treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0-0",
+                        tagName: "SPAN",
+                        done: false
+                    }
+                ]
+            }
+        ];
+        this.currentTask = [];
+        this.currentEvent = null;
+
         this.db = new IDB();
         this.user = {};
         this.sessionId = '';
@@ -338,6 +406,7 @@
                 var recList = self.getDomElement('records');
 
                 self.createRecordList();
+                self.createTaskList();
                 self.restoreState();
 
                 $(recList).on('mouseout', function () {
@@ -467,6 +536,13 @@
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
 
+            if (this.appMode === 'test') {
+
+                this.currentEvent = e;
+                this.checkTaskCompletion(e);
+
+            }
+
             if (save) {
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
@@ -549,15 +625,15 @@
 
                     };
 
-/*
-                if (lastEvent && lastEvent.type === etype
-                    && lastEvent.target.treePath === event.target.treePath
-                    && !etype.match(/scroll|wheel/i)) {
+                /*
+                 if (lastEvent && lastEvent.type === etype
+                 && lastEvent.target.treePath === event.target.treePath
+                 && !etype.match(/scroll|wheel/i)) {
 
-                    return;
+                 return;
 
-                }
-*/
+                 }
+                 */
 
                 event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
                 event.drag = event.milesLast && etype === 'mouseup';
@@ -598,7 +674,7 @@
 
                 }
 
-                event.kpi = event.milesLast / (event.miles * rec.eventsStat['click']);
+                event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -707,11 +783,13 @@
 
         this.getDistance = function getDistance(p1, p2) {
 
-            return Math.sqrt(Math.pow((p2.x - p1.x), 2) + Math.pow((p2.y - p1.y), 2));
+            var asp = window.innerWidth / window.innerHeight;
+
+            return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
 
         };
 
-        this.getNDCMousePath = function getTotalMousePath(rec) {
+        this.getNDCMousePath = function getNDCMousePath(rec) {
 
             var self = this,
                 path = 0;
@@ -1348,7 +1426,7 @@
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
                 ch = $(this.getDomElement('timeline')).height(),
-                offsetRight = 200,
+                offsetRight = 300,
                 offsetLeft = 100,
                 offsetTop = ch / 2,
                 width = cw - offsetLeft - offsetRight,
@@ -1436,6 +1514,19 @@
 
             ctx.stroke();
             ctx.fill();
+            this.showTimelineStat(rec);
+
+        };
+
+        this.showTimelineStat = function (rec) {
+
+            var loc = this.loc,
+                html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
+                       + rec.eventsStat['click'] + '<span>' + loc.mc + '</span>'
+                       + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
+                       + rec.kpi.toFixed(2) + '<span>' + loc.kpi + '</span>';
+
+            $(this.getDomElement('timelineInfo')).html(html);
 
         };
 
@@ -2592,7 +2683,10 @@
                     appMode: this.appMode,
                     sessionRec: this.sessionRec,
                     sessionId: this.sessionId,
-                    eventIndex: this.eventIndex
+                    eventIndex: this.eventIndex,
+                    testCase: this.testCase,
+                    currentTask: this.currentTask,
+                    currentEvent: this.currentEvent
 
                 }));
 
@@ -2641,6 +2735,15 @@
                 sessionStorage.removeItem('dcipherState');
                 this.appMode = '';
 
+            } else if (this.appMode === 'test') {
+
+                for (var i = 0, end = this.currentTask.step; i < end; i++) {
+
+                    this.activateTaskStep(i);
+
+                }
+                this.checkTaskCompletion(this.currentEvent);
+
             }
 
         };
@@ -2656,6 +2759,121 @@
                 this.appMode = '';
                 this.eventIndex = 0;
                 window.location = loc;
+
+            }
+
+        };
+
+        this.createTaskList = function () {
+
+            var self = this,
+                $tb = $(this.getDomElement('taskBar')),
+                tl = this.testCase,
+                w = $tb.outerHeight(),
+                rp = window.innerWidth - w * (tl.length),
+                d, sn, sd;
+
+            tl.forEach(function (t, i) {
+
+                t.done = false;
+                d = document.createElement('div');
+                d.className = 'd-cipher-task';
+                d.style.left = rp + w * i + 'px';
+
+                sn = document.createElement('span');
+                sn.className = 'step-number';
+                sn.innerHTML = i + 1;
+                sn.setAttribute('step', i);
+                d.appendChild(sn);
+
+                sd = document.createElement('span');
+                sd.className = 'task-description';
+                sd.innerText = t.description;
+                d.appendChild(sd);
+                $tb.append(d);
+
+                sn.addEventListener('click', function (e) {
+
+                    self.activateTaskStep(1 * $(e.target).attr('step'));
+
+                });
+
+            });
+
+        };
+
+        this.activateTaskStep = function (step) {
+
+            var div = $('div', this.getDomElement('taskBar'))[step];
+
+            if (div) {
+
+                $(div).css({
+
+                    left: 84 + 42 * step,
+                    transition: 'left 0.2s ease-out 0.15s'
+
+                });
+
+                if (step) {
+
+                    $('div > span.step-number', this.getDomElement('taskBar'))[step - 1].innerText = '✓';
+
+                } else {
+
+                    this.appMode = 'test';
+                    this.currentTask = this.testCase[step];
+
+                }
+
+            } else {
+
+                this.currentTask = [];
+                alert('Test finished!');
+
+            }
+        };
+
+        this.checkTaskCompletion = function (e) {
+
+            var evts = this.currentTask.events,
+                etarget = e.target;
+
+            if (evts && evts.length) {
+
+                for (var i = 0, el = evts.length; i < el; i++) {
+
+                    var evt = evts[i],
+                        treePath = this.getTreePath(etarget),
+                        offset = $(etarget).offset(),
+                        ww = window.innerWidth,
+                        wh = window.innerHeight,
+                        pX = pageXOffset,
+                        pY = pageYOffset,
+                        vis;
+
+                    vis = offset.top < (pY + wh) && offset.top > pY
+                          && offset.left < pX + ww && offset.left > pX;
+
+                    if (vis && evt.type === e.type
+                        && evt.treePath === treePath) {
+
+                        evt.done = true;
+                        break;
+
+                    }
+
+                }
+
+                if (!evts.filter(function (e) {
+
+                        return !e.done;
+
+                    })) {
+
+                    this.activateTaskStep(this.currentTask.step + 1);
+
+                }
 
             }
 
@@ -2687,17 +2905,15 @@
             mTT = document.createElement('div'),
             eInf = document.createElement('div'),
             tLine = document.createElement('div'),
+            tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
+            taskBar = document.createElement('div'),
             tlCnv = document.createElement('canvas'),
             tlCtx = tlCnv.getContext('2d');
 
         // D-Cipher container
         dMain.id = dCipher.domId.container;
         bdy.appendChild(dMain);
-
-        // Top menu
-        topMenu.id = dCipher.domId.topMenu;
-        bdy.insertBefore(topMenu, bdy.firstChild);
 
         // Init styles
         link.rel = 'stylesheet';
@@ -2734,7 +2950,9 @@
 
         // Time line
         tLine.id = dCipher.domId.timeline;
+        tlInfo.id = dCipher.domId.timelineInfo;
         tLine.appendChild(tlCnv);
+        tLine.appendChild(tlInfo);
         cnvDiv.appendChild(tLine);
 
         // Mouse tooltip
@@ -2779,6 +2997,13 @@
         menu.appendChild(butList);
         dMain.appendChild(menu);
         dMain.appendChild(recList);
+
+        // Top menu
+        topMenu.id = dCipher.domId.topMenu;
+        taskBar.id = dCipher.domId.taskBar;
+        taskBar.innerHTML = dCipher.loc._Start_task;
+        topMenu.appendChild(taskBar);
+        bdy.insertBefore(topMenu, bdy.firstChild);
 
         cnvDiv.addEventListener('click', function (e) {
 

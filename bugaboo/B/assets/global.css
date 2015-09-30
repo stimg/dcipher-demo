@@ -3360,7 +3360,7 @@ img.rsImg {
 
 .colorpicker .info-label {
   display: none;
-  pointer-events: none;
+  transition: none;
   visibility: hidden;
   position: absolute;
   width: 110px;
