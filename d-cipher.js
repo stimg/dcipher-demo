@@ -295,8 +295,8 @@
             'mouseout',
             'mousedown',
             'mouseup',
-            'click',
-            'dblclick',
+            //'click',
+            //'dblclick',
             'keydown',
             'wheel',
             'mousewheel',
@@ -335,10 +335,17 @@
                 active: false,
                 events: [
                     {
-                        type: 'click',
+                        type: 'mousedown',
                         treePath:  "0-2-0-2-0-0-0-0-0-0-0",
                         tagName: "IMG",
                         location: 'http://localhost:3000/bugaboo/B/index.html',
+                        done: false
+                    },
+                    {
+                        type: 'mousedown',
+                        treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                        tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/bugaboo-cameleon3.html',
                         done: false
                     }
                 ]
@@ -350,10 +357,17 @@
                 active: false,
                 events: [
                     {
-                        type: 'click',
+                        type: 'mousedown',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                        tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        done: false
+                    },
+                    {
+                        type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
                         tagName: "path",
-                        location: 'http://localhost:3000/bugaboo/B/bugaboo-cameleon3.html',
+                        location: 'http://localhost:3000/bugaboo/B/create.html',
                         done: false
                     }
                 ]
@@ -365,16 +379,15 @@
                 active: false,
                 events: [
                     {
-                        type: 'click',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0-0-0",
+                        type: 'mousedown',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
                         tagName: "SPAN",
                         location: 'http://localhost:3000/bugaboo/B/create.html',
                         done: false
                     },
                     {
-                        type: 'click',
-                        location: '',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                        type: 'mousedown',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
                         tagName: "SPAN",
                         location: 'http://localhost:3000/bugaboo/B/create.html',
                         done: false
@@ -388,8 +401,15 @@
                 active: false,
                 events: [
                     {
-                        type: 'click',
-                        treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0-0",
+                        type: 'mousedown',
+                        treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                        tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        done: false
+                    },
+                    {
+                        type: 'mousedown',
+                        treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
                         tagName: "SPAN",
                         location: 'http://localhost:3000/bugaboo/B/cart.html',
                         done: false
@@ -2700,6 +2720,12 @@
 
             if (this.appMode) {
 
+                if (this.appMode === 'test') {
+
+                    this.checkTaskCompletion();
+
+                }
+
                 sessionStorage.setItem('dcipherState', JSON.stringify({
 
                     user: this.user,
@@ -2712,12 +2738,6 @@
                     currentEvent: this.currentEvent
 
                 }));
-
-                if (this.appMode === 'test') {
-
-                    this.checkTaskCompletion();
-
-                }
 
             } else {
 
@@ -2836,6 +2856,10 @@
 
         };
 
+        this.restoreTaskState = function () {
+
+        };
+
         this.activateTaskStep = function (step) {
 
             var div = $('div', this.getDomElement('taskBar'))[step],
@@ -2867,6 +2891,7 @@
                     } else {
 
                         this.appMode = 'test';
+
                     }
 
                     this.currentTask = task;
@@ -2947,13 +2972,14 @@
                         wh = window.innerHeight,
                         pX = pageXOffset,
                         pY = pageYOffset,
+                        re = new RegExp('^' + evt.treePath),
                         vis;
 
                     vis = offset.top < (pY + wh) && offset.top > pY
                           && offset.left < pX + ww && offset.left > pX;
 
                     if (vis && evt.type === e.type
-                        && evt.treePath === treePath
+                        && treePath.match(re)
                     && evt.location === e.location) {
 
                         evt.done = true;
@@ -2967,9 +2993,9 @@
 
                         return !e.done;
 
-                    })) {
+                    }).length) {
 
-                    this.activateTaskStep(this.currentTask.step + 1);
+                    this.activateTaskStep(this.currentTask.step);
 
                 }
 
@@ -3142,6 +3168,12 @@
         butList.addEventListener('click', function () {
 
             dCipher.toggleRecList(this);
+
+        });
+
+        window.addEventListener('click', function (e) {
+
+            dCipher.saveEvent(e);
 
         });
 
