@@ -331,11 +331,14 @@
             {
                 step: 1,
                 description: 'Find Cameleon stroller and configure to order',
+                done: false,
+                active: false,
                 events: [
                     {
                         type: 'click',
                         treePath:  "0-2-0-2-0-0-0-0-0-0-0",
                         tagName: "IMG",
+                        location: 'http://localhost:3000/bugaboo/B/index.html',
                         done: false
                     }
                 ]
@@ -343,11 +346,14 @@
             {
                 step: 2,
                 description: 'Choose bassinet and select black canopy color',
+                done: false,
+                active: false,
                 events: [
                     {
                         type: 'click',
                         treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
                         tagName: "path",
+                        location: 'http://localhost:3000/bugaboo/B/bugaboo-cameleon3.html',
                         done: false
                     }
                 ]
@@ -355,17 +361,22 @@
             {
                 step: 3,
                 description: ' Add running accessory, and a cup holder',
+                done: false,
+                active: false,
                 events: [
                     {
                         type: 'click',
                         treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0-0-0",
                         tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/create.html',
                         done: false
                     },
                     {
                         type: 'click',
+                        location: '',
                         treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
                         tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/create.html',
                         done: false
                     }
                 ]
@@ -373,11 +384,14 @@
             {
                 step: 4,
                 description: 'Purchase stroller, checking final cost total before completing',
+                done: false,
+                active: false,
                 events: [
                     {
                         type: 'click',
                         treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0-0",
                         tagName: "SPAN",
+                        location: 'http://localhost:3000/bugaboo/B/cart.html',
                         done: false
                     }
                 ]
@@ -528,6 +542,8 @@
 
             var etype = e.type,
                 etarget = e.target || document.getElementsByTagName('body')[0],
+                treePath = this.getTreePath(etarget),
+                location = document.location.href,
                 save = this.appMode === 'record' &&
                        this.registerEventList.indexOf(etype) > -1
                        && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
@@ -538,8 +554,15 @@
 
             if (this.appMode === 'test') {
 
-                this.currentEvent = e;
-                this.checkTaskCompletion(e);
+                this.currentEvent = {
+
+                    type: etype,
+                    treePath: treePath,
+                    tagName: e.tagName,
+                    location: location
+
+                };
+                this.checkTaskCompletion();
 
             }
 
@@ -563,7 +586,7 @@
                         recId: this.sessionId,
                         timeStamp: e.timeStamp,
                         index: elen,
-                        location: document.location.href,
+                        location: location,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -602,7 +625,7 @@
                         pageXOffset: pageXOffset,
                         pageYOffset: pageYOffset,
                         target: {
-                            treePath: this.getTreePath(etarget),
+                            treePath: treePath,
                             tagName: etarget.tagName,
                             localName: etarget.localName,
                             name: etarget.name,
@@ -2690,6 +2713,12 @@
 
                 }));
 
+                if (this.appMode === 'test') {
+
+                    this.checkTaskCompletion();
+
+                }
+
             } else {
 
                 sessionStorage.removeItem('dcipherState');
@@ -2742,7 +2771,6 @@
                     this.activateTaskStep(i);
 
                 }
-                this.checkTaskCompletion(this.currentEvent);
 
             }
 
@@ -2773,6 +2801,12 @@
                 rp = window.innerWidth - w * (tl.length),
                 d, sn, sd;
 
+            function activateTaskStep(e) {
+
+                self.activateTaskStep(1 * $(e.target).attr('step'));
+
+            }
+
             tl.forEach(function (t, i) {
 
                 t.done = false;
@@ -2794,7 +2828,7 @@
 
                 sn.addEventListener('click', function (e) {
 
-                    self.activateTaskStep(1 * $(e.target).attr('step'));
+                    activateTaskStep(e);
 
                 });
 
@@ -2804,48 +2838,111 @@
 
         this.activateTaskStep = function (step) {
 
-            var div = $('div', this.getDomElement('taskBar'))[step];
+            var div = $('div', this.getDomElement('taskBar'))[step],
+                task = this.testCase[step],
+                $div = $(div),
+                left = (2 + step) * $(div).height();
 
-            if (div) {
+            if (task === this.currentTask && this.currentTask.active) {
 
-                $(div).css({
-
-                    left: 84 + 42 * step,
-                    transition: 'left 0.2s ease-out 0.15s'
-
-                });
-
-                if (step) {
-
-                    $('div > span.step-number', this.getDomElement('taskBar'))[step - 1].innerText = '✓';
-
-                } else {
-
-                    this.appMode = 'test';
-                    this.currentTask = this.testCase[step];
-
-                }
+                this.deactivateTaskStep(step);
 
             } else {
 
-                this.currentTask = [];
-                alert('Test finished!');
+                if (div) {
+
+                    $div.css({
+
+                        left: left,
+                        transition: 'left 0.2s ease-out 0.15s'
+
+                    });
+
+                    if (step) {
+
+                        $('div > span.step-number', this.getDomElement('taskBar'))[step - 1].innerText = '✓';
+                        this.currentTask.active = false;
+                        this.currentTask.done = true;
+
+                    } else {
+
+                        this.appMode = 'test';
+                    }
+
+                    this.currentTask = task;
+                    this.currentTask.done = false;
+                    this.currentTask.active = true;
+
+                } else {
+
+                    this.currentTask = [];
+                    alert('Test finished!');
+
+                }
 
             }
+
         };
 
-        this.checkTaskCompletion = function (e) {
+        this.deactivateTaskStep = function (step) {
 
-            var evts = this.currentTask.events,
-                etarget = e.target;
+            var div = $('div', this.getDomElement('taskBar'))[step],
+                $div = $(div),
+                $spn = $('span.step-number', div),
+                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
+                task = this.testCase[step];
+
+            $div.css({
+
+                left: left,
+                transition: 'left 0.2s ease-out 0.15s'
+
+            });
+
+            task.done = false;
+            task.active = false;
+            task.events.forEach(function (e) {
+
+                e.done = false;
+
+            });
+            if (!step) {
+
+                this.currentTask = null;
+                this.appMode = '';
+
+            } else {
+
+                var cs = step - 1,
+                    ctask = this.testCase[cs];
+
+                this.currentTask = ctask;
+                $('div > span.step-number[step=' + cs +']', this.getDomElement('taskBar')).html(step);
+                ctask.active = true;
+                ctask.done = false;
+                ctask.events.forEach(function (e) {
+
+                    e.done = false;
+
+                });
+
+            }
+
+        };
+
+        this.checkTaskCompletion = function () {
+
+            var e = this.currentEvent,
+                el = this.getElementByTreePath(e.treePath),
+                evts = this.currentTask.events;
 
             if (evts && evts.length) {
 
-                for (var i = 0, el = evts.length; i < el; i++) {
+                for (var i = 0, len = evts.length; i < len; i++) {
 
                     var evt = evts[i],
-                        treePath = this.getTreePath(etarget),
-                        offset = $(etarget).offset(),
+                        treePath = e.treePath,
+                        offset = $(el).offset(),
                         ww = window.innerWidth,
                         wh = window.innerHeight,
                         pX = pageXOffset,
@@ -2856,7 +2953,8 @@
                           && offset.left < pX + ww && offset.left > pX;
 
                     if (vis && evt.type === e.type
-                        && evt.treePath === treePath) {
+                        && evt.treePath === treePath
+                    && evt.location === e.location) {
 
                         evt.done = true;
                         break;
@@ -3105,7 +3203,7 @@
 
         });
 
-        window.addEventListener('unload', function () {
+        window.addEventListener('beforeunload', function () {
 
             dCipher.saveState();
 
