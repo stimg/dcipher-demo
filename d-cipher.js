@@ -41,6 +41,8 @@
             _KPI: "KPI",
             _KPI_event: "KPI Event",
             _Start_task: "Click first task to activate test mode",
+            _Default_record_name: "Test #",
+            _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -338,14 +340,14 @@
                         type: 'mousedown',
                         treePath:  "0-2-0-2-0-0-0-0-0-0-0",
                         tagName: "IMG",
-                        location: 'http://localhost:3000/bugaboo/B/index.html',
+                        location: '/bugaboo/B/index.html',
                         done: false
                     },
                     {
                         type: 'mousedown',
                         treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/bugaboo-cameleon3.html',
+                        location: '/bugaboo/B/bugaboo-cameleon3.html',
                         done: false
                     }
                 ]
@@ -360,14 +362,14 @@
                         type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        location: '/bugaboo/B/create.html',
                         done: false
                     },
                     {
                         type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
                         tagName: "path",
-                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        location: '/bugaboo/B/create.html',
                         done: false
                     }
                 ]
@@ -382,14 +384,14 @@
                         type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        location: '/bugaboo/B/create.html',
                         done: false
                     },
                     {
                         type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        location: '/bugaboo/B/create.html',
                         done: false
                     }
                 ]
@@ -404,14 +406,14 @@
                         type: 'mousedown',
                         treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/create.html',
+                        location: '/bugaboo/B/create.html',
                         done: false
                     },
                     {
-                        type: 'mousedown',
+                        type: 'click',
                         treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
                         tagName: "SPAN",
-                        location: 'http://localhost:3000/bugaboo/B/cart.html',
+                        location: '/bugaboo/B/cart.html',
                         done: false
                     }
                 ]
@@ -484,10 +486,10 @@
 
             }
 
-            if (this.appMode === '') {
+            if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
                 // Turn on record mode
-                this.appMode = 'record';
+                this.appMode = this.appMode || 'record';
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -499,7 +501,7 @@
                 this.sessionRec = {
 
                     id: this.sessionId,
-                    name: '',
+                    name: this.loc._Default_record_name + this.db.records.length,
                     description: '',
                     created: ts,
                     modified: ts,
@@ -525,8 +527,6 @@
 
                 $stat.fadeOut();
                 clearInterval($stat.data('tid'));
-                rec.duration = rec.events[rec.events.length - 1].time;
-                rec.kpi = rec.events[rec.events.length - 1].kpi;
 
                 if (this.db.records.length) {
 
@@ -536,6 +536,8 @@
 
                 if (rec.events.length > 1) {
 
+                    rec.duration = rec.events[rec.events.length - 1].time;
+                    rec.kpi = rec.events[rec.events.length - 1].kpi;
                     rec.mouseMilesTotal = this.getNDCMousePath(rec);
 
                     this.db.putRecord(this.sessionId, rec).then(function () {
@@ -563,8 +565,8 @@
             var etype = e.type,
                 etarget = e.target || document.getElementsByTagName('body')[0],
                 treePath = this.getTreePath(etarget),
-                location = document.location.href,
-                save = this.appMode === 'record' &&
+                location = document.location.pathname,
+                save = (this.appMode === 'record' || this.appMode === 'test') &&
                        this.registerEventList.indexOf(etype) > -1
                        && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
                        && etarget.localName !== 'svg'
@@ -1463,13 +1465,15 @@
 
         this.drawTimeline = function drawTimeline(rec, start, end) {
 
+            this.showTimelineStat(rec);
+
             var self = this,
                 events = rec.events,
                 cnv = $('canvas', this.getDomElement('timeline'))[0],
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
                 ch = $(this.getDomElement('timeline')).height(),
-                offsetRight = 300,
+                offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = 100,
                 offsetTop = ch / 2,
                 width = cw - offsetLeft - offsetRight,
@@ -1557,7 +1561,6 @@
 
             ctx.stroke();
             ctx.fill();
-            this.showTimelineStat(rec);
 
         };
 
@@ -2761,7 +2764,7 @@
 
             }
 
-            if (this.appMode === 'record') {
+            if (this.appMode === 'record' || this.appMode === 'test') {
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(this.getDomElement('butList')).hide();
@@ -2784,11 +2787,13 @@
                 sessionStorage.removeItem('dcipherState');
                 this.appMode = '';
 
-            } else if (this.appMode === 'test') {
+            }
+
+            if (this.appMode === 'test') {
 
                 for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
 
-                    this.activateTaskStep(i);
+                    this.activateTaskStep(i, true);
 
                 }
 
@@ -2823,6 +2828,7 @@
 
             function activateTaskStep(e) {
 
+                e.stopPropagation();
                 self.activateTaskStep(1 * $(e.target).attr('step'));
 
             }
@@ -2854,6 +2860,11 @@
 
             });
 
+            d = document.createElement('div');
+            d.className = 'd-cipher-task-done';
+            d.innerHTML = this.loc._Test_done;
+            $tb.append(d);
+
         };
 
         this.restoreTaskState = function () {
@@ -2862,12 +2873,20 @@
 
         this.activateTaskStep = function (step, restore) {
 
-            var tb = this.getDomElement('taskBar'),
+            var self = this,
+                tb = this.getDomElement('taskBar'),
                 div = $('div', tb)[step],
                 pdiv = $('div', tb)[step - 1],
                 task = this.testCase[step],
                 $div = $(div),
                 left = (2 + step) * $(div).height();
+
+            function endOfTest() {
+
+                $('.d-cipher-task-done', tb).fadeOut();
+                //window.location = self.testCase[0].events[0].location;
+
+            }
 
             if (task === this.currentTask && this.currentTask.active) {
 
@@ -2877,18 +2896,18 @@
 
                 if (pdiv) {
 
-                    if (this.currentTask/* && !restore*/) {
+                    if (this.currentTask) {
 
                         this.currentTask.done = true;
                         this.currentTask.active = false;
 
                     }
 
-                    $('div > span.step-number', tb)[step - 1].innerText = '✓';
+                    $('span.step-number', pdiv).html('✓');
 
                 }
 
-                if (div) {
+                if (step < this.testCase.length) {
 
                     $div.css({
 
@@ -2897,20 +2916,35 @@
 
                     });
 
-                    if (!step) {
-
-                        this.appMode = 'test';
-
-                    }
-
                     this.currentTask = task;
                     this.currentTask.done = false;
                     this.currentTask.active = true;
 
+                    if (!step && !this.appMode) {
+
+                        localStorage.removeItem('Stroller.active');
+                        localStorage.removeItem('Stroller.name');
+                        localStorage.removeItem('Stroller.price');
+                        localStorage.removeItem('Stroller.stroller');
+                        localStorage.removeItem('Stroller.modules.Base');
+                        localStorage.removeItem('Stroller.modules.Frame');
+                        localStorage.removeItem('Stroller.modules.TF');
+                        sessionStorage.removeItem('basket');
+                        this.toggleRecMode();
+                        this.appMode = 'test';
+                        if (!restore && window.location.pathname !== task.events[0].location) {
+
+                            window.location.pathname = task.events[0].location;
+
+                        }
+
+                    }
+
                 } else {
 
                     this.resetTasklist();
-                    alert('Test finished!');
+                    $('.d-cipher-task-done', tb).fadeIn();
+                    setTimeout(endOfTest, 2000);
 
                 }
 
@@ -2967,10 +3001,10 @@
         this.checkTaskCompletion = function () {
 
             var e = this.currentEvent,
-                el = this.getElementByTreePath(e.treePath),
-                evts = this.currentTask.events;
+                el = e ? this.getElementByTreePath(e.treePath) : null,
+                evts = this.currentTask ? this.currentTask.events : null;
 
-            if (evts && evts.length) {
+            if (e && evts && evts.length) {
 
                 for (var i = 0, len = evts.length; i < len; i++) {
 
@@ -3016,7 +3050,8 @@
 
             this.currentTask = null;
             this.currentEvent = null;
-            this.appMode = '';
+            this.appMode = 'record';
+            this.toggleRecMode();
             sessionStorage.removeItem('dcipherState');
 
         };
@@ -3050,8 +3085,7 @@
             tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
-            tlCnv = document.createElement('canvas'),
-            tlCtx = tlCnv.getContext('2d');
+            tlCnv = document.createElement('canvas');
 
         // D-Cipher container
         dMain.id = dCipher.domId.container;
@@ -3167,6 +3201,7 @@
 
         butRec.addEventListener('click', function (e) {
 
+            e.stopPropagation();
             dCipher.toggleRecMode(e);
 
         });
