@@ -329,7 +329,7 @@
 
         this.testCase = [
             {
-                step: 1,
+                step: 0,
                 description: 'Find Cameleon stroller and configure to order',
                 done: false,
                 active: false,
@@ -351,7 +351,7 @@
                 ]
             },
             {
-                step: 2,
+                step: 1,
                 description: 'Choose bassinet and select black canopy color',
                 done: false,
                 active: false,
@@ -373,7 +373,7 @@
                 ]
             },
             {
-                step: 3,
+                step: 2,
                 description: ' Add running accessory, and a cup holder',
                 done: false,
                 active: false,
@@ -395,7 +395,7 @@
                 ]
             },
             {
-                step: 4,
+                step: 3,
                 description: 'Purchase stroller, checking final cost total before completing',
                 done: false,
                 active: false,
@@ -417,7 +417,7 @@
                 ]
             }
         ];
-        this.currentTask = [];
+        this.currentTask = null;
         this.currentEvent = null;
 
         this.db = new IDB();
@@ -2786,7 +2786,7 @@
 
             } else if (this.appMode === 'test') {
 
-                for (var i = 0, end = this.currentTask.step; i < end; i++) {
+                for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
 
                     this.activateTaskStep(i);
 
@@ -2860,9 +2860,11 @@
 
         };
 
-        this.activateTaskStep = function (step) {
+        this.activateTaskStep = function (step, restore) {
 
-            var div = $('div', this.getDomElement('taskBar'))[step],
+            var tb = this.getDomElement('taskBar'),
+                div = $('div', tb)[step],
+                pdiv = $('div', tb)[step - 1],
                 task = this.testCase[step],
                 $div = $(div),
                 left = (2 + step) * $(div).height();
@@ -2873,6 +2875,19 @@
 
             } else {
 
+                if (pdiv) {
+
+                    if (this.currentTask/* && !restore*/) {
+
+                        this.currentTask.done = true;
+                        this.currentTask.active = false;
+
+                    }
+
+                    $('div > span.step-number', tb)[step - 1].innerText = '✓';
+
+                }
+
                 if (div) {
 
                     $div.css({
@@ -2882,13 +2897,7 @@
 
                     });
 
-                    if (step) {
-
-                        $('div > span.step-number', this.getDomElement('taskBar'))[step - 1].innerText = '✓';
-                        this.currentTask.active = false;
-                        this.currentTask.done = true;
-
-                    } else {
+                    if (!step) {
 
                         this.appMode = 'test';
 
@@ -2900,7 +2909,7 @@
 
                 } else {
 
-                    this.currentTask = [];
+                    this.resetTasklist();
                     alert('Test finished!');
 
                 }
@@ -2911,7 +2920,8 @@
 
         this.deactivateTaskStep = function (step) {
 
-            var div = $('div', this.getDomElement('taskBar'))[step],
+            var tb = this.getDomElement('taskBar'),
+                div = $('div', tb)[step],
                 $div = $(div),
                 $spn = $('span.step-number', div),
                 left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
@@ -2933,8 +2943,7 @@
             });
             if (!step) {
 
-                this.currentTask = null;
-                this.appMode = '';
+                this.resetTasklist();
 
             } else {
 
@@ -2942,7 +2951,7 @@
                     ctask = this.testCase[cs];
 
                 this.currentTask = ctask;
-                $('div > span.step-number[step=' + cs +']', this.getDomElement('taskBar')).html(step);
+                $('div > span.step-number[step=' + cs +']', tb).html(step);
                 ctask.active = true;
                 ctask.done = false;
                 ctask.events.forEach(function (e) {
@@ -2995,11 +3004,20 @@
 
                     }).length) {
 
-                    this.activateTaskStep(this.currentTask.step);
+                    this.activateTaskStep(this.currentTask.step + 1);
 
                 }
 
             }
+
+        };
+
+        this.resetTasklist = function () {
+
+            this.currentTask = null;
+            this.currentEvent = null;
+            this.appMode = '';
+            sessionStorage.removeItem('dcipherState');
 
         };
 
