@@ -40,7 +40,7 @@
             _Clicks_sec: 'Clicks in sec',
             _KPI: "KPI",
             _KPI_event: "KPI Event",
-            _Start_task: "Click first task to activate test mode",
+            _Start_test: "Start test",
             _Default_record_name: "Test #",
             _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
 
@@ -534,7 +534,7 @@
 
                 }
 
-                if (rec.events.length > 1) {
+                if (rec.events && rec.events.length > 1) {
 
                     rec.duration = rec.events[rec.events.length - 1].time;
                     rec.kpi = rec.events[rec.events.length - 1].kpi;
@@ -1832,7 +1832,7 @@
 
                                 playEvent(pars2);
 
-                            }, clickDelay);
+                            }, e1.type === 'mouseover' ? 0 : clickDelay );
 
                         }
 
@@ -2022,7 +2022,7 @@
             this.sessionRec = rec;
 
             // Reload initial session location on replay start
-            if (!cnt && window.location.toString() !== sData[0].location) {
+            if (!cnt && window.location.pathname !== sData[0].location) {
 
                 this.eventIndex = 1;
                 window.location = sData[0].location;
@@ -2879,7 +2879,7 @@
                 pdiv = $('div', tb)[step - 1],
                 task = this.testCase[step],
                 $div = $(div),
-                left = (2 + step) * $(div).height();
+                left = (2 + step) * ($(div).height() + 2);
 
             function endOfTest() {
 
@@ -3085,6 +3085,7 @@
             tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
+            startTest = document.createElement('span'),
             tlCnv = document.createElement('canvas');
 
         // D-Cipher container
@@ -3177,7 +3178,10 @@
         // Top menu
         topMenu.id = dCipher.domId.topMenu;
         taskBar.id = dCipher.domId.taskBar;
-        taskBar.innerHTML = dCipher.loc._Start_task;
+        //taskBar.innerHTML = dCipher.loc._Start_task;
+        startTest.className = 'start-test';
+        startTest.innerHTML = dCipher.loc._Start_test;
+        taskBar.appendChild(startTest);
         topMenu.appendChild(taskBar);
         bdy.insertBefore(topMenu, bdy.firstChild);
 
@@ -3221,6 +3225,12 @@
         butList.addEventListener('click', function () {
 
             dCipher.toggleRecList(this);
+
+        });
+
+        startTest.addEventListener('click', function () {
+
+            dCipher.activateTaskStep(0);
 
         });
 
@@ -3368,6 +3378,7 @@
                 if (handler.toString().match(/stopPropagation|preventDefault/)
                     || type === 'mouseover' || type === 'mouseout'
                     || type === 'mouseenter' || type === 'mouseleave'
+                    || type.match(/scroll|wheel/)
                 ) {
 
                     node._addEventListener(type, function (e) {

@@ -80,9 +80,20 @@
   vertical-align: top;
   color: white;
   font-size: 19px;
-  padding: 10px 0 0 20px;
+  //padding: 10px 0 0 20px;
   overflow: hidden;
   white-space: nowrap;
+  .start-test{
+    display: inline-block;
+    cursor: pointer;
+    padding: 11px;
+    margin-left: 1px;
+    background-color: gray;
+  }
+  .start-test:hover{
+    color: black;
+    background-color: silver;
+  }
   .d-cipher-task{
     position: absolute;
     top: 0;
@@ -96,7 +107,7 @@
       padding-top: 7px;
       font-size: 24px;
       text-align: center;
-      margin-right: 2px;
+      margin-left: 1px;
       background-color: gray;
       border-right: solid 2px darkgray;
       cursor: pointer;
@@ -145,6 +156,7 @@
     height: 42px;
     background-color: gray;
     padding: 10px;
+    margin: 0 1px;
     cursor: pointer;
     display: inline-block;
     .play{
