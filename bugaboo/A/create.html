@@ -516,7 +516,7 @@
                                     msg = msg.join(', ') + ' has been added to your cart.';
                                     $('#basketPopupText').html(msg);
 
-                                    $('#NotificationCart').show().animate({'top': +171});
+                                    $('#NotificationCart').show().animate({'top': +130});
                                     $('#NotificationCart').data('tid', setTimeout(function () {
                                         $('#NotificationCart').fadeOut('fast').css('top', 0);
                                     }, 5000));
@@ -540,7 +540,6 @@
                                     });
 
 //                                    console.debug('--> basket: ', imgs);
-                                    alert('--> basket: ', imgs);
                                     sessionStorage.setItem('basket', JSON.stringify(imgs));
 
                                 }

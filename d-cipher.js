@@ -329,96 +329,231 @@
 
         };
 
-        this.testCase = [
-            {
-                step: 0,
-                description: 'Find Cameleon stroller and configure to order',
-                done: false,
-                active: false,
-                events: [
-                    {
-                        type: 'mousedown',
-                        treePath:  "0-2-0-2-0-0-0-0-0-0-0",
-                        tagName: "IMG",
-                        location: '/bugaboo/B/index.html',
-                        done: false
-                    },
-                    {
-                        type: 'mousedown',
-                        treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/bugaboo-cameleon3.html',
-                        done: false
-                    }
-                ]
-            },
-            {
-                step: 1,
-                description: 'Choose bassinet and select black canopy color',
-                done: false,
-                active: false,
-                events: [
-                    {
-                        type: 'mousedown',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/create.html',
-                        done: false
-                    },
-                    {
-                        type: 'mousedown',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                        tagName: "path",
-                        location: '/bugaboo/B/create.html',
-                        done: false
-                    }
-                ]
-            },
-            {
-                step: 2,
-                description: ' Add running accessory, and a cup holder',
-                done: false,
-                active: false,
-                events: [
-                    {
-                        type: 'mousedown',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/create.html',
-                        done: false
-                    },
-                    {
-                        type: 'mousedown',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/create.html',
-                        done: false
-                    }
-                ]
-            },
-            {
-                step: 3,
-                description: 'Purchase stroller, checking final cost total before completing',
-                done: false,
-                active: false,
-                events: [
-                    {
-                        type: 'mousedown',
-                        treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/create.html',
-                        done: false
-                    },
-                    {
-                        type: 'click',
-                        treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                        tagName: "SPAN",
-                        location: '/bugaboo/B/cart.html',
-                        done: false
-                    }
-                ]
-            }
+        this.testCases = [
+
+            [
+                {
+                    step: 0,
+                    description: 'Find Cameleon stroller and configure to order',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath:  "0-2-0-1-2-1-0-0-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath:  "0-2-0-2-1-0-0-0-1-0-1",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/bugaboo-cameleon3.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 1,
+                    description: 'Choose bassinet and select black canopy color',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                            tagName: "path",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 2,
+                    description: ' Add running accessory, and a cup holder',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 3,
+                    description: 'Purchase stroller, checking final cost total before completing',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                            alternate: [2],
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-2-0-1-2-0-0-1-2-0-0",
+                            alternate: [1],
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+/*
+                        {
+                            type: 'wheel',
+                            treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
+                            tagName: "DIV",
+                            location: '/bugaboo/A/cart.html',
+                            done: false
+                        },
+*/
+                        {
+                            type: 'click',
+                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                            //alternate: [4],
+                            tagName: "A",
+                            location: '/bugaboo/A/cart.html',
+                            done: false
+                        }/*,
+                        {
+                            type: 'click',
+                            treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
+                            alternate: [3],
+                            tagName: "A",
+                            location: '/bugaboo/A/cart.html',
+                            done: false
+                        }*/
+                    ]
+                }
+            ],
+            [
+                {
+                    step: 0,
+                    description: 'Find Cameleon stroller and configure to order',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath:  "0-2-0-2-0-0-0-0-0-0-0",
+                            tagName: "IMG",
+                            location: '/bugaboo/B/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/bugaboo-cameleon3.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 1,
+                    description: 'Choose bassinet and select black canopy color',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                            tagName: "path",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 2,
+                    description: ' Add running accessory, and a cup holder',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 3,
+                    description: 'Purchase stroller, checking final cost total before completing',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'click',
+                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/cart.html',
+                            done: false
+                        }
+                    ]
+                }
+            ]
         ];
+;
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -439,8 +574,18 @@
             self.db.init();
             self.db.getAllRecords().done(function () {
 
-                var recList = self.getDomElement('records');
+                var recList = self.getDomElement('records'),
+                    path = window.location.pathname;
 
+                if (path.match('/bugaboo/A/')) {
+
+                    self.testCase = self.testCases[0];
+
+                } else if (path.match('/bugaboo/B/')) {
+
+                    self.testCase = self.testCases[1];
+
+                }
                 self.createRecordList();
                 self.createTaskList();
                 self.restoreState();
@@ -520,7 +665,6 @@
 
                 // Turn off record mode
                 this.appMode = '';
-
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
 
                 var rec = this.sessionRec;
@@ -534,7 +678,7 @@
 
                 }
 
-                if (rec.events && rec.events.length > 1) {
+                if (rec && rec.events && rec.events.length > 1) {
 
                     rec.duration = rec.events[rec.events.length - 1].time;
                     rec.kpi = rec.events[rec.events.length - 1].kpi;
@@ -573,6 +717,8 @@
                        && etarget.localName !== 'circle';
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
+            console.debug('TREE PATH: ', treePath);
+            console.debug('tagName: ', etarget.tagName);
 
             if (this.appMode === 'test') {
 
@@ -580,7 +726,7 @@
 
                     type: etype,
                     treePath: treePath,
-                    tagName: e.tagName,
+                    tagName: etarget.tagName,
                     location: location
 
                 };
@@ -1696,7 +1842,7 @@
         this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
-                cnt = eventIndex || 1,
+                cnt = eventIndex || 0,
                 delay = 20, speed = 2,
                 rec = this.getRecordById(sId),
                 sData = rec.events,
@@ -2017,7 +2163,7 @@
 
             }
 
-            this.appMode = 'play';
+            //this.appMode = 'play';
             this.sessionId = sId;
             this.sessionRec = rec;
 
@@ -2025,7 +2171,8 @@
             if (!cnt && window.location.pathname !== sData[0].location) {
 
                 this.eventIndex = 1;
-                window.location = sData[0].location;
+                //window.location = sData[0].location;
+                this.resetApp('play', sData[0].location);
                 return;
 
             }
@@ -2903,7 +3050,7 @@
 
                     }
 
-                    $('span.step-number', pdiv).html('✓');
+                    $('span.step-number', pdiv).html('✓').removeClass('active');
 
                 }
 
@@ -2916,12 +3063,15 @@
 
                     });
 
+                    $('span.step-number', div).addClass('active');
+
                     this.currentTask = task;
                     this.currentTask.done = false;
                     this.currentTask.active = true;
 
                     if (!step && !this.appMode) {
 
+/*
                         localStorage.removeItem('Stroller.active');
                         localStorage.removeItem('Stroller.name');
                         localStorage.removeItem('Stroller.price');
@@ -2937,12 +3087,17 @@
                             window.location.pathname = task.events[0].location;
 
                         }
+*/
+                        this.toggleRecMode();
+                        this.resetApp('test', task.events[0].location, restore);
 
                     }
 
                 } else {
 
                     this.resetTasklist();
+                    this.appMode = 'record';
+                    this.toggleRecMode();
                     $('.d-cipher-task-done', tb).fadeIn();
                     setTimeout(endOfTest, 2000);
 
@@ -2967,7 +3122,7 @@
                 transition: 'left 0.2s ease-out 0.15s'
 
             });
-
+            $spn.removeClass('active').trigger('mouseout');
             task.done = false;
             task.active = false;
             task.events.forEach(function (e) {
@@ -2978,6 +3133,8 @@
             if (!step) {
 
                 this.resetTasklist();
+                this.appMode = 'record';
+                this.toggleRecMode();
 
             } else {
 
@@ -2985,7 +3142,7 @@
                     ctask = this.testCase[cs];
 
                 this.currentTask = ctask;
-                $('div > span.step-number[step=' + cs +']', tb).html(step);
+                $('div > span.step-number[step=' + cs +']', tb).html(step).addClass('active');
                 ctask.active = true;
                 ctask.done = false;
                 ctask.events.forEach(function (e) {
@@ -3026,6 +3183,15 @@
                     && evt.location === e.location) {
 
                         evt.done = true;
+                        if (evt.alternate && evt.alternate.length) {
+
+                            evt.alternate.forEach(function (i) {
+
+                                evts[i].done = true;
+
+                            });
+
+                        }
                         break;
 
                     }
@@ -3046,12 +3212,46 @@
 
         };
 
+        this.resetApp = function (mode, path, restore) {
+
+            localStorage.removeItem('Stroller.active');
+            localStorage.removeItem('Stroller.name');
+            localStorage.removeItem('Stroller.price');
+            localStorage.removeItem('Stroller.stroller');
+            localStorage.removeItem('Stroller.modules.Base');
+            localStorage.removeItem('Stroller.modules.Frame');
+            localStorage.removeItem('Stroller.modules.TF');
+            sessionStorage.removeItem('basket');
+            this.appMode = mode;
+            if (!restore && window.location.pathname !== path) {
+
+                window.location.pathname = path;
+
+            }
+
+        };
+
         this.resetTasklist = function () {
+
+            var $tb = $(this.getDomElement('taskBar')),
+                tl = this.testCase,
+                $tasks = $('div', $tb),
+                w = $tb.outerHeight(),
+                rp = window.innerWidth - w * (tl.length),
+                d;
+
+            tl.forEach(function (t, i) {
+
+                t.done = false;
+                t.active = false;
+                d = $tasks[i];
+                $(d).css('left', rp + w * i);
+                $('.step-number', d).html(i + 1);
+
+            });
 
             this.currentTask = null;
             this.currentEvent = null;
-            this.appMode = 'record';
-            this.toggleRecMode();
             sessionStorage.removeItem('dcipherState');
 
         };
@@ -3206,6 +3406,11 @@
         butRec.addEventListener('click', function (e) {
 
             e.stopPropagation();
+            if (dCipher.appMode === 'test'){
+                dCipher.resetTasklist();
+
+
+            }
             dCipher.toggleRecMode(e);
 
         });

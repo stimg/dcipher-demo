@@ -3900,6 +3900,11 @@ img.rsImg {
   margin-top: 61px;
   pointer-events: none; }
 
+#NotificationCart{
+  /*position: absolute !important;*/
+  z-index: 45 !important;
+}
+
 .configurator-product-menu .menu {
   position: absolute;
   display: block;
