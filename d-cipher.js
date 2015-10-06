@@ -340,21 +340,21 @@
                     events: [
                         {
                             type: 'mousedown',
-                            treePath:  "0-2-0-1-2-1-0-0-0",
+                            treePath: "0-2-0-1-2-1-0-0-0",
                             tagName: "A",
                             location: '/bugaboo/A/index.html',
                             done: false
                         },
                         {
                             type: 'mousedown',
-                            treePath:  "0-2-0-2-1-0-0-0-1-0-1",
+                            treePath: "0-2-0-2-1-0-0-0-1-0-1",
                             tagName: "SPAN",
                             location: '/bugaboo/A/index.html',
                             done: false
                         },
                         {
                             type: 'mousedown',
-                            treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
                             tagName: "A",
                             location: '/bugaboo/A/bugaboo-cameleon3.html',
                             done: false
@@ -434,15 +434,15 @@
                             location: '/bugaboo/A/create.html',
                             done: false
                         },
-/*
-                        {
-                            type: 'wheel',
-                            treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
-                            tagName: "DIV",
-                            location: '/bugaboo/A/cart.html',
-                            done: false
-                        },
-*/
+                        /*
+                         {
+                         type: 'wheel',
+                         treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
+                         tagName: "DIV",
+                         location: '/bugaboo/A/cart.html',
+                         done: false
+                         },
+                         */
                         {
                             type: 'click',
                             treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
@@ -451,14 +451,14 @@
                             location: '/bugaboo/A/cart.html',
                             done: false
                         }/*,
-                        {
-                            type: 'click',
-                            treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
-                            alternate: [3],
-                            tagName: "A",
-                            location: '/bugaboo/A/cart.html',
-                            done: false
-                        }*/
+                         {
+                         type: 'click',
+                         treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
+                         alternate: [3],
+                         tagName: "A",
+                         location: '/bugaboo/A/cart.html',
+                         done: false
+                         }*/
                     ]
                 }
             ],
@@ -471,14 +471,14 @@
                     events: [
                         {
                             type: 'mousedown',
-                            treePath:  "0-2-0-2-0-0-0-0-0-0-0",
-                            tagName: "IMG",
+                            treePath: "0-2-0-2-0-0-0-0-0-0",
+                            tagName: "A",
                             location: '/bugaboo/B/index.html',
                             done: false
                         },
                         {
                             type: 'mousedown',
-                            treePath:  "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
                             tagName: "SPAN",
                             location: '/bugaboo/B/bugaboo-cameleon3.html',
                             done: false
@@ -553,7 +553,7 @@
                 }
             ]
         ];
-;
+        ;
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -865,7 +865,8 @@
 
                 }
 
-                event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
+                //event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
+                event.kpi =  100 *  event.time * (event.miles || 1) / (rec.eventsStat['click'] || 1);
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -1919,7 +1920,7 @@
 
                 } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
 
-                    el.dispatchEvent(new MouseEvent(etype, e));
+                    //el.dispatchEvent(new MouseEvent(etype, e));
 
                 } else if (etype.match(/wheel|scroll/i)) {
 
@@ -1978,7 +1979,7 @@
 
                                 playEvent(pars2);
 
-                            }, e1.type === 'mouseover' ? 0 : clickDelay );
+                            }, e1.type === 'mouseover' ? 0 : clickDelay);
 
                         }
 
@@ -2003,34 +2004,34 @@
 
                         if (!mouseDown) {
 
-                            /*
-                             if (mOverElement !== el) {
+                            if (mOverElement !== el) {
 
-                             if (mOverElement) {
+                                if (mOverElement) {
 
-                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                             $(mOverElement).removeClass(mOverClass);
+                                    mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                                    //$(mOverElement).removeClass(mOverClass);
 
-                             }
-                             if (self.addMouseOverClass(el, ':hover')) {
+                                }
+/*
+                                if (self.addMouseOverClass(el, ':hover')) {
 
-                             $(el).addClass(mOverClass);
+                                    $(el).addClass(mOverClass);
 
-                             }
+                                }
+*/
 
-                             el.dispatchEvent(new MouseEvent('mouseover', {
+                                el.dispatchEvent(new MouseEvent('mouseover', {
 
-                             clientX: x,
-                             clientY: y,
-                             pageX: x,
-                             pageY: y,
-                             view: window
+                                    clientX: x,
+                                    clientY: y,
+                                    pageX: x,
+                                    pageY: y,
+                                    view: window
 
-                             }));
-                             mOverElement = el;
+                                }));
+                                mOverElement = el;
 
-                             }
-                             */
+                            }
 
                         } else {
 
@@ -2978,7 +2979,7 @@
                 var currentTask = self.currentTask,
                     step = 1 * $(e.target).attr('step'),
                     newTask = tl[step];
-                    cs = currentTask ? currentTask.step : -1;
+                cs = currentTask ? currentTask.step : -1;
 
                 e.stopPropagation();
 
@@ -3152,7 +3153,7 @@
                     ctask = this.testCase[cs];
 
                 this.currentTask = ctask;
-                $('div > span.step-number[step=' + cs +']', tb).html(step).addClass('active');
+                $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
                 ctask.active = true;
                 ctask.done = false;
                 ctask.events.forEach(function (e) {
@@ -3190,7 +3191,7 @@
 
                     if (vis && evt.type === e.type
                         && treePath.match(re)
-                    && evt.location === e.location) {
+                        && evt.location === e.location) {
 
                         evt.done = true;
                         if (evt.alternate && evt.alternate.length) {
@@ -3261,7 +3262,7 @@
                 });
                 d = $tasks[i];
                 $(d).css('left', rp + w * i);
-                $('.step-number', d).html(i + 1);
+                $('.step-number', d).html(i + 1).removeClass('active');
 
             });
 
@@ -3421,9 +3422,8 @@
         butRec.addEventListener('click', function (e) {
 
             e.stopPropagation();
-            if (dCipher.appMode === 'test'){
+            if (dCipher.appMode === 'test') {
                 dCipher.resetTasklist();
-
 
             }
             dCipher.toggleRecMode(e);
