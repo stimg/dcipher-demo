@@ -639,6 +639,7 @@
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(cnvh).hide();
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
                 $(this.getDomElement('butList')).hide();
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 this.hideRecList();
@@ -666,6 +667,7 @@
                 // Turn off record mode
                 this.appMode = '';
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
                 var rec = this.sessionRec;
 
@@ -1479,6 +1481,7 @@
             if (!$('canvas.cnv:visible', cnvh).length) {
 
                 $(cnvh).hide();
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
             }
 
@@ -2004,6 +2007,7 @@
 
                         if (!mouseDown) {
 
+/*
                             if (mOverElement !== el) {
 
                                 if (mOverElement) {
@@ -2012,13 +2016,11 @@
                                     //$(mOverElement).removeClass(mOverClass);
 
                                 }
-/*
                                 if (self.addMouseOverClass(el, ':hover')) {
 
                                     $(el).addClass(mOverClass);
 
                                 }
-*/
 
                                 el.dispatchEvent(new MouseEvent('mouseover', {
 
@@ -2032,6 +2034,7 @@
                                 mOverElement = el;
 
                             }
+*/
 
                         } else {
 
@@ -2937,6 +2940,12 @@
 
             }
 
+            if (this.appMode !== 'test') {
+
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+
+            }
+
             if (this.appMode === 'test') {
 
                 for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
@@ -3087,7 +3096,7 @@
                     $div.css({
 
                         left: left,
-                        transition: 'left 0.2s ease-out 0.15s'
+                        transition: restore ? '' : 'left 0.2s ease-out 0.15s'
 
                     });
 
