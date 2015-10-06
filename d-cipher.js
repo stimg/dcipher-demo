@@ -765,7 +765,7 @@
                             pageXOffset: pageOffsetNDC.x,
                             pageYOffset: pageOffsetNDC.y
                         },
-                        bubbles: !etype.match(/wheel|scroll/i) && etype !== 'mouseover',
+                        bubbles: !etype.match(/wheel|scroll/i)/* && etype !== 'mouseover'*/,
                         cancelBubble: e.cancelBubble,
                         cancelable: e.cancelable,
                         defaultPrevented: e.defaultPrevented,
@@ -1923,7 +1923,7 @@
 
                 } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
 
-                    //el.dispatchEvent(new MouseEvent(etype, e));
+                    el.dispatchEvent(new MouseEvent(etype, e));
 
                 } else if (etype.match(/wheel|scroll/i)) {
 
@@ -2172,11 +2172,10 @@
             this.sessionRec = rec;
 
             // Reload initial session location on replay start
-            if (!cnt && window.location.pathname !== sData[0].location) {
+            if (!cnt && window.location.pathname !== sData[1].location) {
 
                 this.eventIndex = 1;
-                //window.location = sData[0].location;
-                this.resetApp('play', sData[0].location);
+                this.resetApp('play', sData[1].location);
                 return;
 
             }
@@ -2481,6 +2480,11 @@
 
             });
 
+            if (!visRecs.length){
+
+                $(cnvHolder).hide();
+
+            }
             $(recListDiv).children().remove();
             $(cnvHolder).children('.cnv').remove();
             this.db.records.forEach(function (r, idx) {
@@ -3048,10 +3052,6 @@
             d.className = 'd-cipher-task-done';
             d.innerHTML = this.loc._Test_done;
             $tb.append(d);
-
-        };
-
-        this.restoreTaskState = function () {
 
         };
 
