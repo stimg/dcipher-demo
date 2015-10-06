@@ -866,7 +866,7 @@
                 }
 
                 //event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
-                event.kpi =  100 *  event.time * (event.miles || 1) / (rec.eventsStat['click'] || 1);
+                event.kpi =  event.time * (event.miles || 1) / 1000 * (rec.eventsStat['click'] || 1);
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
