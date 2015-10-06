@@ -2975,8 +2975,35 @@
 
             function activateTaskStep(e) {
 
+                var currentTask = self.currentTask,
+                    step = 1 * $(e.target).attr('step'),
+                    newTask = tl[step];
+                    cs = currentTask ? currentTask.step : -1;
+
                 e.stopPropagation();
-                self.activateTaskStep(1 * $(e.target).attr('step'));
+
+                if (newTask.active || newTask.done) {
+
+                    for (var i = tl.length - 1; i >= step; i--) {
+
+                        if (tl[i].active || tl[i].done) {
+
+                            self.deactivateTaskStep(i);
+
+                        }
+
+                    }
+
+                } else {
+
+                    while (++cs < step) {
+
+                        self.activateTaskStep(cs, true);
+
+                    }
+                    self.activateTaskStep(cs);
+
+                }
 
             }
 
@@ -3071,23 +3098,6 @@
 
                     if (!step && !this.appMode) {
 
-/*
-                        localStorage.removeItem('Stroller.active');
-                        localStorage.removeItem('Stroller.name');
-                        localStorage.removeItem('Stroller.price');
-                        localStorage.removeItem('Stroller.stroller');
-                        localStorage.removeItem('Stroller.modules.Base');
-                        localStorage.removeItem('Stroller.modules.Frame');
-                        localStorage.removeItem('Stroller.modules.TF');
-                        sessionStorage.removeItem('basket');
-                        this.toggleRecMode();
-                        this.appMode = 'test';
-                        if (!restore && window.location.pathname !== task.events[0].location) {
-
-                            window.location.pathname = task.events[0].location;
-
-                        }
-*/
                         this.toggleRecMode();
                         this.resetApp('test', task.events[0].location, restore);
 
@@ -3244,6 +3254,11 @@
 
                 t.done = false;
                 t.active = false;
+                t.events.forEach(function (e) {
+
+                    e.done = false;
+
+                });
                 d = $tasks[i];
                 $(d).css('left', rp + w * i);
                 $('.step-number', d).html(i + 1);
