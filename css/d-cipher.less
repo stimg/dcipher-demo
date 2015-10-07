@@ -1,7 +1,7 @@
 @import "bootstrap-colorpicker.css";
 
 #d-cipher-container {
-  font: normal 14px Helvetica, Tahoma sans-serif;
+  font: normal 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
   color: #333;
   box-sizing: border-box;
   opacity: 1;
@@ -241,7 +241,9 @@
   font-size: 18px;
   padding-top: 15px;
   span{
+    font-weight: lighter;
     font-size: 12px;
+    letter-spacing: 0.1em;
     padding-right: 15px;
     padding-left: 3px;
   }
@@ -356,14 +358,36 @@
 #d-cipher-m-tooltip{
   display: none;
   position: fixed;
+  white-space: nowrap;
   z-index: 10000015;
   //max-height: 5em;
   //overflow: hidden;
   text-overflow: ellipsis;
-  padding: 10px;
   background-color: rgba(0, 0, 0, 0.3);
   color: white;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
+  padding: 5px;
+  table, tr{
+    border: none;
+    margin: 0;
+    padding: 0;
+  }
+  .row{
+
+  }
+  td{
+    padding: 0 5px;
+    line-height: inherit;
+  }
+  .tt-name{
+    font-weight: lighter;
+    letter-spacing: 0.05em;
+    margin-right: 0.5em;
+    text-align: right;
+  }
+  .tt-value{
+    font-weight: 200;
+  }
 }
 
 #d-cipher-event-info{

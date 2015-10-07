@@ -13,6 +13,7 @@
             _Type: 'Type',
             _Time: 'Time',
             _Mouse_miles: 'Mouse miles',
+            _Distance: "Distance",
             _Path: 'Path',
             _from: 'from',
             _Target: 'Target',
@@ -29,7 +30,7 @@
             _Event: 'Event',
             _Event_list: 'Events list',
             _Session: 'Session',
-            _Session_name: 'Session name',
+            _Session_name: 'Session',
             _Created: 'Created',
             _Modified: 'Modified',
             _Author: 'Author',
@@ -868,7 +869,7 @@
                 }
 
                 //event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
-                event.kpi =  event.time * (event.miles || 1) / 1000 * (rec.eventsStat['click'] || 1);
+                event.kpi = event.time * (event.miles || 1) / 1000 * (rec.eventsStat['click'] || 1);
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -1166,7 +1167,7 @@
                 cnvh = self.getDomElement('canvasHolder'),
                 x = event.clientX, y = event.clientY,
                 evts = self.getEventsUnderMouse(x, y),
-                html = '', evt, rec,
+                html = '<table>', evt, rec,
                 w, h, top, left;
 
             function getEventInfo(e) {
@@ -1178,21 +1179,30 @@
 
                 if (etarget.dcipherName) {
 
-                    html += loc._Target + ': ' + etarget.dcipherName + '<br />';
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td><</tr>';
 
                 }
 
                 if (etarget.dcipherAction) {
 
-                    html += loc._Action + ': ' + etarget.dcipherAction + '<br />';
+                    html += '<div>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</div><br />';
 
                 }
 
-                html += loc._Session_name + ': ' + rec.name + '<br />'
-                        + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
-                        + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
-                        + loc._Event + ': ' + loc[e.type]/* + '<br />'
-                 + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
+                html += '<tr>' +
+                        '<td class="tt-name">' + loc._Session_name + ':<br /><br /></td>' +
+                        '<td class="tt-value">' + rec.name + '<br /><br /></td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '</tr>';
 
                 return html;
             }
@@ -1216,11 +1226,13 @@
 
                     }
 
-                    html += '<br />' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ';
+                    html += '<tr>' +
+                            '<td colspan="2" class="tt-value" style="text-align: right;">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '</tr>';
 
                 });
 
-                $tt.html(html);
+                $tt.html(html + '</table>');
                 w = $tt.outerWidth();
                 h = $tt.outerHeight();
 
@@ -1248,8 +1260,10 @@
 
                 }
 
-                $tt.css('top', top).css('left', left)
-                    .show();
+                $tt.css({
+                    'top': top,
+                    'left': left
+                }).show();
 
             } else if (event.target.parentNode.id !== self.domId['timeline']) {
 
@@ -1269,7 +1283,7 @@
                 loc = this.loc,
                 evts = this.eventsUnderMouse,
                 $eInf = $(this.getDomElement('eventInfo')),
-                dx = 0, dy = 0, html = '', rec,
+                dx = 0, dy = 0, html = '<table>', rec,
                 top, left, x, y, w, h, shift = 10;
 
             evt = evts[0];
@@ -1280,17 +1294,33 @@
 
                 var clicks = rec.eventsStat['click'];
 
-                return loc._Session_name + ': ' + rec.name + '<br />'
-                       + loc._Created + ': ' + (new Date(rec.created)).toLocaleString() + '<br />'
-                       + loc._Modified + ': ' + (new Date(rec.modified)).toLocaleString() + '<br />'
-                       + loc._Author + ': ' + rec.author + '<br />'
-                       + loc._Clicks + ': ' + clicks + ', '
-                       + loc._Duration + ': ' + self.getTimeString(rec.duration) + '<br />'
-                       + loc._Mouse_miles + ': ' + rec.mouseMilesTotal.toFixed(2) + ', '// + '<br />'
-                       + loc._Events + ': ' + rec.events.length + '<br />'
-                       + loc._KPI + ': ' + rec.kpi + '<br />'
-                       + loc._Clicks_sec + ': ' + (1000 * clicks / rec.duration).toFixed(1) + '<br />'
-                       + loc._Miles_sec + ': ' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2);
+                return '<tr>' +
+                       '<td class= "tt-name">' + loc._Session_name + ': ' + '<br /><br /></td>' +
+                       '<td class= "tt-value">' + rec.name + '<br />' +  '<br /><br /></td>' +
+                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleString() + '</td>' +
+                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleString() + '</td>'+
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
+                       '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">'+ loc._Clicks + ': </td>' +
+                       '<td class= "tt-value">' + clicks + ', </td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Duration + ': </td>' +
+                       '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Events + ': </td>' +
+                       '<td class= "tt-value">' + rec.events.length + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._KPI + ': </td>' +
+                       '<td class= "tt-value">' + rec.kpi + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
+                       '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
+                       '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + </td> +
+                        '</tr>';
             }
 
             html += getRecordInfo(rec);
@@ -1304,7 +1334,7 @@
 
                     rId = e.recId;
                     rec = self.getRecordById(rId);
-                    html += '<br /><br />' + getRecordInfo(rec);
+                    html += '<tr><td></td></tr>' + getRecordInfo(rec);
 
                 }
 
@@ -1432,16 +1462,16 @@
         this.getTimeString = function getTimeString(ms) {
 
             var time = ms / 1000,
-                hours, mins, secs;
+                hours, mins, secs, html = '';
 
             hours = Math.floor(time / 3600);
-            hours = hours < 10 ? '0' + hours : hours;
             mins = Math.floor((time - hours * 3600) / 60);
-            mins = mins < 10 ? '0' + mins : mins;
             secs = Math.floor(time - hours * 3600 - mins * 60);
-            secs = secs < 10 ? '0' + secs : secs;
+            html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
+            html += mins < 10 ? '0' + mins + ':' : mins + ':';
+            html += secs < 10 ? '0' + secs : secs;
 
-            return hours + ':' + mins + ':' + secs;
+            return html;
 
         };
 
@@ -2007,34 +2037,34 @@
 
                         if (!mouseDown) {
 
-/*
-                            if (mOverElement !== el) {
+                            /*
+                             if (mOverElement !== el) {
 
-                                if (mOverElement) {
+                             if (mOverElement) {
 
-                                    mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                                    //$(mOverElement).removeClass(mOverClass);
+                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                             //$(mOverElement).removeClass(mOverClass);
 
-                                }
-                                if (self.addMouseOverClass(el, ':hover')) {
+                             }
+                             if (self.addMouseOverClass(el, ':hover')) {
 
-                                    $(el).addClass(mOverClass);
+                             $(el).addClass(mOverClass);
 
-                                }
+                             }
 
-                                el.dispatchEvent(new MouseEvent('mouseover', {
+                             el.dispatchEvent(new MouseEvent('mouseover', {
 
-                                    clientX: x,
-                                    clientY: y,
-                                    pageX: x,
-                                    pageY: y,
-                                    view: window
+                             clientX: x,
+                             clientY: y,
+                             pageX: x,
+                             pageY: y,
+                             view: window
 
-                                }));
-                                mOverElement = el;
+                             }));
+                             mOverElement = el;
 
-                            }
-*/
+                             }
+                             */
 
                         } else {
 
@@ -2480,7 +2510,7 @@
 
             });
 
-            if (!visRecs.length){
+            if (!visRecs.length) {
 
                 $(cnvHolder).hide();
 
