@@ -1,7 +1,8 @@
 @import "bootstrap-colorpicker.css";
 
-#d-cipher-container {
-  font: normal 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+#d-cipher-container, #d-cipher-topmenu {
+  font: 200 14px 'Helvetica Neue', Helvetica, Arial, sans-serif;
+  letter-spacing: 0.05em;
   color: #333;
   box-sizing: border-box;
   opacity: 1;
@@ -86,7 +87,7 @@
   .start-test{
     display: none;
     cursor: pointer;
-    padding: 11px;
+    padding: 9px 15px;
     margin-left: 1px;
     background-color: gray;
   }
@@ -104,7 +105,7 @@
       display: inline-block;
       height: 42px;
       width: 42px;
-      padding-top: 7px;
+      padding-top: 6px;
       font-size: 24px;
       text-align: center;
       margin-left: 1px;
@@ -117,8 +118,10 @@
       color: silver;
     }
     .task-description{
-      padding-left: 20px;
-    }
+      display: inline-block;
+      padding: 6px 20px;
+      vertical-align: middle;
+      height: 100%;    }
   }
   .d-cipher-task-done{
     display: none;
