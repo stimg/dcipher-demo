@@ -770,7 +770,7 @@
                             pageXOffset: pageOffsetNDC.x,
                             pageYOffset: pageOffsetNDC.y
                         },
-                        bubbles: !etype.match(/wheel|scroll/i)/* && etype !== 'mouseover'*/,
+                        bubbles: true,
                         cancelBubble: e.cancelBubble,
                         cancelable: e.cancelable,
                         defaultPrevented: e.defaultPrevented,
@@ -865,7 +865,7 @@
 
                 }
 
-                if (!etype.match(/wheel|scroll/i) || !lastEvent || lastEvent.type.match(/wheel|scroll/i)) {
+                if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
 
                     rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
                     event.eventNo = rec.eventsStat[etype];
@@ -1126,7 +1126,7 @@
                         '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
                         '</tr><tr>' +
                         '<td class="tt-name">' + loc._Distance + ':</td>' +
-                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
                         '</tr>';
 
                 return html;
@@ -1640,7 +1640,7 @@
                     ctx.beginPath();
                     ctx.moveTo(ex, ey);
 
-                } else if (!pe || !pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
+                } else if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
 
                     ctx.lineTo(ex, ey);
 
@@ -1713,7 +1713,7 @@
                 offsetTop = ch / 2,
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
-                posx = offsetLeft, posx0, pe;
+                posx = offsetLeft, posx0, pe, ne;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1736,6 +1736,7 @@
 
                 //ne = arr[i + 1];
                 pe = arr[i - 1];
+                ne = arr[i + 1];
                 posx0 = posx;
                 posx = offsetLeft + pxs * e.time;
 
@@ -1766,15 +1767,15 @@
                 if (i) {
 
                     ctx.beginPath();
-                    if (!e.type.match(/wheel|scroll/i)) {
+                    if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
 
                         self.drawEventPict(ctx, pe.type, posx0, offsetTop);
 
-                    } else if (!pe.type.match(/wheel|scroll/i)) {
+                    }/* else if (ne && !ne.type.match(/wheel|scroll/i)) {
 
                         self.drawEventPict(ctx, 'wheel', posx0, offsetTop);
 
-                    }
+                    }*/
 
                     ctx.stroke();
                     ctx.fill();
@@ -2257,7 +2258,7 @@
             this.sessionRec = rec;
 
             // Reload initial session location on replay start
-            if (!cnt && window.location.pathname !== sData[1].location) {
+            if (!cnt /*&& window.location.pathname !== sData[1].location*/) {
 
                 this.eventIndex = 1;
                 this.resetApp('play', sData[1].location);
@@ -3017,7 +3018,11 @@
             } else if (this.appMode === 'play') {
 
                 this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
-                this.playSession(this.sessionRec.id, this.eventIndex);
+                setTimeout(function () {
+
+                    self.playSession(self.sessionRec.id, self.eventIndex);
+
+                }, 1000);
 
             } else if (this.appMode === 'timeline') {
 
@@ -3328,7 +3333,7 @@
             localStorage.removeItem('Stroller.modules.TF');
             sessionStorage.removeItem('basket');
             this.appMode = mode;
-            if (!restore && window.location.pathname !== path) {
+            if (!restore /*&& window.location.pathname !== path*/) {
 
                 window.location.pathname = path;
 
