@@ -9,6 +9,8 @@
 
             _Recording: 'Recording',
             _Clicks: 'Clicks',
+            _Wheels: 'Wheels',
+            _Drags: 'Drags',
             _Events: 'Events',
             _Type: 'Type',
             _Time: 'Time',
@@ -36,10 +38,10 @@
             _Author: 'Author',
             _Duration: 'Duration',
             _Relative_mouse_speed: 'Relative mouse speed',
-            _Miles_sec: 'Mouse miles in sec',
-            _Events_sec: 'Events in sec',
-            _Clicks_sec: 'Clicks in sec',
-            _KPI: "KPI",
+            _Miles_sec: 'Distance / sec',
+            _Events_sec: 'Events / sec',
+            _Clicks_sec: 'Clicks / sec',
+            _KPI: "KPI power",
             _KPI_event: "KPI Event",
             _Start_test: "Start test",
             _Default_record_name: "Test #",
@@ -51,6 +53,7 @@
             mousedown: 'Mouse down',
             mousemove: 'Mouse move',
             mouseup: 'Mouse up',
+            drag: 'Drag',
             click: 'Click',
             dblclick: 'Double click',
             keydown: 'Key down',
@@ -279,6 +282,7 @@
             butList: 'd-cipher-menu-but-list',
             stat: 'd-cipher-stat',
             timeline: 'd-cipher-timeline',
+            timelineTooltip: 'd-cipher-timeline-tooltip',
             timelineInfo: 'd-cipher-timeline-info',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
@@ -868,8 +872,13 @@
 
                 }
 
-                //event.kpi = 100 / (event.miles * 0.05 + rec.eventsStat['click'] * 0.05 + 1);
-                event.kpi = event.time * (event.miles || 1) / 1000 * (rec.eventsStat['click'] || 1);
+                if (event.drag) {
+
+                    rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
+                    event.eventNo = rec.eventsStat['drag'];
+
+                }
+                event.kpi = event.time * (event.miles || 1) / (1000 * (rec.eventsStat['click'] || 1));
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -1075,7 +1084,7 @@
 
             var self = this,
                 event = this.getTimelineEvent(e),
-                $tt = $(this.getDomElement('eventInfo')),
+                $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
                 hw2 = $he.outerWidth() / 2,
                 $cnv = $('canvas', '#' + this.domId['timeline']);
@@ -1089,21 +1098,36 @@
 
                 if (etarget.dcipherName) {
 
-                    html += loc._Target + ': ' + etarget.dcipherName + '<br />';
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
                 }
 
                 if (etarget.dcipherAction) {
 
-                    html += loc._Action + ': ' + etarget.dcipherAction + '<br />';
+                    html += '<tr>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</tr><tr>' +
+                            '<td colspan = "2" class = "empty-row"></td>' +
+                            '</tr><br />';
 
                 }
 
-                html += loc._Session_name + ': ' + rec.name + '<br />'
-                        + loc._Time + ': ' + self.getTimeString(e.time) + ' ' + loc._from + ' ' + self.getTimeString(rec.duration) + '<br />'
-                        + loc._Mouse_miles + ': ' + e.miles.toFixed(2) + ' ' + loc._from + ' ' + rec.mouseMilesTotal.toFixed(2) + '<br />'
-                        + loc._Event + ': ' + loc[e.type]/* + '<br />'
-                 + loc._KPI_event + ': ' + e.kpi.toFixed(2)*/;
+                html += '<tr>' +
+                        '<td class="tt-name">' + loc._Session_name + ':</td>' +
+                        '<td class="tt-value">' + rec.name + '</td>' +
+                        '</tr>';
+
+                html += '<tr>' +
+                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '</tr>';
 
                 return html;
             }
@@ -1113,11 +1137,11 @@
                 var loc = this.loc,
                     pos = $cnv.offset(),
                     x = event.x + pos.left, y = event.y + pos.top,
-                    html = '', w, h, top, left;
+                    html = '<table>', w, h, top, left;
 
                 $cnv.css('cursor', 'pointer');
                 $he.show().css({'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
-                html += getEventInfo(event.event);
+                html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
                 w = $tt.outerWidth();
                 h = $tt.outerHeight();
@@ -1180,28 +1204,24 @@
                 if (etarget.dcipherName) {
 
                     html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                            '<td class="tt-value">' + etarget.dcipherName + '</td><</tr>';
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
                 }
 
                 if (etarget.dcipherAction) {
 
-                    html += '<div>' +
+                    html += '<tr>' +
                             '<td class="tt-name">' + loc._Action + ':</td>' +
                             '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
-                            '</div><br />';
+                            '</tr>';
 
                 }
 
                 html += '<tr>' +
-                        '<td class="tt-name">' + loc._Session_name + ':<br /><br /></td>' +
-                        '<td class="tt-value">' + rec.name + '<br /><br /></td>' +
+                        '<td class="tt-name">' + loc._Session_name + ':</td>' +
+                        '<td class="tt-value">' + rec.name + '</td>' +
                         '</tr><tr>' +
-                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
-                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + loc._Distance + ':</td>' +
-                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
                         '</tr>';
 
                 return html;
@@ -1227,7 +1247,13 @@
                     }
 
                     html += '<tr>' +
-                            '<td colspan="2" class="tt-value" style="text-align: right;">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._Distance + ':</td>' +
+                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
                             '</tr>';
 
                 });
@@ -1292,35 +1318,52 @@
 
             function getRecordInfo(rec) {
 
-                var clicks = rec.eventsStat['click'];
+                var clicks = rec.eventsStat['click'],
+                    showEvents = ['click', 'wheel', 'drag'];
 
-                return '<tr>' +
-                       '<td class= "tt-name">' + loc._Session_name + ': ' + '<br /><br /></td>' +
-                       '<td class= "tt-value">' + rec.name + '<br />' +  '<br /><br /></td>' +
-                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleString() + '</td>' +
-                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleString() + '</td>'+
+                html = '<tr>' +
+                       '<td class= "tt-name">' + loc._Session_name + ': ' + '<br /></td>' +
+                       '<td class= "tt-value">' + rec.name + '<br /></td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
+                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
+                       '</tr><tr>' +
+                       '<td colspan = "2" class = "empty-row"></td>' +
                        '</tr><tr>' +
                        '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
                        '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">'+ loc._Clicks + ': </td>' +
-                       '<td class= "tt-value">' + clicks + ', </td>' +
                        '</tr><tr>' +
                        '<td class= "tt-name">' + loc._Duration + ': </td>' +
                        '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
                        '</tr><tr>' +
                        '<td class= "tt-name">' + loc._Events + ': </td>' +
                        '<td class= "tt-value">' + rec.events.length + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._KPI + ': </td>' +
-                       '<td class= "tt-value">' + rec.kpi + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
-                       '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
-                       '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + </td> +
+                       '</tr><tr>';
+
+                showEvents.forEach(function (k) {
+
+                        if (rec.eventsStat[k]) {
+
+                            html += '<td class= "tt-name">' + loc[k] + ': </td>' +
+                                    '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
+                                    '</tr><tr>';
+
+                        }
+
+                    }
+                );
+
+                html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._KPI + ': </td>' +
+                        '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
                         '</tr>';
+
+                return html;
             }
 
             html += getRecordInfo(rec);
@@ -1338,13 +1381,25 @@
 
                 }
 
-                html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
-                        + ' #' + e.eventNo
-                        + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
+                /*
+                 html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
+                 + ' #' + e.eventNo
+                 + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
+                 */
+
+                html += '<tr>' +
+                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '</tr>';
 
             });
 
-            $eInf.html(html);
+            $eInf.html(html + '</table>');
             w = $eInf.outerWidth();
             h = $eInf.outerHeight();
             x = dx / evts.length;
@@ -3337,6 +3392,7 @@
             mTT = document.createElement('div'),
             eInf = document.createElement('div'),
             tLine = document.createElement('div'),
+            tlTT = document.createElement('div'),
             tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
@@ -3394,6 +3450,10 @@
         // Event info popup
         eInf.id = dCipher.domId.eventInfo;
         dMain.appendChild(eInf);
+
+        // Event info popup
+        tlTT.id = dCipher.domId.timelineTooltip;
+        dMain.appendChild(tlTT);
 
         // Record button
         butRec.id = dCipher.domId.butRecord;
