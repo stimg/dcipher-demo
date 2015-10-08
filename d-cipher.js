@@ -687,9 +687,11 @@
 
                 if (rec && rec.events && rec.events.length > 1) {
 
-                    rec.duration = rec.events[rec.events.length - 1].time;
-                    rec.kpi = rec.events[rec.events.length - 1].kpi;
-                    rec.mouseMilesTotal = this.getNDCMousePath(rec);
+                    var evt = rec.events[rec.events.length - 1];
+
+                    rec.duration = evt.time;
+                    rec.kpi = evt.kpi;
+                    rec.mouseMilesTotal = evt.miles;
 
                     this.db.putRecord(this.sessionId, rec).then(function () {
 
@@ -878,7 +880,7 @@
                     event.eventNo = rec.eventsStat['drag'];
 
                 }
-                event.kpi = event.time * (event.miles || 1) / (1000 * (rec.eventsStat['click'] || 1));
+                event.kpi = (event.time / 1000) * (rec.eventsStat['click'] || 1) / (event.miles || 1);
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -1806,7 +1808,7 @@
                 html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
                        + rec.eventsStat['click'] + '<span>' + loc.mc + '</span>'
                        + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
-                       + rec.kpi.toFixed(2) + '<span>' + loc.kpi + '</span>';
+                       + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
 
             $(this.getDomElement('timelineInfo')).html(html);
 
