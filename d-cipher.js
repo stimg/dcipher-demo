@@ -609,7 +609,6 @@
 
                     clearTimeout($(recList).data('tid'));
 
-                    console.debug('---> mouseover');
                 });
 
                 $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
@@ -1089,7 +1088,7 @@
                 $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
                 hw2 = $he.outerWidth() / 2,
-                $cnv = $('canvas', '#' + this.domId['timeline']);
+                $tl = $(this.getDomElement('timeline'));
 
             function getEventInfo(e) {
 
@@ -1119,6 +1118,8 @@
                 html += '<tr>' +
                         '<td class="tt-name">' + loc._Session_name + ':</td>' +
                         '<td class="tt-value">' + rec.name + '</td>' +
+                        '</tr><tr>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
                         '</tr>';
 
                 html += '<tr>' +
@@ -1137,11 +1138,12 @@
             if (event) {
 
                 var loc = this.loc,
-                    pos = $cnv.offset(),
-                    x = event.x + pos.left, y = event.y + pos.top,
+                    //pos = $tl.offset(),
+                    x = event.clientX/* + pos.left*/,
+                    y = event.clientY/*y + pos.top*/,
                     html = '<table>', w, h, top, left;
 
-                $cnv.css('cursor', 'pointer');
+                $tl.css('cursor', 'pointer');
                 $he.show().css({'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
                 html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
@@ -1177,7 +1179,7 @@
 
             } else {
 
-                $cnv.css('cursor', 'default');
+                $tl.css('cursor', 'default');
                 $tt.hide();
                 $he.hide();
 
@@ -1256,6 +1258,11 @@
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._Distance + ':</td>' +
                             '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+/*
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._KPI + ':</td>' +
+                            '<td class="tt-value">' + e.kpi.toFixed(1) + '</td>' +
+*/
                             '</tr>';
 
                 });
@@ -1709,13 +1716,15 @@
                 cnv = $('canvas', this.getDomElement('timeline'))[0],
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
-                ch = $(this.getDomElement('timeline')).height(),
+                $tl = $(this.getDomElement('timeline')),
+                ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = 100,
                 offsetTop = ch / 2,
+                cy = window.innerHeight - ch  + offsetTop,
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
-                posx = offsetLeft, posx0, pe, ne;
+                posx = offsetLeft, posx0, pe;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1736,57 +1745,66 @@
                 //console.debug('---> posx:', posx);
                 //console.debug('---> e.time:', e.time);
 
-                //ne = arr[i + 1];
-                pe = arr[i - 1];
-                ne = arr[i + 1];
-                posx0 = posx;
-                posx = offsetLeft + pxs * e.time;
 
-                self.timeLineEvents.push({
+                if (e.eventNo) {
 
-                    type: 'timeline',
-                    clientX: posx,
-                    clientY: offsetTop,
-                    target: $('canvas', '#' + self.domId.timeline)[0],
-                    x: posx,
-                    y: offsetTop,
-                    event: e
+                    pe = arr[i - 1];
+                    posx0 = posx;
+                    posx = offsetLeft + pxs * e.time;
 
-                });
+                    self.timeLineEvents.push({
 
-                ctx.beginPath();
-                ctx.moveTo(posx0, offsetTop);
-                //if (ne && ne.drag) {
-                if (e.drag) {
+                        type: 'timeline',
+                        clientX: posx,
+                        clientY: cy,
+                        target: $('canvas', '#' + self.domId.timeline)[0],
+                        x: posx,
+                        y: offsetTop,
+                        event: e
 
-                    ctx.setLineDash([3, 3]);
-
-                }
-                ctx.lineTo(posx, offsetTop);
-                ctx.stroke();
-                ctx.setLineDash([]);
-
-                if (i) {
+                    });
 
                     ctx.beginPath();
-                    if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
+                    ctx.moveTo(posx0, offsetTop);
+                    //if (ne && ne.drag) {
+                    if (e.drag) {
 
+                        ctx.setLineDash([3, 3]);
+
+                    }
+                    ctx.lineTo(posx, offsetTop);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    if (i) {
+
+                        ctx.beginPath();
                         self.drawEventPict(ctx, pe.type, posx0, offsetTop);
 
-                    }/* else if (ne && !ne.type.match(/wheel|scroll/i)) {
+/*
+                        if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
 
-                        self.drawEventPict(ctx, 'wheel', posx0, offsetTop);
+                            self.drawEventPict(ctx, pe.type, posx0, offsetTop);
 
-                    }*/
+                        } else if (ne && !ne.type.match(/wheel|scroll/i)) {
 
-                    ctx.stroke();
-                    ctx.fill();
+                         self.drawEventPict(ctx, 'wheel', posx0, offsetTop);
+
+                         }
+*/
+
+                        ctx.stroke();
+                        ctx.fill();
+
+                    }
 
                 }
-
             });
 
             e = events[events.length - 1];
+            self.drawEventPict(ctx, e.type, posx, offsetTop);
+
+/*
             if (!e.type.match(/wheel|scroll/i)) {
 
                 self.drawEventPict(ctx, e.type, posx, offsetTop);
@@ -1796,6 +1814,7 @@
                 self.drawEventPict(ctx, 'wheel', posx, offsetTop);
 
             }
+*/
 
             ctx.stroke();
             ctx.fill();
@@ -1817,17 +1836,18 @@
         this.getTimelineEvent = function getTimelineEvent(e) {
 
             var te = this.timeLineEvents,
-                pos = $(e.target).offset(),
+                //pos = $(e.target).offset(),
                 abs = Math.abs,
-                x = e.clientX - pos.left,
-                y = e.clientY - pos.top,
+                //x = e.clientX - pos.left,
+                //y = e.clientY - pos.top,
                 th = 5, evt, event = null,
                 i, il = te.length;
 
             for (i = 0; i < il; i++) {
 
                 evt = te[i];
-                if (abs(x - evt.x) < th && abs(y - evt.y)) {
+                //if (abs(x - evt.x) < th && abs(y - evt.y) < th) {
+                if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
 
                     event = evt;
                     break;
@@ -2742,8 +2762,8 @@
 
                     if ($el.attr('type') === 'text') {
 
-                        self.setActiveRecord(id);
                         self.showSpiderGraph(id);
+                        self.setActiveRecord(id);
 
                     }
 
