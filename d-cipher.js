@@ -623,6 +623,34 @@
 
         };
 
+        this.catchEvents = function catchEvents(e) {
+
+            var self = this,
+                el = document.elementFromPoint(e.clientX, e.clientY),
+                list = self.registerEventList,
+                type, p;
+
+            for (var i = 0, il = list.length; i < il; i++) {
+
+                p = list[i];
+                type = p;
+
+                if (typeof el['on' + p] === 'function'
+                    && (!el.eventListenerList || !el.eventListenerList[type])) {
+
+                    el.addEventListener(type, function (e) {
+
+                        self.saveEvent(e);
+
+                    });
+                    el.dispatchEvent(new MouseEvent(type, e));
+
+                }
+
+            }
+
+        };
+
         this.toggleRecMode = function toggleRecMode(e) {
 
             var self = this,
@@ -632,6 +660,12 @@
             function updateStats() {
 
                 self.updateStatString();
+
+            }
+
+            function catchEvents(e) {
+
+                self.catchEvents(e);
 
             }
 
@@ -646,6 +680,7 @@
                 $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
                 $(this.getDomElement('butList')).hide();
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
+                $('body').on('mousemove', catchEvents);
                 this.hideRecList();
                 this.sessionId = ts.toString();
                 this.sessionRec = {
@@ -677,6 +712,7 @@
 
                 $stat.fadeOut();
                 clearInterval($stat.data('tid'));
+                $('body').off('mousemove', catchEvents);
 
                 if (this.db.records.length) {
 
@@ -691,6 +727,13 @@
                     rec.duration = evt.time;
                     rec.kpi = evt.kpi;
                     rec.mouseMilesTotal = evt.miles;
+                    rec.eventsQty = 0;
+
+                    for (var et in rec.eventsStat) {
+
+                        rec.eventsQty += rec.eventsStat[et];
+
+                    }
 
                     this.db.putRecord(this.sessionId, rec).then(function () {
 
@@ -725,8 +768,8 @@
                        && etarget.localName !== 'circle';
 
             console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
-            console.debug('TREE PATH: ', treePath);
-            console.debug('tagName: ', etarget.tagName);
+            //console.debug('TREE PATH: ', treePath);
+            //console.debug('tagName: ', etarget.tagName);
 
             if (this.appMode === 'test') {
 
@@ -873,13 +916,27 @@
 
                 }
 
+                if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
+
+                    lastEvent.eventNo = rec.eventsStat['wheel'];
+
+                }
+
                 if (event.drag) {
 
                     rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
                     event.eventNo = rec.eventsStat['drag'];
 
                 }
+
                 event.kpi = (event.time / 1000) * (rec.eventsStat['click'] || 1) / (event.miles || 1);
+                event.kpiLast = event.kpi;
+                    /*
+                                    event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+
+                                    console.debug('-------> event.kpiLast', event.kpiLast);
+                    */
+
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
@@ -1130,6 +1187,9 @@
                         '</tr><tr>' +
                         '<td class="tt-name">' + loc._Distance + ':</td>' +
                         '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._KPI + ':</td>' +
+                        '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
                         '</tr>';
 
                 return html;
@@ -1138,7 +1198,7 @@
             if (event) {
 
                 var loc = this.loc,
-                    //pos = $tl.offset(),
+                //pos = $tl.offset(),
                     x = event.clientX/* + pos.left*/,
                     y = event.clientY/*y + pos.top*/,
                     html = '<table>', w, h, top, left;
@@ -1258,11 +1318,9 @@
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._Distance + ':</td>' +
                             '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-/*
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._KPI + ':</td>' +
-                            '<td class="tt-value">' + e.kpi.toFixed(1) + '</td>' +
-*/
+                             '</tr><tr>' +
+                             '<td class="tt-name">' + loc._KPI + ':</td>' +
+                             '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
                             '</tr>';
 
                 });
@@ -1346,7 +1404,7 @@
                        '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
                        '</tr><tr>' +
                        '<td class= "tt-name">' + loc._Events + ': </td>' +
-                       '<td class= "tt-value">' + rec.events.length + '</td>' +
+                       '<td class= "tt-value">' + rec.eventsQty + '</td>' +
                        '</tr><tr>';
 
                 showEvents.forEach(function (k) {
@@ -1721,7 +1779,7 @@
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = 100,
                 offsetTop = ch / 2,
-                cy = window.innerHeight - ch  + offsetTop,
+                cy = window.innerHeight - ch + offsetTop,
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
                 posx = offsetLeft, posx0, pe;
@@ -1745,7 +1803,6 @@
                 //console.debug('---> posx:', posx);
                 //console.debug('---> e.time:', e.time);
 
-
                 if (e.eventNo) {
 
                     pe = arr[i - 1];
@@ -1766,10 +1823,14 @@
 
                     ctx.beginPath();
                     ctx.moveTo(posx0, offsetTop);
-                    //if (ne && ne.drag) {
                     if (e.drag) {
 
                         ctx.setLineDash([3, 3]);
+
+                    }
+                    if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
+
+                        ctx.setLineDash([1, 2]);
 
                     }
                     ctx.lineTo(posx, offsetTop);
@@ -1780,19 +1841,6 @@
 
                         ctx.beginPath();
                         self.drawEventPict(ctx, pe.type, posx0, offsetTop);
-
-/*
-                        if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
-
-                            self.drawEventPict(ctx, pe.type, posx0, offsetTop);
-
-                        } else if (ne && !ne.type.match(/wheel|scroll/i)) {
-
-                         self.drawEventPict(ctx, 'wheel', posx0, offsetTop);
-
-                         }
-*/
-
                         ctx.stroke();
                         ctx.fill();
 
@@ -1801,21 +1849,7 @@
                 }
             });
 
-            e = events[events.length - 1];
-            self.drawEventPict(ctx, e.type, posx, offsetTop);
-
-/*
-            if (!e.type.match(/wheel|scroll/i)) {
-
-                self.drawEventPict(ctx, e.type, posx, offsetTop);
-
-            } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
-
-                self.drawEventPict(ctx, 'wheel', posx, offsetTop);
-
-            }
-*/
-
+            self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
             ctx.stroke();
             ctx.fill();
 
@@ -1836,10 +1870,10 @@
         this.getTimelineEvent = function getTimelineEvent(e) {
 
             var te = this.timeLineEvents,
-                //pos = $(e.target).offset(),
+            //pos = $(e.target).offset(),
                 abs = Math.abs,
-                //x = e.clientX - pos.left,
-                //y = e.clientY - pos.top,
+            //x = e.clientX - pos.left,
+            //y = e.clientY - pos.top,
                 th = 5, evt, event = null,
                 i, il = te.length;
 
@@ -2090,7 +2124,7 @@
 
                                 playEvent(pars2);
 
-                            }, e1.type === 'mouseover' ? 0 : clickDelay);
+                            }, e2.type === 'mouseover' ? 0 : clickDelay);
 
                         }
 
@@ -3031,6 +3065,11 @@
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(this.getDomElement('butList')).hide();
+                $('body').on('mousemove', function (e) {
+
+                    self.catchEvents(e);
+
+                });
                 $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
 
                     self.updateStatString();
@@ -3650,6 +3689,46 @@
 
         });
 
+        overridePrototype();
+
+        /*
+         var observer = new MutationObserver(function (mutations) {
+
+         for (var i = 0, len = mutations.length; i < len; i++) {
+
+         for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+
+         var node = mutations[i].addedNodes[j];
+
+         for (var p in node) {
+
+         if (node.className === 'colorpicker-hot-spot') {
+
+         console.debug('########### NODE: ', node);
+
+         }
+
+         if (p.hasOwnProperty(p) && p.match(/^onmouse/i)){
+
+         node.addEventListener(p.substring(2), function () {
+
+         dCipher.saveEvent(e);
+
+         });
+         console.debug('====> MUTATION OBSERVER: added listener to node', node);
+
+         }
+
+         }
+
+         }
+
+         }
+
+         });
+         observer.observe(bdy, { childList: true });
+         */
+
         setTimeout(checkJQuery, 500);
 
     }
@@ -3733,8 +3812,8 @@
 
                     });
 
-                    console.debug('JS listener --> Element: %s, Event added: ', this, type);
-                    console.debug('Handler: ', handler.toString());
+                    //console.debug('JS listener --> Element: %s, Event added: ', this, type);
+                    //console.debug('Handler: ', handler.toString());
 
                 }
 
@@ -3783,7 +3862,6 @@
     }
 
     document.addEventListener('DOMContentLoaded', initDomElements);
-    overridePrototype();
 
 })(window, document);
 
