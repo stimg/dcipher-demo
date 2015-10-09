@@ -276,9 +276,9 @@
 
 #d-cipher-timeline-cursor{
   position: absolute;
-  display: block;
+  display: none;
   padding: 2px 0;
-  border: solid 5px transparent;
+  border: solid 4px transparent;
   border-top-color: white;
   border-bottom-color: white;
   transform: scale(1, 2.2);
@@ -403,18 +403,21 @@
   color: white;
   box-shadow: 1px 1px 3px rgba(0, 0, 0, .3);
   padding: 5px;
+  /*
   table, tr{
     border: none;
     margin: 0;
     padding: 0;
   }
-  .row{
-
-  }
   td{
     padding: 0 5px;
     line-height: inherit;
     min-height: 20px;
+  }
+  .tt-header{
+    font-weight: 200;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
   .tt-name{
     font-weight: lighter;
@@ -425,6 +428,7 @@
   .tt-value{
     font-weight: 200;
   }
+  */
 }
 
 #d-cipher-m-tooltip, #d-cipher-event-info, #d-cipher-timeline-tooltip{
@@ -439,6 +443,11 @@
   td{
     padding: 0 5px;
     line-height: inherit;
+  }
+  .tt-header{
+    font-weight: 200;
+    letter-spacing: 0.05em;
+    text-align: center;
   }
   .tt-name{
     font-weight: lighter;

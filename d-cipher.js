@@ -1197,17 +1197,17 @@
                 }
 
                 html += '<tr>' +
-                        '<td class="tt-name">' + loc._Session_name + ':</td>' +
-                        '<td class="tt-value">' + rec.name + '</td>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
                         '</tr><tr>' +
                         '<td colspan = "2" class = "empty-row"></td>' +
                         '</tr>';
 
                 html += '<tr>' +
                         //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
                         '</tr><tr>' +
-                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
                         '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
                         '</tr><tr>' +
                         '<td class="tt-name">' + loc._Distance + ':</td>' +
@@ -1307,8 +1307,8 @@
                 }
 
                 html += '<tr>' +
-                        '<td class="tt-name">' + loc._Session_name + ':</td>' +
-                        '<td class="tt-value">' + rec.name + '</td>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
                         '</tr><tr>' +
                         '<td colspan = "2" class = "empty-row"></td>' +
                         '</tr>';
@@ -1337,9 +1337,9 @@
 
                     html += '<tr>' +
                             //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                            '<td colspan="2" class="tt-value">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
                             '</tr><tr>' +
-                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
                             '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._Distance + ':</td>' +
@@ -1416,8 +1416,8 @@
                     showEvents = ['click', 'wheel', 'drag'];
 
                 html = '<tr>' +
-                       '<td class= "tt-name">' + loc._Session_name + ': ' + '<br /></td>' +
-                       '<td class= "tt-value">' + rec.name + '<br /></td>' +
+                       /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
+                       '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
                        '</tr><tr>' +
                        '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
                        '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
@@ -1482,9 +1482,9 @@
                  */
 
                 html += '<tr>' +
-                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
                         '</tr><tr>' +
-                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
                         '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
                         '</tr><tr>' +
                         '<td class="tt-name">' + loc._Distance + ':</td>' +
@@ -2035,6 +2035,7 @@
                 cnv = $('#cnvId-' + rec.id, cnvh)[0],
                 ctx = cnv.getContext('2d'),
                 $cur = $(self.getDomElement('cursor')),
+                $tlCursor = $(self.getDomElement('timelineCursor')),
                 clickDelay = this.clickDelay,
                 mOverElement,
                 mOverClass = self.domId['mouseOverClass'];
@@ -2130,11 +2131,14 @@
 
                 if (e1 && e2) {
 
-                    var dur = e2.timeStamp - e1.timeStamp,
+                    var recDuration = rec.duration,
+                        etime = e1.time,
+                        dur = e2.timeStamp - e1.timeStamp,
                         pars1 = pars || self.getTargetScreenPars(e1),
                         pars2 = self.getTargetScreenPars(e2),
                         step = 0,
-                        steps = dur / speed / delay,
+                        dt = speed * delay,
+                        steps = dur / dt,
                         dx = pars2.x - pars1.x,
                         dy = pars2.y - pars1.y,
                         mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
@@ -2142,6 +2146,8 @@
                     function drawStep() {
 
                         var x0, y0, x, y, el;
+
+                        $tlCursor.css(self.getTimeLineCursorPars(etime + step * dt, recDuration));
 
                         x0 = pars1.x + dx * step;
                         y0 = pars1.y + dy * step;
@@ -2310,6 +2316,7 @@
 
                         }
                         //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
+                        $tlCursor.css(self.getTimeLineCursorPars(etime, recDuration));
                         setTimeout(drawStep, delay);
 
                     } else {
@@ -2376,6 +2383,7 @@
             $(el).addClass(mOverClass);
             $(cnv).show();
             $cur.show();
+            $tlCursor.show();
             this.hideRecList();
             this.setActiveRecord(sId);
             ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
@@ -3479,14 +3487,7 @@
 
             if (rec && rec.active) {
 
-                var offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
-                    pxs = width / rec.duration,
-                    //top = window.innerHeight - ($(tl).height() + $tlc.outerHeight()) / 2,
-                    top = ($(tl).height() - $tlc.outerHeight()) / 2,
-                    left = this.timeLineOffsetLeft + pxs * evt.time - $tlc.outerWidth() / 2;
-
-                $tlc.css({ top: top, left: left }).show();
+                $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
 
             } else if (e.target === tl) {
 
@@ -3494,6 +3495,23 @@
 
             }
 
+        };
+
+        this.getTimeLineCursorPars = function (time, duration) {
+
+            var offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                tl = this.getDomElement('timeline'),
+                $tlc = $(this.getDomElement('timelineCursor')),
+                width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
+                pxs = width / duration,
+                top = ($(tl).height() - $tlc.outerHeight()) / 2,
+                left = this.timeLineOffsetLeft + pxs * time - $tlc.outerWidth() / 2;
+
+            return {
+
+                top: top,
+                left: left
+            }
 
         };
 
