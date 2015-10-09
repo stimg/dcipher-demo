@@ -62,6 +62,7 @@
             DOMMouseScroll: 'Wheel',
             sec: 'sec',
             mc: 'mc',
+            evs: 'evs',
             mm: 'mm',
             mp: 'mp',
             kpi: 'kpi',
@@ -284,6 +285,7 @@
             timeline: 'd-cipher-timeline',
             timelineTooltip: 'd-cipher-timeline-tooltip',
             timelineInfo: 'd-cipher-timeline-info',
+            timelineCursor: 'd-cipher-timeline-cursor',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
             highlightEvent: 'd-cipher-highlight-event',
@@ -304,7 +306,7 @@
             'mouseup',
             //'click',
             //'dblclick',
-            'keydown',
+            //'keydown',
             'wheel',
             'mousewheel',
             'DOMMouseScroll'
@@ -326,6 +328,13 @@
             'DOMMouseScroll'
 
         ];
+
+        this.elementEventFilters = {
+
+            path: ['mouseover', 'mouseout'],
+            circle: this.registerEventList
+
+        };
 
         this.mouse = {
 
@@ -571,6 +580,7 @@
         this.eventsUnderMouse = [];
         this.timeLineEvents = [];
         this.clickDelay = 200;
+        this.timeLineOffsetLeft = 100;
 
         this.init = function init() {
 
@@ -757,7 +767,8 @@
 
         this.saveEvent = function saveEvent(e) {
 
-            var etype = e.type,
+            var self = this,
+                etype = e.type,
                 etarget = e.target || document.getElementsByTagName('body')[0],
                 treePath = this.getTreePath(etarget),
                 location = document.location.pathname,
@@ -929,7 +940,20 @@
 
                 }
 
-                event.kpi = (event.time / 1000) * (rec.eventsStat['click'] || 1) / (event.miles || 1);
+/*
+                var sd = 0;
+                rec.events.forEach(function (e) {
+
+                    if (e.type === 'wheel') {
+
+                        sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+
+                    }
+
+                });
+*/
+                event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
                 event.kpiLast = event.kpi;
                     /*
                                     event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
@@ -1180,7 +1204,8 @@
                         '</tr>';
 
                 html += '<tr>' +
-                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '<td colspan="2" class="tt-value">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
                         '</tr><tr>' +
                         '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
                         '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
@@ -1204,7 +1229,7 @@
                     html = '<table>', w, h, top, left;
 
                 $tl.css('cursor', 'pointer');
-                $he.show().css({'top': event.event.y - hw2 + 'px', 'left': event.event.x - hw2 + 'px'});
+                $he.css({ top: event.event.y - hw2, left: event.event.x - hw2}).show();
                 html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
                 w = $tt.outerWidth();
@@ -1311,7 +1336,8 @@
                     }
 
                     html += '<tr>' +
-                            '<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '<td colspan="2" class="tt-value">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
                             '</tr><tr>' +
                             '<td class="tt-name">' + '(' + self.getTimeString(e.time) + ' – ' + self.getTimeString(rec.duration) + ')</td> ' +
                             '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
@@ -1361,6 +1387,7 @@
             } else if (event.target.parentNode.id !== self.domId['timeline']) {
 
                 $(self.getDomElement('eventInfo')).hide();
+                $(self.getDomElement('timelineCursor')).hide();
                 $(cnvh).css('cursor', 'default');
                 $tt.hide();
 
@@ -1550,21 +1577,26 @@
 
             var loc = this.loc,
                 rec = this.sessionRec,
+                evt = rec.events[rec.events.length - 1],
                 ms = rec.modified,
+                miles = evt ? evt.miles : 0,
                 timeString = this.getTimeString(1 * new Date() - ms),
                 clicks = rec.eventsStat.click || 0,
+                drags =  rec.eventsStat.drag || 0,
+                wheels =  rec.eventsStat.wheel || 0,
                 el = document.elementFromPoint(this.mouse.x, this.mouse.y),
                 trg = el.name || el.id || el.className,
             //type = e ? loc[e.type] : '',
                 msg = ''; //loc._Recording + '.';
 
             msg += /*loc._Time + ': ' +*/ timeString + ' ';
-            msg += loc._Mouse_miles + ': ' + rec.mouseMilesTotal.toFixed(2) + '  ';
-            msg += loc._Clicks + ': ' + clicks + '  ';
-            //msg += loc._Type + ': ' + type + '; ';
+            msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
+            msg += loc._Clicks + ': ' + clicks + ' | ';
+            msg += loc._Drags + ': ' + drags + ' | ';
+            msg += loc._Wheels + ': ' + wheels + ' | ';
             if (trg) {
 
-                msg += loc._Target + ': ' + trg + '; ';
+                msg += loc._Target + ': ' + trg + ' | ';
 
             }
             msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
@@ -1743,7 +1775,12 @@
 
             if (start === undefined && end === undefined) {
 
-                $(cnvh).show().on('mousemove', {self: this}, this.showMouseTooltip);
+                $(cnvh).show().on('mousemove', {self: this}, function (e) {
+
+                    self.showMouseTooltip(e);
+                    self.highlightTimeLineEvent(e);
+
+                });
                 $(cnv).show();
                 rec.drawn = true;
                 this.checkRecordCheckbox(sId);
@@ -1777,7 +1814,7 @@
                 $tl = $(this.getDomElement('timeline')),
                 ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                offsetLeft = 100,
+                offsetLeft = this.timeLineOffsetLeft,
                 offsetTop = ch / 2,
                 cy = window.innerHeight - ch + offsetTop,
                 width = cw - offsetLeft - offsetRight,
@@ -1859,7 +1896,7 @@
 
             var loc = this.loc,
                 html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
-                       + rec.eventsStat['click'] + '<span>' + loc.mc + '</span>'
+                       + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
                        + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
                        + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
 
@@ -3432,6 +3469,34 @@
 
         };
 
+        this.highlightTimeLineEvent = function (e) {
+
+            var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
+                evt = evts ? evts[0] : null,
+                rec = evt ? this.getRecordById(evt.recId) : null,
+                tl = this.getDomElement('timeline'),
+                $tlc = $(this.getDomElement('timelineCursor'));
+
+            if (rec && rec.active) {
+
+                var offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                    width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
+                    pxs = width / rec.duration,
+                    //top = window.innerHeight - ($(tl).height() + $tlc.outerHeight()) / 2,
+                    top = ($(tl).height() - $tlc.outerHeight()) / 2,
+                    left = this.timeLineOffsetLeft + pxs * evt.time - $tlc.outerWidth() / 2;
+
+                $tlc.css({ top: top, left: left }).show();
+
+            } else if (e.target === tl) {
+
+                $tlc.hide();
+
+            }
+
+
+        };
+
     }; // End of DCipher class
 
     var dCipher = new DCipher();
@@ -3459,6 +3524,7 @@
             eInf = document.createElement('div'),
             tLine = document.createElement('div'),
             tlTT = document.createElement('div'),
+            tlCursor = document.createElement('div'),
             tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
@@ -3505,9 +3571,15 @@
         // Time line
         tLine.id = dCipher.domId.timeline;
         tlInfo.id = dCipher.domId.timelineInfo;
+        tlCursor.id = dCipher.domId.timelineCursor;
         tLine.appendChild(tlCnv);
         tLine.appendChild(tlInfo);
+        tLine.appendChild(tlCursor);
         cnvDiv.appendChild(tLine);
+
+        // Time line event info popup
+        tlTT.id = dCipher.domId.timelineTooltip;
+        dMain.appendChild(tlTT);
 
         // Mouse tooltip
         mTT.id = dCipher.domId.mTooltip;
@@ -3516,10 +3588,6 @@
         // Event info popup
         eInf.id = dCipher.domId.eventInfo;
         dMain.appendChild(eInf);
-
-        // Event info popup
-        tlTT.id = dCipher.domId.timelineTooltip;
-        dMain.appendChild(tlTT);
 
         // Record button
         butRec.id = dCipher.domId.butRecord;
@@ -3836,7 +3904,7 @@
 
             node._removeEventListener(type, handler, useCapture);
 
-            if (node.eventListenerList[type]) {
+            if (node.eventListenerList && node.eventListenerList[type]) {
 
                 node.eventListenerList[type] = node.eventListenerList[type].filter(function (listener) {
 
