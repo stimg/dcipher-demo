@@ -878,15 +878,13 @@
 
                     };
 
-                /*
-                 if (lastEvent && lastEvent.type === etype
-                 && lastEvent.target.treePath === event.target.treePath
-                 && !etype.match(/scroll|wheel/i)) {
+                if (lastEvent && lastEvent.type === etype
+                    && lastEvent.target.treePath === event.target.treePath
+                    && !etype.match(/scroll|wheel/i)) {
 
-                 return;
+                    return;
 
-                 }
-                 */
+                }
 
                 event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
                 event.drag = event.milesLast && etype === 'mouseup';
@@ -940,26 +938,26 @@
 
                 }
 
-/*
-                var sd = 0;
-                rec.events.forEach(function (e) {
+                /*
+                 var sd = 0;
+                 rec.events.forEach(function (e) {
 
-                    if (e.type === 'wheel') {
+                 if (e.type === 'wheel') {
 
-                        sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+                 sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
 
-                    }
+                 }
 
-                });
-*/
+                 });
+                 */
                 event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
                 //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
                 event.kpiLast = event.kpi;
-                    /*
-                                    event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+                /*
+                 event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
 
-                                    console.debug('-------> event.kpiLast', event.kpiLast);
-                    */
+                 console.debug('-------> event.kpiLast', event.kpiLast);
+                 */
 
                 events.push(event);
                 rec.mouseMilesTotal = milesTotal;
@@ -1229,7 +1227,7 @@
                     html = '<table>', w, h, top, left;
 
                 $tl.css('cursor', 'pointer');
-                $he.css({ top: event.event.y - hw2, left: event.event.x - hw2}).show();
+                $he.css({top: event.event.y - hw2, left: event.event.x - hw2}).show();
                 html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
                 w = $tt.outerWidth();
@@ -1344,9 +1342,9 @@
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._Distance + ':</td>' +
                             '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                             '</tr><tr>' +
-                             '<td class="tt-name">' + loc._KPI + ':</td>' +
-                             '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._KPI + ':</td>' +
+                            '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
                             '</tr>';
 
                 });
@@ -1582,8 +1580,8 @@
                 miles = evt ? evt.miles : 0,
                 timeString = this.getTimeString(1 * new Date() - ms),
                 clicks = rec.eventsStat.click || 0,
-                drags =  rec.eventsStat.drag || 0,
-                wheels =  rec.eventsStat.wheel || 0,
+                drags = rec.eventsStat.drag || 0,
+                wheels = rec.eventsStat.wheel || 0,
                 el = document.elementFromPoint(this.mouse.x, this.mouse.y),
                 trg = el.name || el.id || el.className,
             //type = e ? loc[e.type] : '',
@@ -2229,9 +2227,10 @@
 
                         }
 
-                        $cur.css('top', y).css('left', x);
 
+                        $cur.css('top', y).css('left', x);
                         ctx.beginPath();
+
                         ctx.moveTo(x0, y0);
                         ctx.lineTo(x, y);
                         ctx.stroke();
@@ -3071,6 +3070,12 @@
 
                 }
 
+                this.sessionRec.events.forEach(function (e) {
+
+                    delete e.target.element;
+
+                });
+
                 sessionStorage.setItem('dcipherState', JSON.stringify({
 
                     user: this.user,
@@ -3889,7 +3894,8 @@
                 if (handler.toString().match(/stopPropagation|preventDefault/)
                     || type === 'mouseover' || type === 'mouseout'
                     || type === 'mouseenter' || type === 'mouseleave'
-                    || type.match(/scroll|wheel/)
+                    || type === 'mousedown' || type === 'mouseup'
+                    || type.match(/scroll|wheel/i)
                 ) {
 
                     node._addEventListener(type, function (e) {
