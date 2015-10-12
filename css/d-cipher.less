@@ -276,7 +276,7 @@
 
 #d-cipher-timeline-cursor{
   position: absolute;
-  display: block;
+  display: none;
   padding: 2px 0;
   border: solid 4px transparent;
   border-top-color: white;
@@ -299,6 +299,17 @@
     //width: 100%;
     //height: inherit;
     //background-color: magenta;
+  }
+  .cursor-bg{
+    position: absolute;
+    display: none;
+    height: 52px;
+    z-index: -1;
+    width: 0;
+    background-color: rgba(0, 0, 0, 0.1);
+    border-right: solid 1px red;
+    border-left: solid 1px red;
+    transform: translate(0, -26px);
   }
 }
 

@@ -1854,7 +1854,6 @@
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
                 $tl = $(this.getDomElement('timeline')),
-                $tlc = $(this.getDomElement('timelineCursor')),
                 ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = this.timeLineOffsetLeft,
@@ -1862,8 +1861,8 @@
                 cy = window.innerHeight - ch + offsetTop,
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
-                posx = offsetLeft, posx0, pe,
-                top, left;
+                posx = offsetLeft,
+                posx0, pe;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1873,19 +1872,13 @@
 
             if (this.eventIndex) {
 
-                $tlc.css(this.getTimeLineCursorPars(events[this.eventIndex].time, rec.duration));
+                this.drawTLCursor(events[this.eventIndex].time, rec.duration);
 
             } else {
 
-                $tlc.css({
-
-                    top: offsetTop,
-                    left: offsetLeft
-
-                });
+                this.drawTLCursor(0, rec.duration);
 
             }
-            $tlc.show();
 
             ctx.lineWidth = 2.0;
             ctx.fillStyle = 'white';
@@ -1952,1081 +1945,1082 @@
 
         };
 
-        this.showTimelineStat = function (rec) {
+        this.drawTLCursor = function (pos, total) {
 
-            var loc = this.loc,
-                html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
-                       + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
-                       + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
-                       + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
+            var pars = this.getTimeLineCursorPars(pos, total),
+                offsetLeft = this.timeLineOffsetLeft;
 
-            $(this.getDomElement('timelineInfo')).html(html);
+            $(this.getDomElement('timelineCursor')).css(pars).show();
+
+            $('.cursor-bg', this.getDomElement('timelineCursorBg')).css({
+
+                top: $(this.getDomElement('timeline')).outerHeight() / 2,
+                left: offsetLeft,
+                width: pars.left - offsetLeft + 1
+
+
+            }).show();
 
         };
 
-        this.getTimelineEvent = function getTimelineEvent(e) {
+            this.showTimelineStat = function (rec) {
 
-            var te = this.timeLineEvents,
-            //pos = $(e.target).offset(),
-                abs = Math.abs,
-            //x = e.clientX - pos.left,
-            //y = e.clientY - pos.top,
-                th = 5, evt, event = null,
-                i, il = te.length;
+                var loc = this.loc,
+                    html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
+                           + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
+                           + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
+                           + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
 
-            for (i = 0; i < il; i++) {
+                $(this.getDomElement('timelineInfo')).html(html);
 
-                evt = te[i];
-                //if (abs(x - evt.x) < th && abs(y - evt.y) < th) {
-                if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
+            };
 
-                    event = evt;
-                    break;
+            this.getTimelineEvent = function getTimelineEvent(e) {
+
+                var te = this.timeLineEvents,
+                //pos = $(e.target).offset(),
+                    abs = Math.abs,
+                //x = e.clientX - pos.left,
+                //y = e.clientY - pos.top,
+                    th = 5, evt, event = null,
+                    i, il = te.length;
+
+                for (i = 0; i < il; i++) {
+
+                    evt = te[i];
+                    //if (abs(x - evt.x) < th && abs(y - evt.y) < th) {
+                    if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
+
+                        event = evt;
+                        break;
+
+                    }
 
                 }
 
-            }
+                return event;
 
-            return event;
+            };
 
-        };
+            this.showTimelineEvent = function showTimelineEvent(event) {
 
-        this.showTimelineEvent = function showTimelineEvent(event) {
+                this.sessionId = event.recId;
+                this.sessionRec = this.getRecordById(event.recId);
+                this.eventIndex = this.sessionRec.events.indexOf(event);
+                this.appMode = 'timeline';
+                window.location = event.location;
 
-            this.sessionId = event.recId;
-            this.sessionRec = this.getRecordById(event.recId);
-            this.eventIndex = this.sessionRec.events.indexOf(event);
-            this.appMode = 'timeline';
-            window.location = event.location;
+            };
 
-        };
+            this.drawEventPict = function (ctx, type, x, y) {
 
-        this.drawEventPict = function (ctx, type, x, y) {
+                if (this.drawEventList.indexOf(type) > -1) {
 
-            if (this.drawEventList.indexOf(type) > -1) {
+                    var endAngle = 2 * Math.PI, d = 3;
 
-                var endAngle = 2 * Math.PI, d = 3;
+                    if (type === 'start') {
 
-                if (type === 'start') {
+                        ctx.moveTo(x - 1, y - 3);
+                        ctx.lineTo(x - 1, y + 3);
 
-                    ctx.moveTo(x - 1, y - 3);
-                    ctx.lineTo(x - 1, y + 3);
+                    } else if (type === 'click') {
 
-                } else if (type === 'click') {
+                        ctx.moveTo(x + d, y);
+                        ctx.arc(x, y, d, 0, endAngle, true);
 
-                    ctx.moveTo(x + d, y);
-                    ctx.arc(x, y, d, 0, endAngle, true);
+                    } else if (type === 'dblclick') {
 
-                } else if (type === 'dblclick') {
+                        ctx.moveTo(x + d, y);
+                        ctx.arc(x, y, d, 0, endAngle, true);
+                        ctx.moveTo(x + 2 * d, y);
+                        ctx.arc(x, y, 2 * d, 0, endAngle, true);
 
-                    ctx.moveTo(x + d, y);
-                    ctx.arc(x, y, d, 0, endAngle, true);
-                    ctx.moveTo(x + 2 * d, y);
-                    ctx.arc(x, y, 2 * d, 0, endAngle, true);
+                    } else if (type === 'mousedown') {
 
-                } else if (type === 'mousedown') {
+                        ctx.moveTo(x + 3, y - 2);
+                        ctx.lineTo(x, y + 3);
+                        ctx.lineTo(x - 3, y - 2);
+                        ctx.lineTo(x + 3, y - 2);
 
-                    ctx.moveTo(x + 3, y - 2);
-                    ctx.lineTo(x, y + 3);
-                    ctx.lineTo(x - 3, y - 2);
-                    ctx.lineTo(x + 3, y - 2);
+                    } else if (type === 'mouseup') {
 
-                } else if (type === 'mouseup') {
+                        ctx.moveTo(x - 3, y + 2);
+                        ctx.lineTo(x, y - 3);
+                        ctx.lineTo(x + 3, y + 2);
+                        ctx.lineTo(x - 3, y + 2);
 
-                    ctx.moveTo(x - 3, y + 2);
-                    ctx.lineTo(x, y - 3);
-                    ctx.lineTo(x + 3, y + 2);
-                    ctx.lineTo(x - 3, y + 2);
+                    } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
 
-                } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
+                        ctx.moveTo(x + 1, y);
+                        ctx.arc(x, y, 1, 0, endAngle, true);
 
-                    ctx.moveTo(x + 1, y);
-                    ctx.arc(x, y, 1, 0, endAngle, true);
+                    } else if (type.match(/wheel|scroll/i)) {
 
-                } else if (type.match(/wheel|scroll/i)) {
+                        ctx.moveTo(x - 3, y - 1);
+                        ctx.lineTo(x, y - 4);
+                        ctx.lineTo(x + 3, y - 1);
+                        //ctx.lineTo(x - 3, y - 1);
+                        ctx.closePath();
 
-                    ctx.moveTo(x - 3, y - 1);
-                    ctx.lineTo(x, y - 4);
-                    ctx.lineTo(x + 3, y - 1);
-                    //ctx.lineTo(x - 3, y - 1);
-                    ctx.closePath();
+                        /*
+                         ctx.moveTo(x + 2, y);
+                         ctx.arc(x, y, 2, 0, endAngle, true);
+                         */
 
-                    /*
-                     ctx.moveTo(x + 2, y);
-                     ctx.arc(x, y, 2, 0, endAngle, true);
-                     */
+                        ctx.moveTo(x - 3, y + 1);
+                        ctx.lineTo(x, y + 4);
+                        ctx.lineTo(x + 3, y + 1);
+                        //ctx.lineTo(x - 3, y + 1);
+                        ctx.closePath();
 
-                    ctx.moveTo(x - 3, y + 1);
-                    ctx.lineTo(x, y + 4);
-                    ctx.lineTo(x + 3, y + 1);
-                    //ctx.lineTo(x - 3, y + 1);
-                    ctx.closePath();
+                        /*
+                         ctx.strokeRect(x - 3, y - 2, 1.5, 4);
+                         ctx.fillRect(x - 3, y - 2, 1.5, 4);
+                         ctx.strokeRect(x, y - 2, 1.5, 4);
+                         ctx.fillRect(x, y - 2, 1.5, 4);
+                         */
 
-                    /*
-                     ctx.strokeRect(x - 3, y - 2, 1.5, 4);
-                     ctx.fillRect(x - 3, y - 2, 1.5, 4);
-                     ctx.strokeRect(x, y - 2, 1.5, 4);
-                     ctx.fillRect(x, y - 2, 1.5, 4);
-                     */
+                    }
 
                 }
 
-            }
+            };
 
-        };
+            this.playSession = function playSession(sId, eventIndex) {
 
-        this.playSession = function playSession(sId, eventIndex) {
+                var self = this,
+                    cnt = eventIndex || this.eventIndex || 0,
+                    delay = 20, speed = 2,
+                    rec = this.getRecordById(sId),
+                    sData = rec.events,
+                    pars = this.getTargetScreenPars(sData[cnt]),
+                    el = pars.element,
+                    cnvh = this.getDomElement('canvasHolder'),
+                    cnv = $('#cnvId-' + rec.id, cnvh)[0],
+                    ctx = cnv.getContext('2d'),
+                    $cur = $(self.getDomElement('cursor')),
+                    $tlCursor = $(self.getDomElement('timelineCursor')),
+                    clickDelay = this.clickDelay,
+                    mOverElement,
+                    mOverClass = self.domId['mouseOverClass'];
 
-            var self = this,
-                cnt = eventIndex || 0,
-                delay = 20, speed = 2,
-                rec = this.getRecordById(sId),
-                sData = rec.events,
-                pars = this.getTargetScreenPars(sData[cnt]),
-                el = pars.element,
-                cnvh = this.getDomElement('canvasHolder'),
-                cnv = $('#cnvId-' + rec.id, cnvh)[0],
-                ctx = cnv.getContext('2d'),
-                $cur = $(self.getDomElement('cursor')),
-                $tlCursor = $(self.getDomElement('timelineCursor')),
-                clickDelay = this.clickDelay,
-                mOverElement,
-                mOverClass = self.domId['mouseOverClass'];
+                function playEvent(pars) {
 
-            function playEvent(pars) {
+                    var e = sData[cnt],
+                        etype = e.type;
 
-                var e = sData[cnt],
-                    etype = e.type;
+                    pars = pars || self.getTargetScreenPars(e);
+                    el = pars.element;
+                    self.eventIndex = cnt;
 
-                pars = pars || self.getTargetScreenPars(e);
-                el = pars.element;
-                self.eventIndex = cnt;
+                    console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
+                    /*
+                     if (pars.winScrollX || pars.winScrollY) {
 
-                console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
-                /*
-                 if (pars.winScrollX || pars.winScrollY) {
+                     window.scrollTo(pars.winScrollX, pars.winScrollY);
 
-                 window.scrollTo(pars.winScrollX, pars.winScrollY);
+                     }
+                     */
 
-                 }
-                 */
+                    if (etype === 'click') {
 
-                if (etype === 'click') {
-
-                    el.dispatchEvent(new MouseEvent('mousedown', e));
-                    el.dispatchEvent(new MouseEvent('mouseup', e));
-                    el.dispatchEvent(new MouseEvent('click', e));
-
-                    self.showMouseDown(pars.x, pars.y);
-                    setTimeout(function () {
-
-                        self.hideMouseDown();
-
-                    }, clickDelay);
-
-                } else if (etype === 'dblclick') {
-
-                    el.dispatchEvent(new MouseEvent('mousedown', e));
-                    el.dispatchEvent(new MouseEvent('mouseup', e));
-                    el.dispatchEvent(new MouseEvent('click', e));
-                    el.dispatchEvent(new MouseEvent('mousedown', e));
-                    el.dispatchEvent(new MouseEvent('mouseup', e));
-                    el.dispatchEvent(new MouseEvent('click', e));
-                    el.dispatchEvent(new MouseEvent('dblclick', e));
-
-                    self.showDblClick(pars.x, pars.y);
-
-                } else if (etype === 'mousedown' || etype === 'mouseup') {
-
-                    el.dispatchEvent(new MouseEvent(etype, e));
-
-                    if (etype === 'mousedown') {
+                        el.dispatchEvent(new MouseEvent('mousedown', e));
+                        el.dispatchEvent(new MouseEvent('mouseup', e));
+                        el.dispatchEvent(new MouseEvent('click', e));
 
                         self.showMouseDown(pars.x, pars.y);
-
-                    } else if (etype === 'mouseup') {
-
                         setTimeout(function () {
 
                             self.hideMouseDown();
 
                         }, clickDelay);
 
+                    } else if (etype === 'dblclick') {
+
+                        el.dispatchEvent(new MouseEvent('mousedown', e));
+                        el.dispatchEvent(new MouseEvent('mouseup', e));
+                        el.dispatchEvent(new MouseEvent('click', e));
+                        el.dispatchEvent(new MouseEvent('mousedown', e));
+                        el.dispatchEvent(new MouseEvent('mouseup', e));
+                        el.dispatchEvent(new MouseEvent('click', e));
+                        el.dispatchEvent(new MouseEvent('dblclick', e));
+
+                        self.showDblClick(pars.x, pars.y);
+
+                    } else if (etype === 'mousedown' || etype === 'mouseup') {
+
+                        el.dispatchEvent(new MouseEvent(etype, e));
+
+                        if (etype === 'mousedown') {
+
+                            self.showMouseDown(pars.x, pars.y);
+
+                        } else if (etype === 'mouseup') {
+
+                            setTimeout(function () {
+
+                                self.hideMouseDown();
+
+                            }, clickDelay);
+
+                        }
+
+                    } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
+
+                        el.dispatchEvent(new MouseEvent(etype, e));
+
+                    } else if (etype.match(/wheel|scroll/i)) {
+
+                        //window.scrollTo(pars.winScrollX, pars.winScrollY);
+                        window.scrollTo(e.pageXOffset, e.pageYOffset);
+                        el.dispatchEvent(new WheelEvent(etype, e));
+                        //$(el).offset({top: pars.top, left: pars.left});
+
                     }
 
-                } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
+                    $(cnv).css('cursor', 'none');
 
-                    el.dispatchEvent(new MouseEvent(etype, e));
+                    setTimeout(function () {
 
-                } else if (etype.match(/wheel|scroll/i)) {
+                        moveCursor(pars);
 
-                    //window.scrollTo(pars.winScrollX, pars.winScrollY);
-                    window.scrollTo(e.pageXOffset, e.pageYOffset);
-                    el.dispatchEvent(new WheelEvent(etype, e));
-                    //$(el).offset({top: pars.top, left: pars.left});
+                    }, 0);
 
                 }
 
-                $(cnv).css('cursor', 'none');
+                function moveCursor(pars) {
 
-                setTimeout(function () {
+                    var e1 = sData[cnt],
+                        e2 = sData[++cnt];
 
-                    moveCursor(pars);
+                    if (e1 && e2) {
 
-                }, 0);
+                        var recDuration = rec.duration,
+                            etime = e1.time,
+                            dur = e2.timeStamp - e1.timeStamp,
+                            pars1 = pars || self.getTargetScreenPars(e1),
+                            pars2 = self.getTargetScreenPars(e2),
+                            step = 0,
+                            dt = speed * delay,
+                            steps = dur / dt,
+                            dx = pars2.x - pars1.x,
+                            dy = pars2.y - pars1.y,
+                            mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
 
-            }
+                        function drawStep() {
 
-            function moveCursor(pars) {
+                            var x0, y0, x, y, el;
 
-                var e1 = sData[cnt],
-                    e2 = sData[++cnt];
+                            x0 = pars1.x + dx * step;
+                            y0 = pars1.y + dy * step;
+                            step++;
 
-                if (e1 && e2) {
+                            if (step < steps) {
 
-                    var recDuration = rec.duration,
-                        etime = e1.time,
-                        dur = e2.timeStamp - e1.timeStamp,
-                        pars1 = pars || self.getTargetScreenPars(e1),
-                        pars2 = self.getTargetScreenPars(e2),
-                        step = 0,
-                        dt = speed * delay,
-                        steps = dur / dt,
-                        dx = pars2.x - pars1.x,
-                        dy = pars2.y - pars1.y,
-                        mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
+                                x = pars1.x + dx * step;
+                                y = pars1.y + dy * step;
+                                self.drawTLCursor(etime + step * dt, recDuration);
+                                setTimeout(drawStep, delay);
 
-                    function drawStep() {
+                            } else {
 
-                        var x0, y0, x, y, el;
+                                x = pars2.x;
+                                y = pars2.y;
+                                self.drawTLCursor(e2.time, recDuration);
+                                setTimeout(function () {
 
-                        x0 = pars1.x + dx * step;
-                        y0 = pars1.y + dy * step;
-                        step++;
+                                    playEvent(pars2);
 
-                        if (step < steps) {
+                                }, e2.type === 'mouseover' ? 0 : clickDelay);
 
-                            x = pars1.x + dx * step;
-                            y = pars1.y + dy * step;
-                            $tlCursor.css(self.getTimeLineCursorPars(etime + step * dt, recDuration));
+                            }
+
+                            $(cnvh).hide();
+                            el = document.elementFromPoint(x, y);
+                            $(cnvh).show();
+                            $(cnv).css('cursor', 'none');
+
+                            el.dispatchEvent(new MouseEvent('mousemove', {
+
+                                bubbles: true,
+                                cancelable: false,
+                                button: e1.button,
+                                which: e1.which,
+                                clientX: x,
+                                clientY: y,
+                                pageX: x,
+                                pageY: y,
+                                view: window
+
+                            }));
+
+                            if (!mouseDown) {
+
+                                /*
+                                 if (mOverElement !== el) {
+
+                                 if (mOverElement) {
+
+                                 mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                                 //$(mOverElement).removeClass(mOverClass);
+
+                                 }
+                                 if (self.addMouseOverClass(el, ':hover')) {
+
+                                 $(el).addClass(mOverClass);
+
+                                 }
+
+                                 el.dispatchEvent(new MouseEvent('mouseover', {
+
+                                 clientX: x,
+                                 clientY: y,
+                                 pageX: x,
+                                 pageY: y,
+                                 view: window
+
+                                 }));
+                                 mOverElement = el;
+
+                                 }
+                                 */
+
+                            } else {
+
+                                self.showMouseDown(x, y);
+                                ctx.save();
+                                ctx.setLineDash([3, 5]);
+
+                            }
+
+                            $cur.css('top', y).css('left', x);
+                            ctx.beginPath();
+
+                            ctx.moveTo(x0, y0);
+                            ctx.lineTo(x, y);
+                            ctx.stroke();
+
+                            if (mouseDown) {
+
+                                ctx.restore();
+
+                            }
+
+                            if (step === 1) {
+
+                                ctx.beginPath();
+                                self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
+                                ctx.stroke();
+                                ctx.fill();
+
+                            }
+
+                        }
+
+                        function scrollWindow(x, y, dx, dy) {
+
+                            var wx = window.pageXOffset,
+                                wy = window.pageYOffset,
+                                call = false;
+
+                            dx = dx || (x - wx) / 10;
+                            dy = dy || (y - wy) / 10;
+
+                            if ((dx > 0 && wx < x && wx + dx < x)
+                                || dx < 0 && wx > x && wx + dx > x) {
+
+                                wx += dx;
+                                call = true;
+
+                            } else {
+
+                                wx = x;
+
+                            }
+
+                            if ((dy > 0 && wy < y && wy + dy < y)
+                                || dy < 0 && wy > y && wy + dy > y) {
+
+                                wy += dy;
+                                call = true;
+
+                            } else {
+
+                                wy = y;
+
+                            }
+
+                            window.scrollTo(wx, wy);
+
+                            if (call) {
+
+                                setTimeout(function () {
+
+                                    scrollWindow(x, y, dx, dy);
+
+                                }, 20);
+
+                            }
+
+                        }
+
+                        if (pars2.winScrollX || pars2.winScrollY) {
+
+                            //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
+                            scrollWindow(pars2.winScrollX, pars2.winScrollY);
+
+                        }
+
+                        self.drawTLCursor(etime, recDuration);
+                        if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
+
+                            if (steps) {
+
+                                dx = dx / steps;
+                                dy = dy / steps;
+
+                            }
+                            //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
                             setTimeout(drawStep, delay);
 
                         } else {
 
-                            x = pars2.x;
-                            y = pars2.y;
-                            $tlCursor.css(self.getTimeLineCursorPars(e2.time, recDuration));
-                            setTimeout(function () {
+                            //setTimeout(function () {
 
-                                playEvent(pars2);
+                            playEvent(pars2);
 
-                            }, e2.type === 'mouseover' ? 0 : clickDelay);
+                            //}, 0);
 
                         }
-
-                        $(cnvh).hide();
-                        el = document.elementFromPoint(x, y);
-                        $(cnvh).show();
-                        $(cnv).css('cursor', 'none');
-
-                        el.dispatchEvent(new MouseEvent('mousemove', {
-
-                            bubbles: true,
-                            cancelable: false,
-                            button: e1.button,
-                            which: e1.which,
-                            clientX: x,
-                            clientY: y,
-                            pageX: x,
-                            pageY: y,
-                            view: window
-
-                        }));
-
-                        if (!mouseDown) {
-
-                            /*
-                             if (mOverElement !== el) {
-
-                             if (mOverElement) {
-
-                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                             //$(mOverElement).removeClass(mOverClass);
-
-                             }
-                             if (self.addMouseOverClass(el, ':hover')) {
-
-                             $(el).addClass(mOverClass);
-
-                             }
-
-                             el.dispatchEvent(new MouseEvent('mouseover', {
-
-                             clientX: x,
-                             clientY: y,
-                             pageX: x,
-                             pageY: y,
-                             view: window
-
-                             }));
-                             mOverElement = el;
-
-                             }
-                             */
-
-                        } else {
-
-                            self.showMouseDown(x, y);
-                            ctx.save();
-                            ctx.setLineDash([3, 5]);
-
-                        }
-
-                        $cur.css('top', y).css('left', x);
-                        ctx.beginPath();
-
-                        ctx.moveTo(x0, y0);
-                        ctx.lineTo(x, y);
-                        ctx.stroke();
-
-                        if (mouseDown) {
-
-                            ctx.restore();
-
-                        }
-
-                        if (step === 1) {
-
-                            ctx.beginPath();
-                            self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
-                            ctx.stroke();
-                            ctx.fill();
-
-                        }
-
-                    }
-
-                    function scrollWindow(x, y, dx, dy) {
-
-                        var wx = window.pageXOffset,
-                            wy = window.pageYOffset,
-                            call = false;
-
-                        dx = dx || (x - wx) / 10;
-                        dy = dy || (y - wy) / 10;
-
-                        if ((dx > 0 && wx < x && wx + dx < x)
-                            || dx < 0 && wx > x && wx + dx > x) {
-
-                            wx += dx;
-                            call = true;
-
-                        } else {
-
-                            wx = x;
-
-                        }
-
-                        if ((dy > 0 && wy < y && wy + dy < y)
-                            || dy < 0 && wy > y && wy + dy > y) {
-
-                            wy += dy;
-                            call = true;
-
-                        } else {
-
-                            wy = y;
-
-                        }
-
-                        window.scrollTo(wx, wy);
-
-                        if (call) {
-
-                            setTimeout(function () {
-
-                                scrollWindow(x, y, dx, dy);
-
-                            }, 20);
-
-                        }
-
-                    }
-
-                    if (pars2.winScrollX || pars2.winScrollY) {
-
-                        //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
-                        scrollWindow(pars2.winScrollX, pars2.winScrollY);
-
-                    }
-
-                    $tlCursor.css(self.getTimeLineCursorPars(etime, recDuration));
-                    if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
-
-                        if (steps) {
-
-                            dx = dx / steps;
-                            dy = dy / steps;
-
-                        }
-                        //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
-                        setTimeout(drawStep, delay);
 
                     } else {
 
-                        //setTimeout(function () {
+                        // End of play
+                        $cur.hide();
+                        $(mOverElement).removeClass(mOverClass);
+                        self.removeMouseOverStyle();
+                        $(cnv).css('cursor', 'default');
+                        if (cnt === sData.length) {
 
-                        playEvent(pars2);
+                            self.drawSpiderGraph(rec.id);
 
-                        //}, 0);
+                        } else {
+
+                            self.drawSpiderGraph(rec.id, 0, cnt);
+
+                        }
+                        self.appMode = '';
+                        //self.sessionRec = null;
+                        sessionStorage.removeItem('dcipherState');
 
                     }
+
+                }
+
+                //this.appMode = 'play';
+                this.sessionId = sId;
+                this.sessionRec = rec;
+
+                // Reload initial session location on replay start
+                if (!cnt /*&& window.location.pathname !== sData[1].location*/) {
+
+                    this.eventIndex = 1;
+                    this.resetApp('play', sData[1].location);
+                    return;
 
                 } else {
 
-                    // End of play
-                    $cur.hide();
-                    $(mOverElement).removeClass(mOverClass);
-                    self.removeMouseOverStyle();
-                    $(cnv).css('cursor', 'default');
-                    if (cnt === sData.length) {
-
-                        self.drawSpiderGraph(rec.id);
-
-                    } else {
-
-                        self.drawSpiderGraph(rec.id, 0, cnt);
-
-                    }
-                    self.appMode = '';
-                    //self.sessionRec = null;
-                    sessionStorage.removeItem('dcipherState');
+                    this.appMode = 'play';
 
                 }
 
-            }
+                $(cnv).css('cursor', 'none');
+                el.dispatchEvent(new MouseEvent('mousemove', {
 
-            //this.appMode = 'play';
-            this.sessionId = sId;
-            this.sessionRec = rec;
+                    bubbles: true,
+                    cancelable: false,
+                    clientX: pars.x,
+                    clientY: pars.y,
+                    pageX: pars.x,
+                    pageY: pars.y,
+                    view: window
 
-            // Reload initial session location on replay start
-            if (!cnt /*&& window.location.pathname !== sData[1].location*/) {
+                }));
+                mOverElement = el;
+                this.addMouseOverClass(el, ':hover');
+                $(el).addClass(mOverClass);
+                $(cnv).show();
+                $cur.show();
+                $tlCursor.show();
+                this.hideRecList();
+                this.setActiveRecord(sId);
+                ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+                ctx.strokeStyle = rec.color;
+                if (eventIndex !== undefined) {
 
-                this.eventIndex = 1;
-                this.resetApp('play', sData[1].location);
-                return;
-
-            }
-
-            $(cnv).css('cursor', 'none');
-            el.dispatchEvent(new MouseEvent('mousemove', {
-
-                bubbles: true,
-                cancelable: false,
-                clientX: pars.x,
-                clientY: pars.y,
-                pageX: pars.x,
-                pageY: pars.y,
-                view: window
-
-            }));
-            mOverElement = el;
-            this.addMouseOverClass(el, ':hover');
-            $(el).addClass(mOverClass);
-            $(cnv).show();
-            $cur.show();
-            $tlCursor.show();
-            this.hideRecList();
-            this.setActiveRecord(sId);
-            ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
-            ctx.strokeStyle = rec.color;
-            if (eventIndex !== undefined) {
-
-                this.showSpiderGraph(sId, 0, eventIndex + 1);
-
-            }
-
-            setTimeout(function () {
-
-                //if (cnt) {
-
-                playEvent(pars);
-
-                //} else {
-
-                //moveCursor(pars);
-
-                //}
-
-            }, clickDelay);
-
-        };
-
-        this.getTargetScreenPars = function getTargetScreenPars(e) {
-
-            var etarget = e.target,
-                winW = window.innerWidth,
-                winH = window.innerHeight,
-                winScrollX = 0,
-                winScrollY = 0,
-                x = e.x,
-                y = e.y,
-                el = null, $el = null;
-
-            if (!etarget.element || (etarget.element && etarget.element === window)) {
-
-                el = this.getElementByTreePath(etarget.treePath);
-                $el = $(el);
-
-            } else {
-
-                el = etarget.element;
-                $el = $(el);
-
-            }
-
-            if ($el && etarget.tagName === el.tagName
-                && etarget.id === el.id
-                && etarget.title === el.title
-                //&& etarget.dcipherName === el.dataset.dcipherName
-                //&& etarget.dcipherAction === el.dataset.dcipherAction
-                && $(el).is(':visible')
-                && !e.type.match(/wheel|scroll/i)
-            ) {
-
-                var offset = $el.offset(),
-                    elX = offset.left,
-                    elY = offset.top,
-                    elW = $el.outerWidth(),
-                    elH = $el.outerHeight(),
-                    locX = elW * etarget.relX,
-                    locY = elH * etarget.relY,
-                    cpx = 20,
-                    cpy = 20;
-
-                etarget.element = el;
-                /*
-                 x = elX + locX;
-                 y = elY + locY;
-                 */
-
-                if (x + cpx > pageXOffset + winW) {
-
-                    winScrollX = x + cpx - winW;
-                    x -= winScrollX;
+                    this.showSpiderGraph(sId, 0, eventIndex + 1);
 
                 }
 
-                if (y + cpy > pageYOffset + winH) {
+                setTimeout(function () {
 
-                    winScrollY = y + cpy - winH;
-                    y -= winScrollY;
+                    //if (cnt) {
+
+                    playEvent(pars);
+
+                    //} else {
+
+                    //moveCursor(pars);
+
+                    //}
+
+                }, clickDelay);
+
+            };
+
+            this.getTargetScreenPars = function getTargetScreenPars(e) {
+
+                var etarget = e.target,
+                    winW = window.innerWidth,
+                    winH = window.innerHeight,
+                    winScrollX = 0,
+                    winScrollY = 0,
+                    x = e.x,
+                    y = e.y,
+                    el = null, $el = null;
+
+                if (!etarget.element || (etarget.element && etarget.element === window)) {
+
+                    el = this.getElementByTreePath(etarget.treePath);
+                    $el = $(el);
+
+                } else {
+
+                    el = etarget.element;
+                    $el = $(el);
 
                 }
 
-                /*
-                 e.pageX += x - e.x;
-                 e.pageY += y - e.y;
-                 e.clientX = x;
-                 e.clientY = y;
-                 e.x = x;
-                 e.y = y;
-                 */
+                if ($el && etarget.tagName === el.tagName
+                    && etarget.id === el.id
+                    && etarget.title === el.title
+                    //&& etarget.dcipherName === el.dataset.dcipherName
+                    //&& etarget.dcipherAction === el.dataset.dcipherAction
+                    && $(el).is(':visible')
+                    && !e.type.match(/wheel|scroll/i)
+                ) {
 
-            }
+                    var offset = $el.offset(),
+                        elX = offset.left,
+                        elY = offset.top,
+                        elW = $el.outerWidth(),
+                        elH = $el.outerHeight(),
+                        locX = elW * etarget.relX,
+                        locY = elH * etarget.relY,
+                        cpx = 20,
+                        cpy = 20;
 
-            return {
+                    etarget.element = el;
+                    /*
+                     x = elX + locX;
+                     y = elY + locY;
+                     */
 
-                element: el,
-                x: x,
-                y: y,
-                left: elX + etarget.dx,
-                top: elY + etarget.dy,
-                localX: locX,
-                localY: locY,
-                width: elW,
-                height: elH,
-                winScrollX: winScrollX,
-                winScrollY: winScrollY
+                    if (x + cpx > pageXOffset + winW) {
 
-            }
-
-        };
-
-        this.removeMouseOverStyle = function removeMoverStyle() {
-
-            $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
-
-        };
-        this.addMouseOverClass = function getPseudoClass(el, pclass) {
-
-            var sheets = document.styleSheets,
-                rules, s, r, selectorText, rule,
-                selectors = [],
-                styles = '', styleNode = document.createElement('style'),
-                mouseOverStyleId = this.domId.mouseOverStyle,
-                $container = $('#' + this.domId.container);
-
-            if (el.id) {
-
-                selectors.push('#' + el.id + pclass);
-
-            }
-
-            if (el.className && typeof el.className === 'string') {
-
-                el.className.split(" ").forEach(function (s) {
-
-                    if (s) {
-
-                        selectors.push('.' + s + pclass);
+                        winScrollX = x + cpx - winW;
+                        x -= winScrollX;
 
                     }
 
-                });
+                    if (y + cpy > pageYOffset + winH) {
 
-            }
+                        winScrollY = y + cpy - winH;
+                        y -= winScrollY;
 
-            for (s = 0; s < sheets.length; s++) {
+                    }
 
-                rules = sheets[s].rules || sheets[s].cssRules || [];
+                    /*
+                     e.pageX += x - e.x;
+                     e.pageY += y - e.y;
+                     e.clientX = x;
+                     e.clientY = y;
+                     e.x = x;
+                     e.y = y;
+                     */
 
-                for (r = 0; r < rules.length; r++) {
+                }
 
-                    rule = rules[r];
-                    selectorText = rule.selectorText;
+                return {
 
-                    selectors.forEach(function (c) {
+                    element: el,
+                    x: x,
+                    y: y,
+                    left: elX + etarget.dx,
+                    top: elY + etarget.dy,
+                    localX: locX,
+                    localY: locY,
+                    width: elW,
+                    height: elH,
+                    winScrollX: winScrollX,
+                    winScrollY: winScrollY
 
-                        if (selectorText && selectorText.match(new RegExp(c))) {
+                }
 
-                            var ct = rule.cssText;
+            };
 
-                            styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
+            this.removeMouseOverStyle = function removeMoverStyle() {
 
-                            //console.debug('---> cssObj: ', cssObj);
+                $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
+
+            };
+            this.addMouseOverClass = function getPseudoClass(el, pclass) {
+
+                var sheets = document.styleSheets,
+                    rules, s, r, selectorText, rule,
+                    selectors = [],
+                    styles = '', styleNode = document.createElement('style'),
+                    mouseOverStyleId = this.domId.mouseOverStyle,
+                    $container = $('#' + this.domId.container);
+
+                if (el.id) {
+
+                    selectors.push('#' + el.id + pclass);
+
+                }
+
+                if (el.className && typeof el.className === 'string') {
+
+                    el.className.split(" ").forEach(function (s) {
+
+                        if (s) {
+
+                            selectors.push('.' + s + pclass);
 
                         }
 
                     });
-                }
-
-            }
-
-            $('#' + mouseOverStyleId, $container).remove();
-
-            if (styles) {
-
-                $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
-                $container.append(styleNode);
-                return true;
-
-            } else {
-
-                return false;
-
-            }
-
-        };
-
-        this.toggleRecList = function toggleRecList() {
-
-            var rlId = this.domId['records'],
-                rbId = this.domId['butList'],
-                $rl = $('#' + rlId);
-
-            function hideReclist(e) {
-
-                if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
-
-                    $rl.hide();
 
                 }
 
-            }
+                for (s = 0; s < sheets.length; s++) {
 
-            if (!$rl.is(':visible') && this.db.records.length) {
+                    rules = sheets[s].rules || sheets[s].cssRules || [];
 
-                this.setRecListPosition();
-                $rl.show();
-                $('body').on('click', hideReclist);
+                    for (r = 0; r < rules.length; r++) {
 
-            } else {
+                        rule = rules[r];
+                        selectorText = rule.selectorText;
 
-                $rl.hide();
-                $('body').off('click', hideReclist);
+                        selectors.forEach(function (c) {
 
-            }
+                            if (selectorText && selectorText.match(new RegExp(c))) {
 
-        };
+                                var ct = rule.cssText;
 
-        this.setRecListPosition = function setRecListPosition() {
+                                styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
 
-            var $butList = $(this.getDomElement('butList')),
-                p = $butList.offset(),
-                $rl = $(this.getDomElement('records')),
-                hidden = $rl.css('display') === 'none';
+                                //console.debug('---> cssObj: ', cssObj);
 
-            if (hidden) {
+                            }
 
-                $rl.css('display', 'block')
-                    .css('visibility', 'hidden');
-
-            }
-
-            /*
-             $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
-             .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
-             */
-            if (hidden) {
-
-                $rl.css('visibility', 'visible')
-                    .css('display', 'none');
-
-            }
-
-        };
-
-        this.createRecordList = function createRecordList() {
-
-            var self = this,
-                recListDiv = this.getDomElement('records'),
-                cnvHolder = this.getDomElement('canvasHolder'),
-                visRecs = {}, actRecs = {},
-                rec, butShow, butDel, butPlay, inpName, nChckb,
-                cnv, ctx, butCp, cpInp, cpSp;
-
-            if (!this.db.records.length) {
-
-                $(recListDiv).hide();
-                $(cnvHolder).hide();
-                $(this.getDomElement('butList')).hide();
-                return;
-
-            }
-
-            // Get all visible records
-            $('input:checkbox', recListDiv).each(function () {
-
-                visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
-
-            });
-
-            // Get all active records
-            $('.rec', recListDiv).each(function () {
-
-                actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
-
-            });
-
-            if (!visRecs.length) {
-
-                $(cnvHolder).hide();
-
-            }
-            $(recListDiv).children().remove();
-            $(cnvHolder).children('.cnv').remove();
-            this.db.records.forEach(function (r, idx) {
-
-                // Restore visibility and active flags
-                r.visible = visRecs[r.id];
-                r.active = actRecs[r.id];
-                r.drawn = false;
-                self.calcSC(r);
-
-                // Record canvas
-                cnv = document.createElement('canvas');
-                cnv.setAttribute('data-dcipher-rec-id', r.id);
-                cnv.height = window.innerHeight;
-                cnv.width = window.innerWidth;
-                cnv.id = 'cnvId-' + r.id;
-                cnv.className = 'cnv';
-                ctx = cnv.getContext('2d');
-                ctx.lineWidth = 1.5;
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = r.color;
-                ctx.lineCap = 'square';
-                ctx.lineJoin = 'miter';
-                ctx.miterLimit = 4.0;
-                ctx.shadowOffsetX = 0;
-                ctx.shadowOffsetY = 3.0;
-                ctx.shadowBlur = 4.0;
-                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                cnvHolder.appendChild(cnv);
-
-                // Record div
-                rec = document.createElement('div');
-                rec.id = 'recId-' + r.id;
-                rec.className = 'rec' + (actRecs[r.id] ? ' active' : '');
-                rec.setAttribute('data-dcipher-rec-id', r.id);
-
-                // Show record button
-                nChckb = document.createElement('input');
-                nChckb.setAttribute('data-dcipher-rec-id', r.id);
-                nChckb.setAttribute('cnv-id', idx);
-                nChckb.type = 'checkbox';
-                nChckb.id = 'showRecId-' + r.id;
-                nChckb.value = r.id;
-                nChckb.className = "chckb-show";
-                nChckb.checked = visRecs[r.id];
-                rec.appendChild(nChckb);
-
-                butShow = document.createElement('label');
-                butShow.setAttribute('data-dcipher-rec-id', r.id);
-                butShow.setAttribute('cnv-id', idx);
-                butShow.htmlFor = 'showRecId-' + r.id;
-                butShow.className = 'show';
-                butShow.title = dCipher.loc._Toggle_record;
-                rec.appendChild(butShow);
-
-                // Delete Record button
-                butDel = document.createElement('div');
-                butDel.setAttribute('data-dcipher-rec-id', r.id);
-                butDel.id = 'delRecId-' + r.id;
-                butDel.className = 'del';
-                butDel.innerHTML = '&#10005;';
-                butDel.title = dCipher.loc._Delete_record;
-                rec.appendChild(butDel);
-
-                // Color picker
-                cpInp = document.createElement('input');
-                cpInp.type = 'hidden';
-                cpInp.value = r.color;
-
-                cpSp = document.createElement('span');
-                cpSp.className = 'input-group-addon cp-span';
-                cpi = document.createElement('i');
-                cpi.className = 'cp-i';
-                cpi.style.backgroundColor = r.color;
-                cpi.title = dCipher.loc._Change_color;
-                cpSp.appendChild(cpi);
-
-                butCp = document.createElement('div');
-                butCp.setAttribute('data-dcipher-rec-id', r.id);
-                butCp.id = 'cpId-' + r.id;
-                butCp.className = 'cp-container input-group';
-                butCp.appendChild(cpInp);
-                butCp.appendChild(cpSp);
-                rec.appendChild(butCp);
-
-                // Play record button
-                /*
-                 butPlay = document.createElement('div');
-                 butPlay.setAttribute('data-dcipher-rec-id', r.id);
-                 butPlay.id = 'playRecId-' + r.id;
-                 butPlay.className = 'play';
-                 butPlay.title = dCipher.loc._Play_record;
-                 rec.appendChild(butPlay);
-                 */
-
-                // Edit name field
-                inpName = document.createElement('input');
-                inpName.setAttribute('data-dcipher-rec-id', r.id);
-                inpName.placeholder = self.loc._Name_placeholder;
-                inpName.type = 'text';
-                inpName.value = r.name;
-                inpName.disabled = true;
-                inpName.id = 'recNameId-' + r.id;
-                inpName.className = 'rec-name';
-                rec.appendChild(inpName);
-
-                recListDiv.appendChild(rec);
-                self.setRecListPosition();
-
-                // Define listeners
-                nChckb.addEventListener('change', function () {
-
-                    var $el = $(this);
-
-                    if ($el.prop('checked')) {
-
-                        self.showSpiderGraph($el.attr('data-dcipher-rec-id'));
-
-                    } else {
-
-                        self.unsetActiveRecord($el.attr('data-dcipher-rec-id'));
-
-                    }
-
-                });
-
-                butDel.addEventListener('click', function () {
-
-                    self.deleteRecord($(this).attr('data-dcipher-rec-id'));
-
-                });
-
-                /*
-                 butPlay.addEventListener('click', function () {
-
-                 self.playSession($(this).attr('data-dcipher-rec-id'));
-
-                 });
-                 */
-
-                inpName.addEventListener('change', function () {
-
-                    var $el = $(this);
-                    self.updateRecordName($el.attr('data-dcipher-rec-id'), $el.val());
-                    //$el.attr('disabled', true);
-
-                });
-
-                inpName.addEventListener('blur', function () {
-
-                    var $el = $(this);
-                    $el.attr('disabled', true);
-
-                });
-
-                rec.addEventListener('dblclick', function () {
-
-                    var $el = $('input[type="text"]', this);
-                    $el.attr('disabled', false).focus();
-
-                });
-
-                rec.addEventListener('click', function (e) {
-
-                    var $el = $(e.target),
-                        id = $el.attr('data-dcipher-rec-id');
-
-                    if ($el.attr('type') === 'text') {
-
-                        self.showSpiderGraph(id);
-                        self.setActiveRecord(id);
-
-                    }
-
-                });
-
-                // Draw record spidergraph if active
-                if (visRecs[r.id]) {
-
-                    self.showSpiderGraph(r.id);
-
-                    if (actRecs[r.id]) {
-
-                        self.drawTimeline(r);
-
+                        });
                     }
 
                 }
 
-                $(butCp).colorpicker({
+                $('#' + mouseOverStyleId, $container).remove();
 
-                    format: 'rgba',
-                    container: butCp,
-                    //align: 'right',
-                    customClass: 'cp-pos',
-                    colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
+                if (styles) {
 
-                }).on('hidePicker.bs-colorpicker', function () {
-                    //
-                    var $el = $(this);
-
-                    self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
-
-                });
-
-            });
-
-        };
-
-        this.setActiveRecord = function setActiveRecord(id) {
-
-            var self = this,
-                recs = this.getDomElement('records'),
-                $rec = $('#recId-' + id, recs),
-                $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
-
-            $('.rec', recs).removeClass('active');
-            $rec.addClass('active');
-
-            this.db.records.forEach(function (r) {
-
-                if (r.id == id) {
-
-                    r.active = true;
-                    r.visible = true;
-                    self.drawTimeline(r);
-                    self.sessionRec = r;
-                    self.sessionId = r.id;
+                    $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
+                    $container.append(styleNode);
+                    return true;
 
                 } else {
 
-                    r.active = false;
+                    return false;
 
                 }
 
-            });
+            };
 
-            if (!$chkb.prop('checked')) {
+            this.toggleRecList = function toggleRecList() {
 
-                $chkb.prop('checked', true);
+                var rlId = this.domId['records'],
+                    rbId = this.domId['butList'],
+                    $rl = $('#' + rlId);
 
-            }
+                function hideReclist(e) {
 
-        };
+                    if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
 
-        this.unsetActiveRecord = function unsetActiveRecord(id) {
+                        $rl.hide();
 
-            $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-            this.getRecordById(id).active = false;
-            this.hideSpiderGraph(id);
+                    }
 
-        };
+                }
 
-        this.deleteRecord = function deleteRecord(id) {
+                if (!$rl.is(':visible') && this.db.records.length) {
 
-            var self = this;
+                    this.setRecListPosition();
+                    $rl.show();
+                    $('body').on('click', hideReclist);
 
-            this.db.deleteRecord(id).then(function () {
+                } else {
 
-                self.createRecordList();
+                    $rl.hide();
+                    $('body').off('click', hideReclist);
 
-            }, function (e, msg) {
+                }
 
-                console.warn('[WARN] Could not delete record. Error:', msg);
+            };
 
-            });
+            this.setRecListPosition = function setRecListPosition() {
 
-        };
+                var $butList = $(this.getDomElement('butList')),
+                    p = $butList.offset(),
+                    $rl = $(this.getDomElement('records')),
+                    hidden = $rl.css('display') === 'none';
 
-        this.updateRecordName = function updateRecordName(id, name) {
+                if (hidden) {
 
-            var self = this,
-                rec = this.getRecordById(id);
+                    $rl.css('display', 'block')
+                        .css('visibility', 'hidden');
 
-            rec.name = name;
-            delete rec.drawn;
-            this.db.putRecord(id, rec).then(function () {
+                }
 
-                self.createRecordList();
-                self.setActiveRecord(id);
-                self.showSpiderGraph(id);
+                /*
+                 $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
+                 .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
+                 */
+                if (hidden) {
 
-            }, function (e, msg) {
+                    $rl.css('visibility', 'visible')
+                        .css('display', 'none');
 
-                console.warn('[WARN] Could not update record. Error:', msg);
+                }
 
-            });
+            };
 
-        };
+            this.createRecordList = function createRecordList() {
 
-        this.updateRecordColor = function updateRecordColor(id, color) {
+                var self = this,
+                    recListDiv = this.getDomElement('records'),
+                    cnvHolder = this.getDomElement('canvasHolder'),
+                    visRecs = {}, actRecs = {},
+                    rec, butShow, butDel, butPlay, inpName, nChckb,
+                    cnv, ctx, butCp, cpInp, cpSp;
 
-            var self = this,
-                rec = this.getRecordById(id);
+                if (!this.db.records.length) {
 
-            if (rec.color !== color) {
+                    $(recListDiv).hide();
+                    $(cnvHolder).hide();
+                    $(this.getDomElement('butList')).hide();
+                    return;
 
-                rec.color = color;
+                }
+
+                // Get all visible records
+                $('input:checkbox', recListDiv).each(function () {
+
+                    visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
+
+                });
+
+                // Get all active records
+                $('.rec', recListDiv).each(function () {
+
+                    actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
+
+                });
+
+                if (!visRecs.length) {
+
+                    $(cnvHolder).hide();
+
+                }
+                $(recListDiv).children().remove();
+                $(cnvHolder).children('.cnv').remove();
+                this.db.records.forEach(function (r, idx) {
+
+                    // Restore visibility and active flags
+                    r.visible = visRecs[r.id];
+                    r.active = actRecs[r.id];
+                    r.drawn = false;
+                    self.calcSC(r);
+
+                    // Record canvas
+                    cnv = document.createElement('canvas');
+                    cnv.setAttribute('data-dcipher-rec-id', r.id);
+                    cnv.height = window.innerHeight;
+                    cnv.width = window.innerWidth;
+                    cnv.id = 'cnvId-' + r.id;
+                    cnv.className = 'cnv';
+                    ctx = cnv.getContext('2d');
+                    ctx.lineWidth = 1.5;
+                    ctx.fillStyle = 'white';
+                    ctx.strokeStyle = r.color;
+                    ctx.lineCap = 'square';
+                    ctx.lineJoin = 'miter';
+                    ctx.miterLimit = 4.0;
+                    ctx.shadowOffsetX = 0;
+                    ctx.shadowOffsetY = 3.0;
+                    ctx.shadowBlur = 4.0;
+                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                    cnvHolder.appendChild(cnv);
+
+                    // Record div
+                    rec = document.createElement('div');
+                    rec.id = 'recId-' + r.id;
+                    rec.className = 'rec' + (actRecs[r.id] ? ' active' : '');
+                    rec.setAttribute('data-dcipher-rec-id', r.id);
+
+                    // Show record button
+                    nChckb = document.createElement('input');
+                    nChckb.setAttribute('data-dcipher-rec-id', r.id);
+                    nChckb.setAttribute('cnv-id', idx);
+                    nChckb.type = 'checkbox';
+                    nChckb.id = 'showRecId-' + r.id;
+                    nChckb.value = r.id;
+                    nChckb.className = "chckb-show";
+                    nChckb.checked = visRecs[r.id];
+                    rec.appendChild(nChckb);
+
+                    butShow = document.createElement('label');
+                    butShow.setAttribute('data-dcipher-rec-id', r.id);
+                    butShow.setAttribute('cnv-id', idx);
+                    butShow.htmlFor = 'showRecId-' + r.id;
+                    butShow.className = 'show';
+                    butShow.title = dCipher.loc._Toggle_record;
+                    rec.appendChild(butShow);
+
+                    // Delete Record button
+                    butDel = document.createElement('div');
+                    butDel.setAttribute('data-dcipher-rec-id', r.id);
+                    butDel.id = 'delRecId-' + r.id;
+                    butDel.className = 'del';
+                    butDel.innerHTML = '&#10005;';
+                    butDel.title = dCipher.loc._Delete_record;
+                    rec.appendChild(butDel);
+
+                    // Color picker
+                    cpInp = document.createElement('input');
+                    cpInp.type = 'hidden';
+                    cpInp.value = r.color;
+
+                    cpSp = document.createElement('span');
+                    cpSp.className = 'input-group-addon cp-span';
+                    cpi = document.createElement('i');
+                    cpi.className = 'cp-i';
+                    cpi.style.backgroundColor = r.color;
+                    cpi.title = dCipher.loc._Change_color;
+                    cpSp.appendChild(cpi);
+
+                    butCp = document.createElement('div');
+                    butCp.setAttribute('data-dcipher-rec-id', r.id);
+                    butCp.id = 'cpId-' + r.id;
+                    butCp.className = 'cp-container input-group';
+                    butCp.appendChild(cpInp);
+                    butCp.appendChild(cpSp);
+                    rec.appendChild(butCp);
+
+                    // Play record button
+                    /*
+                     butPlay = document.createElement('div');
+                     butPlay.setAttribute('data-dcipher-rec-id', r.id);
+                     butPlay.id = 'playRecId-' + r.id;
+                     butPlay.className = 'play';
+                     butPlay.title = dCipher.loc._Play_record;
+                     rec.appendChild(butPlay);
+                     */
+
+                    // Edit name field
+                    inpName = document.createElement('input');
+                    inpName.setAttribute('data-dcipher-rec-id', r.id);
+                    inpName.placeholder = self.loc._Name_placeholder;
+                    inpName.type = 'text';
+                    inpName.value = r.name;
+                    inpName.disabled = true;
+                    inpName.id = 'recNameId-' + r.id;
+                    inpName.className = 'rec-name';
+                    rec.appendChild(inpName);
+
+                    recListDiv.appendChild(rec);
+                    self.setRecListPosition();
+
+                    // Define listeners
+                    nChckb.addEventListener('change', function () {
+
+                        var $el = $(this);
+
+                        if ($el.prop('checked')) {
+
+                            self.showSpiderGraph($el.attr('data-dcipher-rec-id'));
+
+                        } else {
+
+                            self.unsetActiveRecord($el.attr('data-dcipher-rec-id'));
+
+                        }
+
+                    });
+
+                    butDel.addEventListener('click', function () {
+
+                        self.deleteRecord($(this).attr('data-dcipher-rec-id'));
+
+                    });
+
+                    /*
+                     butPlay.addEventListener('click', function () {
+
+                     self.playSession($(this).attr('data-dcipher-rec-id'));
+
+                     });
+                     */
+
+                    inpName.addEventListener('change', function () {
+
+                        var $el = $(this);
+                        self.updateRecordName($el.attr('data-dcipher-rec-id'), $el.val());
+                        //$el.attr('disabled', true);
+
+                    });
+
+                    inpName.addEventListener('blur', function () {
+
+                        var $el = $(this);
+                        $el.attr('disabled', true);
+
+                    });
+
+                    rec.addEventListener('dblclick', function () {
+
+                        var $el = $('input[type="text"]', this);
+                        $el.attr('disabled', false).focus();
+
+                    });
+
+                    rec.addEventListener('click', function (e) {
+
+                        var $el = $(e.target),
+                            id = $el.attr('data-dcipher-rec-id');
+
+                        if ($el.attr('type') === 'text') {
+
+                            self.showSpiderGraph(id);
+                            self.setActiveRecord(id);
+
+                        }
+
+                    });
+
+                    // Draw record spidergraph if active
+                    if (visRecs[r.id]) {
+
+                        self.showSpiderGraph(r.id);
+
+                        if (actRecs[r.id]) {
+
+                            self.drawTimeline(r);
+
+                        }
+
+                    }
+
+                    $(butCp).colorpicker({
+
+                        format: 'rgba',
+                        container: butCp,
+                        //align: 'right',
+                        customClass: 'cp-pos',
+                        colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
+
+                    }).on('hidePicker.bs-colorpicker', function () {
+                        //
+                        var $el = $(this);
+
+                        self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
+
+                    });
+
+                });
+
+            };
+
+            this.setActiveRecord = function setActiveRecord(id) {
+
+                var self = this,
+                    recs = this.getDomElement('records'),
+                    $rec = $('#recId-' + id, recs),
+                    $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
+
+                $('.rec', recs).removeClass('active');
+                $rec.addClass('active');
+
+                this.db.records.forEach(function (r) {
+
+                    if (r.id == id) {
+
+                        r.active = true;
+                        r.visible = true;
+                        self.drawTimeline(r);
+                        self.sessionRec = r;
+                        self.sessionId = r.id;
+
+                    } else {
+
+                        r.active = false;
+
+                    }
+
+                });
+
+                if (!$chkb.prop('checked')) {
+
+                    $chkb.prop('checked', true);
+
+                }
+
+            };
+
+            this.unsetActiveRecord = function unsetActiveRecord(id) {
+
+                $('#recId-' + id, this.getDomElement('records')).removeClass('active');
+                this.getRecordById(id).active = false;
+                this.hideSpiderGraph(id);
+
+            };
+
+            this.deleteRecord = function deleteRecord(id) {
+
+                var self = this;
+
+                this.db.deleteRecord(id).then(function () {
+
+                    self.createRecordList();
+
+                }, function (e, msg) {
+
+                    console.warn('[WARN] Could not delete record. Error:', msg);
+
+                });
+
+            };
+
+            this.updateRecordName = function updateRecordName(id, name) {
+
+                var self = this,
+                    rec = this.getRecordById(id);
+
+                rec.name = name;
                 delete rec.drawn;
                 this.db.putRecord(id, rec).then(function () {
 
                     self.createRecordList();
+                    self.setActiveRecord(id);
+                    self.showSpiderGraph(id);
 
                 }, function (e, msg) {
 
@@ -3034,2622 +3028,2654 @@
 
                 });
 
-            }
+            };
 
-        };
+            this.updateRecordColor = function updateRecordColor(id, color) {
 
-        this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
+                var self = this,
+                    rec = this.getRecordById(id);
 
-            $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
-            this.getRecordById(sId).visible = true;
+                if (rec.color !== color) {
 
-        };
+                    rec.color = color;
+                    delete rec.drawn;
+                    this.db.putRecord(id, rec).then(function () {
 
-        this.hideRecList = function hideRecList() {
+                        self.createRecordList();
 
-            $(this.getDomElement('records')).hide();
+                    }, function (e, msg) {
 
-        };
-
-        this.showMouseClick = function showMouseClick(x, y) {
-
-            var $el = $(this.getDomElement('click'));
-
-            function showClick() {
-
-                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                    .show().fadeOut();
-
-            }
-
-            setTimeout(showClick, 0);
-
-        };
-
-        this.showDblClick = function showMouseClick(x, y) {
-
-            var self = this,
-                $el = $(this.getDomElement('dblClick'));
-
-            function showClick() {
-
-                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                    .show();
-
-                setTimeout(function () {
-
-                    $el.fadeOut('fast');
-
-                }, self.clickDelay);
-
-            }
-
-            this.showMouseClick(x, y);
-            setTimeout(showClick, 0);
-
-        };
-
-        this.showMouseDown = function showMouseDown(x, y) {
-
-            var $el = $(this.getDomElement('click'));
-
-            $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
-
-        };
-
-        this.hideMouseDown = function hideMouseDown() {
-
-            $(this.getDomElement('click')).fadeOut('fast');
-
-        };
-
-        this.mouseMoveHandler = function mouseMoveHandler(e) {
-
-            e.data.self.mouse = {
-
-                x: e.clientX,
-                y: e.clientY
-
-            }
-
-        };
-
-        this.saveState = function saveState() {
-
-            if (this.appMode) {
-
-                if (this.appMode === 'test') {
-
-                    this.checkTaskCompletion();
-
-                }
-
-                this.sessionRec.events.forEach(function (e) {
-
-                    delete e.target.element;
-
-                });
-
-                sessionStorage.setItem('dcipherState', JSON.stringify({
-
-                    user: this.user,
-                    appMode: this.appMode,
-                    sessionRec: this.sessionRec,
-                    sessionId: this.sessionId,
-                    eventIndex: this.eventIndex,
-                    testCase: this.testCase,
-                    currentTask: this.currentTask,
-                    currentEvent: this.currentEvent
-
-                }));
-
-            } else {
-
-                sessionStorage.removeItem('dcipherState');
-
-            }
-        };
-
-        this.restoreState = function restoreState() {
-
-            var self = this,
-                state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
-
-            for (var k in state) {
-
-                if (state[k]) {
-
-                    this[k] = state[k];
-
-                }
-
-            }
-
-            if (this.appMode === 'record' || this.appMode === 'test') {
-
-                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                $(this.getDomElement('butList')).hide();
-                $('body').on('mousemove', function (e) {
-
-                    self.catchEvents(e);
-
-                });
-                $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
-
-                    self.updateStatString();
-
-                }, 100)).fadeIn();
-
-            } else if (this.appMode === 'play') {
-
-                this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
-                setTimeout(function () {
-
-                    self.playSession(self.sessionRec.id, self.eventIndex);
-
-                }, 1000);
-
-            } else if (this.appMode === 'timeline') {
-
-                var event = this.sessionRec.events[this.eventIndex],
-                    tEvt;
-
-                this.setActiveRecord(this.sessionRec.id);
-                this.showSpiderGraph(this.sessionRec.id);
-
-                tEvt = this.timeLineEvents.find(function (e) {
-
-                    return e.event.index === event.index;
-
-                });
-                this.showTLTooltip(tEvt);
-                sessionStorage.removeItem('dcipherState');
-                this.appMode = '';
-
-            }
-
-            if (this.appMode !== 'test') {
-
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
-
-            }
-
-            if (this.appMode === 'test') {
-
-                for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
-
-                    this.activateTaskStep(i, true);
-
-                }
-
-            }
-
-        };
-
-        this.resetState = function resetState() {
-
-            sessionStorage.removeItem('dcipherState');
-            if (this.sessionRec) {
-
-                var loc = this.sessionRec.events[0].location;
-
-                this.sessionRec = null;
-                this.appMode = '';
-                this.eventIndex = 0;
-                window.location = loc;
-
-            }
-
-        };
-
-        this.createTaskList = function () {
-
-            var self = this,
-                $tb = $(this.getDomElement('taskBar')),
-                tl = this.testCase,
-                w = $tb.outerHeight(),
-                rp = window.innerWidth - w * (tl.length),
-                d, sn, sd;
-
-            function activateTaskStep(e) {
-
-                var currentTask = self.currentTask,
-                    step = 1 * $(e.target).attr('step'),
-                    newTask = tl[step];
-                cs = currentTask ? currentTask.step : -1;
-
-                e.stopPropagation();
-
-                if (newTask.active || newTask.done) {
-
-                    for (var i = tl.length - 1; i >= step; i--) {
-
-                        if (tl[i].active || tl[i].done) {
-
-                            self.deactivateTaskStep(i);
-
-                        }
-
-                    }
-
-                } else {
-
-                    while (++cs < step) {
-
-                        self.activateTaskStep(cs, true);
-
-                    }
-                    self.activateTaskStep(cs);
-
-                }
-
-            }
-
-            tl.forEach(function (t, i) {
-
-                t.done = false;
-                d = document.createElement('div');
-                d.className = 'd-cipher-task';
-                d.style.left = rp + w * i + 'px';
-
-                sn = document.createElement('span');
-                sn.className = 'step-number';
-                sn.innerHTML = i + 1;
-                sn.setAttribute('step', i);
-                d.appendChild(sn);
-
-                sd = document.createElement('span');
-                sd.className = 'task-description';
-                sd.innerText = t.description;
-                d.appendChild(sd);
-                $tb.append(d);
-
-                sn.addEventListener('click', function (e) {
-
-                    activateTaskStep(e);
-
-                });
-
-            });
-
-            d = document.createElement('div');
-            d.className = 'd-cipher-task-done';
-            d.innerHTML = this.loc._Test_done;
-            $tb.append(d);
-
-        };
-
-        this.activateTaskStep = function (step, restore) {
-
-            var self = this,
-                tb = this.getDomElement('taskBar'),
-                div = $('div', tb)[step],
-                pdiv = $('div', tb)[step - 1],
-                task = this.testCase[step],
-                $div = $(div),
-                left = (2 + step) * ($(div).height() + 2);
-
-            function endOfTest() {
-
-                $('.d-cipher-task-done', tb).fadeOut();
-                //window.location = self.testCase[0].events[0].location;
-
-            }
-
-            if (task === this.currentTask && this.currentTask.active) {
-
-                this.deactivateTaskStep(step);
-
-            } else {
-
-                if (pdiv) {
-
-                    if (this.currentTask) {
-
-                        this.currentTask.done = true;
-                        this.currentTask.active = false;
-
-                    }
-
-                    $('span.step-number', pdiv).html('✓').removeClass('active');
-
-                }
-
-                if (step < this.testCase.length) {
-
-                    $div.css({
-
-                        left: left,
-                        transition: restore ? '' : 'left 0.2s ease-out 0.15s'
+                        console.warn('[WARN] Could not update record. Error:', msg);
 
                     });
 
-                    $('span.step-number', div).addClass('active');
+                }
 
-                    this.currentTask = task;
-                    this.currentTask.done = false;
-                    this.currentTask.active = true;
+            };
 
-                    if (!step && !this.appMode) {
+            this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
 
-                        this.toggleRecMode();
-                        this.resetApp('test', task.events[0].location, restore);
+                $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
+                this.getRecordById(sId).visible = true;
+
+            };
+
+            this.hideRecList = function hideRecList() {
+
+                $(this.getDomElement('records')).hide();
+
+            };
+
+            this.showMouseClick = function showMouseClick(x, y) {
+
+                var $el = $(this.getDomElement('click'));
+
+                function showClick() {
+
+                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                        .show().fadeOut();
+
+                }
+
+                setTimeout(showClick, 0);
+
+            };
+
+            this.showDblClick = function showMouseClick(x, y) {
+
+                var self = this,
+                    $el = $(this.getDomElement('dblClick'));
+
+                function showClick() {
+
+                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                        .show();
+
+                    setTimeout(function () {
+
+                        $el.fadeOut('fast');
+
+                    }, self.clickDelay);
+
+                }
+
+                this.showMouseClick(x, y);
+                setTimeout(showClick, 0);
+
+            };
+
+            this.showMouseDown = function showMouseDown(x, y) {
+
+                var $el = $(this.getDomElement('click'));
+
+                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
+
+            };
+
+            this.hideMouseDown = function hideMouseDown() {
+
+                $(this.getDomElement('click')).fadeOut('fast');
+
+            };
+
+            this.mouseMoveHandler = function mouseMoveHandler(e) {
+
+                e.data.self.mouse = {
+
+                    x: e.clientX,
+                    y: e.clientY
+
+                }
+
+            };
+
+            this.saveState = function saveState() {
+
+                if (this.appMode) {
+
+                    if (this.appMode === 'test') {
+
+                        this.checkTaskCompletion();
 
                     }
 
+                    this.sessionRec.events.forEach(function (e) {
+
+                        delete e.target.element;
+
+                    });
+
+                    sessionStorage.setItem('dcipherState', JSON.stringify({
+
+                        user: this.user,
+                        appMode: this.appMode,
+                        sessionRec: this.sessionRec,
+                        sessionId: this.sessionId,
+                        eventIndex: this.eventIndex,
+                        testCase: this.testCase,
+                        currentTask: this.currentTask,
+                        currentEvent: this.currentEvent
+
+                    }));
+
                 } else {
+
+                    sessionStorage.removeItem('dcipherState');
+
+                }
+            };
+
+            this.restoreState = function restoreState() {
+
+                var self = this,
+                    state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+
+                for (var k in state) {
+
+                    if (state[k]) {
+
+                        this[k] = state[k];
+
+                    }
+
+                }
+
+                if (this.appMode === 'record' || this.appMode === 'test') {
+
+                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                    $(this.getDomElement('butList')).hide();
+                    $('body').on('mousemove', function (e) {
+
+                        self.catchEvents(e);
+
+                    });
+                    $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+
+                        self.updateStatString();
+
+                    }, 100)).fadeIn();
+
+                } else if (this.appMode === 'play') {
+
+                    this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
+                    setTimeout(function () {
+
+                        self.playSession(self.sessionRec.id, self.eventIndex);
+
+                    }, 1000);
+
+                } else if (this.appMode === 'timeline') {
+
+                    var event = this.sessionRec.events[this.eventIndex],
+                        tEvt;
+
+                    this.setActiveRecord(this.sessionRec.id);
+                    this.showSpiderGraph(this.sessionRec.id);
+
+                    tEvt = this.timeLineEvents.find(function (e) {
+
+                        return e.event.index === event.index;
+
+                    });
+                    this.showTLTooltip(tEvt);
+                    sessionStorage.removeItem('dcipherState');
+                    this.appMode = '';
+
+                }
+
+                if (this.appMode !== 'test') {
+
+                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+
+                }
+
+                if (this.appMode === 'test') {
+
+                    for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
+
+                        this.activateTaskStep(i, true);
+
+                    }
+
+                }
+
+            };
+
+            this.resetState = function resetState() {
+
+                sessionStorage.removeItem('dcipherState');
+                if (this.sessionRec) {
+
+                    var loc = this.sessionRec.events[0].location;
+
+                    this.sessionRec = null;
+                    this.appMode = '';
+                    this.eventIndex = 0;
+                    window.location = loc;
+
+                }
+
+            };
+
+            this.createTaskList = function () {
+
+                var self = this,
+                    $tb = $(this.getDomElement('taskBar')),
+                    tl = this.testCase,
+                    w = $tb.outerHeight(),
+                    rp = window.innerWidth - w * (tl.length),
+                    d, sn, sd;
+
+                function activateTaskStep(e) {
+
+                    var currentTask = self.currentTask,
+                        step = 1 * $(e.target).attr('step'),
+                        newTask = tl[step];
+                    cs = currentTask ? currentTask.step : -1;
+
+                    e.stopPropagation();
+
+                    if (newTask.active || newTask.done) {
+
+                        for (var i = tl.length - 1; i >= step; i--) {
+
+                            if (tl[i].active || tl[i].done) {
+
+                                self.deactivateTaskStep(i);
+
+                            }
+
+                        }
+
+                    } else {
+
+                        while (++cs < step) {
+
+                            self.activateTaskStep(cs, true);
+
+                        }
+                        self.activateTaskStep(cs);
+
+                    }
+
+                }
+
+                tl.forEach(function (t, i) {
+
+                    t.done = false;
+                    d = document.createElement('div');
+                    d.className = 'd-cipher-task';
+                    d.style.left = rp + w * i + 'px';
+
+                    sn = document.createElement('span');
+                    sn.className = 'step-number';
+                    sn.innerHTML = i + 1;
+                    sn.setAttribute('step', i);
+                    d.appendChild(sn);
+
+                    sd = document.createElement('span');
+                    sd.className = 'task-description';
+                    sd.innerText = t.description;
+                    d.appendChild(sd);
+                    $tb.append(d);
+
+                    sn.addEventListener('click', function (e) {
+
+                        activateTaskStep(e);
+
+                    });
+
+                });
+
+                d = document.createElement('div');
+                d.className = 'd-cipher-task-done';
+                d.innerHTML = this.loc._Test_done;
+                $tb.append(d);
+
+            };
+
+            this.activateTaskStep = function (step, restore) {
+
+                var self = this,
+                    tb = this.getDomElement('taskBar'),
+                    div = $('div', tb)[step],
+                    pdiv = $('div', tb)[step - 1],
+                    task = this.testCase[step],
+                    $div = $(div),
+                    left = (2 + step) * ($(div).height() + 2);
+
+                function endOfTest() {
+
+                    $('.d-cipher-task-done', tb).fadeOut();
+                    //window.location = self.testCase[0].events[0].location;
+
+                }
+
+                if (task === this.currentTask && this.currentTask.active) {
+
+                    this.deactivateTaskStep(step);
+
+                } else {
+
+                    if (pdiv) {
+
+                        if (this.currentTask) {
+
+                            this.currentTask.done = true;
+                            this.currentTask.active = false;
+
+                        }
+
+                        $('span.step-number', pdiv).html('✓').removeClass('active');
+
+                    }
+
+                    if (step < this.testCase.length) {
+
+                        $div.css({
+
+                            left: left,
+                            transition: restore ? '' : 'left 0.2s ease-out 0.15s'
+
+                        });
+
+                        $('span.step-number', div).addClass('active');
+
+                        this.currentTask = task;
+                        this.currentTask.done = false;
+                        this.currentTask.active = true;
+
+                        if (!step && !this.appMode) {
+
+                            this.toggleRecMode();
+                            this.resetApp('test', task.events[0].location, restore);
+
+                        }
+
+                    } else {
+
+                        this.resetTasklist();
+                        this.appMode = 'record';
+                        this.toggleRecMode();
+                        $('.d-cipher-task-done', tb).fadeIn();
+                        setTimeout(endOfTest, 2000);
+
+                    }
+
+                }
+
+            };
+
+            this.deactivateTaskStep = function (step) {
+
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div', tb)[step],
+                    $div = $(div),
+                    $spn = $('span.step-number', div),
+                    left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
+                    task = this.testCase[step];
+
+                $div.css({
+
+                    left: left,
+                    transition: 'left 0.2s ease-out 0.15s'
+
+                });
+                $spn.removeClass('active').trigger('mouseout');
+                task.done = false;
+                task.active = false;
+                task.events.forEach(function (e) {
+
+                    e.done = false;
+
+                });
+                if (!step) {
 
                     this.resetTasklist();
                     this.appMode = 'record';
                     this.toggleRecMode();
-                    $('.d-cipher-task-done', tb).fadeIn();
-                    setTimeout(endOfTest, 2000);
+
+                } else {
+
+                    var cs = step - 1,
+                        ctask = this.testCase[cs];
+
+                    this.currentTask = ctask;
+                    $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
+                    ctask.active = true;
+                    ctask.done = false;
+                    ctask.events.forEach(function (e) {
+
+                        e.done = false;
+
+                    });
 
                 }
 
-            }
+            };
 
-        };
+            this.checkTaskCompletion = function () {
 
-        this.deactivateTaskStep = function (step) {
+                var e = this.currentEvent,
+                    el = e ? this.getElementByTreePath(e.treePath) : null,
+                    evts = this.currentTask ? this.currentTask.events : null;
 
-            var tb = this.getDomElement('taskBar'),
-                div = $('div', tb)[step],
-                $div = $(div),
-                $spn = $('span.step-number', div),
-                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
-                task = this.testCase[step];
+                if (e && evts && evts.length) {
 
-            $div.css({
+                    for (var i = 0, len = evts.length; i < len; i++) {
 
-                left: left,
-                transition: 'left 0.2s ease-out 0.15s'
+                        var evt = evts[i],
+                            treePath = e.treePath,
+                            offset = $(el).offset(),
+                            ww = window.innerWidth,
+                            wh = window.innerHeight,
+                            pX = pageXOffset,
+                            pY = pageYOffset,
+                            re = new RegExp('^' + evt.treePath),
+                            vis;
 
-            });
-            $spn.removeClass('active').trigger('mouseout');
-            task.done = false;
-            task.active = false;
-            task.events.forEach(function (e) {
+                        vis = offset.top < (pY + wh) && offset.top > pY
+                              && offset.left < pX + ww && offset.left > pX;
 
-                e.done = false;
+                        if (vis && evt.type === e.type
+                            && treePath.match(re)
+                            && evt.location === e.location) {
 
-            });
-            if (!step) {
+                            evt.done = true;
+                            if (evt.alternate && evt.alternate.length) {
 
-                this.resetTasklist();
-                this.appMode = 'record';
-                this.toggleRecMode();
+                                evt.alternate.forEach(function (i) {
 
-            } else {
+                                    evts[i].done = true;
 
-                var cs = step - 1,
-                    ctask = this.testCase[cs];
+                                });
 
-                this.currentTask = ctask;
-                $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
-                ctask.active = true;
-                ctask.done = false;
-                ctask.events.forEach(function (e) {
-
-                    e.done = false;
-
-                });
-
-            }
-
-        };
-
-        this.checkTaskCompletion = function () {
-
-            var e = this.currentEvent,
-                el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = this.currentTask ? this.currentTask.events : null;
-
-            if (e && evts && evts.length) {
-
-                for (var i = 0, len = evts.length; i < len; i++) {
-
-                    var evt = evts[i],
-                        treePath = e.treePath,
-                        offset = $(el).offset(),
-                        ww = window.innerWidth,
-                        wh = window.innerHeight,
-                        pX = pageXOffset,
-                        pY = pageYOffset,
-                        re = new RegExp('^' + evt.treePath),
-                        vis;
-
-                    vis = offset.top < (pY + wh) && offset.top > pY
-                          && offset.left < pX + ww && offset.left > pX;
-
-                    if (vis && evt.type === e.type
-                        && treePath.match(re)
-                        && evt.location === e.location) {
-
-                        evt.done = true;
-                        if (evt.alternate && evt.alternate.length) {
-
-                            evt.alternate.forEach(function (i) {
-
-                                evts[i].done = true;
-
-                            });
+                            }
+                            break;
 
                         }
-                        break;
+
+                    }
+
+                    if (!evts.filter(function (e) {
+
+                            return !e.done;
+
+                        }).length) {
+
+                        this.activateTaskStep(this.currentTask.step + 1);
 
                     }
 
                 }
 
-                if (!evts.filter(function (e) {
+            };
 
-                        return !e.done;
+            this.resetApp = function (mode, path, restore) {
 
-                    }).length) {
+                localStorage.removeItem('Stroller.active');
+                localStorage.removeItem('Stroller.name');
+                localStorage.removeItem('Stroller.price');
+                localStorage.removeItem('Stroller.stroller');
+                localStorage.removeItem('Stroller.modules.Base');
+                localStorage.removeItem('Stroller.modules.Frame');
+                localStorage.removeItem('Stroller.modules.TF');
+                sessionStorage.removeItem('basket');
+                this.appMode = mode;
+                if (!restore && path /*&& window.location.pathname !== path*/) {
 
-                    this.activateTaskStep(this.currentTask.step + 1);
+                    window.location.pathname = path;
 
                 }
 
-            }
+            };
 
-        };
+            this.resetTasklist = function () {
 
-        this.resetApp = function (mode, path, restore) {
+                var $tb = $(this.getDomElement('taskBar')),
+                    tl = this.testCase,
+                    $tasks = $('div', $tb),
+                    w = $tb.outerHeight(),
+                    rp = window.innerWidth - w * (tl.length),
+                    d;
 
-            localStorage.removeItem('Stroller.active');
-            localStorage.removeItem('Stroller.name');
-            localStorage.removeItem('Stroller.price');
-            localStorage.removeItem('Stroller.stroller');
-            localStorage.removeItem('Stroller.modules.Base');
-            localStorage.removeItem('Stroller.modules.Frame');
-            localStorage.removeItem('Stroller.modules.TF');
-            sessionStorage.removeItem('basket');
-            this.appMode = mode;
-            if (!restore && path /*&& window.location.pathname !== path*/) {
+                tl.forEach(function (t, i) {
 
-                window.location.pathname = path;
+                    t.done = false;
+                    t.active = false;
+                    t.events.forEach(function (e) {
 
-            }
+                        e.done = false;
 
-        };
-
-        this.resetTasklist = function () {
-
-            var $tb = $(this.getDomElement('taskBar')),
-                tl = this.testCase,
-                $tasks = $('div', $tb),
-                w = $tb.outerHeight(),
-                rp = window.innerWidth - w * (tl.length),
-                d;
-
-            tl.forEach(function (t, i) {
-
-                t.done = false;
-                t.active = false;
-                t.events.forEach(function (e) {
-
-                    e.done = false;
+                    });
+                    d = $tasks[i];
+                    $(d).css('left', rp + w * i);
+                    $('.step-number', d).html(i + 1).removeClass('active');
 
                 });
-                d = $tasks[i];
-                $(d).css('left', rp + w * i);
-                $('.step-number', d).html(i + 1).removeClass('active');
+
+                this.currentTask = null;
+                this.currentEvent = null;
+                sessionStorage.removeItem('dcipherState');
+
+            };
+
+            this.highlightTimeLineEvent = function (e) {
+
+                var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
+                    evt = evts ? evts[0] : null,
+                    rec = evt ? this.getRecordById(evt.recId) : null,
+                    tl = this.getDomElement('timeline'),
+                    $tlc = $(this.getDomElement('timelineCircle'));
+
+                if (rec && rec.active) {
+
+                    $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
+
+                } else if (e.target === tl) {
+
+                    $tlc.hide();
+
+                }
+
+            };
+
+            this.getTimeLineCursorPars = function (time, duration) {
+
+                var offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                    tl = this.getDomElement('timeline'),
+                    $tlc = $(this.getDomElement('timelineCursor')),
+                    width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
+                    pxs = width / duration,
+                    top = $(tl).height() / 2,
+                    left = this.timeLineOffsetLeft + pxs * time;
+
+                return {
+
+                    top: top,
+                    left: left
+                }
+
+            };
+
+        }; // End of DCipher class
+
+        var dCipher = new DCipher();
+
+        function initDomElements() {
+
+            var bdy = document.getElementsByTagName('body')[0],
+                dMain = document.createElement('div'),
+                link = document.createElement('link'),
+                cnvDiv = document.createElement('div'),
+                stat = document.createElement('div'),
+                menu = document.createElement('div'),
+                butRec = document.createElement('div'),
+                rec = document.createElement('div'),
+                butPlay = document.createElement('div'),
+                play = document.createElement('div'),
+                butList = document.createElement('div'),
+                recs = document.createElement('div'),
+                recList = document.createElement('div'),
+                click = document.createElement('div'),
+                dblclick = document.createElement('div'),
+                evtHlt = document.createElement('div'),
+                cursor = document.createElement('div'),
+                mTT = document.createElement('div'),
+                eInf = document.createElement('div'),
+                tLine = document.createElement('div'),
+                tlTT = document.createElement('div'),
+                tlCursor = document.createElement('div'),
+                tlCursorBg = document.createElement('div'),
+                tlCircle = document.createElement('div'),
+                tlInfo = document.createElement('div'),
+                tlCnv = document.createElement('canvas');
+            topMenu = document.createElement('div'),
+                taskBar = document.createElement('div'),
+                startTest = document.createElement('span'),
+
+                // D-Cipher container
+                dMain.id = dCipher.domId.container;
+            bdy.appendChild(dMain);
+
+            // Init styles
+            link.rel = 'stylesheet';
+            link.type = 'text/css';
+            link.media = 'all';
+            link.href = dCipher.baseURL + dCipher.cssURL;
+            bdy.insertBefore(link, document.getElementById(dMain.id));
+
+            // Init canvas holder
+            cnvDiv.id = dCipher.domId.canvasHolder;
+            cnvDiv.width = window.innerWidth;
+            cnvDiv.height = window.innerHeight;
+            dMain.appendChild(cnvDiv);
+
+            // Status bar
+            stat.id = dCipher.domId.stat;
+            dMain.appendChild(stat);
+
+            // Click spot
+            click.id = dCipher.domId.click;
+            cnvDiv.appendChild(click);
+
+            // Double click spot
+            dblclick.id = dCipher.domId.dblClick;
+            cnvDiv.appendChild(dblclick);
+
+            // Highlight event spot
+            evtHlt.id = dCipher.domId.highlightEvent;
+            cnvDiv.appendChild(evtHlt);
+
+            // Cursor
+            cursor.id = dCipher.domId.cursor;
+            cnvDiv.appendChild(cursor);
+
+            // Time line
+            tLine.id = dCipher.domId.timeline;
+            tlInfo.id = dCipher.domId.timelineInfo;
+            tlCursor.id = dCipher.domId.timelineCursor;
+            tlCursorBg.className = 'cursor-bg';
+            tlCircle.id = dCipher.domId.timelineCircle;
+            tLine.appendChild(tlCursorBg);
+            tLine.appendChild(tlInfo);
+            tLine.appendChild(tlCursor);
+            tLine.appendChild(tlCnv);
+            tLine.appendChild(tlCircle);
+            cnvDiv.appendChild(tLine);
+
+            // Time line event info popup
+            tlTT.id = dCipher.domId.timelineTooltip;
+            dMain.appendChild(tlTT);
+
+            // Mouse tooltip
+            mTT.id = dCipher.domId.mTooltip;
+            dMain.appendChild(mTT);
+
+            // Event info popup
+            eInf.id = dCipher.domId.eventInfo;
+            dMain.appendChild(eInf);
+
+            // Record button
+            butRec.id = dCipher.domId.butRecord;
+            butRec.className = 'btn rec';
+            butRec.title = dCipher.loc._Record_session;
+            rec.className = 'rec';
+            butRec.appendChild(rec);
+            topMenu.appendChild(butRec);
+
+            // Play button
+            butPlay.id = dCipher.domId.butPlay;
+            butPlay.className = 'btn play';
+            butPlay.title = dCipher.loc._Play_record;
+            play.className = 'play';
+            //butPlay.style.display = 'none';
+            butPlay.appendChild(play);
+            topMenu.appendChild(butPlay);
+
+            // Record list button
+            butList.id = dCipher.domId.butList;
+            butList.className = 'btn';
+            recs.className = 'recs';
+            butList.title = dCipher.loc._Show_records;
+            butList.appendChild(recs);
+
+            // Record list
+            recList.id = 'd-cipher-rec-list';
+
+            // D-Cipher menu
+            menu.id = dCipher.domId.menu;
+            //menu.appendChild(butRec);
+            //menu.appendChild(butPlay);
+            menu.appendChild(butList);
+            dMain.appendChild(menu);
+            dMain.appendChild(recList);
+
+            // Top menu
+            topMenu.id = dCipher.domId.topMenu;
+            taskBar.id = dCipher.domId.taskBar;
+            //taskBar.innerHTML = dCipher.loc._Start_task;
+            startTest.className = 'start-test';
+            startTest.innerHTML = dCipher.loc._Start_test;
+            taskBar.appendChild(startTest);
+            topMenu.appendChild(taskBar);
+            bdy.insertBefore(topMenu, bdy.firstChild);
+
+            cnvDiv.addEventListener('click', function (e) {
+
+                dCipher.canvasHolderClickHandler(e, dCipher);
 
             });
 
-            this.currentTask = null;
-            this.currentEvent = null;
-            sessionStorage.removeItem('dcipherState');
-
-        };
-
-        this.highlightTimeLineEvent = function (e) {
-
-            var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
-                evt = evts ? evts[0] : null,
-                rec = evt ? this.getRecordById(evt.recId) : null,
-                tl = this.getDomElement('timeline'),
-                $tlc = $(this.getDomElement('timelineCircle'));
-
-            if (rec && rec.active) {
-
-                $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
-
-            } else if (e.target === tl) {
-
-                $tlc.hide();
-
-            }
-
-        };
-
-        this.getTimeLineCursorPars = function (time, duration) {
-
-            var offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                tl = this.getDomElement('timeline'),
-                $tlc = $(this.getDomElement('timelineCursor')),
-                width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
-                pxs = width / duration,
-                top = $(tl).height() / 2,
-                left = this.timeLineOffsetLeft + pxs * time;
-
-            return {
-
-                top: top,
-                left: left
-            }
-
-        };
-
-    }; // End of DCipher class
-
-    var dCipher = new DCipher();
-
-    function initDomElements() {
-
-        var bdy = document.getElementsByTagName('body')[0],
-            dMain = document.createElement('div'),
-            link = document.createElement('link'),
-            cnvDiv = document.createElement('div'),
-            stat = document.createElement('div'),
-            menu = document.createElement('div'),
-            butRec = document.createElement('div'),
-            rec = document.createElement('div'),
-            butPlay = document.createElement('div'),
-            play = document.createElement('div'),
-            butList = document.createElement('div'),
-            recs = document.createElement('div'),
-            recList = document.createElement('div'),
-            click = document.createElement('div'),
-            dblclick = document.createElement('div'),
-            evtHlt = document.createElement('div'),
-            cursor = document.createElement('div'),
-            mTT = document.createElement('div'),
-            eInf = document.createElement('div'),
-            tLine = document.createElement('div'),
-            tlTT = document.createElement('div'),
-            tlCursor = document.createElement('div'),
-            tlCircle = document.createElement('div'),
-            tlInfo = document.createElement('div'),
-            topMenu = document.createElement('div'),
-            taskBar = document.createElement('div'),
-            startTest = document.createElement('span'),
-            tlCnv = document.createElement('canvas');
-
-        // D-Cipher container
-        dMain.id = dCipher.domId.container;
-        bdy.appendChild(dMain);
-
-        // Init styles
-        link.rel = 'stylesheet';
-        link.type = 'text/css';
-        link.media = 'all';
-        link.href = dCipher.baseURL + dCipher.cssURL;
-        bdy.insertBefore(link, document.getElementById(dMain.id));
-
-        // Init canvas holder
-        cnvDiv.id = dCipher.domId.canvasHolder;
-        cnvDiv.width = window.innerWidth;
-        cnvDiv.height = window.innerHeight;
-        dMain.appendChild(cnvDiv);
-
-        // Status bar
-        stat.id = dCipher.domId.stat;
-        dMain.appendChild(stat);
-
-        // Click spot
-        click.id = dCipher.domId.click;
-        cnvDiv.appendChild(click);
-
-        // Double click spot
-        dblclick.id = dCipher.domId.dblClick;
-        cnvDiv.appendChild(dblclick);
-
-        // Highlight event spot
-        evtHlt.id = dCipher.domId.highlightEvent;
-        cnvDiv.appendChild(evtHlt);
-
-        // Cursor
-        cursor.id = dCipher.domId.cursor;
-        cnvDiv.appendChild(cursor);
-
-        // Time line
-        tLine.id = dCipher.domId.timeline;
-        tlInfo.id = dCipher.domId.timelineInfo;
-        tlCursor.id = dCipher.domId.timelineCursor;
-        tlCircle.id = dCipher.domId.timelineCircle;
-        tLine.appendChild(tlCnv);
-        tLine.appendChild(tlInfo);
-        tLine.appendChild(tlCursor);
-        tLine.appendChild(tlCircle);
-        cnvDiv.appendChild(tLine);
+            tlCnv.addEventListener('mousemove', function (e) {
 
-        // Time line event info popup
-        tlTT.id = dCipher.domId.timelineTooltip;
-        dMain.appendChild(tlTT);
+                dCipher.showTLTooltip(e);
 
-        // Mouse tooltip
-        mTT.id = dCipher.domId.mTooltip;
-        dMain.appendChild(mTT);
+            });
 
-        // Event info popup
-        eInf.id = dCipher.domId.eventInfo;
-        dMain.appendChild(eInf);
+            tlCnv.addEventListener('click', function (e) {
 
-        // Record button
-        butRec.id = dCipher.domId.butRecord;
-        butRec.className = 'btn rec';
-        butRec.title = dCipher.loc._Record_session;
-        rec.className = 'rec';
-        butRec.appendChild(rec);
-        topMenu.appendChild(butRec);
+                var evt = dCipher.getTimelineEvent(e);
 
-        // Play button
-        butPlay.id = dCipher.domId.butPlay;
-        butPlay.className = 'btn play';
-        butPlay.title = dCipher.loc._Play_record;
-        play.className = 'play';
-        //butPlay.style.display = 'none';
-        butPlay.appendChild(play);
-        topMenu.appendChild(butPlay);
+                if (evt) {
 
-        // Record list button
-        butList.id = dCipher.domId.butList;
-        butList.className = 'btn';
-        recs.className = 'recs';
-        butList.title = dCipher.loc._Show_records;
-        butList.appendChild(recs);
+                    dCipher.showTimelineEvent(evt.event);
 
-        // Record list
-        recList.id = 'd-cipher-rec-list';
+                }
 
-        // D-Cipher menu
-        menu.id = dCipher.domId.menu;
-        //menu.appendChild(butRec);
-        //menu.appendChild(butPlay);
-        menu.appendChild(butList);
-        dMain.appendChild(menu);
-        dMain.appendChild(recList);
+            });
 
-        // Top menu
-        topMenu.id = dCipher.domId.topMenu;
-        taskBar.id = dCipher.domId.taskBar;
-        //taskBar.innerHTML = dCipher.loc._Start_task;
-        startTest.className = 'start-test';
-        startTest.innerHTML = dCipher.loc._Start_test;
-        taskBar.appendChild(startTest);
-        topMenu.appendChild(taskBar);
-        bdy.insertBefore(topMenu, bdy.firstChild);
+            butRec.addEventListener('click', function (e) {
 
-        cnvDiv.addEventListener('click', function (e) {
+                e.stopPropagation();
+                if (dCipher.appMode === 'test') {
+                    dCipher.resetTasklist();
 
-            dCipher.canvasHolderClickHandler(e, dCipher);
+                }
+                dCipher.toggleRecMode(e);
 
-        });
+            });
 
-        tlCnv.addEventListener('mousemove', function (e) {
+            butPlay.addEventListener('click', function () {
 
-            dCipher.showTLTooltip(e);
+                var sId = dCipher.sessionId;
 
-        });
+                if (sId) {
 
-        tlCnv.addEventListener('click', function (e) {
+                    dCipher.playSession(sId);
 
-            dCipher.showTimelineEvent(dCipher.getTimelineEvent(e).event);
+                }
 
-        });
+            });
 
-        butRec.addEventListener('click', function (e) {
+            butList.addEventListener('click', function () {
 
-            e.stopPropagation();
-            if (dCipher.appMode === 'test') {
-                dCipher.resetTasklist();
+                dCipher.toggleRecList(this);
 
-            }
-            dCipher.toggleRecMode(e);
+            });
 
-        });
+            startTest.addEventListener('click', function () {
 
-        butPlay.addEventListener('click', function () {
+                dCipher.activateTaskStep(0);
 
-            var sId = dCipher.sessionId;
+            });
 
-            if (sId) {
-
-                dCipher.playSession(sId);
-
-            }
-
-        });
-
-        butList.addEventListener('click', function () {
-
-            dCipher.toggleRecList(this);
-
-        });
-
-        startTest.addEventListener('click', function () {
-
-            dCipher.activateTaskStep(0);
-
-        });
-
-        window.addEventListener('click', function (e) {
-
-            dCipher.saveEvent(e);
-
-        });
-
-        window.addEventListener('mousedown', function (e) {
-
-            dCipher.saveEvent(e);
-
-        });
-
-        window.addEventListener('mouseup', function (e) {
-
-            dCipher.saveEvent(e);
-
-        });
-
-        window.addEventListener('dragstart', function (e) {
-
-            dCipher.saveEvent(e);
-
-        });
-
-        window.addEventListener('dragend', function (e) {
-
-            dCipher.saveEvent(e);
-
-        });
-
-        window.addEventListener('keydown', function (e) {
-
-            if (e.keyCode === 27) {
-
-                dCipher.resetState();
-
-            } else {
+            window.addEventListener('click', function (e) {
 
                 dCipher.saveEvent(e);
 
-            }
+            });
 
-        });
+            window.addEventListener('mousedown', function (e) {
 
-        window.addEventListener('wheel', function (e) {
+                dCipher.saveEvent(e);
 
-            dCipher.saveEvent(e);
+            });
 
-        });
+            window.addEventListener('mouseup', function (e) {
 
-        window.addEventListener('resize', function (e) {
+                dCipher.saveEvent(e);
 
-            var $recs = $(dCipher.getDomElement('records'));
+            });
 
-            clearTimeout($recs.data('tid'));
+            window.addEventListener('dragstart', function (e) {
 
-            $recs.data('tid', setTimeout(function () {
+                dCipher.saveEvent(e);
 
-                dCipher.createRecordList(e);
+            });
 
-            }, 500));
+            window.addEventListener('dragend', function (e) {
 
-        });
+                dCipher.saveEvent(e);
 
-        window.addEventListener('beforeunload', function () {
+            });
 
-            dCipher.saveState();
+            window.addEventListener('keydown', function (e) {
 
-        });
+                if (e.keyCode === 27) {
 
-        overridePrototype();
+                    dCipher.resetState();
 
-        /*
-         var observer = new MutationObserver(function (mutations) {
+                } else {
 
-         for (var i = 0, len = mutations.length; i < len; i++) {
+                    dCipher.saveEvent(e);
 
-         for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+                }
 
-         var node = mutations[i].addedNodes[j];
+            });
 
-         for (var p in node) {
+            window.addEventListener('wheel', function (e) {
 
-         if (node.className === 'colorpicker-hot-spot') {
+                dCipher.saveEvent(e);
 
-         console.debug('########### NODE: ', node);
+            });
 
-         }
+            window.addEventListener('resize', function (e) {
 
-         if (p.hasOwnProperty(p) && p.match(/^onmouse/i)){
+                var $recs = $(dCipher.getDomElement('records'));
 
-         node.addEventListener(p.substring(2), function () {
+                clearTimeout($recs.data('tid'));
 
-         dCipher.saveEvent(e);
+                $recs.data('tid', setTimeout(function () {
 
-         });
-         console.debug('====> MUTATION OBSERVER: added listener to node', node);
+                    dCipher.createRecordList(e);
 
-         }
+                }, 500));
 
-         }
+            });
 
-         }
+            window.addEventListener('beforeunload', function () {
 
-         }
+                dCipher.saveState();
 
-         });
-         observer.observe(bdy, { childList: true });
-         */
+            });
 
-        setTimeout(checkJQuery, 500);
+            overridePrototype();
 
-    }
+            /*
+             var observer = new MutationObserver(function (mutations) {
 
-    function checkJQuery(cnt) {
+             for (var i = 0, len = mutations.length; i < len; i++) {
 
-        cnt = isNaN(cnt) ? 50 : cnt;
+             for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
 
-        if (window.jQuery || window.$) {
+             var node = mutations[i].addedNodes[j];
 
-            console.debug('Found jQuery, init IndexedDB...');
-            initJQueryPlugins();
-            if ($.indexedDB) {
+             for (var p in node) {
 
-                console.debug('IndexedDB initialized, initialize D-Cipher.');
-                dCipher.init();
+             if (node.className === 'colorpicker-hot-spot') {
 
-            }
+             console.debug('########### NODE: ', node);
 
-        } else {
+             }
 
-            cnt--;
+             if (p.hasOwnProperty(p) && p.match(/^onmouse/i)){
 
-            if (cnt) {
+             node.addEventListener(p.substring(2), function () {
 
-                checkJQuery(cnt);
+             dCipher.saveEvent(e);
+
+             });
+             console.debug('====> MUTATION OBSERVER: added listener to node', node);
+
+             }
+
+             }
+
+             }
+
+             }
+
+             });
+             observer.observe(bdy, { childList: true });
+             */
+
+            setTimeout(checkJQuery, 500);
+
+        }
+
+        function checkJQuery(cnt) {
+
+            cnt = isNaN(cnt) ? 50 : cnt;
+
+            if (window.jQuery || window.$) {
+
+                console.debug('Found jQuery, init IndexedDB...');
+                initJQueryPlugins();
+                if ($.indexedDB) {
+
+                    console.debug('IndexedDB initialized, initialize D-Cipher.');
+                    dCipher.init();
+
+                }
 
             } else {
 
-                loadJQuery();
+                cnt--;
 
-            }
+                if (cnt) {
 
-        }
+                    checkJQuery(cnt);
 
-    }
+                } else {
 
-    function loadJQuery() {
-
-        console.debug('Loading jQuery');
-
-        var script = document.createElement('script');
-
-        script.async = 'async';
-        script.type = 'text/javascript';
-        script.src = 'jquery-2.1.4.min.js';
-        document.getElementsByTagName('head')[0].appendChild(script);
-        setTimeout(checkJQuery, 500);
-
-    }
-
-    function overridePrototype() {
-
-        Element.prototype._addEventListener = Element.prototype.addEventListener;
-        Element.prototype.addEventListener = function (type, handler, useCapture) {
-
-            useCapture = useCapture === void 0 ? false : useCapture;
-            var node = this;
-
-            node._addEventListener(type, handler, useCapture);
-
-            if (!node.eventListenerList) {
-
-                node.eventListenerList = {};
-
-            }
-
-            if (!node.eventListenerList[type]) {
-
-                node.eventListenerList[type] = [];
-
-                if (handler.toString().match(/stopPropagation|preventDefault/)
-                    || type === 'mouseover' || type === 'mouseout'
-                    || type === 'mouseenter' || type === 'mouseleave'
-                    || type === 'mousedown' || type === 'mouseup'
-                    || type.match(/scroll|wheel/i)
-                ) {
-
-                    node._addEventListener(type, function (e) {
-
-                        dCipher.saveEvent(e);
-
-                    });
-
-                    //console.debug('JS listener --> Element: %s, Event added: ', this, type);
-                    //console.debug('Handler: ', handler.toString());
+                    loadJQuery();
 
                 }
 
             }
 
-            node.eventListenerList[type].push({
+        }
 
-                type: type,
-                handler: handler,
-                useCapture: useCapture
+        function loadJQuery() {
 
-            });
+            console.debug('Loading jQuery');
 
-        };
+            var script = document.createElement('script');
 
-        Element.prototype._removeEventListener = Element.prototype.removeEventListener;
-        Element.prototype.removeEventListener = function (type, handler, useCapture) {
+            script.async = 'async';
+            script.type = 'text/javascript';
+            script.src = 'jquery-2.1.4.min.js';
+            document.getElementsByTagName('head')[0].appendChild(script);
+            setTimeout(checkJQuery, 500);
 
-            var node = this;
+        }
 
-            node._removeEventListener(type, handler, useCapture);
+        function overridePrototype() {
 
-            if (node.eventListenerList && node.eventListenerList[type]) {
+            Element.prototype._addEventListener = Element.prototype.addEventListener;
+            Element.prototype.addEventListener = function (type, handler, useCapture) {
 
-                node.eventListenerList[type] = node.eventListenerList[type].filter(function (listener) {
+                useCapture = useCapture === void 0 ? false : useCapture;
+                var node = this;
 
-                    return listener.handler.toString() !== handler.toString();
+                node._addEventListener(type, handler, useCapture);
+
+                if (!node.eventListenerList) {
+
+                    node.eventListenerList = {};
+
+                }
+
+                if (!node.eventListenerList[type]) {
+
+                    node.eventListenerList[type] = [];
+
+                    if (handler.toString().match(/stopPropagation|preventDefault/)
+                        || type === 'mouseover' || type === 'mouseout'
+                        || type === 'mouseenter' || type === 'mouseleave'
+                        || type === 'mousedown' || type === 'mouseup'
+                        || type.match(/scroll|wheel/i)
+                    ) {
+
+                        node._addEventListener(type, function (e) {
+
+                            dCipher.saveEvent(e);
+
+                        });
+
+                        //console.debug('JS listener --> Element: %s, Event added: ', this, type);
+                        //console.debug('Handler: ', handler.toString());
+
+                    }
+
+                }
+
+                node.eventListenerList[type].push({
+
+                    type: type,
+                    handler: handler,
+                    useCapture: useCapture
 
                 });
 
-                if (node.eventListenerList[type].length === 0) {
-
-                    delete node.eventListenerList[type];
-                    node._removeEventListener(type, function (e) {
-
-                        dCipher.saveEvent(e);
-
-                    });
-
-                }
-
-            }
-
-        }
-
-    }
-
-    document.addEventListener('DOMContentLoaded', initDomElements);
-
-})(window, document);
-
-// jQuery plugins
-function initJQueryPlugins() {
-
-    initColorPicker();
-    initIndexedDB();
-
-    $.extend({
-
-        newGuid: function () {
-
-            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
-
-                var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8;
-                return v.toString(16);
-
-            });
-
-        }
-
-    });
-
-};
-
-// Indexed DB
-function initIndexedDB() {
-
-    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-    var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-    var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
-
-    IDBCursor.PREV = IDBCursor.PREV || "prev";
-    IDBCursor.NEXT = IDBCursor.NEXT || "next";
-
-    /**
-     * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
-     * supports strings
-     */
-    var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-
-    function getDefaultTransaction(mode) {
-        var result = null;
-        switch (mode) {
-            case 0:
-            case 1:
-            case "readwrite":
-            case "readonly":
-                result = mode;
-                break;
-            default:
-                result = IDBTransaction.READ_WRITE || "readwrite";
-        }
-        return result;
-    }
-
-    $.extend({
-        /**
-         * The IndexedDB object used to open databases
-         * @param {Object} dbName - name of the database
-         * @param {Object} config - version, onupgradeneeded, onversionchange, schema
-         */
-        "indexedDB": function (dbName, config) {
-            if (config) {
-                // Parse the config argument
-                if (typeof config === "number") config = {
-                    "version": config
-                };
-
-                var version = config.version;
-                if (config.schema && !version) {
-                    var max = -1;
-                    for (key in config.schema) {
-                        max = max > key ? max : key;
-                    }
-                    version = config.version || max;
-                }
-            }
-
-            var wrap = {
-                "request": function (req, args) {
-                    return $.Deferred(function (dfd) {
-                        try {
-                            var idbRequest = typeof req === "function" ? req(args) : req;
-                            idbRequest.onsuccess = function (e) {
-                                //console.log("Success", idbRequest, e, this);
-                                dfd.resolveWith(idbRequest, [idbRequest.result, e]);
-                            };
-                            idbRequest.onerror = function (e) {
-                                //console.log("Error", idbRequest, e, this);
-                                dfd.rejectWith(idbRequest, [idbRequest.error, e]);
-                            };
-                            if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
-                                idbRequest.onblocked = function (e) {
-                                    //console.log("Blocked", idbRequest, e, this);
-                                    var res;
-                                    try {
-                                        res = idbRequest.result;
-                                    }
-                                    catch (e) {
-                                        res = null; // Required for Older Chrome versions, accessing result causes error
-                                    }
-                                    dfd.notifyWith(idbRequest, [res, e]);
-                                };
-                            }
-                            if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
-                                idbRequest.onupgradeneeded = function (e) {
-                                    //console.log("Upgrade", idbRequest, e, this);
-                                    dfd.notifyWith(idbRequest, [idbRequest.result, e]);
-                                };
-                            }
-                        }
-                        catch (e) {
-                            e.name = "exception";
-                            dfd.rejectWith(idbRequest, ["exception", e]);
-                        }
-                    });
-                },
-                // Wraps the IDBTransaction to return promises, and other dependent methods
-                "transaction": function (idbTransaction) {
-                    return {
-                        "objectStore": function (storeName) {
-                            try {
-                                return wrap.objectStore(idbTransaction.objectStore(storeName));
-                            }
-                            catch (e) {
-                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                                return wrap.objectStore(null);
-                            }
-                        },
-                        "createObjectStore": function (storeName, storeParams) {
-                            try {
-                                return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
-                            }
-                            catch (e) {
-                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                            }
-                        },
-                        "deleteObjectStore": function (storeName) {
-                            try {
-                                idbTransaction.db.deleteObjectStore(storeName);
-                            }
-                            catch (e) {
-                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                            }
-                        },
-                        "abort": function () {
-                            idbTransaction.abort();
-                        }
-                    };
-                },
-                "objectStore": function (idbObjectStore) {
-                    var result = {};
-                    // Define CRUD operations
-                    var crudOps = ["add", "put", "get", "delete", "clear", "count"];
-                    for (var i = 0; i < crudOps.length; i++) {
-                        result[crudOps[i]] = (function (op) {
-                            return function () {
-                                return wrap.request(function (args) {
-                                    return idbObjectStore[op].apply(idbObjectStore, args);
-                                }, arguments);
-                            };
-                        })(crudOps[i]);
-                    }
-
-                    result.each = function (callback, range, direction) {
-                        return wrap.cursor(function () {
-                            if (direction) {
-                                return idbObjectStore.openCursor(wrap.range(range), direction);
-                            } else {
-                                return idbObjectStore.openCursor(wrap.range(range));
-                            }
-                        }, callback);
-                    };
-
-                    result.index = function (name) {
-                        return wrap.index(function () {
-                            return idbObjectStore.index(name);
-                        });
-                    };
-
-                    result.createIndex = function (prop, options, indexName) {
-                        if (arguments.length === 2 && typeof options === "string") {
-                            indexName = arguments[1];
-                            options = null;
-                        }
-                        if (!indexName) {
-                            indexName = prop;
-                        }
-                        return wrap.index(function () {
-                            return idbObjectStore.createIndex(indexName, prop, options);
-                        });
-                    };
-
-                    result.deleteIndex = function (indexName) {
-                        return idbObjectStore.deleteIndex(indexName);
-                    };
-
-                    return result;
-                },
-
-                "range": function (r) {
-                    if ($.isArray(r)) {
-                        if (r.length === 1) {
-                            return IDBKeyRange.only(r[0]);
-                        } else {
-                            return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
-                        }
-                    } else if (typeof r === "undefined") {
-                        return null;
-                    } else {
-                        return r;
-                    }
-                },
-
-                "cursor": function (idbCursor, callback) {
-                    return $.Deferred(function (dfd) {
-                        try {
-                            //console.log("Cursor request created", idbCursor);
-                            var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
-                            cursorReq.onsuccess = function (e) {
-                                //console.log("Cursor successful");
-                                if (!cursorReq.result) {
-                                    dfd.resolveWith(cursorReq, [null, e]);
-                                    return;
-                                }
-                                var elem = {
-                                    // Delete, update do not move
-                                    "delete": function () {
-                                        return wrap.request(function () {
-                                            return cursorReq.result["delete"]();
-                                        });
-                                    },
-                                    "update": function (data) {
-                                        return wrap.request(function () {
-                                            return cursorReq.result["update"](data);
-                                        });
-                                    },
-                                    "next": function (key) {
-                                        this.data = key;
-                                    },
-                                    "key": cursorReq.result.key,
-                                    "value": cursorReq.result.value
-                                };
-                                //console.log("Cursor in progress", elem, e);
-                                dfd.notifyWith(cursorReq, [elem, e]);
-                                var result = callback.apply(cursorReq, [elem]);
-                                //console.log("Iteration function returned", result);
-                                try {
-                                    if (result === false) {
-                                        dfd.resolveWith(cursorReq, [null, e]);
-                                    } else if (typeof result === "number") {
-                                        cursorReq.result["advance"].apply(cursorReq.result, [result]);
-                                    } else {
-                                        if (elem.data) cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
-                                        else cursorReq.result["continue"]();
-                                    }
-                                }
-                                catch (e) {
-                                    //console.log("Exception when trying to advance cursor", cursorReq, e);
-                                    dfd.rejectWith(cursorReq, [cursorReq.result, e]);
-                                }
-                            };
-                            cursorReq.onerror = function (e) {
-                                //console.log("Cursor request errored out", e);
-                                dfd.rejectWith(cursorReq, [cursorReq.result, e]);
-                            };
-                        }
-                        catch (e) {
-                            //console.log("An exception occured inside cursor", cursorReq, e);
-                            e.type = "exception";
-                            dfd.rejectWith(cursorReq, [null, e]);
-                        }
-                    });
-                },
-
-                "index": function (index) {
-                    try {
-                        var idbIndex = (typeof index === "function" ? index() : index);
-                    }
-                    catch (e) {
-                        idbIndex = null;
-                    }
-                    //console.logidbIndex, index);
-                    return {
-                        "each": function (callback, range, direction) {
-                            return wrap.cursor(function () {
-                                if (direction) {
-                                    return idbIndex.openCursor(wrap.range(range), direction);
-                                } else {
-                                    return idbIndex.openCursor(wrap.range(range));
-                                }
-
-                            }, callback);
-                        },
-                        "eachKey": function (callback, range, direction) {
-                            return wrap.cursor(function () {
-                                if (direction) {
-                                    return idbIndex.openKeyCursor(wrap.range(range), direction);
-                                } else {
-                                    return idbIndex.openKeyCursor(wrap.range(range));
-                                }
-                            }, callback);
-                        },
-                        "get": function (key) {
-                            if (typeof idbIndex.get === "function") {
-                                return wrap.request(idbIndex.get(key));
-                            } else {
-                                return idbIndex.openCursor(wrap.range(key));
-                            }
-                        },
-                        "getKey": function (key) {
-                            if (typeof idbIndex.getKey === "function") {
-                                return wrap.request(idbIndex.getKey(key));
-                            } else {
-                                return idbIndex.openKeyCursor(wrap.range(key));
-                            }
-                        }
-                    };
-                }
             };
 
-            // Start with opening the database
-            var dbPromise = wrap.request(function () {
-                //console.log("Trying to open DB with", version);
-                return version ? indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
-            });
-            dbPromise.then(function (db, e) {
-                //console.log("DB opened at", db.version);
-                db.onversionchange = function () {
-                    // Try to automatically close the database if there is a version change request
-                    if (!(config && config.onversionchange && config.onversionchange() !== false)) {
-                        db.close();
+            Element.prototype._removeEventListener = Element.prototype.removeEventListener;
+            Element.prototype.removeEventListener = function (type, handler, useCapture) {
+
+                var node = this;
+
+                node._removeEventListener(type, handler, useCapture);
+
+                if (node.eventListenerList && node.eventListenerList[type]) {
+
+                    node.eventListenerList[type] = node.eventListenerList[type].filter(function (listener) {
+
+                        return listener.handler.toString() !== handler.toString();
+
+                    });
+
+                    if (node.eventListenerList[type].length === 0) {
+
+                        delete node.eventListenerList[type];
+                        node._removeEventListener(type, function (e) {
+
+                            dCipher.saveEvent(e);
+
+                        });
+
                     }
-                };
-            }, function (error, e) {
-                //console.logerror, e);
-                // Nothing much to do if an error occurs
-            }, function (db, e) {
-                if (e && e.type === "upgradeneeded") {
-                    if (config && config.schema) {
-                        // Assuming that version is always an integer
-                        //console.log("Upgrading DB to ", db.version);
-                        for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
-                            typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+
+                }
+
+            }
+
+        }
+
+        document.addEventListener('DOMContentLoaded', initDomElements);
+
+    }
+    )
+    (window, document);
+
+// jQuery plugins
+    function initJQueryPlugins() {
+
+        initColorPicker();
+        initIndexedDB();
+
+        $.extend({
+
+            newGuid: function () {
+
+                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+
+                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8;
+                    return v.toString(16);
+
+                });
+
+            }
+
+        });
+
+    };
+
+// Indexed DB
+    function initIndexedDB() {
+
+        var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+        var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+        var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
+
+        IDBCursor.PREV = IDBCursor.PREV || "prev";
+        IDBCursor.NEXT = IDBCursor.NEXT || "next";
+
+        /**
+         * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
+         * supports strings
+         */
+        var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
+
+        function getDefaultTransaction(mode) {
+            var result = null;
+            switch (mode) {
+                case 0:
+                case 1:
+                case "readwrite":
+                case "readonly":
+                    result = mode;
+                    break;
+                default:
+                    result = IDBTransaction.READ_WRITE || "readwrite";
+            }
+            return result;
+        }
+
+        $.extend({
+            /**
+             * The IndexedDB object used to open databases
+             * @param {Object} dbName - name of the database
+             * @param {Object} config - version, onupgradeneeded, onversionchange, schema
+             */
+            "indexedDB": function (dbName, config) {
+                if (config) {
+                    // Parse the config argument
+                    if (typeof config === "number") config = {
+                        "version": config
+                    };
+
+                    var version = config.version;
+                    if (config.schema && !version) {
+                        var max = -1;
+                        for (key in config.schema) {
+                            max = max > key ? max : key;
                         }
-                    }
-                    if (config && typeof config.upgrade === "function") {
-                        config.upgrade.call(this, wrap.transaction(this.transaction));
+                        version = config.version || max;
                     }
                 }
-            });
 
-            return $.extend(dbPromise, {
-                "cmp": function (key1, key2) {
-                    return indexedDB.cmp(key1, key2);
-                },
-                "deleteDatabase": function () {
-                    // Kinda looks ugly coz DB is opened before it needs to be deleted.
-                    // Blame it on the API
-                    return $.Deferred(function (dfd) {
-                        dbPromise.then(function (db, e) {
+                var wrap = {
+                    "request": function (req, args) {
+                        return $.Deferred(function (dfd) {
+                            try {
+                                var idbRequest = typeof req === "function" ? req(args) : req;
+                                idbRequest.onsuccess = function (e) {
+                                    //console.log("Success", idbRequest, e, this);
+                                    dfd.resolveWith(idbRequest, [idbRequest.result, e]);
+                                };
+                                idbRequest.onerror = function (e) {
+                                    //console.log("Error", idbRequest, e, this);
+                                    dfd.rejectWith(idbRequest, [idbRequest.error, e]);
+                                };
+                                if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
+                                    idbRequest.onblocked = function (e) {
+                                        //console.log("Blocked", idbRequest, e, this);
+                                        var res;
+                                        try {
+                                            res = idbRequest.result;
+                                        }
+                                        catch (e) {
+                                            res = null; // Required for Older Chrome versions, accessing result causes error
+                                        }
+                                        dfd.notifyWith(idbRequest, [res, e]);
+                                    };
+                                }
+                                if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
+                                    idbRequest.onupgradeneeded = function (e) {
+                                        //console.log("Upgrade", idbRequest, e, this);
+                                        dfd.notifyWith(idbRequest, [idbRequest.result, e]);
+                                    };
+                                }
+                            }
+                            catch (e) {
+                                e.name = "exception";
+                                dfd.rejectWith(idbRequest, ["exception", e]);
+                            }
+                        });
+                    },
+                    // Wraps the IDBTransaction to return promises, and other dependent methods
+                    "transaction": function (idbTransaction) {
+                        return {
+                            "objectStore": function (storeName) {
+                                try {
+                                    return wrap.objectStore(idbTransaction.objectStore(storeName));
+                                }
+                                catch (e) {
+                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                                    return wrap.objectStore(null);
+                                }
+                            },
+                            "createObjectStore": function (storeName, storeParams) {
+                                try {
+                                    return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
+                                }
+                                catch (e) {
+                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                                }
+                            },
+                            "deleteObjectStore": function (storeName) {
+                                try {
+                                    idbTransaction.db.deleteObjectStore(storeName);
+                                }
+                                catch (e) {
+                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                                }
+                            },
+                            "abort": function () {
+                                idbTransaction.abort();
+                            }
+                        };
+                    },
+                    "objectStore": function (idbObjectStore) {
+                        var result = {};
+                        // Define CRUD operations
+                        var crudOps = ["add", "put", "get", "delete", "clear", "count"];
+                        for (var i = 0; i < crudOps.length; i++) {
+                            result[crudOps[i]] = (function (op) {
+                                return function () {
+                                    return wrap.request(function (args) {
+                                        return idbObjectStore[op].apply(idbObjectStore, args);
+                                    }, arguments);
+                                };
+                            })(crudOps[i]);
+                        }
+
+                        result.each = function (callback, range, direction) {
+                            return wrap.cursor(function () {
+                                if (direction) {
+                                    return idbObjectStore.openCursor(wrap.range(range), direction);
+                                } else {
+                                    return idbObjectStore.openCursor(wrap.range(range));
+                                }
+                            }, callback);
+                        };
+
+                        result.index = function (name) {
+                            return wrap.index(function () {
+                                return idbObjectStore.index(name);
+                            });
+                        };
+
+                        result.createIndex = function (prop, options, indexName) {
+                            if (arguments.length === 2 && typeof options === "string") {
+                                indexName = arguments[1];
+                                options = null;
+                            }
+                            if (!indexName) {
+                                indexName = prop;
+                            }
+                            return wrap.index(function () {
+                                return idbObjectStore.createIndex(indexName, prop, options);
+                            });
+                        };
+
+                        result.deleteIndex = function (indexName) {
+                            return idbObjectStore.deleteIndex(indexName);
+                        };
+
+                        return result;
+                    },
+
+                    "range": function (r) {
+                        if ($.isArray(r)) {
+                            if (r.length === 1) {
+                                return IDBKeyRange.only(r[0]);
+                            } else {
+                                return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
+                            }
+                        } else if (typeof r === "undefined") {
+                            return null;
+                        } else {
+                            return r;
+                        }
+                    },
+
+                    "cursor": function (idbCursor, callback) {
+                        return $.Deferred(function (dfd) {
+                            try {
+                                //console.log("Cursor request created", idbCursor);
+                                var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
+                                cursorReq.onsuccess = function (e) {
+                                    //console.log("Cursor successful");
+                                    if (!cursorReq.result) {
+                                        dfd.resolveWith(cursorReq, [null, e]);
+                                        return;
+                                    }
+                                    var elem = {
+                                        // Delete, update do not move
+                                        "delete": function () {
+                                            return wrap.request(function () {
+                                                return cursorReq.result["delete"]();
+                                            });
+                                        },
+                                        "update": function (data) {
+                                            return wrap.request(function () {
+                                                return cursorReq.result["update"](data);
+                                            });
+                                        },
+                                        "next": function (key) {
+                                            this.data = key;
+                                        },
+                                        "key": cursorReq.result.key,
+                                        "value": cursorReq.result.value
+                                    };
+                                    //console.log("Cursor in progress", elem, e);
+                                    dfd.notifyWith(cursorReq, [elem, e]);
+                                    var result = callback.apply(cursorReq, [elem]);
+                                    //console.log("Iteration function returned", result);
+                                    try {
+                                        if (result === false) {
+                                            dfd.resolveWith(cursorReq, [null, e]);
+                                        } else if (typeof result === "number") {
+                                            cursorReq.result["advance"].apply(cursorReq.result, [result]);
+                                        } else {
+                                            if (elem.data) cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+                                            else cursorReq.result["continue"]();
+                                        }
+                                    }
+                                    catch (e) {
+                                        //console.log("Exception when trying to advance cursor", cursorReq, e);
+                                        dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+                                    }
+                                };
+                                cursorReq.onerror = function (e) {
+                                    //console.log("Cursor request errored out", e);
+                                    dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+                                };
+                            }
+                            catch (e) {
+                                //console.log("An exception occured inside cursor", cursorReq, e);
+                                e.type = "exception";
+                                dfd.rejectWith(cursorReq, [null, e]);
+                            }
+                        });
+                    },
+
+                    "index": function (index) {
+                        try {
+                            var idbIndex = (typeof index === "function" ? index() : index);
+                        }
+                        catch (e) {
+                            idbIndex = null;
+                        }
+                        //console.logidbIndex, index);
+                        return {
+                            "each": function (callback, range, direction) {
+                                return wrap.cursor(function () {
+                                    if (direction) {
+                                        return idbIndex.openCursor(wrap.range(range), direction);
+                                    } else {
+                                        return idbIndex.openCursor(wrap.range(range));
+                                    }
+
+                                }, callback);
+                            },
+                            "eachKey": function (callback, range, direction) {
+                                return wrap.cursor(function () {
+                                    if (direction) {
+                                        return idbIndex.openKeyCursor(wrap.range(range), direction);
+                                    } else {
+                                        return idbIndex.openKeyCursor(wrap.range(range));
+                                    }
+                                }, callback);
+                            },
+                            "get": function (key) {
+                                if (typeof idbIndex.get === "function") {
+                                    return wrap.request(idbIndex.get(key));
+                                } else {
+                                    return idbIndex.openCursor(wrap.range(key));
+                                }
+                            },
+                            "getKey": function (key) {
+                                if (typeof idbIndex.getKey === "function") {
+                                    return wrap.request(idbIndex.getKey(key));
+                                } else {
+                                    return idbIndex.openKeyCursor(wrap.range(key));
+                                }
+                            }
+                        };
+                    }
+                };
+
+                // Start with opening the database
+                var dbPromise = wrap.request(function () {
+                    //console.log("Trying to open DB with", version);
+                    return version ? indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
+                });
+                dbPromise.then(function (db, e) {
+                    //console.log("DB opened at", db.version);
+                    db.onversionchange = function () {
+                        // Try to automatically close the database if there is a version change request
+                        if (!(config && config.onversionchange && config.onversionchange() !== false)) {
                             db.close();
-                            wrap.request(function () {
-                                return indexedDB.deleteDatabase(dbName);
-                            }).then(function (result, e) {
-                                dfd.resolveWith(this, [result, e]);
+                        }
+                    };
+                }, function (error, e) {
+                    //console.logerror, e);
+                    // Nothing much to do if an error occurs
+                }, function (db, e) {
+                    if (e && e.type === "upgradeneeded") {
+                        if (config && config.schema) {
+                            // Assuming that version is always an integer
+                            //console.log("Upgrading DB to ", db.version);
+                            for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
+                                typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+                            }
+                        }
+                        if (config && typeof config.upgrade === "function") {
+                            config.upgrade.call(this, wrap.transaction(this.transaction));
+                        }
+                    }
+                });
+
+                return $.extend(dbPromise, {
+                    "cmp": function (key1, key2) {
+                        return indexedDB.cmp(key1, key2);
+                    },
+                    "deleteDatabase": function () {
+                        // Kinda looks ugly coz DB is opened before it needs to be deleted.
+                        // Blame it on the API
+                        return $.Deferred(function (dfd) {
+                            dbPromise.then(function (db, e) {
+                                db.close();
+                                wrap.request(function () {
+                                    return indexedDB.deleteDatabase(dbName);
+                                }).then(function (result, e) {
+                                    dfd.resolveWith(this, [result, e]);
+                                }, function (error, e) {
+                                    dfd.rejectWith(this, [error, e]);
+                                }, function (db, e) {
+                                    dfd.notifyWith(this, [db, e]);
+                                });
                             }, function (error, e) {
                                 dfd.rejectWith(this, [error, e]);
                             }, function (db, e) {
                                 dfd.notifyWith(this, [db, e]);
                             });
-                        }, function (error, e) {
-                            dfd.rejectWith(this, [error, e]);
-                        }, function (db, e) {
-                            dfd.notifyWith(this, [db, e]);
                         });
-                    });
-                },
-                "transaction": function (storeNames, mode) {
-                    !$.isArray(storeNames) && (storeNames = [storeNames]);
-                    mode = getDefaultTransaction(mode);
-                    return $.Deferred(function (dfd) {
-                        dbPromise.then(function (db, e) {
-                            var idbTransaction;
-                            try {
-                                //console.log("DB Opened, now trying to create a transaction", storeNames, mode);
-                                idbTransaction = db.transaction(storeNames, mode);
-                                //console.log("Created a transaction", idbTransaction, mode, storeNames);
-                                idbTransaction.onabort = idbTransaction.onerror = function (e) {
-                                    dfd.rejectWith(idbTransaction, [e]);
-                                };
-                                idbTransaction.oncomplete = function (e) {
-                                    dfd.resolveWith(idbTransaction, [e]);
-                                };
-                            }
-                            catch (e) {
-                                //console.log("Creating a traction failed", e, storeNames, mode, this);
-                                e.type = "exception";
-                                dfd.rejectWith(this, [e]);
-                                return;
-                            }
-                            try {
-                                dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
-                            }
-                            catch (e) {
-                                e.type = "exception";
-                                dfd.rejectWith(this, [e]);
-                            }
-                        }, function (err, e) {
-                            dfd.rejectWith(this, [e, err]);
-                        }, function (res, e) {
-                            //console.log("Database open is blocked or upgrade needed", res, e.type);
-                            //dfd.notifyWith(this, ["", e]);
-                        });
-
-                    });
-                },
-                "objectStore": function (storeName, mode) {
-                    var me = this, result = {};
-
-                    function op(callback) {
+                    },
+                    "transaction": function (storeNames, mode) {
+                        !$.isArray(storeNames) && (storeNames = [storeNames]);
+                        mode = getDefaultTransaction(mode);
                         return $.Deferred(function (dfd) {
-                            function onTransactionProgress(trans, callback) {
+                            dbPromise.then(function (db, e) {
+                                var idbTransaction;
                                 try {
-                                    //console.log("Finally, returning the object store", trans);
-                                    callback(trans.objectStore(storeName)).then(function (result, e) {
-                                        dfd.resolveWith(this, [result, e]);
-                                    }, function (err, e) {
-                                        dfd.rejectWith(this, [err, e]);
-                                    });
+                                    //console.log("DB Opened, now trying to create a transaction", storeNames, mode);
+                                    idbTransaction = db.transaction(storeNames, mode);
+                                    //console.log("Created a transaction", idbTransaction, mode, storeNames);
+                                    idbTransaction.onabort = idbTransaction.onerror = function (e) {
+                                        dfd.rejectWith(idbTransaction, [e]);
+                                    };
+                                    idbTransaction.oncomplete = function (e) {
+                                        dfd.resolveWith(idbTransaction, [e]);
+                                    };
                                 }
                                 catch (e) {
-                                    //console.log("Duh, an exception occured", e);
-                                    e.name = "exception";
-                                    dfd.rejectWith(trans, [e, e]);
+                                    //console.log("Creating a traction failed", e, storeNames, mode, this);
+                                    e.type = "exception";
+                                    dfd.rejectWith(this, [e]);
+                                    return;
                                 }
-                            }
-
-                            me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
-                                //console.log("Transaction completed");
-                                // Nothing to do when transaction is complete
+                                try {
+                                    dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
+                                }
+                                catch (e) {
+                                    e.type = "exception";
+                                    dfd.rejectWith(this, [e]);
+                                }
                             }, function (err, e) {
-                                // If transaction fails, CrudOp fails
-                                if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
-                                    //console.log("Object Not found, so will try to create one now");
-                                    var db = this.result;
-                                    db.close();
-                                    dbPromise = wrap.request(function () {
-                                        //console.log("Now trying to open the database again", db.version);
-                                        return indexedDB.open(dbName, (parseInt(db.version, 10) || 1) + 1);
-                                    });
-                                    dbPromise.then(function (db, e) {
-                                        //console.log("Database opened, tto open transaction", db.version);
-                                        db.onversionchange = function () {
-                                            // Try to automatically close the database if there is a version change request
-                                            if (!(config && config.onversionchange && config.onversionchange() !== false)) {
-                                                db.close();
-                                            }
-                                        };
-                                        me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
-                                            //console.log("Transaction completed when trying to create object store");
-                                            // Nothing much to do
+                                dfd.rejectWith(this, [e, err]);
+                            }, function (res, e) {
+                                //console.log("Database open is blocked or upgrade needed", res, e.type);
+                                //dfd.notifyWith(this, ["", e]);
+                            });
+
+                        });
+                    },
+                    "objectStore": function (storeName, mode) {
+                        var me = this, result = {};
+
+                        function op(callback) {
+                            return $.Deferred(function (dfd) {
+                                function onTransactionProgress(trans, callback) {
+                                    try {
+                                        //console.log("Finally, returning the object store", trans);
+                                        callback(trans.objectStore(storeName)).then(function (result, e) {
+                                            dfd.resolveWith(this, [result, e]);
                                         }, function (err, e) {
                                             dfd.rejectWith(this, [err, e]);
-                                        }, function (trans, e) {
-                                            //console.log("Transaction in progress, when object store was not found", this, trans, e);
-                                            onTransactionProgress(trans, callback);
                                         });
-                                    }, function (err, e) {
-                                        dfd.rejectWith(this, [err, e]);
-                                    }, function (db, e) {
-                                        if (e.type === "upgradeneeded") {
-                                            try {
-                                                //console.log("Now trying to create an object store", e.type);
-                                                db.createObjectStore(storeName, mode === true ? {
-                                                    "autoIncrement": true
-                                                } : mode);
-                                                //console.log("Object store created", storeName, db);
-                                            }
-                                            catch (ex) {
-                                                //console.log("Exception when trying ot create a new object store", ex);
-                                                dfd.rejectWith(this, [ex, e]);
-                                            }
-                                        }
-                                    });
-                                } else {
-                                    //console.log("Error in transaction inside object store", err);
-                                    dfd.rejectWith(this, [err, e]);
+                                    }
+                                    catch (e) {
+                                        //console.log("Duh, an exception occured", e);
+                                        e.name = "exception";
+                                        dfd.rejectWith(trans, [e, e]);
+                                    }
                                 }
-                            }, function (trans) {
-                                //console.log("Transaction is in progress", trans);
-                                onTransactionProgress(trans, callback);
+
+                                me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
+                                    //console.log("Transaction completed");
+                                    // Nothing to do when transaction is complete
+                                }, function (err, e) {
+                                    // If transaction fails, CrudOp fails
+                                    if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
+                                        //console.log("Object Not found, so will try to create one now");
+                                        var db = this.result;
+                                        db.close();
+                                        dbPromise = wrap.request(function () {
+                                            //console.log("Now trying to open the database again", db.version);
+                                            return indexedDB.open(dbName, (parseInt(db.version, 10) || 1) + 1);
+                                        });
+                                        dbPromise.then(function (db, e) {
+                                            //console.log("Database opened, tto open transaction", db.version);
+                                            db.onversionchange = function () {
+                                                // Try to automatically close the database if there is a version change request
+                                                if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+                                                    db.close();
+                                                }
+                                            };
+                                            me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
+                                                //console.log("Transaction completed when trying to create object store");
+                                                // Nothing much to do
+                                            }, function (err, e) {
+                                                dfd.rejectWith(this, [err, e]);
+                                            }, function (trans, e) {
+                                                //console.log("Transaction in progress, when object store was not found", this, trans, e);
+                                                onTransactionProgress(trans, callback);
+                                            });
+                                        }, function (err, e) {
+                                            dfd.rejectWith(this, [err, e]);
+                                        }, function (db, e) {
+                                            if (e.type === "upgradeneeded") {
+                                                try {
+                                                    //console.log("Now trying to create an object store", e.type);
+                                                    db.createObjectStore(storeName, mode === true ? {
+                                                        "autoIncrement": true
+                                                    } : mode);
+                                                    //console.log("Object store created", storeName, db);
+                                                }
+                                                catch (ex) {
+                                                    //console.log("Exception when trying ot create a new object store", ex);
+                                                    dfd.rejectWith(this, [ex, e]);
+                                                }
+                                            }
+                                        });
+                                    } else {
+                                        //console.log("Error in transaction inside object store", err);
+                                        dfd.rejectWith(this, [err, e]);
+                                    }
+                                }, function (trans) {
+                                    //console.log("Transaction is in progress", trans);
+                                    onTransactionProgress(trans, callback);
+                                });
                             });
-                        });
-                    }
+                        }
 
-                    function crudOp(opName, args) {
-                        return op(function (wrappedObjectStore) {
-                            return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
-                        });
-                    }
+                        function crudOp(opName, args) {
+                            return op(function (wrappedObjectStore) {
+                                return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
+                            });
+                        }
 
-                    function indexOp(opName, indexName, args) {
-                        return op(function (wrappedObjectStore) {
-                            var index = wrappedObjectStore.index(indexName);
-                            return index[opName].apply(index[opName], args);
-                        });
-                    }
+                        function indexOp(opName, indexName, args) {
+                            return op(function (wrappedObjectStore) {
+                                var index = wrappedObjectStore.index(indexName);
+                                return index[opName].apply(index[opName], args);
+                            });
+                        }
 
-                    var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
-                    for (var i = 0; i < crud.length; i++) {
-                        result[crud[i]] = (function (op) {
-                            return function () {
-                                return crudOp(op, arguments);
+                        var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
+                        for (var i = 0; i < crud.length; i++) {
+                            result[crud[i]] = (function (op) {
+                                return function () {
+                                    return crudOp(op, arguments);
+                                };
+                            })(crud[i]);
+                        }
+
+                        result.index = function (indexName) {
+                            return {
+                                "each": function (callback, range, direction) {
+                                    return indexOp("each", indexName, [callback, range, direction]);
+                                },
+                                "eachKey": function (callback, range, direction) {
+                                    return indexOp("eachKey", indexName, [callback, range, direction]);
+                                },
+                                "get": function (key) {
+                                    return indexOp("get", indexName, [key]);
+                                },
+                                "getKey": function (key) {
+                                    return indexOp("getKey", indexName, [key]);
+                                }
                             };
-                        })(crud[i]);
-                    }
-
-                    result.index = function (indexName) {
-                        return {
-                            "each": function (callback, range, direction) {
-                                return indexOp("each", indexName, [callback, range, direction]);
-                            },
-                            "eachKey": function (callback, range, direction) {
-                                return indexOp("eachKey", indexName, [callback, range, direction]);
-                            },
-                            "get": function (key) {
-                                return indexOp("get", indexName, [key]);
-                            },
-                            "getKey": function (key) {
-                                return indexOp("getKey", indexName, [key]);
-                            }
                         };
-                    };
 
-                    return result;
-                }
-            });
-        }
-    });
-
-    $.indexedDB.IDBCursor = IDBCursor;
-    $.indexedDB.IDBTransaction = IDBTransaction;
-    $.idb = $.indexedDB;
-};
-
-// Bootstrap color picker
-/*!
- * Bootstrap Colorpicker
- * http://mjolnic.github.io/bootstrap-colorpicker/
- *
- * Originally written by (c) 2012 Stefan Petre
- * Licensed under the Apache License v2.0
- * http://www.apache.org/licenses/LICENSE-2.0.txt
- *
- * @todo Update DOCS
- */
-
-/*
- (function(factory) {
- "use strict";
- if (typeof exports === 'object') {
- module.exports = factory(window.jQuery);
- } else if (typeof define === 'function' && define.amd) {
- define(['jquery'], factory);
- } else if (window.jQuery && !window.jQuery.fn.colorpicker) {
- factory(window.jQuery);
- }
- }
- */
-
-function initColorPicker() {
-    'use strict';
-
-    // Color object
-    var Color = function (val, customColors) {
-        this.value = {
-            h: 0,
-            s: 0,
-            b: 0,
-            a: 1
-        };
-        this.origFormat = null; // original string format
-        if (customColors) {
-            $.extend(this.colors, customColors);
-        }
-        if (val) {
-            if (val.toLowerCase !== undefined) {
-                // cast to string
-                val = val + '';
-                this.setColor(val);
-            } else if (val.h !== undefined) {
-                this.value = val;
+                        return result;
+                    }
+                });
             }
-        }
+        });
+
+        $.indexedDB.IDBCursor = IDBCursor;
+        $.indexedDB.IDBTransaction = IDBTransaction;
+        $.idb = $.indexedDB;
     };
 
-    Color.prototype = {
-        constructor: Color,
-        // 140 predefined colors from the HTML Colors spec
-        colors: {
-            "aliceblue": "#f0f8ff",
-            "antiquewhite": "#faebd7",
-            "aqua": "#00ffff",
-            "aquamarine": "#7fffd4",
-            "azure": "#f0ffff",
-            "beige": "#f5f5dc",
-            "bisque": "#ffe4c4",
-            "black": "#000000",
-            "blanchedalmond": "#ffebcd",
-            "blue": "#0000ff",
-            "blueviolet": "#8a2be2",
-            "brown": "#a52a2a",
-            "burlywood": "#deb887",
-            "cadetblue": "#5f9ea0",
-            "chartreuse": "#7fff00",
-            "chocolate": "#d2691e",
-            "coral": "#ff7f50",
-            "cornflowerblue": "#6495ed",
-            "cornsilk": "#fff8dc",
-            "crimson": "#dc143c",
-            "cyan": "#00ffff",
-            "darkblue": "#00008b",
-            "darkcyan": "#008b8b",
-            "darkgoldenrod": "#b8860b",
-            "darkgray": "#a9a9a9",
-            "darkgreen": "#006400",
-            "darkkhaki": "#bdb76b",
-            "darkmagenta": "#8b008b",
-            "darkolivegreen": "#556b2f",
-            "darkorange": "#ff8c00",
-            "darkorchid": "#9932cc",
-            "darkred": "#8b0000",
-            "darksalmon": "#e9967a",
-            "darkseagreen": "#8fbc8f",
-            "darkslateblue": "#483d8b",
-            "darkslategray": "#2f4f4f",
-            "darkturquoise": "#00ced1",
-            "darkviolet": "#9400d3",
-            "deeppink": "#ff1493",
-            "deepskyblue": "#00bfff",
-            "dimgray": "#696969",
-            "dodgerblue": "#1e90ff",
-            "firebrick": "#b22222",
-            "floralwhite": "#fffaf0",
-            "forestgreen": "#228b22",
-            "fuchsia": "#ff00ff",
-            "gainsboro": "#dcdcdc",
-            "ghostwhite": "#f8f8ff",
-            "gold": "#ffd700",
-            "goldenrod": "#daa520",
-            "gray": "#808080",
-            "green": "#008000",
-            "greenyellow": "#adff2f",
-            "honeydew": "#f0fff0",
-            "hotpink": "#ff69b4",
-            "indianred": "#cd5c5c",
-            "indigo": "#4b0082",
-            "ivory": "#fffff0",
-            "khaki": "#f0e68c",
-            "lavender": "#e6e6fa",
-            "lavenderblush": "#fff0f5",
-            "lawngreen": "#7cfc00",
-            "lemonchiffon": "#fffacd",
-            "lightblue": "#add8e6",
-            "lightcoral": "#f08080",
-            "lightcyan": "#e0ffff",
-            "lightgoldenrodyellow": "#fafad2",
-            "lightgrey": "#d3d3d3",
-            "lightgreen": "#90ee90",
-            "lightpink": "#ffb6c1",
-            "lightsalmon": "#ffa07a",
-            "lightseagreen": "#20b2aa",
-            "lightskyblue": "#87cefa",
-            "lightslategray": "#778899",
-            "lightsteelblue": "#b0c4de",
-            "lightyellow": "#ffffe0",
-            "lime": "#00ff00",
-            "limegreen": "#32cd32",
-            "linen": "#faf0e6",
-            "magenta": "#ff00ff",
-            "maroon": "#800000",
-            "mediumaquamarine": "#66cdaa",
-            "mediumblue": "#0000cd",
-            "mediumorchid": "#ba55d3",
-            "mediumpurple": "#9370d8",
-            "mediumseagreen": "#3cb371",
-            "mediumslateblue": "#7b68ee",
-            "mediumspringgreen": "#00fa9a",
-            "mediumturquoise": "#48d1cc",
-            "mediumvioletred": "#c71585",
-            "midnightblue": "#191970",
-            "mintcream": "#f5fffa",
-            "mistyrose": "#ffe4e1",
-            "moccasin": "#ffe4b5",
-            "navajowhite": "#ffdead",
-            "navy": "#000080",
-            "oldlace": "#fdf5e6",
-            "olive": "#808000",
-            "olivedrab": "#6b8e23",
-            "orange": "#ffa500",
-            "orangered": "#ff4500",
-            "orchid": "#da70d6",
-            "palegoldenrod": "#eee8aa",
-            "palegreen": "#98fb98",
-            "paleturquoise": "#afeeee",
-            "palevioletred": "#d87093",
-            "papayawhip": "#ffefd5",
-            "peachpuff": "#ffdab9",
-            "peru": "#cd853f",
-            "pink": "#ffc0cb",
-            "plum": "#dda0dd",
-            "powderblue": "#b0e0e6",
-            "purple": "#800080",
-            "red": "#ff0000",
-            "rosybrown": "#bc8f8f",
-            "royalblue": "#4169e1",
-            "saddlebrown": "#8b4513",
-            "salmon": "#fa8072",
-            "sandybrown": "#f4a460",
-            "seagreen": "#2e8b57",
-            "seashell": "#fff5ee",
-            "sienna": "#a0522d",
-            "silver": "#c0c0c0",
-            "skyblue": "#87ceeb",
-            "slateblue": "#6a5acd",
-            "slategray": "#708090",
-            "snow": "#fffafa",
-            "springgreen": "#00ff7f",
-            "steelblue": "#4682b4",
-            "tan": "#d2b48c",
-            "teal": "#008080",
-            "thistle": "#d8bfd8",
-            "tomato": "#ff6347",
-            "turquoise": "#40e0d0",
-            "violet": "#ee82ee",
-            "wheat": "#f5deb3",
-            "white": "#ffffff",
-            "whitesmoke": "#f5f5f5",
-            "yellow": "#ffff00",
-            "yellowgreen": "#9acd32",
-            "transparent": "transparent"
-        },
-        _sanitizeNumber: function (val) {
-            if (typeof val === 'number') {
-                return val;
+// Bootstrap color picker
+    /*!
+     * Bootstrap Colorpicker
+     * http://mjolnic.github.io/bootstrap-colorpicker/
+     *
+     * Originally written by (c) 2012 Stefan Petre
+     * Licensed under the Apache License v2.0
+     * http://www.apache.org/licenses/LICENSE-2.0.txt
+     *
+     * @todo Update DOCS
+     */
+
+    /*
+     (function(factory) {
+     "use strict";
+     if (typeof exports === 'object') {
+     module.exports = factory(window.jQuery);
+     } else if (typeof define === 'function' && define.amd) {
+     define(['jquery'], factory);
+     } else if (window.jQuery && !window.jQuery.fn.colorpicker) {
+     factory(window.jQuery);
+     }
+     }
+     */
+
+    function initColorPicker() {
+        'use strict';
+
+        // Color object
+        var Color = function (val, customColors) {
+            this.value = {
+                h: 0,
+                s: 0,
+                b: 0,
+                a: 1
+            };
+            this.origFormat = null; // original string format
+            if (customColors) {
+                $.extend(this.colors, customColors);
             }
-            if (isNaN(val) || (val === null) || (val === '') || (val === undefined)) {
+            if (val) {
+                if (val.toLowerCase !== undefined) {
+                    // cast to string
+                    val = val + '';
+                    this.setColor(val);
+                } else if (val.h !== undefined) {
+                    this.value = val;
+                }
+            }
+        };
+
+        Color.prototype = {
+            constructor: Color,
+            // 140 predefined colors from the HTML Colors spec
+            colors: {
+                "aliceblue": "#f0f8ff",
+                "antiquewhite": "#faebd7",
+                "aqua": "#00ffff",
+                "aquamarine": "#7fffd4",
+                "azure": "#f0ffff",
+                "beige": "#f5f5dc",
+                "bisque": "#ffe4c4",
+                "black": "#000000",
+                "blanchedalmond": "#ffebcd",
+                "blue": "#0000ff",
+                "blueviolet": "#8a2be2",
+                "brown": "#a52a2a",
+                "burlywood": "#deb887",
+                "cadetblue": "#5f9ea0",
+                "chartreuse": "#7fff00",
+                "chocolate": "#d2691e",
+                "coral": "#ff7f50",
+                "cornflowerblue": "#6495ed",
+                "cornsilk": "#fff8dc",
+                "crimson": "#dc143c",
+                "cyan": "#00ffff",
+                "darkblue": "#00008b",
+                "darkcyan": "#008b8b",
+                "darkgoldenrod": "#b8860b",
+                "darkgray": "#a9a9a9",
+                "darkgreen": "#006400",
+                "darkkhaki": "#bdb76b",
+                "darkmagenta": "#8b008b",
+                "darkolivegreen": "#556b2f",
+                "darkorange": "#ff8c00",
+                "darkorchid": "#9932cc",
+                "darkred": "#8b0000",
+                "darksalmon": "#e9967a",
+                "darkseagreen": "#8fbc8f",
+                "darkslateblue": "#483d8b",
+                "darkslategray": "#2f4f4f",
+                "darkturquoise": "#00ced1",
+                "darkviolet": "#9400d3",
+                "deeppink": "#ff1493",
+                "deepskyblue": "#00bfff",
+                "dimgray": "#696969",
+                "dodgerblue": "#1e90ff",
+                "firebrick": "#b22222",
+                "floralwhite": "#fffaf0",
+                "forestgreen": "#228b22",
+                "fuchsia": "#ff00ff",
+                "gainsboro": "#dcdcdc",
+                "ghostwhite": "#f8f8ff",
+                "gold": "#ffd700",
+                "goldenrod": "#daa520",
+                "gray": "#808080",
+                "green": "#008000",
+                "greenyellow": "#adff2f",
+                "honeydew": "#f0fff0",
+                "hotpink": "#ff69b4",
+                "indianred": "#cd5c5c",
+                "indigo": "#4b0082",
+                "ivory": "#fffff0",
+                "khaki": "#f0e68c",
+                "lavender": "#e6e6fa",
+                "lavenderblush": "#fff0f5",
+                "lawngreen": "#7cfc00",
+                "lemonchiffon": "#fffacd",
+                "lightblue": "#add8e6",
+                "lightcoral": "#f08080",
+                "lightcyan": "#e0ffff",
+                "lightgoldenrodyellow": "#fafad2",
+                "lightgrey": "#d3d3d3",
+                "lightgreen": "#90ee90",
+                "lightpink": "#ffb6c1",
+                "lightsalmon": "#ffa07a",
+                "lightseagreen": "#20b2aa",
+                "lightskyblue": "#87cefa",
+                "lightslategray": "#778899",
+                "lightsteelblue": "#b0c4de",
+                "lightyellow": "#ffffe0",
+                "lime": "#00ff00",
+                "limegreen": "#32cd32",
+                "linen": "#faf0e6",
+                "magenta": "#ff00ff",
+                "maroon": "#800000",
+                "mediumaquamarine": "#66cdaa",
+                "mediumblue": "#0000cd",
+                "mediumorchid": "#ba55d3",
+                "mediumpurple": "#9370d8",
+                "mediumseagreen": "#3cb371",
+                "mediumslateblue": "#7b68ee",
+                "mediumspringgreen": "#00fa9a",
+                "mediumturquoise": "#48d1cc",
+                "mediumvioletred": "#c71585",
+                "midnightblue": "#191970",
+                "mintcream": "#f5fffa",
+                "mistyrose": "#ffe4e1",
+                "moccasin": "#ffe4b5",
+                "navajowhite": "#ffdead",
+                "navy": "#000080",
+                "oldlace": "#fdf5e6",
+                "olive": "#808000",
+                "olivedrab": "#6b8e23",
+                "orange": "#ffa500",
+                "orangered": "#ff4500",
+                "orchid": "#da70d6",
+                "palegoldenrod": "#eee8aa",
+                "palegreen": "#98fb98",
+                "paleturquoise": "#afeeee",
+                "palevioletred": "#d87093",
+                "papayawhip": "#ffefd5",
+                "peachpuff": "#ffdab9",
+                "peru": "#cd853f",
+                "pink": "#ffc0cb",
+                "plum": "#dda0dd",
+                "powderblue": "#b0e0e6",
+                "purple": "#800080",
+                "red": "#ff0000",
+                "rosybrown": "#bc8f8f",
+                "royalblue": "#4169e1",
+                "saddlebrown": "#8b4513",
+                "salmon": "#fa8072",
+                "sandybrown": "#f4a460",
+                "seagreen": "#2e8b57",
+                "seashell": "#fff5ee",
+                "sienna": "#a0522d",
+                "silver": "#c0c0c0",
+                "skyblue": "#87ceeb",
+                "slateblue": "#6a5acd",
+                "slategray": "#708090",
+                "snow": "#fffafa",
+                "springgreen": "#00ff7f",
+                "steelblue": "#4682b4",
+                "tan": "#d2b48c",
+                "teal": "#008080",
+                "thistle": "#d8bfd8",
+                "tomato": "#ff6347",
+                "turquoise": "#40e0d0",
+                "violet": "#ee82ee",
+                "wheat": "#f5deb3",
+                "white": "#ffffff",
+                "whitesmoke": "#f5f5f5",
+                "yellow": "#ffff00",
+                "yellowgreen": "#9acd32",
+                "transparent": "transparent"
+            },
+            _sanitizeNumber: function (val) {
+                if (typeof val === 'number') {
+                    return val;
+                }
+                if (isNaN(val) || (val === null) || (val === '') || (val === undefined)) {
+                    return 1;
+                }
+                if (val.toLowerCase !== undefined) {
+                    return parseFloat(val);
+                }
                 return 1;
-            }
-            if (val.toLowerCase !== undefined) {
-                return parseFloat(val);
-            }
-            return 1;
-        },
-        isTransparent: function (strVal) {
-            if (!strVal) {
-                return false;
-            }
-            strVal = strVal.toLowerCase().trim();
-            return (strVal === 'transparent') || (strVal.match(/#?00000000/)) || (strVal.match(/(rgba|hsla)\(0,0,0,0?\.?0\)/));
-        },
-        rgbaIsTransparent: function (rgba) {
-            return ((rgba.r === 0) && (rgba.g === 0) && (rgba.b === 0) && (rgba.a === 0));
-        },
-        //parse a string to HSB
-        setColor: function (strVal) {
-            strVal = strVal.toLowerCase().trim();
-            if (strVal) {
-                if (this.isTransparent(strVal)) {
-                    this.value = {
-                        h: 0,
-                        s: 0,
-                        b: 0,
-                        a: 0
-                    };
-                } else {
-                    this.value = this.stringToHSB(strVal) || {
+            },
+            isTransparent: function (strVal) {
+                if (!strVal) {
+                    return false;
+                }
+                strVal = strVal.toLowerCase().trim();
+                return (strVal === 'transparent') || (strVal.match(/#?00000000/)) || (strVal.match(/(rgba|hsla)\(0,0,0,0?\.?0\)/));
+            },
+            rgbaIsTransparent: function (rgba) {
+                return ((rgba.r === 0) && (rgba.g === 0) && (rgba.b === 0) && (rgba.a === 0));
+            },
+            //parse a string to HSB
+            setColor: function (strVal) {
+                strVal = strVal.toLowerCase().trim();
+                if (strVal) {
+                    if (this.isTransparent(strVal)) {
+                        this.value = {
                             h: 0,
                             s: 0,
                             b: 0,
-                            a: 1
-                        }; // if parser fails, defaults to black
-                }
-            }
-        },
-        stringToHSB: function (strVal) {
-            strVal = strVal.toLowerCase();
-            var alias;
-            if (typeof this.colors[strVal] !== 'undefined') {
-                strVal = this.colors[strVal];
-                alias = 'alias';
-            }
-            var that = this,
-                result = false;
-            $.each(this.stringParsers, function (i, parser) {
-                var match = parser.re.exec(strVal),
-                    values = match && parser.parse.apply(that, [match]),
-                    format = alias || parser.format || 'rgba';
-                if (values) {
-                    if (format.match(/hsla?/)) {
-                        result = that.RGBtoHSB.apply(that, that.HSLtoRGB.apply(that, values));
+                            a: 0
+                        };
                     } else {
-                        result = that.RGBtoHSB.apply(that, values);
+                        this.value = this.stringToHSB(strVal) || {
+                                h: 0,
+                                s: 0,
+                                b: 0,
+                                a: 1
+                            }; // if parser fails, defaults to black
                     }
-                    that.origFormat = format;
-                    return false;
                 }
-                return true;
-            });
-            return result;
-        },
-        setHue: function (h) {
-            this.value.h = 1 - h;
-        },
-        setSaturation: function (s) {
-            this.value.s = s;
-        },
-        setBrightness: function (b) {
-            this.value.b = 1 - b;
-        },
-        setAlpha: function (a) {
-            this.value.a = parseInt((1 - a) * 100, 10) / 100;
-        },
-        toRGB: function (h, s, b, a) {
-            if (!h) {
-                h = this.value.h;
-                s = this.value.s;
-                b = this.value.b;
-            }
-            h *= 360;
-            var R, G, B, X, C;
-            h = (h % 360) / 60;
-            C = b * s;
-            X = C * (1 - Math.abs(h % 2 - 1));
-            R = G = B = b - C;
-
-            h = ~~h;
-            R += [C, X, 0, 0, X, C][h];
-            G += [X, C, C, X, 0, 0][h];
-            B += [0, 0, X, C, C, X][h];
-            return {
-                r: Math.round(R * 255),
-                g: Math.round(G * 255),
-                b: Math.round(B * 255),
-                a: a || this.value.a
-            };
-        },
-        toHex: function (h, s, b, a) {
-            var rgb = this.toRGB(h, s, b, a);
-            if (this.rgbaIsTransparent(rgb)) {
-                return 'transparent';
-            }
-            return '#' + ((1 << 24) | (parseInt(rgb.r) << 16) | (parseInt(rgb.g) << 8) | parseInt(rgb.b)).toString(16).substr(1);
-        },
-        toHSL: function (h, s, b, a) {
-            h = h || this.value.h;
-            s = s || this.value.s;
-            b = b || this.value.b;
-            a = a || this.value.a;
-
-            var H = h,
-                L = (2 - s) * b,
-                S = s * b;
-            if (L > 0 && L <= 1) {
-                S /= L;
-            } else {
-                S /= 2 - L;
-            }
-            L /= 2;
-            if (S > 1) {
-                S = 1;
-            }
-            return {
-                h: isNaN(H) ? 0 : H,
-                s: isNaN(S) ? 0 : S,
-                l: isNaN(L) ? 0 : L,
-                a: isNaN(a) ? 0 : a
-            };
-        },
-        toAlias: function (r, g, b, a) {
-            var rgb = this.toHex(r, g, b, a);
-            for (var alias in this.colors) {
-                if (this.colors[alias] === rgb) {
-                    return alias;
+            },
+            stringToHSB: function (strVal) {
+                strVal = strVal.toLowerCase();
+                var alias;
+                if (typeof this.colors[strVal] !== 'undefined') {
+                    strVal = this.colors[strVal];
+                    alias = 'alias';
                 }
-            }
-            return false;
-        },
-        RGBtoHSB: function (r, g, b, a) {
-            r /= 255;
-            g /= 255;
-            b /= 255;
-
-            var H, S, V, C;
-            V = Math.max(r, g, b);
-            C = V - Math.min(r, g, b);
-            H = (C === 0 ? null :
-                 V === r ? (g - b) / C :
-                 V === g ? (b - r) / C + 2 :
-                 (r - g) / C + 4
-            );
-            H = ((H + 360) % 6) * 60 / 360;
-            S = C === 0 ? 0 : C / V;
-            return {
-                h: this._sanitizeNumber(H),
-                s: S,
-                b: V,
-                a: this._sanitizeNumber(a)
-            };
-        },
-        HueToRGB: function (p, q, h) {
-            if (h < 0) {
-                h += 1;
-            } else if (h > 1) {
-                h -= 1;
-            }
-            if ((h * 6) < 1) {
-                return p + (q - p) * h * 6;
-            } else if ((h * 2) < 1) {
-                return q;
-            } else if ((h * 3) < 2) {
-                return p + (q - p) * ((2 / 3) - h) * 6;
-            } else {
-                return p;
-            }
-        },
-        HSLtoRGB: function (h, s, l, a) {
-            if (s < 0) {
-                s = 0;
-            }
-            var q;
-            if (l <= 0.5) {
-                q = l * (1 + s);
-            } else {
-                q = l + s - (l * s);
-            }
-
-            var p = 2 * l - q;
-
-            var tr = h + (1 / 3);
-            var tg = h;
-            var tb = h - (1 / 3);
-
-            var r = Math.round(this.HueToRGB(p, q, tr) * 255);
-            var g = Math.round(this.HueToRGB(p, q, tg) * 255);
-            var b = Math.round(this.HueToRGB(p, q, tb) * 255);
-            return [r, g, b, this._sanitizeNumber(a)];
-        },
-        toString: function (format) {
-            format = format || 'rgba';
-            var c = false;
-            switch (format) {
-                case 'rgb':
-                {
-                    c = this.toRGB();
-                    if (this.rgbaIsTransparent(c)) {
-                        return 'transparent';
+                var that = this,
+                    result = false;
+                $.each(this.stringParsers, function (i, parser) {
+                    var match = parser.re.exec(strVal),
+                        values = match && parser.parse.apply(that, [match]),
+                        format = alias || parser.format || 'rgba';
+                    if (values) {
+                        if (format.match(/hsla?/)) {
+                            result = that.RGBtoHSB.apply(that, that.HSLtoRGB.apply(that, values));
+                        } else {
+                            result = that.RGBtoHSB.apply(that, values);
+                        }
+                        that.origFormat = format;
+                        return false;
                     }
-                    return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-                }
-                    break;
-                case 'rgba':
-                {
-                    c = this.toRGB();
-                    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')';
-                }
-                    break;
-                case 'hsl':
-                {
-                    c = this.toHSL();
-                    return 'hsl(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%)';
-                }
-                    break;
-                case 'hsla':
-                {
-                    c = this.toHSL();
-                    return 'hsla(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%,' + c.a + ')';
-                }
-                    break;
-                case 'hex':
-                {
-                    return this.toHex();
-                }
-                    break;
-                case 'alias':
-                    return this.toAlias() || this.toHex();
-                default:
-                {
-                    return c;
-                }
-                    break;
-            }
-        },
-        // a set of RE's that can match strings and generate color tuples.
-        // from John Resig color plugin
-        // https://github.com/jquery/jquery-color/
-        stringParsers: [{
-            re: /rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*?\)/,
-            format: 'rgb',
-            parse: function (execResult) {
-                return [
-                    execResult[1],
-                    execResult[2],
-                    execResult[3],
-                    1
-                ];
-            }
-        }, {
-            re: /rgb\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
-            format: 'rgb',
-            parse: function (execResult) {
-                return [
-                    2.55 * execResult[1],
-                    2.55 * execResult[2],
-                    2.55 * execResult[3],
-                    1
-                ];
-            }
-        }, {
-            re: /rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-            format: 'rgba',
-            parse: function (execResult) {
-                return [
-                    execResult[1],
-                    execResult[2],
-                    execResult[3],
-                    execResult[4]
-                ];
-            }
-        }, {
-            re: /rgba\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-            format: 'rgba',
-            parse: function (execResult) {
-                return [
-                    2.55 * execResult[1],
-                    2.55 * execResult[2],
-                    2.55 * execResult[3],
-                    execResult[4]
-                ];
-            }
-        }, {
-            re: /hsl\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
-            format: 'hsl',
-            parse: function (execResult) {
-                return [
-                    execResult[1] / 360,
-                    execResult[2] / 100,
-                    execResult[3] / 100,
-                    execResult[4]
-                ];
-            }
-        }, {
-            re: /hsla\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-            format: 'hsla',
-            parse: function (execResult) {
-                return [
-                    execResult[1] / 360,
-                    execResult[2] / 100,
-                    execResult[3] / 100,
-                    execResult[4]
-                ];
-            }
-        }, {
-            re: /#?([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
-            format: 'hex',
-            parse: function (execResult) {
-                return [
-                    parseInt(execResult[1], 16),
-                    parseInt(execResult[2], 16),
-                    parseInt(execResult[3], 16),
-                    1
-                ];
-            }
-        }, {
-            re: /#?([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/,
-            format: 'hex',
-            parse: function (execResult) {
-                return [
-                    parseInt(execResult[1] + execResult[1], 16),
-                    parseInt(execResult[2] + execResult[2], 16),
-                    parseInt(execResult[3] + execResult[3], 16),
-                    1
-                ];
-            }
-        }
-        ],
-        colorNameToHex: function (name) {
-            if (typeof this.colors[name.toLowerCase()] !== 'undefined') {
-                return this.colors[name.toLowerCase()];
-            }
-            return false;
-        }
-    };
-
-    var defaults = {
-        horizontal: false, // horizontal mode layout ?
-        inline: false, //forces to show the colorpicker as an inline element
-        color: false, //forces a color
-        format: false, //forces a format
-        input: 'input', // children input selector
-        container: false, // container selector
-        component: '.add-on, .input-group-addon', // children component selector
-        sliders: {
-            saturation: {
-                maxLeft: 100,
-                maxTop: 100,
-                callLeft: 'setSaturation',
-                callTop: 'setBrightness'
-            },
-            hue: {
-                maxLeft: 0,
-                maxTop: 100,
-                callLeft: false,
-                callTop: 'setHue'
-            },
-            alpha: {
-                maxLeft: 0,
-                maxTop: 100,
-                callLeft: false,
-                callTop: 'setAlpha'
-            }
-        },
-        slidersHorz: {
-            saturation: {
-                maxLeft: 100,
-                maxTop: 100,
-                callLeft: 'setSaturation',
-                callTop: 'setBrightness'
-            },
-            hue: {
-                maxLeft: 100,
-                maxTop: 0,
-                callLeft: 'setHue',
-                callTop: false
-            },
-            alpha: {
-                maxLeft: 100,
-                maxTop: 0,
-                callLeft: 'setAlpha',
-                callTop: false
-            }
-        },
-        template: '<div class="bs-colorpicker dropdown-menu">' +
-                  '<div class="bs-colorpicker-saturation"><i><b></b></i></div>' +
-                  '<div class="bs-colorpicker-hue"><i></i></div>' +
-                  '<div class="bs-colorpicker-alpha"><i></i></div>' +
-                  '<div class="bs-colorpicker-color"><div /></div>' +
-                  '<div class="bs-colorpicker-selectors"></div>' +
-                  '</div>',
-        align: 'right',
-        customClass: null,
-        colorSelectors: null
-    };
-
-    var Colorpicker = function (element, options) {
-        this.element = $(element).addClass('bs-colorpicker-element');
-        this.options = $.extend(true, {}, defaults, this.element.data(), options);
-        this.component = this.options.component;
-        this.component = (this.component !== false) ? this.element.find(this.component) : false;
-        if (this.component && (this.component.length === 0)) {
-            this.component = false;
-        }
-        this.container = (this.options.container === true) ? this.element : this.options.container;
-        this.container = (this.container !== false) ? $(this.container) : false;
-
-        // Is the element an input? Should we search inside for any input?
-        this.input = this.element.is('input') ? this.element : (this.options.input ?
-                                                                this.element.find(this.options.input) : false);
-        if (this.input && (this.input.length === 0)) {
-            this.input = false;
-        }
-        // Set HSB color
-        this.color = new Color(this.options.color !== false ? this.options.color : this.getValue(), this.options.colorSelectors);
-        this.format = this.options.format !== false ? this.options.format : this.color.origFormat;
-
-        // Setup picker
-        this.picker = $(this.options.template);
-        if (this.options.customClass) {
-            this.picker.addClass(this.options.customClass);
-        }
-        if (this.options.inline) {
-            this.picker.addClass('bs-colorpicker-inline bs-colorpicker-visible');
-        } else {
-            this.picker.addClass('bs-colorpicker-hidden');
-        }
-        if (this.options.horizontal) {
-            this.picker.addClass('bs-colorpicker-horizontal');
-        }
-        if (this.format === 'rgba' || this.format === 'hsla' || this.options.format === false) {
-            this.picker.addClass('bs-colorpicker-with-alpha');
-        }
-        if (this.options.align === 'right') {
-            this.picker.addClass('bs-colorpicker-right');
-        }
-        if (this.options.colorSelectors) {
-            var colorpicker = this;
-            $.each(this.options.colorSelectors, function (name, color) {
-                var $btn = $('<i />').css('background-color', color).data('class', name);
-                $btn.click(function () {
-                    colorpicker.setValue($(this).css('background-color'));
+                    return true;
                 });
-                colorpicker.picker.find('.bs-colorpicker-selectors').append($btn);
-            });
-            this.picker.find('.bs-colorpicker-selectors').show();
-        }
-        this.picker.on('mousedown.bs-colorpicker touchstart.bs-colorpicker', $.proxy(this.mousedown, this));
-        this.picker.appendTo(this.container ? this.container : $('body'));
+                return result;
+            },
+            setHue: function (h) {
+                this.value.h = 1 - h;
+            },
+            setSaturation: function (s) {
+                this.value.s = s;
+            },
+            setBrightness: function (b) {
+                this.value.b = 1 - b;
+            },
+            setAlpha: function (a) {
+                this.value.a = parseInt((1 - a) * 100, 10) / 100;
+            },
+            toRGB: function (h, s, b, a) {
+                if (!h) {
+                    h = this.value.h;
+                    s = this.value.s;
+                    b = this.value.b;
+                }
+                h *= 360;
+                var R, G, B, X, C;
+                h = (h % 360) / 60;
+                C = b * s;
+                X = C * (1 - Math.abs(h % 2 - 1));
+                R = G = B = b - C;
 
-        // Bind events
-        if (this.input !== false) {
-            this.input.on({
-                'keyup.bs-colorpicker': $.proxy(this.keyup, this)
-            });
-            this.input.on({
-                'change.bs-colorpicker': $.proxy(this.change, this)
-            });
-            if (this.component === false) {
+                h = ~~h;
+                R += [C, X, 0, 0, X, C][h];
+                G += [X, C, C, X, 0, 0][h];
+                B += [0, 0, X, C, C, X][h];
+                return {
+                    r: Math.round(R * 255),
+                    g: Math.round(G * 255),
+                    b: Math.round(B * 255),
+                    a: a || this.value.a
+                };
+            },
+            toHex: function (h, s, b, a) {
+                var rgb = this.toRGB(h, s, b, a);
+                if (this.rgbaIsTransparent(rgb)) {
+                    return 'transparent';
+                }
+                return '#' + ((1 << 24) | (parseInt(rgb.r) << 16) | (parseInt(rgb.g) << 8) | parseInt(rgb.b)).toString(16).substr(1);
+            },
+            toHSL: function (h, s, b, a) {
+                h = h || this.value.h;
+                s = s || this.value.s;
+                b = b || this.value.b;
+                a = a || this.value.a;
+
+                var H = h,
+                    L = (2 - s) * b,
+                    S = s * b;
+                if (L > 0 && L <= 1) {
+                    S /= L;
+                } else {
+                    S /= 2 - L;
+                }
+                L /= 2;
+                if (S > 1) {
+                    S = 1;
+                }
+                return {
+                    h: isNaN(H) ? 0 : H,
+                    s: isNaN(S) ? 0 : S,
+                    l: isNaN(L) ? 0 : L,
+                    a: isNaN(a) ? 0 : a
+                };
+            },
+            toAlias: function (r, g, b, a) {
+                var rgb = this.toHex(r, g, b, a);
+                for (var alias in this.colors) {
+                    if (this.colors[alias] === rgb) {
+                        return alias;
+                    }
+                }
+                return false;
+            },
+            RGBtoHSB: function (r, g, b, a) {
+                r /= 255;
+                g /= 255;
+                b /= 255;
+
+                var H, S, V, C;
+                V = Math.max(r, g, b);
+                C = V - Math.min(r, g, b);
+                H = (C === 0 ? null :
+                     V === r ? (g - b) / C :
+                     V === g ? (b - r) / C + 2 :
+                     (r - g) / C + 4
+                );
+                H = ((H + 360) % 6) * 60 / 360;
+                S = C === 0 ? 0 : C / V;
+                return {
+                    h: this._sanitizeNumber(H),
+                    s: S,
+                    b: V,
+                    a: this._sanitizeNumber(a)
+                };
+            },
+            HueToRGB: function (p, q, h) {
+                if (h < 0) {
+                    h += 1;
+                } else if (h > 1) {
+                    h -= 1;
+                }
+                if ((h * 6) < 1) {
+                    return p + (q - p) * h * 6;
+                } else if ((h * 2) < 1) {
+                    return q;
+                } else if ((h * 3) < 2) {
+                    return p + (q - p) * ((2 / 3) - h) * 6;
+                } else {
+                    return p;
+                }
+            },
+            HSLtoRGB: function (h, s, l, a) {
+                if (s < 0) {
+                    s = 0;
+                }
+                var q;
+                if (l <= 0.5) {
+                    q = l * (1 + s);
+                } else {
+                    q = l + s - (l * s);
+                }
+
+                var p = 2 * l - q;
+
+                var tr = h + (1 / 3);
+                var tg = h;
+                var tb = h - (1 / 3);
+
+                var r = Math.round(this.HueToRGB(p, q, tr) * 255);
+                var g = Math.round(this.HueToRGB(p, q, tg) * 255);
+                var b = Math.round(this.HueToRGB(p, q, tb) * 255);
+                return [r, g, b, this._sanitizeNumber(a)];
+            },
+            toString: function (format) {
+                format = format || 'rgba';
+                var c = false;
+                switch (format) {
+                    case 'rgb':
+                    {
+                        c = this.toRGB();
+                        if (this.rgbaIsTransparent(c)) {
+                            return 'transparent';
+                        }
+                        return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+                    }
+                        break;
+                    case 'rgba':
+                    {
+                        c = this.toRGB();
+                        return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')';
+                    }
+                        break;
+                    case 'hsl':
+                    {
+                        c = this.toHSL();
+                        return 'hsl(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%)';
+                    }
+                        break;
+                    case 'hsla':
+                    {
+                        c = this.toHSL();
+                        return 'hsla(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%,' + c.a + ')';
+                    }
+                        break;
+                    case 'hex':
+                    {
+                        return this.toHex();
+                    }
+                        break;
+                    case 'alias':
+                        return this.toAlias() || this.toHex();
+                    default:
+                    {
+                        return c;
+                    }
+                        break;
+                }
+            },
+            // a set of RE's that can match strings and generate color tuples.
+            // from John Resig color plugin
+            // https://github.com/jquery/jquery-color/
+            stringParsers: [{
+                re: /rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*?\)/,
+                format: 'rgb',
+                parse: function (execResult) {
+                    return [
+                        execResult[1],
+                        execResult[2],
+                        execResult[3],
+                        1
+                    ];
+                }
+            }, {
+                re: /rgb\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
+                format: 'rgb',
+                parse: function (execResult) {
+                    return [
+                        2.55 * execResult[1],
+                        2.55 * execResult[2],
+                        2.55 * execResult[3],
+                        1
+                    ];
+                }
+            }, {
+                re: /rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+                format: 'rgba',
+                parse: function (execResult) {
+                    return [
+                        execResult[1],
+                        execResult[2],
+                        execResult[3],
+                        execResult[4]
+                    ];
+                }
+            }, {
+                re: /rgba\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+                format: 'rgba',
+                parse: function (execResult) {
+                    return [
+                        2.55 * execResult[1],
+                        2.55 * execResult[2],
+                        2.55 * execResult[3],
+                        execResult[4]
+                    ];
+                }
+            }, {
+                re: /hsl\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
+                format: 'hsl',
+                parse: function (execResult) {
+                    return [
+                        execResult[1] / 360,
+                        execResult[2] / 100,
+                        execResult[3] / 100,
+                        execResult[4]
+                    ];
+                }
+            }, {
+                re: /hsla\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+                format: 'hsla',
+                parse: function (execResult) {
+                    return [
+                        execResult[1] / 360,
+                        execResult[2] / 100,
+                        execResult[3] / 100,
+                        execResult[4]
+                    ];
+                }
+            }, {
+                re: /#?([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
+                format: 'hex',
+                parse: function (execResult) {
+                    return [
+                        parseInt(execResult[1], 16),
+                        parseInt(execResult[2], 16),
+                        parseInt(execResult[3], 16),
+                        1
+                    ];
+                }
+            }, {
+                re: /#?([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/,
+                format: 'hex',
+                parse: function (execResult) {
+                    return [
+                        parseInt(execResult[1] + execResult[1], 16),
+                        parseInt(execResult[2] + execResult[2], 16),
+                        parseInt(execResult[3] + execResult[3], 16),
+                        1
+                    ];
+                }
+            }
+            ],
+            colorNameToHex: function (name) {
+                if (typeof this.colors[name.toLowerCase()] !== 'undefined') {
+                    return this.colors[name.toLowerCase()];
+                }
+                return false;
+            }
+        };
+
+        var defaults = {
+            horizontal: false, // horizontal mode layout ?
+            inline: false, //forces to show the colorpicker as an inline element
+            color: false, //forces a color
+            format: false, //forces a format
+            input: 'input', // children input selector
+            container: false, // container selector
+            component: '.add-on, .input-group-addon', // children component selector
+            sliders: {
+                saturation: {
+                    maxLeft: 100,
+                    maxTop: 100,
+                    callLeft: 'setSaturation',
+                    callTop: 'setBrightness'
+                },
+                hue: {
+                    maxLeft: 0,
+                    maxTop: 100,
+                    callLeft: false,
+                    callTop: 'setHue'
+                },
+                alpha: {
+                    maxLeft: 0,
+                    maxTop: 100,
+                    callLeft: false,
+                    callTop: 'setAlpha'
+                }
+            },
+            slidersHorz: {
+                saturation: {
+                    maxLeft: 100,
+                    maxTop: 100,
+                    callLeft: 'setSaturation',
+                    callTop: 'setBrightness'
+                },
+                hue: {
+                    maxLeft: 100,
+                    maxTop: 0,
+                    callLeft: 'setHue',
+                    callTop: false
+                },
+                alpha: {
+                    maxLeft: 100,
+                    maxTop: 0,
+                    callLeft: 'setAlpha',
+                    callTop: false
+                }
+            },
+            template: '<div class="bs-colorpicker dropdown-menu">' +
+                      '<div class="bs-colorpicker-saturation"><i><b></b></i></div>' +
+                      '<div class="bs-colorpicker-hue"><i></i></div>' +
+                      '<div class="bs-colorpicker-alpha"><i></i></div>' +
+                      '<div class="bs-colorpicker-color"><div /></div>' +
+                      '<div class="bs-colorpicker-selectors"></div>' +
+                      '</div>',
+            align: 'right',
+            customClass: null,
+            colorSelectors: null
+        };
+
+        var Colorpicker = function (element, options) {
+            this.element = $(element).addClass('bs-colorpicker-element');
+            this.options = $.extend(true, {}, defaults, this.element.data(), options);
+            this.component = this.options.component;
+            this.component = (this.component !== false) ? this.element.find(this.component) : false;
+            if (this.component && (this.component.length === 0)) {
+                this.component = false;
+            }
+            this.container = (this.options.container === true) ? this.element : this.options.container;
+            this.container = (this.container !== false) ? $(this.container) : false;
+
+            // Is the element an input? Should we search inside for any input?
+            this.input = this.element.is('input') ? this.element : (this.options.input ?
+                                                                    this.element.find(this.options.input) : false);
+            if (this.input && (this.input.length === 0)) {
+                this.input = false;
+            }
+            // Set HSB color
+            this.color = new Color(this.options.color !== false ? this.options.color : this.getValue(), this.options.colorSelectors);
+            this.format = this.options.format !== false ? this.options.format : this.color.origFormat;
+
+            // Setup picker
+            this.picker = $(this.options.template);
+            if (this.options.customClass) {
+                this.picker.addClass(this.options.customClass);
+            }
+            if (this.options.inline) {
+                this.picker.addClass('bs-colorpicker-inline bs-colorpicker-visible');
+            } else {
+                this.picker.addClass('bs-colorpicker-hidden');
+            }
+            if (this.options.horizontal) {
+                this.picker.addClass('bs-colorpicker-horizontal');
+            }
+            if (this.format === 'rgba' || this.format === 'hsla' || this.options.format === false) {
+                this.picker.addClass('bs-colorpicker-with-alpha');
+            }
+            if (this.options.align === 'right') {
+                this.picker.addClass('bs-colorpicker-right');
+            }
+            if (this.options.colorSelectors) {
+                var colorpicker = this;
+                $.each(this.options.colorSelectors, function (name, color) {
+                    var $btn = $('<i />').css('background-color', color).data('class', name);
+                    $btn.click(function () {
+                        colorpicker.setValue($(this).css('background-color'));
+                    });
+                    colorpicker.picker.find('.bs-colorpicker-selectors').append($btn);
+                });
+                this.picker.find('.bs-colorpicker-selectors').show();
+            }
+            this.picker.on('mousedown.bs-colorpicker touchstart.bs-colorpicker', $.proxy(this.mousedown, this));
+            this.picker.appendTo(this.container ? this.container : $('body'));
+
+            // Bind events
+            if (this.input !== false) {
+                this.input.on({
+                    'keyup.bs-colorpicker': $.proxy(this.keyup, this)
+                });
+                this.input.on({
+                    'change.bs-colorpicker': $.proxy(this.change, this)
+                });
+                if (this.component === false) {
+                    this.element.on({
+                        'focus.bs-colorpicker': $.proxy(this.show, this)
+                    });
+                }
+                if (this.options.inline === false) {
+                    this.element.on({
+                        'focusout.bs-colorpicker': $.proxy(this.hide, this)
+                    });
+                }
+            }
+
+            if (this.component !== false) {
+                this.component.on({
+                    'click.bs-colorpicker': $.proxy(this.show, this)
+                });
+            }
+
+            if ((this.input === false) && (this.component === false)) {
                 this.element.on({
+                    'click.bs-colorpicker': $.proxy(this.show, this)
+                });
+            }
+
+            // for HTML5 input[type='color']
+            if ((this.input !== false) && (this.component !== false) && (this.input.attr('type') === 'color')) {
+
+                this.input.on({
+                    'click.bs-colorpicker': $.proxy(this.show, this),
                     'focus.bs-colorpicker': $.proxy(this.show, this)
                 });
             }
-            if (this.options.inline === false) {
-                this.element.on({
-                    'focusout.bs-colorpicker': $.proxy(this.hide, this)
-                });
-            }
-        }
-
-        if (this.component !== false) {
-            this.component.on({
-                'click.bs-colorpicker': $.proxy(this.show, this)
-            });
-        }
-
-        if ((this.input === false) && (this.component === false)) {
-            this.element.on({
-                'click.bs-colorpicker': $.proxy(this.show, this)
-            });
-        }
-
-        // for HTML5 input[type='color']
-        if ((this.input !== false) && (this.component !== false) && (this.input.attr('type') === 'color')) {
-
-            this.input.on({
-                'click.bs-colorpicker': $.proxy(this.show, this),
-                'focus.bs-colorpicker': $.proxy(this.show, this)
-            });
-        }
-        this.update();
-
-        $($.proxy(function () {
-            this.element.trigger('create');
-        }, this));
-    };
-
-    Colorpicker.Color = Color;
-
-    Colorpicker.prototype = {
-        constructor: Colorpicker,
-        destroy: function () {
-            this.picker.remove();
-            this.element.removeData('colorpicker').off('.bs-colorpicker');
-            if (this.input !== false) {
-                this.input.off('.bs-colorpicker');
-            }
-            if (this.component !== false) {
-                this.component.off('.bs-colorpicker');
-            }
-            this.element.removeClass('bs-colorpicker-element');
-            this.element.trigger({
-                type: 'destroy'
-            });
-        },
-        reposition: function () {
-            if (this.options.inline !== false || this.options.container) {
-                return false;
-            }
-            var type = this.container && this.container[0] !== document.body ? 'position' : 'offset';
-            var element = this.component || this.element;
-            var offset = element[type]();
-            if (this.options.align === 'right') {
-                offset.left -= this.picker.outerWidth() - element.outerWidth();
-            }
-            this.picker.css({
-                top: offset.top + element.outerHeight(),
-                left: offset.left
-            });
-        },
-        show: function (e) {
-            if (this.isDisabled()) {
-                return false;
-            }
-            this.picker.addClass('bs-colorpicker-visible').removeClass('bs-colorpicker-hidden');
-            this.reposition();
-            $(window).on('resize.bs-colorpicker', $.proxy(this.reposition, this));
-            if (e && (!this.hasInput() || this.input.attr('type') === 'color')) {
-                if (e.stopPropagation && e.preventDefault) {
-                    e.stopPropagation();
-                    e.preventDefault();
-                }
-            }
-            if (this.options.inline === false) {
-                $(window.document).on({
-                    'mousedown.bs-colorpicker': $.proxy(this.hide, this)
-                });
-            }
-            this.element.trigger({
-                type: 'showPicker',
-                color: this.color
-            });
-        },
-        hide: function () {
-            this.picker.addClass('bs-colorpicker-hidden').removeClass('bs-colorpicker-visible');
-            $(window).off('resize.bs-colorpicker', this.reposition);
-            $(document).off({
-                'mousedown.bs-colorpicker': this.hide
-            });
             this.update();
-            this.element.trigger({
-                type: 'hidePicker',
-                color: this.color
-            });
-        },
-        updateData: function (val) {
-            val = val || this.color.toString(this.format);
-            this.element.data('color', val);
-            return val;
-        },
-        updateInput: function (val) {
-            val = val || this.color.toString(this.format);
-            if (this.input !== false) {
-                if (this.options.colorSelectors) {
-                    var color = new Color(val, this.options.colorSelectors);
-                    var alias = color.toAlias();
-                    if (typeof this.options.colorSelectors[alias] !== 'undefined') {
-                        val = alias;
-                    }
+
+            $($.proxy(function () {
+                this.element.trigger('create');
+            }, this));
+        };
+
+        Colorpicker.Color = Color;
+
+        Colorpicker.prototype = {
+            constructor: Colorpicker,
+            destroy: function () {
+                this.picker.remove();
+                this.element.removeData('colorpicker').off('.bs-colorpicker');
+                if (this.input !== false) {
+                    this.input.off('.bs-colorpicker');
                 }
-                this.input.prop('value', val);
-            }
-            return val;
-        },
-        updatePicker: function (val) {
-            if (val !== undefined) {
-                this.color = new Color(val, this.options.colorSelectors);
-            }
-            var sl = (this.options.horizontal === false) ? this.options.sliders : this.options.slidersHorz;
-            var icns = this.picker.find('i');
-            if (icns.length === 0) {
-                return;
-            }
-            if (this.options.horizontal === false) {
-                sl = this.options.sliders;
-                icns.eq(1).css('top', sl.hue.maxTop * (1 - this.color.value.h)).end()
-                    .eq(2).css('top', sl.alpha.maxTop * (1 - this.color.value.a));
-            } else {
-                sl = this.options.slidersHorz;
-                icns.eq(1).css('left', sl.hue.maxLeft * (1 - this.color.value.h)).end()
-                    .eq(2).css('left', sl.alpha.maxLeft * (1 - this.color.value.a));
-            }
-            icns.eq(0).css({
-                'top': sl.saturation.maxTop - this.color.value.b * sl.saturation.maxTop,
-                'left': this.color.value.s * sl.saturation.maxLeft
-            });
-            this.picker.find('.bs-colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
-            this.picker.find('.bs-colorpicker-alpha').css('backgroundColor', this.color.toHex());
-            this.picker.find('.bs-colorpicker-color, .bs-colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
-            return val;
-        },
-        updateComponent: function (val) {
-            val = val || this.color.toString(this.format);
-            if (this.component !== false) {
-                var icn = this.component.find('i').eq(0);
-                if (icn.length > 0) {
-                    icn.css({
-                        'backgroundColor': val
-                    });
-                } else {
-                    this.component.css({
-                        'backgroundColor': val
-                    });
+                if (this.component !== false) {
+                    this.component.off('.bs-colorpicker');
                 }
-            }
-            return val;
-        },
-        update: function (force) {
-            var val;
-            if ((this.getValue(false) !== false) || (force === true)) {
-                // Update input/data only if the current value is not empty
-                val = this.updateComponent();
-                this.updateInput(val);
-                this.updateData(val);
-                this.updatePicker(); // only update picker if value is not empty
-            }
-            return val;
-
-        },
-        setValue: function (val) { // set color manually
-            this.color = new Color(val, this.options.colorSelectors);
-            this.update(true);
-            this.element.trigger({
-                type: 'changeColor',
-                color: this.color,
-                value: val
-            });
-        },
-        getValue: function (defaultValue) {
-            defaultValue = (defaultValue === undefined) ? '#000000' : defaultValue;
-            var val;
-            if (this.hasInput()) {
-                val = this.input.val();
-            } else {
-                val = this.element.data('color');
-            }
-            if ((val === undefined) || (val === '') || (val === null)) {
-                // if not defined or empty, return default
-                val = defaultValue;
-            }
-            return val;
-        },
-        hasInput: function () {
-            return (this.input !== false);
-        },
-        isDisabled: function () {
-            if (this.hasInput()) {
-                return (this.input.prop('disabled') === true);
-            }
-            return false;
-        },
-        disable: function () {
-            if (this.hasInput()) {
-                this.input.prop('disabled', true);
+                this.element.removeClass('bs-colorpicker-element');
                 this.element.trigger({
-                    type: 'disable',
-                    color: this.color,
-                    value: this.getValue()
+                    type: 'destroy'
                 });
-                return true;
-            }
-            return false;
-        },
-        enable: function () {
-            if (this.hasInput()) {
-                this.input.prop('disabled', false);
-                this.element.trigger({
-                    type: 'enable',
-                    color: this.color,
-                    value: this.getValue()
-                });
-                return true;
-            }
-            return false;
-        },
-        currentSlider: null,
-        mousePointer: {
-            left: 0,
-            top: 0
-        },
-        mousedown: function (e) {
-            if (!e.pageX && !e.pageY && e.originalEvent) {
-                e.pageX = e.originalEvent.touches[0].pageX;
-                e.pageY = e.originalEvent.touches[0].pageY;
-            }
-            e.stopPropagation();
-            e.preventDefault();
-
-            var target = $(e.target);
-
-            //detect the slider and set the limits and callbacks
-            var zone = target.closest('div');
-            var sl = this.options.horizontal ? this.options.slidersHorz : this.options.sliders;
-            if (!zone.is('.bs-colorpicker')) {
-                if (zone.is('.bs-colorpicker-saturation')) {
-                    this.currentSlider = $.extend({}, sl.saturation);
-                } else if (zone.is('.bs-colorpicker-hue')) {
-                    this.currentSlider = $.extend({}, sl.hue);
-                } else if (zone.is('.bs-colorpicker-alpha')) {
-                    this.currentSlider = $.extend({}, sl.alpha);
-                } else {
+            },
+            reposition: function () {
+                if (this.options.inline !== false || this.options.container) {
                     return false;
                 }
-                var offset = zone.offset();
-                //reference to guide's style
-                this.currentSlider.guide = zone.find('i')[0].style;
-                this.currentSlider.left = e.pageX - offset.left;
-                this.currentSlider.top = e.pageY - offset.top;
-                this.mousePointer = {
-                    left: e.pageX,
-                    top: e.pageY
-                };
-                //trigger mousemove to move the guide to the current position
-                $(document).on({
-                    'mousemove.bs-colorpicker': $.proxy(this.mousemove, this),
-                    'touchmove.bs-colorpicker': $.proxy(this.mousemove, this),
-                    'mouseup.bs-colorpicker': $.proxy(this.mouseup, this),
-                    'touchend.bs-colorpicker': $.proxy(this.mouseup, this)
-                }).trigger('mousemove');
-            }
-            return false;
-        },
-        mousemove: function (e) {
-            if (!e.pageX && !e.pageY && e.originalEvent) {
-                e.pageX = e.originalEvent.touches[0].pageX;
-                e.pageY = e.originalEvent.touches[0].pageY;
-            }
-            e.stopPropagation();
-            e.preventDefault();
-            var left = Math.max(
-                0,
-                Math.min(
-                    this.currentSlider.maxLeft,
-                    this.currentSlider.left + ((e.pageX || this.mousePointer.left) - this.mousePointer.left)
-                )
-            );
-            var top = Math.max(
-                0,
-                Math.min(
-                    this.currentSlider.maxTop,
-                    this.currentSlider.top + ((e.pageY || this.mousePointer.top) - this.mousePointer.top)
-                )
-            );
-            this.currentSlider.guide.left = left + 'px';
-            this.currentSlider.guide.top = top + 'px';
-            if (this.currentSlider.callLeft) {
-                this.color[this.currentSlider.callLeft].call(this.color, left / this.currentSlider.maxLeft);
-            }
-            if (this.currentSlider.callTop) {
-                this.color[this.currentSlider.callTop].call(this.color, top / this.currentSlider.maxTop);
-            }
-            // Change format dynamically
-            // Only occurs if user choose the dynamic format by
-            // setting option format to false
-            if (this.currentSlider.callTop === 'setAlpha' && this.options.format === false) {
-
-                // Converting from hex / rgb to rgba
-                if (this.color.value.a !== 1) {
-                    this.format = 'rgba';
-                    this.color.origFormat = 'rgba';
+                var type = this.container && this.container[0] !== document.body ? 'position' : 'offset';
+                var element = this.component || this.element;
+                var offset = element[type]();
+                if (this.options.align === 'right') {
+                    offset.left -= this.picker.outerWidth() - element.outerWidth();
                 }
-
-                // Converting from rgba to hex
-                else {
-                    this.format = 'hex';
-                    this.color.origFormat = 'hex';
+                this.picker.css({
+                    top: offset.top + element.outerHeight(),
+                    left: offset.left
+                });
+            },
+            show: function (e) {
+                if (this.isDisabled()) {
+                    return false;
                 }
-            }
-            this.update(true);
-
-            this.element.trigger({
-                type: 'changeColor',
-                color: this.color
-            });
-            return false;
-        },
-        mouseup: function (e) {
-            e.stopPropagation();
-            e.preventDefault();
-            $(document).off({
-                'mousemove.bs-colorpicker': this.mousemove,
-                'touchmove.bs-colorpicker': this.mousemove,
-                'mouseup.bs-colorpicker': this.mouseup,
-                'touchend.bs-colorpicker': this.mouseup
-            });
-            return false;
-        },
-        change: function (e) {
-            this.keyup(e);
-        },
-        keyup: function (e) {
-            if ((e.keyCode === 38)) {
-                if (this.color.value.a < 1) {
-                    this.color.value.a = Math.round((this.color.value.a + 0.01) * 100) / 100;
+                this.picker.addClass('bs-colorpicker-visible').removeClass('bs-colorpicker-hidden');
+                this.reposition();
+                $(window).on('resize.bs-colorpicker', $.proxy(this.reposition, this));
+                if (e && (!this.hasInput() || this.input.attr('type') === 'color')) {
+                    if (e.stopPropagation && e.preventDefault) {
+                        e.stopPropagation();
+                        e.preventDefault();
+                    }
                 }
+                if (this.options.inline === false) {
+                    $(window.document).on({
+                        'mousedown.bs-colorpicker': $.proxy(this.hide, this)
+                    });
+                }
+                this.element.trigger({
+                    type: 'showPicker',
+                    color: this.color
+                });
+            },
+            hide: function () {
+                this.picker.addClass('bs-colorpicker-hidden').removeClass('bs-colorpicker-visible');
+                $(window).off('resize.bs-colorpicker', this.reposition);
+                $(document).off({
+                    'mousedown.bs-colorpicker': this.hide
+                });
+                this.update();
+                this.element.trigger({
+                    type: 'hidePicker',
+                    color: this.color
+                });
+            },
+            updateData: function (val) {
+                val = val || this.color.toString(this.format);
+                this.element.data('color', val);
+                return val;
+            },
+            updateInput: function (val) {
+                val = val || this.color.toString(this.format);
+                if (this.input !== false) {
+                    if (this.options.colorSelectors) {
+                        var color = new Color(val, this.options.colorSelectors);
+                        var alias = color.toAlias();
+                        if (typeof this.options.colorSelectors[alias] !== 'undefined') {
+                            val = alias;
+                        }
+                    }
+                    this.input.prop('value', val);
+                }
+                return val;
+            },
+            updatePicker: function (val) {
+                if (val !== undefined) {
+                    this.color = new Color(val, this.options.colorSelectors);
+                }
+                var sl = (this.options.horizontal === false) ? this.options.sliders : this.options.slidersHorz;
+                var icns = this.picker.find('i');
+                if (icns.length === 0) {
+                    return;
+                }
+                if (this.options.horizontal === false) {
+                    sl = this.options.sliders;
+                    icns.eq(1).css('top', sl.hue.maxTop * (1 - this.color.value.h)).end()
+                        .eq(2).css('top', sl.alpha.maxTop * (1 - this.color.value.a));
+                } else {
+                    sl = this.options.slidersHorz;
+                    icns.eq(1).css('left', sl.hue.maxLeft * (1 - this.color.value.h)).end()
+                        .eq(2).css('left', sl.alpha.maxLeft * (1 - this.color.value.a));
+                }
+                icns.eq(0).css({
+                    'top': sl.saturation.maxTop - this.color.value.b * sl.saturation.maxTop,
+                    'left': this.color.value.s * sl.saturation.maxLeft
+                });
+                this.picker.find('.bs-colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
+                this.picker.find('.bs-colorpicker-alpha').css('backgroundColor', this.color.toHex());
+                this.picker.find('.bs-colorpicker-color, .bs-colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
+                return val;
+            },
+            updateComponent: function (val) {
+                val = val || this.color.toString(this.format);
+                if (this.component !== false) {
+                    var icn = this.component.find('i').eq(0);
+                    if (icn.length > 0) {
+                        icn.css({
+                            'backgroundColor': val
+                        });
+                    } else {
+                        this.component.css({
+                            'backgroundColor': val
+                        });
+                    }
+                }
+                return val;
+            },
+            update: function (force) {
+                var val;
+                if ((this.getValue(false) !== false) || (force === true)) {
+                    // Update input/data only if the current value is not empty
+                    val = this.updateComponent();
+                    this.updateInput(val);
+                    this.updateData(val);
+                    this.updatePicker(); // only update picker if value is not empty
+                }
+                return val;
+
+            },
+            setValue: function (val) { // set color manually
+                this.color = new Color(val, this.options.colorSelectors);
                 this.update(true);
-            } else if ((e.keyCode === 40)) {
-                if (this.color.value.a > 0) {
-                    this.color.value.a = Math.round((this.color.value.a - 0.01) * 100) / 100;
+                this.element.trigger({
+                    type: 'changeColor',
+                    color: this.color,
+                    value: val
+                });
+            },
+            getValue: function (defaultValue) {
+                defaultValue = (defaultValue === undefined) ? '#000000' : defaultValue;
+                var val;
+                if (this.hasInput()) {
+                    val = this.input.val();
+                } else {
+                    val = this.element.data('color');
                 }
-                this.update(true);
-            } else {
-                this.color = new Color(this.input.val(), this.options.colorSelectors);
+                if ((val === undefined) || (val === '') || (val === null)) {
+                    // if not defined or empty, return default
+                    val = defaultValue;
+                }
+                return val;
+            },
+            hasInput: function () {
+                return (this.input !== false);
+            },
+            isDisabled: function () {
+                if (this.hasInput()) {
+                    return (this.input.prop('disabled') === true);
+                }
+                return false;
+            },
+            disable: function () {
+                if (this.hasInput()) {
+                    this.input.prop('disabled', true);
+                    this.element.trigger({
+                        type: 'disable',
+                        color: this.color,
+                        value: this.getValue()
+                    });
+                    return true;
+                }
+                return false;
+            },
+            enable: function () {
+                if (this.hasInput()) {
+                    this.input.prop('disabled', false);
+                    this.element.trigger({
+                        type: 'enable',
+                        color: this.color,
+                        value: this.getValue()
+                    });
+                    return true;
+                }
+                return false;
+            },
+            currentSlider: null,
+            mousePointer: {
+                left: 0,
+                top: 0
+            },
+            mousedown: function (e) {
+                if (!e.pageX && !e.pageY && e.originalEvent) {
+                    e.pageX = e.originalEvent.touches[0].pageX;
+                    e.pageY = e.originalEvent.touches[0].pageY;
+                }
+                e.stopPropagation();
+                e.preventDefault();
+
+                var target = $(e.target);
+
+                //detect the slider and set the limits and callbacks
+                var zone = target.closest('div');
+                var sl = this.options.horizontal ? this.options.slidersHorz : this.options.sliders;
+                if (!zone.is('.bs-colorpicker')) {
+                    if (zone.is('.bs-colorpicker-saturation')) {
+                        this.currentSlider = $.extend({}, sl.saturation);
+                    } else if (zone.is('.bs-colorpicker-hue')) {
+                        this.currentSlider = $.extend({}, sl.hue);
+                    } else if (zone.is('.bs-colorpicker-alpha')) {
+                        this.currentSlider = $.extend({}, sl.alpha);
+                    } else {
+                        return false;
+                    }
+                    var offset = zone.offset();
+                    //reference to guide's style
+                    this.currentSlider.guide = zone.find('i')[0].style;
+                    this.currentSlider.left = e.pageX - offset.left;
+                    this.currentSlider.top = e.pageY - offset.top;
+                    this.mousePointer = {
+                        left: e.pageX,
+                        top: e.pageY
+                    };
+                    //trigger mousemove to move the guide to the current position
+                    $(document).on({
+                        'mousemove.bs-colorpicker': $.proxy(this.mousemove, this),
+                        'touchmove.bs-colorpicker': $.proxy(this.mousemove, this),
+                        'mouseup.bs-colorpicker': $.proxy(this.mouseup, this),
+                        'touchend.bs-colorpicker': $.proxy(this.mouseup, this)
+                    }).trigger('mousemove');
+                }
+                return false;
+            },
+            mousemove: function (e) {
+                if (!e.pageX && !e.pageY && e.originalEvent) {
+                    e.pageX = e.originalEvent.touches[0].pageX;
+                    e.pageY = e.originalEvent.touches[0].pageY;
+                }
+                e.stopPropagation();
+                e.preventDefault();
+                var left = Math.max(
+                    0,
+                    Math.min(
+                        this.currentSlider.maxLeft,
+                        this.currentSlider.left + ((e.pageX || this.mousePointer.left) - this.mousePointer.left)
+                    )
+                );
+                var top = Math.max(
+                    0,
+                    Math.min(
+                        this.currentSlider.maxTop,
+                        this.currentSlider.top + ((e.pageY || this.mousePointer.top) - this.mousePointer.top)
+                    )
+                );
+                this.currentSlider.guide.left = left + 'px';
+                this.currentSlider.guide.top = top + 'px';
+                if (this.currentSlider.callLeft) {
+                    this.color[this.currentSlider.callLeft].call(this.color, left / this.currentSlider.maxLeft);
+                }
+                if (this.currentSlider.callTop) {
+                    this.color[this.currentSlider.callTop].call(this.color, top / this.currentSlider.maxTop);
+                }
                 // Change format dynamically
                 // Only occurs if user choose the dynamic format by
                 // setting option format to false
-                if (this.color.origFormat && this.options.format === false) {
-                    this.format = this.color.origFormat;
+                if (this.currentSlider.callTop === 'setAlpha' && this.options.format === false) {
+
+                    // Converting from hex / rgb to rgba
+                    if (this.color.value.a !== 1) {
+                        this.format = 'rgba';
+                        this.color.origFormat = 'rgba';
+                    }
+
+                    // Converting from rgba to hex
+                    else {
+                        this.format = 'hex';
+                        this.color.origFormat = 'hex';
+                    }
                 }
-                if (this.getValue(false) !== false) {
-                    this.updateData();
-                    this.updateComponent();
-                    this.updatePicker();
+                this.update(true);
+
+                this.element.trigger({
+                    type: 'changeColor',
+                    color: this.color
+                });
+                return false;
+            },
+            mouseup: function (e) {
+                e.stopPropagation();
+                e.preventDefault();
+                $(document).off({
+                    'mousemove.bs-colorpicker': this.mousemove,
+                    'touchmove.bs-colorpicker': this.mousemove,
+                    'mouseup.bs-colorpicker': this.mouseup,
+                    'touchend.bs-colorpicker': this.mouseup
+                });
+                return false;
+            },
+            change: function (e) {
+                this.keyup(e);
+            },
+            keyup: function (e) {
+                if ((e.keyCode === 38)) {
+                    if (this.color.value.a < 1) {
+                        this.color.value.a = Math.round((this.color.value.a + 0.01) * 100) / 100;
+                    }
+                    this.update(true);
+                } else if ((e.keyCode === 40)) {
+                    if (this.color.value.a > 0) {
+                        this.color.value.a = Math.round((this.color.value.a - 0.01) * 100) / 100;
+                    }
+                    this.update(true);
+                } else {
+                    this.color = new Color(this.input.val(), this.options.colorSelectors);
+                    // Change format dynamically
+                    // Only occurs if user choose the dynamic format by
+                    // setting option format to false
+                    if (this.color.origFormat && this.options.format === false) {
+                        this.format = this.color.origFormat;
+                    }
+                    if (this.getValue(false) !== false) {
+                        this.updateData();
+                        this.updateComponent();
+                        this.updatePicker();
+                    }
                 }
+                this.element.trigger({
+                    type: 'changeColor',
+                    color: this.color,
+                    value: this.input.val()
+                });
             }
-            this.element.trigger({
-                type: 'changeColor',
-                color: this.color,
-                value: this.input.val()
+        };
+
+        $.colorpicker = Colorpicker;
+
+        $.fn.colorpicker = function (option) {
+            var pickerArgs = arguments,
+                rv;
+
+            var $returnValue = this.each(function () {
+                var $this = $(this),
+                    inst = $this.data('colorpicker'),
+                    options = ((typeof option === 'object') ? option : {});
+                if ((!inst) && (typeof option !== 'string')) {
+                    $this.data('colorpicker', new Colorpicker(this, options));
+                } else {
+                    if (typeof option === 'string') {
+                        rv = inst[option].apply(inst, Array.prototype.slice.call(pickerArgs, 1));
+                    }
+                }
             });
-        }
-    };
-
-    $.colorpicker = Colorpicker;
-
-    $.fn.colorpicker = function (option) {
-        var pickerArgs = arguments,
-            rv;
-
-        var $returnValue = this.each(function () {
-            var $this = $(this),
-                inst = $this.data('colorpicker'),
-                options = ((typeof option === 'object') ? option : {});
-            if ((!inst) && (typeof option !== 'string')) {
-                $this.data('colorpicker', new Colorpicker(this, options));
-            } else {
-                if (typeof option === 'string') {
-                    rv = inst[option].apply(inst, Array.prototype.slice.call(pickerArgs, 1));
-                }
+            if (option === 'getValue') {
+                return rv;
             }
-        });
-        if (option === 'getValue') {
-            return rv;
-        }
-        return $returnValue;
+            return $returnValue;
+        };
+
+        $.fn.colorpicker.constructor = Colorpicker;
+
     };
-
-    $.fn.colorpicker.constructor = Colorpicker;
-
-};
 
 
