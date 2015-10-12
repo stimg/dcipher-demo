@@ -682,7 +682,7 @@
             if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
                 // Turn on record mode
-                this.appMode = this.appMode || 'record';
+                this.resetApp(this.appMode || 'record', window.location.pathname);
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -3444,7 +3444,7 @@
             localStorage.removeItem('Stroller.modules.TF');
             sessionStorage.removeItem('basket');
             this.appMode = mode;
-            if (!restore /*&& window.location.pathname !== path*/) {
+            if (!restore && path /*&& window.location.pathname !== path*/) {
 
                 window.location.pathname = path;
 
