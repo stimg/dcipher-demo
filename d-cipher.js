@@ -286,6 +286,7 @@
             timelineTooltip: 'd-cipher-timeline-tooltip',
             timelineInfo: 'd-cipher-timeline-info',
             timelineCursor: 'd-cipher-timeline-cursor',
+            timelineCircle: 'd-cipher-timeline-circle',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
             highlightEvent: 'd-cipher-highlight-event',
@@ -1166,7 +1167,6 @@
                 event = this.getTimelineEvent(e),
                 $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
-                hw2 = $he.outerWidth() / 2,
                 $tl = $(this.getDomElement('timeline'));
 
             function getEventInfo(e) {
@@ -1226,8 +1226,19 @@
                     y = event.clientY/*y + pos.top*/,
                     html = '<table>', w, h, top, left;
 
+                if (!$tl.data('eiTID')) {
+
+                    $tl.data('eiTID', setTimeout(function () {
+
+                        $tt.hide();
+                        self.showEventsInfo(event);
+
+                    }, 2000));
+
+                }
+
                 $tl.css('cursor', 'pointer');
-                $he.css({top: event.event.y - hw2, left: event.event.x - hw2}).show();
+                $he.css({top: event.event.y, left: event.event.x}).show();
                 html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
                 w = $tt.outerWidth();
@@ -1265,6 +1276,13 @@
                 $tl.css('cursor', 'default');
                 $tt.hide();
                 $he.hide();
+                $(this.getDomElement('eventInfo')).hide();
+                if ($tl.data('eiTID')) {
+
+                    clearTimeout($tl.data('eiTID'));
+                    $tl.data('eiTID', null);
+
+                }
 
             }
 
@@ -1276,6 +1294,7 @@
                 loc = self.loc,
                 $tt = $(self.getDomElement('mTooltip')),
                 cnvh = self.getDomElement('canvasHolder'),
+                $cnvh = $(cnvh),
                 x = event.clientX, y = event.clientY,
                 evts = self.getEventsUnderMouse(x, y),
                 html = '<table>', evt, rec,
@@ -1316,7 +1335,18 @@
 
             if (evts.length) {
 
-                $(cnvh).css('cursor', 'pointer');
+                $cnvh.css('cursor', 'pointer');
+
+                if (!$cnvh.data('eiTID')) {
+
+                    $cnvh.data('eiTID', setTimeout(function () {
+
+                        $(self.getDomElement('eventInfo')).hide();
+                        self.showEventsInfo();
+
+                    }, 2000));
+
+                }
 
                 evt = evts[0];
                 rId = evt.recId;
@@ -1385,8 +1415,14 @@
             } else if (event.target.parentNode.id !== self.domId['timeline']) {
 
                 $(self.getDomElement('eventInfo')).hide();
-                $(self.getDomElement('timelineCursor')).hide();
-                $(cnvh).css('cursor', 'default');
+                $(self.getDomElement('timelineCircle')).hide();
+                $cnvh.css('cursor', 'default');
+                if ($cnvh.data('eiTID')) {
+
+                    clearTimeout($cnvh.data('eiTID'));
+                    $cnvh.data('eiTID', null);
+
+                }
                 $tt.hide();
 
             }
@@ -1395,7 +1431,7 @@
 
         };
 
-        this.showEventsInfo = function () {
+        this.showEventsInfo = function (event) {
 
             var self = this,
                 loc = this.loc,
@@ -1404,9 +1440,13 @@
                 dx = 0, dy = 0, html = '<table>', rec,
                 top, left, x, y, w, h, shift = 10;
 
-            evt = evts[0];
-            rId = evt.recId;
-            rec = self.getRecordById(rId);
+            evt = evts[0] || event.event;
+
+            if (!evt) {
+
+                return;
+
+            }
 
             function getRecordInfo(rec) {
 
@@ -1458,6 +1498,9 @@
                 return html;
             }
 
+            rId = evt.recId;
+            rec = self.getRecordById(rId);
+
             html += getRecordInfo(rec);
 
             evts.forEach(function (e) {
@@ -1494,8 +1537,8 @@
             $eInf.html(html + '</table>');
             w = $eInf.outerWidth();
             h = $eInf.outerHeight();
-            x = dx / evts.length;
-            y = dy / evts.length;
+            x = event ? event.clientX : dx / evts.length;
+            y = event ? event.clientY : dy / evts.length;
 
             if (y - h - shift > 5) {
 
@@ -1565,7 +1608,8 @@
 
             if (self.eventsUnderMouse.length) {
 
-                self.showEventsInfo();
+                //self.showEventsInfo();
+                self.showTimelineEvent(self.eventsUnderMouse[0]);
 
             }
 
@@ -1810,6 +1854,7 @@
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
                 $tl = $(this.getDomElement('timeline')),
+                $tlc = $(this.getDomElement('timelineCursor')),
                 ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = this.timeLineOffsetLeft,
@@ -1817,13 +1862,30 @@
                 cy = window.innerHeight - ch + offsetTop,
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
-                posx = offsetLeft, posx0, pe;
+                posx = offsetLeft, posx0, pe,
+                top, left;
 
             this.timeLineEvents = [];
             cnv.width = cw;
             cnv.height = ch;
             $(cnv).width(cw);
             $(cnv).height(ch);
+
+            if (this.eventIndex) {
+
+                $tlc.css(this.getTimeLineCursorPars(events[this.eventIndex].time, rec.duration));
+
+            } else {
+
+                $tlc.css({
+
+                    top: offsetTop,
+                    left: offsetLeft
+
+                });
+
+            }
+            $tlc.show();
 
             ctx.lineWidth = 2.0;
             ctx.fillStyle = 'white';
@@ -1929,20 +1991,13 @@
 
         };
 
-        this.showTimelineEvent = function showTimelineEvent(e) {
+        this.showTimelineEvent = function showTimelineEvent(event) {
 
-            var evt = this.getTimelineEvent(e),
-                event = evt ? evt.event : null;
-
-            if (event) {
-
-                this.sessionId = event.recId;
-                this.sessionRec = this.getRecordById(event.recId);
-                this.eventIndex = this.sessionRec.events.indexOf(event);
-                this.appMode = 'timeline';
-                window.location = event.location;
-
-            }
+            this.sessionId = event.recId;
+            this.sessionRec = this.getRecordById(event.recId);
+            this.eventIndex = this.sessionRec.events.indexOf(event);
+            this.appMode = 'timeline';
+            window.location = event.location;
 
         };
 
@@ -2145,8 +2200,6 @@
 
                         var x0, y0, x, y, el;
 
-                        $tlCursor.css(self.getTimeLineCursorPars(etime + step * dt, recDuration));
-
                         x0 = pars1.x + dx * step;
                         y0 = pars1.y + dy * step;
                         step++;
@@ -2155,12 +2208,14 @@
 
                             x = pars1.x + dx * step;
                             y = pars1.y + dy * step;
+                            $tlCursor.css(self.getTimeLineCursorPars(etime + step * dt, recDuration));
                             setTimeout(drawStep, delay);
 
                         } else {
 
                             x = pars2.x;
                             y = pars2.y;
+                            $tlCursor.css(self.getTimeLineCursorPars(e2.time, recDuration));
                             setTimeout(function () {
 
                                 playEvent(pars2);
@@ -2226,7 +2281,6 @@
                             ctx.setLineDash([3, 5]);
 
                         }
-
 
                         $cur.css('top', y).css('left', x);
                         ctx.beginPath();
@@ -2306,6 +2360,7 @@
 
                     }
 
+                    $tlCursor.css(self.getTimeLineCursorPars(etime, recDuration));
                     if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
 
                         if (steps) {
@@ -2315,7 +2370,6 @@
 
                         }
                         //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
-                        $tlCursor.css(self.getTimeLineCursorPars(etime, recDuration));
                         setTimeout(drawStep, delay);
 
                     } else {
@@ -3137,9 +3191,18 @@
 
             } else if (this.appMode === 'timeline') {
 
+                var event = this.sessionRec.events[this.eventIndex],
+                    tEvt;
+
                 this.setActiveRecord(this.sessionRec.id);
                 this.showSpiderGraph(this.sessionRec.id);
-                this.showTLTooltip(this.timeLineEvents[this.eventIndex]);
+
+                tEvt = this.timeLineEvents.find(function (e) {
+
+                    return e.event.index === event.index;
+
+                });
+                this.showTLTooltip(tEvt);
                 sessionStorage.removeItem('dcipherState');
                 this.appMode = '';
 
@@ -3488,7 +3551,7 @@
                 evt = evts ? evts[0] : null,
                 rec = evt ? this.getRecordById(evt.recId) : null,
                 tl = this.getDomElement('timeline'),
-                $tlc = $(this.getDomElement('timelineCursor'));
+                $tlc = $(this.getDomElement('timelineCircle'));
 
             if (rec && rec.active) {
 
@@ -3509,8 +3572,8 @@
                 $tlc = $(this.getDomElement('timelineCursor')),
                 width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
                 pxs = width / duration,
-                top = ($(tl).height() - $tlc.outerHeight()) / 2,
-                left = this.timeLineOffsetLeft + pxs * time - $tlc.outerWidth() / 2;
+                top = $(tl).height() / 2,
+                left = this.timeLineOffsetLeft + pxs * time;
 
             return {
 
@@ -3548,6 +3611,7 @@
             tLine = document.createElement('div'),
             tlTT = document.createElement('div'),
             tlCursor = document.createElement('div'),
+            tlCircle = document.createElement('div'),
             tlInfo = document.createElement('div'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
@@ -3595,9 +3659,11 @@
         tLine.id = dCipher.domId.timeline;
         tlInfo.id = dCipher.domId.timelineInfo;
         tlCursor.id = dCipher.domId.timelineCursor;
+        tlCircle.id = dCipher.domId.timelineCircle;
         tLine.appendChild(tlCnv);
         tLine.appendChild(tlInfo);
         tLine.appendChild(tlCursor);
+        tLine.appendChild(tlCircle);
         cnvDiv.appendChild(tLine);
 
         // Time line event info popup
@@ -3671,7 +3737,7 @@
 
         tlCnv.addEventListener('click', function (e) {
 
-            dCipher.showTimelineEvent(e);
+            dCipher.showTimelineEvent(dCipher.getTimelineEvent(e).event);
 
         });
 

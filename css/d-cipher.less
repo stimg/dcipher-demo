@@ -276,12 +276,12 @@
 
 #d-cipher-timeline-cursor{
   position: absolute;
-  display: none;
+  display: block;
   padding: 2px 0;
   border: solid 4px transparent;
   border-top-color: white;
   border-bottom-color: white;
-  transform: scale(1, 2.2);
+  transform: scale(1, 2.2) translate(-4px, -2.5px);
 }
 
 #d-cipher-timeline {
@@ -346,7 +346,7 @@
   border: solid 2px rgba(255, 0, 255, 0.5);
   background-color: transparent;
 }
-#d-cipher-highlight-event {
+#d-cipher-highlight-event, #d-cipher-timeline-circle {
   display: none;
   position: absolute;
   z-index: 1000001;
@@ -355,10 +355,11 @@
   width: 24px;
   height: 24px;
   border-radius: 20px;
-  border: solid 4px white;
+  border: solid 4px rgba(255, 255, 255, 0.7);
   background-color: transparent;
+  transform: translate(-12px, -12px);
 }
-#d-cipher-highlight-event:before{
+#d-cipher-highlight-event:before, #d-cipher-timeline-circle:before{
   content: '';
   display: block;
   width: 22px;
@@ -366,6 +367,9 @@
   border: solid 2px red;
   border-radius: 22px;
   margin: -3px;
+}
+#d-cipher-timeline-circle{
+  //transform: translate(-8px, -6px);
 }
 #d-cipher-dblclick:after {
   /*
