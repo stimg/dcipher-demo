@@ -3,1561 +3,1266 @@
  */
 (function (window, document) {
 
-        var Strings = {
+    var Strings = {
 
-            en: {
+        en: {
 
-                _Recording: 'Recording',
-                _Clicks: 'Clicks',
-                _Wheels: 'Wheels',
-                _Drags: 'Drags',
-                _Events: 'Events',
-                _Type: 'Type',
-                _Time: 'Time',
-                _Mouse_miles: 'Mouse miles',
-                _Distance: "Distance",
-                _Path: 'Path',
-                _from: 'from',
-                _Target: 'Target',
-                _Action: 'Action',
-                _No_name: 'No name',
-                _Anonym: 'Anonym',
-                _Record_session: 'Record session',
-                _Show_records: 'Show session list',
-                _Name_placeholder: 'Enter name',
-                _Toggle_record: 'Show / hide session',
-                _Delete_record: 'Delete session',
-                _Play_record: 'Simulate session',
-                _Change_color: 'Change color',
-                _Event: 'Event',
-                _Event_list: 'Events list',
-                _Session: 'Session',
-                _Session_name: 'Session',
-                _Created: 'Created',
-                _Modified: 'Modified',
-                _Author: 'Author',
-                _Duration: 'Duration',
-                _Relative_mouse_speed: 'Relative mouse speed',
-                _Miles_sec: 'Distance / sec',
-                _Events_sec: 'Events / sec',
-                _Clicks_sec: 'Clicks / sec',
-                _KPI: "KPI power",
-                _KPI_event: "KPI Event",
-                _Start_test: "Start test",
-                _Default_record_name: "Test #",
-                _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
+            _Recording: 'Recording',
+            _Clicks: 'Clicks',
+            _Wheels: 'Wheels',
+            _Drags: 'Drags',
+            _Events: 'Events',
+            _Type: 'Type',
+            _Time: 'Time',
+            _Mouse_miles: 'Mouse miles',
+            _Distance: "Distance",
+            _Path: 'Path',
+            _from: 'from',
+            _Target: 'Target',
+            _Action: 'Action',
+            _No_name: 'No name',
+            _Anonym: 'Anonym',
+            _Record_session: 'Record session',
+            _Show_records: 'Show session list',
+            _Name_placeholder: 'Enter name',
+            _Toggle_record: 'Show / hide session',
+            _Delete_record: 'Delete session',
+            _Play_record: 'Simulate session',
+            _Change_color: 'Change color',
+            _Event: 'Event',
+            _Event_list: 'Events list',
+            _Session: 'Session',
+            _Session_name: 'Session',
+            _Created: 'Created',
+            _Modified: 'Modified',
+            _Author: 'Author',
+            _Duration: 'Duration',
+            _Relative_mouse_speed: 'Relative mouse speed',
+            _Miles_sec: 'Distance / sec',
+            _Events_sec: 'Events / sec',
+            _Clicks_sec: 'Clicks / sec',
+            _KPI: "KPI power",
+            _KPI_event: "KPI Event",
+            _Start_test: "Start test",
+            _Default_record_name: "Test #",
+            _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
 
-                start: 'Start',
-                mouseover: 'Mouse over',
-                mouseout: 'Mouse out',
-                mousedown: 'Mouse down',
-                mousemove: 'Mouse move',
-                mouseup: 'Mouse up',
-                drag: 'Drag',
-                click: 'Click',
-                dblclick: 'Double click',
-                keydown: 'Key down',
-                wheel: 'Wheel',
-                mousewheel: 'Wheel',
-                DOMMouseScroll: 'Wheel',
-                sec: 'sec',
-                mc: 'mc',
-                evs: 'evs',
-                mm: 'mm',
-                mp: 'mp',
-                kpi: 'kpi',
-                cds: 'cds'
-            },
+            start: 'Start',
+            mouseover: 'Mouse over',
+            mouseout: 'Mouse out',
+            mousedown: 'Mouse down',
+            mousemove: 'Mouse move',
+            mouseup: 'Mouse up',
+            drag: 'Drag',
+            click: 'Click',
+            dblclick: 'Double click',
+            keydown: 'Key down',
+            wheel: 'Wheel',
+            mousewheel: 'Wheel',
+            DOMMouseScroll: 'Wheel',
+            sec: 'sec',
+            mc: 'mc',
+            evs: 'evs',
+            mm: 'mm',
+            mp: 'mp',
+            kpi: 'kpi',
+            cds: 'cds'
+        },
 
-            ru: {},
+        ru: {},
 
-            de: {}
+        de: {}
+
+    };
+
+    // Indexed DB class
+    var IDB = function () {
+
+        this.dbName = 'dCipherDB';
+        this.tables = {
+
+            'sessions': 'sessions'
+
+        };
+        this.records = [];
+
+        this.init = function init() {
+
+            var self = this,
+                tables = self.tables;
+
+            $.indexedDB(self.dbName).done(function (db) {
+
+                var ok = true,
+                    database = db;
+
+                console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
+                            ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
+
+                // Check if all stores are in the database
+                $.each(tables, function (s) {
+
+                    if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
+
+                        ok = false;
+
+                    }
+
+                });
+
+                if (!ok) {
+
+                    if (db.version) {
+
+                        console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
+
+                    }
+
+                    setTimeout(function () {
+
+                        self.upgradeDB(database);
+
+                    }, 10);
+
+                }
+
+            });
 
         };
 
-        // Indexed DB class
-        var IDB = function () {
+        this.upgradeDB = function upgradeDB(db) {
 
-            this.dbName = 'dCipherDB';
-            this.tables = {
+            var ver = 1 + db.version,
+                tables = this.tables;
 
-                'sessions': 'sessions'
+            $.indexedDB(this.dbName, {
 
-            };
-            this.records = [];
+                'version': ver,
+                'upgrade': function (t) {
 
-            this.init = function init() {
+                    var s, k;
 
-                var self = this,
-                    tables = self.tables;
+                    for (s in db.objectStoreNames) {
 
-                $.indexedDB(self.dbName).done(function (db) {
+                        if (db.objectStoreNames.hasOwnProperty(s)) {
 
-                    var ok = true,
-                        database = db;
-
-                    console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
-                                ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
-
-                    // Check if all stores are in the database
-                    $.each(tables, function (s) {
-
-                        if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
-
-                            ok = false;
+                            t.deleteObjectStore(db.objectStoreNames[s]);
+                            console.log('[INFO] dbAdapter: Upgrade database, delete object store "', db.objectStoreNames[s], '".');
 
                         }
-
-                    });
-
-                    if (!ok) {
-
-                        if (db.version) {
-
-                            console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
-
-                        }
-
-                        setTimeout(function () {
-
-                            self.upgradeDB(database);
-
-                        }, 10);
-
                     }
 
-                });
+                    for (k in tables) {
 
-            };
+                        if (tables.hasOwnProperty(k)) {
 
-            this.upgradeDB = function upgradeDB(db) {
-
-                var ver = 1 + db.version,
-                    tables = this.tables;
-
-                $.indexedDB(this.dbName, {
-
-                    'version': ver,
-                    'upgrade': function (t) {
-
-                        var s, k;
-
-                        for (s in db.objectStoreNames) {
-
-                            if (db.objectStoreNames.hasOwnProperty(s)) {
-
-                                t.deleteObjectStore(db.objectStoreNames[s]);
-                                console.log('[INFO] dbAdapter: Upgrade database, delete object store "', db.objectStoreNames[s], '".');
-
-                            }
+                            t.createObjectStore(tables[k]);
+                            console.log('[INFO] dbAdapter: Upgrade database, create object store "' +
+                                        tables[k] + '".');
                         }
-
-                        for (k in tables) {
-
-                            if (tables.hasOwnProperty(k)) {
-
-                                t.createObjectStore(tables[k]);
-                                console.log('[INFO] dbAdapter: Upgrade database, create object store "' +
-                                            tables[k] + '".');
-                            }
-                        }
-
                     }
 
-                }).done(function (db) {
+                }
 
-                    console.log('[INFO] dbAdapter: Indexed database and object storage available. Data base version: ' + db.version + '; storages : ' + db.objectStoreNames.length);
+            }).done(function (db) {
 
-                }).fail(function (error) {
+                console.log('[INFO] dbAdapter: Indexed database and object storage available. Data base version: ' + db.version + '; storages : ' + db.objectStoreNames.length);
 
-                    console.error('[ERROR] DB Adapter: ', error.message);
-                    console.warn('[WARNING] dbAdapter: Indexed database not available. ' + error.message);
+            }).fail(function (error) {
 
-                });
+                console.error('[ERROR] DB Adapter: ', error.message);
+                console.warn('[WARNING] dbAdapter: Indexed database not available. ' + error.message);
 
-            };
+            });
 
-            this.getRecord = function getRecord(id) {
+        };
 
-                return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
+        this.getRecord = function getRecord(id) {
 
-            };
+            return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
 
-            this.putRecord = function putRecord(id, data) {
+        };
 
-                var self = this;
+        this.putRecord = function putRecord(id, data) {
 
-                data.events.forEach(function (e) {
+            var self = this;
 
-                    delete e.target.element;
+            data.events.forEach(function (e) {
 
-                });
+                delete e.target.element;
 
-                return new Promise(function (resolve, reject) {
+            });
 
-                    $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
+            return new Promise(function (resolve, reject) {
 
-                        console.log('[INFO] dbAdapter: session data saved.');
-                        self.getAllRecords().done(resolve);
+                $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
 
-                    }).fail(function (e, msg) {
-
-                        console.warn('[INFO] dbAdapter: Failed to save session data. Error: ', msg);
-                        reject();
-
-                    });
-
-                });
-
-            };
-
-            this.deleteRecord = function deleteRecord(id) {
-
-                var self = this;
-
-                return new Promise(function (resolve, reject) {
-
-                    $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
-
-                        self.getAllRecords().done(function () {
-
-                            console.log('[INFO] dbAdapter: session data deleted.');
-                            resolve(self.records);
-
-                        });
-
-                    }).fail(function () {
-
-                        console.warn('[INFO] dbAdapter: Failed to delete session data.');
-                        reject();
-
-                    });
-
-                });
-
-            };
-
-            this.getAllRecords = function getAllRecords() {
-
-                var self = this,
-                    records = this.records = [];
-
-                return $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
-
-                    //console.log(r.value);
-                    records.push(r.value);
-
-                }).done(function (r, e) {
-
-                    //console.log('--> result: %s, event: %s', r, e);
-                    //console.debug('Records: ', self.records);
+                    console.log('[INFO] dbAdapter: session data saved.');
+                    self.getAllRecords().done(resolve);
 
                 }).fail(function (e, msg) {
 
-                    console.warn('[WARNING] dbAdapter: Failed to get all records. Error: ', msg);
+                    console.warn('[INFO] dbAdapter: Failed to save session data. Error: ', msg);
+                    reject();
 
                 });
 
-            };
+            });
 
-        }; // end of IDB class
+        };
 
-        // DCipher class
-        var DCipher = function () {
+        this.deleteRecord = function deleteRecord(id) {
 
-            //this.baseURL = '/dcipher-demo/';
-            this.baseURL = '/';
-            this.cssURL = 'css/d-cipher.css';
-            this.lang = 'en';
-            this.loc = Strings[this.lang];
-            this.domId = {
+            var self = this;
 
-                container: 'd-cipher-container',
-                mouseOverStyle: 'd-cipher-mouseover-style',
-                mouseOverClass: 'd-cipher-mouseover',
-                cursor: 'd-cipher-cursor',
-                canvasHolder: 'd-cipher-canvas-holder',
-                menu: 'd-cipher-menu',
-                butRecord: 'd-cipher-menu-but-record',
-                butPlay: 'd-cipher-menu-but-play',
-                butList: 'd-cipher-menu-but-list',
-                stat: 'd-cipher-stat',
-                timeline: 'd-cipher-timeline',
-                timelineTooltip: 'd-cipher-timeline-tooltip',
-                timelineInfo: 'd-cipher-timeline-info',
-                timelineCursor: 'd-cipher-timeline-cursor',
-                timelineCircle: 'd-cipher-timeline-circle',
-                timelineBrackets: 'd-cipher-timeline-brackets',
-                click: 'd-cipher-click',
-                dblClick: 'd-cipher-dblclick',
-                highlightEvent: 'd-cipher-highlight-event',
-                records: 'd-cipher-rec-list',
-                mTooltip: 'd-cipher-m-tooltip',
-                eventInfo: 'd-cipher-event-info',
-                topMenu: 'd-cipher-topmenu',
-                taskBar: 'd-cipher-taskbar'
+            return new Promise(function (resolve, reject) {
 
-            };
+                $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
 
-            this.registerEventList = [
+                    self.getAllRecords().done(function () {
 
-                'start',
-                'mouseover',
-                'mouseout',
-                'mousedown',
-                'mouseup',
-                //'click',
-                //'dblclick',
-                //'keydown',
-                'wheel',
-                'mousewheel',
-                'DOMMouseScroll'
-
-            ];
-
-            this.drawEventList = [
-
-                'start',
-                'mouseover',
-                //'mouseout',
-                'mousedown',
-                'mouseup',
-                'click',
-                'dblclick',
-                'keydown',
-                'wheel',
-                'mousewheel',
-                'DOMMouseScroll'
-
-            ];
-
-            this.elementEventFilters = {
-
-                path: ['mouseover', 'mouseout'],
-                circle: this.registerEventList
-
-            };
-
-            this.mouse = {
-
-                x: 0,
-                y: 0
-
-            };
-
-            this.testCases = [
-
-                [
-                    {
-                        step: 0,
-                        description: 'Find Cameleon stroller and configure to order',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-2-0-1-2-1-0-0-0",
-                                tagName: "A",
-                                location: '/bugaboo/A/index.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-2-0-2-1-0-0-0-1-0-1",
-                                tagName: "SPAN",
-                                location: '/bugaboo/A/index.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
-                                tagName: "A",
-                                location: '/bugaboo/A/bugaboo-cameleon3.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 1,
-                        description: 'Choose bassinet and select black canopy color',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                                tagName: "path",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 2,
-                        description: ' Add running accessory, and a cup holder',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                                tagName: "A",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                                tagName: "A",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 3,
-                        description: 'Purchase stroller, checking final cost total before completing',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
-                                alternate: [2],
-                                tagName: "A",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-2-0-1-2-0-0-1-2-0-0",
-                                alternate: [1],
-                                tagName: "A",
-                                location: '/bugaboo/A/create.html',
-                                done: false
-                            },
-                            /*
-                             {
-                             type: 'wheel',
-                             treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
-                             tagName: "DIV",
-                             location: '/bugaboo/A/cart.html',
-                             done: false
-                             },
-                             */
-                            {
-                                type: 'click',
-                                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                                //alternate: [4],
-                                tagName: "A",
-                                location: '/bugaboo/A/cart.html',
-                                done: false
-                            }/*,
-                             {
-                             type: 'click',
-                             treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
-                             alternate: [3],
-                             tagName: "A",
-                             location: '/bugaboo/A/cart.html',
-                             done: false
-                             }*/
-                        ]
-                    }
-                ],
-                [
-                    {
-                        step: 0,
-                        description: 'Find Cameleon stroller and configure to order',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-2-0-2-0-0-0-0-0-0",
-                                tagName: "A",
-                                location: '/bugaboo/B/index.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/bugaboo-cameleon3.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 1,
-                        description: 'Choose bassinet and select black canopy color',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                                tagName: "path",
-                                location: '/bugaboo/B/create.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 2,
-                        description: ' Add running accessory, and a cup holder',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/create.html',
-                                done: false
-                            }
-                        ]
-                    },
-                    {
-                        step: 3,
-                        description: 'Purchase stroller, checking final cost total before completing',
-                        done: false,
-                        active: false,
-                        events: [
-                            {
-                                type: 'mousedown',
-                                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/create.html',
-                                done: false
-                            },
-                            {
-                                type: 'click',
-                                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                                tagName: "SPAN",
-                                location: '/bugaboo/B/cart.html',
-                                done: false
-                            }
-                        ]
-                    }
-                ]
-            ];
-            ;
-            this.currentTask = null;
-            this.currentEvent = null;
-
-            this.db = new IDB();
-            this.user = {};
-            this.sessionId = '';
-            this.activeRecord = null;
-            this.startEventIndex = 0;
-            this.endEventIndex = 0;
-            this.timeBrackets = [0, 0];
-            this.appMode = '';
-            this.eventsUnderMouse = [];
-            this.timeLineEvents = [];
-            this.clickDelay = 200;
-            this.timeLineOffsetLeft = 100;
-
-            this.init = function init() {
-
-                var self = this;
-
-                self.db.init();
-                self.db.getAllRecords().done(function () {
-
-                    var recList = self.getDomElement('records'),
-                        path = window.location.pathname;
-
-                    if (path.match('/bugaboo/A/')) {
-
-                        self.testCase = self.testCases[0];
-
-                    } else if (path.match('/bugaboo/B/')) {
-
-                        self.testCase = self.testCases[1];
-
-                    }
-                    self.createRecordList();
-                    self.createTaskList();
-                    self.restoreState();
-
-                    $(recList).on('mouseout', function () {
-
-                        $(recList).data('tid', setTimeout(function () {
-
-                            $(recList).hide();
-
-                        }, 1000));
+                        console.log('[INFO] dbAdapter: session data deleted.');
+                        resolve(self.records);
 
                     });
 
-                    $(recList).on('mouseover', function () {
+                }).fail(function () {
 
-                        clearTimeout($(recList).data('tid'));
-
-                    });
-
-                    $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
-
-                    $('document').ready(function () {
-
-                        self.setupDOMListeners();
-
-                    });
+                    console.warn('[INFO] dbAdapter: Failed to delete session data.');
+                    reject();
 
                 });
 
-            };
+            });
 
-            this.catchEvents = function catchEvents(e) {
+        };
 
-                var self = this,
-                    el = document.elementFromPoint(e.clientX, e.clientY),
-                    list = self.registerEventList,
-                    type, p;
+        this.getAllRecords = function getAllRecords() {
 
-                for (var i = 0, il = list.length; i < il; i++) {
+            var self = this,
+                records = this.records = [];
 
-                    p = list[i];
-                    type = p;
+            return $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
 
-                    if (typeof el['on' + p] === 'function'
-                        && (!el.eventListenerList || !el.eventListenerList[type])) {
+                //console.log(r.value);
+                records.push(r.value);
 
-                        el.addEventListener(type, function (e) {
+            }).done(function (r, e) {
 
-                            self.saveEvent(e);
+                //console.log('--> result: %s, event: %s', r, e);
+                //console.debug('Records: ', self.records);
 
-                        });
-                        el.dispatchEvent(new MouseEvent(type, e));
+            }).fail(function (e, msg) {
 
-                    }
+                console.warn('[WARNING] dbAdapter: Failed to get all records. Error: ', msg);
 
-                }
+            });
 
-            };
+        };
 
-            this.toggleRecMode = function toggleRecMode(e) {
+    }; // end of IDB class
 
-                var self = this,
-                    cnvh = this.getDomElement('canvasHolder'),
-                    $stat = $(this.getDomElement('stat'));
+    // DCipher class
+    var DCipher = function () {
 
-                function updateStats() {
+        //this.baseURL = '/dcipher-demo/';
+        this.baseURL = '/';
+        this.cssURL = 'css/d-cipher.css';
+        this.lang = 'en';
+        this.loc = Strings[this.lang];
+        this.domId = {
 
-                    self.updateStatString();
+            container: 'd-cipher-container',
+            mouseOverStyle: 'd-cipher-mouseover-style',
+            mouseOverClass: 'd-cipher-mouseover',
+            cursor: 'd-cipher-cursor',
+            canvasHolder: 'd-cipher-canvas-holder',
+            menu: 'd-cipher-menu',
+            butRecord: 'd-cipher-menu-but-record',
+            butPlay: 'd-cipher-menu-but-play',
+            butList: 'd-cipher-menu-but-list',
+            stat: 'd-cipher-stat',
+            timeline: 'd-cipher-timeline',
+            timelineTooltip: 'd-cipher-timeline-tooltip',
+            timelineInfo: 'd-cipher-timeline-info',
+            timelineCursor: 'd-cipher-timeline-cursor',
+            timelineCircle: 'd-cipher-timeline-circle',
+            timelineBrackets: 'd-cipher-timeline-brackets',
+            click: 'd-cipher-click',
+            dblClick: 'd-cipher-dblclick',
+            highlightEvent: 'd-cipher-highlight-event',
+            records: 'd-cipher-rec-list',
+            mTooltip: 'd-cipher-m-tooltip',
+            eventInfo: 'd-cipher-event-info',
+            topMenu: 'd-cipher-topmenu',
+            taskBar: 'd-cipher-taskbar'
 
-                }
+        };
 
-                function catchEvents(e) {
+        this.registerEventList = [
 
-                    self.catchEvents(e);
+            'start',
+            'mouseover',
+            'mouseout',
+            'mousedown',
+            'mouseup',
+            //'click',
+            //'dblclick',
+            //'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
 
-                }
+        ];
 
-                if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+        this.drawEventList = [
 
-                    // Turn on record mode
-                    this.resetApp(this.appMode || 'record', window.location.pathname);
+            'start',
+            'mouseover',
+            //'mouseout',
+            'mousedown',
+            'mouseup',
+            'click',
+            'dblclick',
+            'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
 
-                    var ts = 1 * new Date();
-                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                    $(cnvh).hide();
-                    $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
-                    $(this.getDomElement('butList')).hide();
-                    $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
-                    $('body').on('mousemove', catchEvents);
-                    this.hideRecList();
-                    this.sessionId = ts.toString();
-                    this.activeRecord = {
+        ];
 
-                        id: this.sessionId,
-                        name: this.loc._Default_record_name + this.db.records.length,
-                        description: '',
-                        created: ts,
-                        modified: ts,
-                        author: this.user.fullname || this.loc._Anonym,
-                        color: 'rgba(255, 0, 255, 1)',
-                        duration: 0,
-                        mouseMilesTotal: 0,
-                        events: [],
-                        eventsStat: {}
+        this.elementEventFilters = {
 
-                    };
+            path: ['mouseover', 'mouseout'],
+            circle: this.registerEventList
 
-                    this.saveEvent(new MouseEvent('start', e));
+        };
 
-                } else {
+        this.mouse = {
 
-                    // Turn off record mode
-                    this.appMode = '';
-                    $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
-                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+            x: 0,
+            y: 0
 
-                    var rec = this.activeRecord;
+        };
 
-                    $stat.fadeOut();
-                    clearInterval($stat.data('tid'));
-                    $('body').off('mousemove', catchEvents);
+        this.testCases = [
 
-                    if (this.db.records.length) {
-
-                        $(this.getDomElement('butList')).show();
-
-                    }
-
-                    if (rec && rec.events && rec.events.length > 1) {
-
-                        var evt = rec.events[rec.events.length - 1];
-
-                        rec.duration = evt.time;
-                        rec.kpi = evt.kpi;
-                        rec.mouseMilesTotal = evt.miles;
-                        rec.eventsQty = 0;
-
-                        for (var et in rec.eventsStat) {
-
-                            rec.eventsQty += rec.eventsStat[et];
-
+            [
+                {
+                    step: 0,
+                    description: 'Find Cameleon stroller and configure to order',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-2-0-1-2-1-0-0-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-2-0-2-1-0-0-0-1-0-1",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/bugaboo-cameleon3.html',
+                            done: false
                         }
+                    ]
+                },
+                {
+                    step: 1,
+                    description: 'Choose bassinet and select black canopy color',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                            tagName: "path",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 2,
+                    description: ' Add running accessory, and a cup holder',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 3,
+                    description: 'Purchase stroller, checking final cost total before completing',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                            alternate: [2],
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-2-0-1-2-0-0-1-2-0-0",
+                            alternate: [1],
+                            tagName: "A",
+                            location: '/bugaboo/A/create.html',
+                            done: false
+                        },
+                        /*
+                         {
+                         type: 'wheel',
+                         treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
+                         tagName: "DIV",
+                         location: '/bugaboo/A/cart.html',
+                         done: false
+                         },
+                         */
+                        {
+                            type: 'click',
+                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                            //alternate: [4],
+                            tagName: "A",
+                            location: '/bugaboo/A/cart.html',
+                            done: false
+                        }/*,
+                         {
+                         type: 'click',
+                         treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
+                         alternate: [3],
+                         tagName: "A",
+                         location: '/bugaboo/A/cart.html',
+                         done: false
+                         }*/
+                    ]
+                }
+            ],
+            [
+                {
+                    step: 0,
+                    description: 'Find Cameleon stroller and configure to order',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-2-0-2-0-0-0-0-0-0",
+                            tagName: "A",
+                            location: '/bugaboo/B/index.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/bugaboo-cameleon3.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 1,
+                    description: 'Choose bassinet and select black canopy color',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                            tagName: "path",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 2,
+                    description: ' Add running accessory, and a cup holder',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        }
+                    ]
+                },
+                {
+                    step: 3,
+                    description: 'Purchase stroller, checking final cost total before completing',
+                    done: false,
+                    active: false,
+                    events: [
+                        {
+                            type: 'mousedown',
+                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/create.html',
+                            done: false
+                        },
+                        {
+                            type: 'click',
+                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                            tagName: "SPAN",
+                            location: '/bugaboo/B/cart.html',
+                            done: false
+                        }
+                    ]
+                }
+            ]
+        ];
+        ;
+        this.currentTask = null;
+        this.currentEvent = null;
 
-                        this.db.putRecord(this.sessionId, rec).then(function () {
+        this.db = new IDB();
+        this.user = {};
+        this.sessionId = '';
+        this.activeRecord = null;
+        this.startEventIndex = 0;
+        this.endEventIndex = 0;
+        this.timeBrackets = [0, 0];
+        this.appMode = '';
+        this.eventsUnderMouse = [];
+        this.timeLineEvents = [];
+        this.tlMouse = {x: 0, y: 0, down: false};
+        this.clickDelay = 200;
+        this.timeLineOffsetLeft = 100;
 
-                            $(self.getDomElement('butList')).show();
-                            self.createRecordList();
-                            self.toggleRecList();
-                            $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
-                            self.setActiveRecord(self.sessionId);
-                            self.showSpiderGraph(self.sessionId);
-                            self.activeRecord = null;
+        this.init = function init() {
 
-                        });
+            var self = this;
 
-                    }
+            self.db.init();
+            self.db.getAllRecords().done(function () {
+
+                var recList = self.getDomElement('records'),
+                    path = window.location.pathname;
+
+                if (path.match('/bugaboo/A/')) {
+
+                    self.testCase = self.testCases[0];
+
+                } else if (path.match('/bugaboo/B/')) {
+
+                    self.testCase = self.testCases[1];
+
+                }
+                self.createRecordList();
+                self.createTaskList();
+                self.restoreState();
+
+                $(recList).on('mouseout', function () {
+
+                    $(recList).data('tid', setTimeout(function () {
+
+                        $(recList).hide();
+
+                    }, 1000));
+
+                });
+
+                $(recList).on('mouseover', function () {
+
+                    clearTimeout($(recList).data('tid'));
+
+                });
+
+                $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
+
+                $('document').ready(function () {
+
+                    self.setupDOMListeners();
+
+                });
+
+            });
+
+        };
+
+        this.catchEvents = function catchEvents(e) {
+
+            var self = this,
+                el = document.elementFromPoint(e.clientX, e.clientY),
+                list = self.registerEventList,
+                type, p;
+
+            for (var i = 0, il = list.length; i < il; i++) {
+
+                p = list[i];
+                type = p;
+
+                if (typeof el['on' + p] === 'function'
+                    && (!el.eventListenerList || !el.eventListenerList[type])) {
+
+                    el.addEventListener(type, function (e) {
+
+                        self.saveEvent(e);
+
+                    });
+                    el.dispatchEvent(new MouseEvent(type, e));
 
                 }
 
-                return this;
+            }
 
-            };
+        };
 
-            this.saveEvent = function saveEvent(e) {
+        this.toggleRecMode = function toggleRecMode(e) {
 
-                var self = this,
-                    etype = e.type,
-                    etarget = e.target || document.getElementsByTagName('body')[0],
-                    treePath = this.getTreePath(etarget),
-                    location = document.location.pathname,
-                    save = (this.appMode === 'record' || this.appMode === 'test') &&
-                           this.registerEventList.indexOf(etype) > -1
-                           && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
-                           && etarget.localName !== 'svg'
-                           && etarget.localName !== 'circle';
+            var self = this,
+                cnvh = this.getDomElement('canvasHolder'),
+                $stat = $(this.getDomElement('stat'));
 
-                console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
-                //console.debug('TREE PATH: ', treePath);
-                //console.debug('tagName: ', etarget.tagName);
+            function updateStats() {
 
-                if (this.appMode === 'test') {
+                self.updateStatString();
 
-                    this.currentEvent = {
+            }
 
+            function catchEvents(e) {
+
+                self.catchEvents(e);
+
+            }
+
+            if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+
+                // Turn on record mode
+                this.resetApp(this.appMode || 'record', window.location.pathname);
+
+                var ts = 1 * new Date();
+                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                $(cnvh).hide();
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
+                $(this.getDomElement('butList')).hide();
+                $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
+                $('body').on('mousemove', catchEvents);
+                this.hideRecList();
+                this.sessionId = ts.toString();
+                this.activeRecord = {
+
+                    id: this.sessionId,
+                    name: this.loc._Default_record_name + this.db.records.length,
+                    description: '',
+                    created: ts,
+                    modified: ts,
+                    author: this.user.fullname || this.loc._Anonym,
+                    color: 'rgba(255, 0, 255, 1)',
+                    duration: 0,
+                    mouseMilesTotal: 0,
+                    events: [],
+                    eventsStat: {}
+
+                };
+
+                this.saveEvent(new MouseEvent('start', e));
+
+            } else {
+
+                // Turn off record mode
+                this.appMode = '';
+                $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+
+                var rec = this.activeRecord;
+
+                $stat.fadeOut();
+                clearInterval($stat.data('tid'));
+                $('body').off('mousemove', catchEvents);
+
+                if (this.db.records.length) {
+
+                    $(this.getDomElement('butList')).show();
+
+                }
+
+                if (rec && rec.events && rec.events.length > 1) {
+
+                    var evt = rec.events[rec.events.length - 1];
+
+                    rec.duration = evt.time;
+                    rec.kpi = evt.kpi;
+                    rec.mouseMilesTotal = evt.miles;
+                    rec.eventsQty = 0;
+
+                    for (var et in rec.eventsStat) {
+
+                        rec.eventsQty += rec.eventsStat[et];
+
+                    }
+
+                    this.db.putRecord(this.sessionId, rec).then(function () {
+
+                        $(self.getDomElement('butList')).show();
+                        self.createRecordList();
+                        self.toggleRecList();
+                        $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
+                        self.setActiveRecord(self.sessionId);
+                        self.showSpiderGraph(self.sessionId);
+                        self.activeRecord = null;
+
+                    });
+
+                }
+
+            }
+
+            return this;
+
+        };
+
+        this.saveEvent = function saveEvent(e) {
+
+            var self = this,
+                etype = e.type,
+                etarget = e.target || document.getElementsByTagName('body')[0],
+                treePath = this.getTreePath(etarget),
+                location = document.location.pathname,
+                save = (this.appMode === 'record' || this.appMode === 'test') &&
+                       this.registerEventList.indexOf(etype) > -1
+                       && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
+                       && etarget.localName !== 'svg'
+                       && etarget.localName !== 'circle';
+
+            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
+            //console.debug('TREE PATH: ', treePath);
+            //console.debug('tagName: ', etarget.tagName);
+
+            if (this.appMode === 'test') {
+
+                this.currentEvent = {
+
+                    type: etype,
+                    treePath: treePath,
+                    tagName: etarget.tagName,
+                    location: location
+
+                };
+                this.checkTaskCompletion();
+
+            }
+
+            if (save) {
+
+                //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
+
+                var rec = this.activeRecord,
+                    events = rec.events,
+                    elen = events.length,
+                    lastEvent = events[elen - 1] || null,
+                    milesTotal = this.getNDCMousePath(rec),
+                    clientNDC = this.getNDC(e.clientX, e.clientY),
+                    pageNDC = this.getNDC(e.pageX, e.pageY),
+                    pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
+                    $el = $(etarget),
+                    offs = $el.offset(),
+                    left = offs.left,
+                    top = offs.top,
+                    event = {
+                        recId: this.sessionId,
+                        timeStamp: e.timeStamp,
+                        index: elen,
+                        location: location,
+                        ndc: {
+                            x: clientNDC.x,
+                            y: clientNDC.y,
+                            pageX: pageNDC.x,
+                            pageY: pageNDC.y,
+                            pageXOffset: pageOffsetNDC.x,
+                            pageYOffset: pageOffsetNDC.y
+                        },
+                        bubbles: true,
+                        cancelBubble: e.cancelBubble,
+                        cancelable: e.cancelable,
+                        defaultPrevented: e.defaultPrevented,
+                        returnValue: true,
                         type: etype,
-                        treePath: treePath,
-                        tagName: etarget.tagName,
-                        location: location
+                        char: e.char,
+                        shiftKey: e.shiftKey,
+                        altKey: e.altKey,
+                        ctrlKey: e.ctrlKey,
+                        button: e.button,
+                        which: e.which,
+                        charCode: e.charCode,
+                        deltaX: e.deltaX,
+                        deltaY: e.deltaY,
+                        deltaZ: e.deltaZ,
+                        deltaMode: e.deltaMode,
+                        x: e.clientX,
+                        y: e.clientY,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        pageX: e.pageX,
+                        pageY: e.pageY,
+                        winWidth: window.innerWidth,
+                        winHeight: window.innerHeight,
+                        docHeight: document.body.scrollHeight,
+                        docWidth: document.body.scrollWidth,
+                        pageXOffset: pageXOffset,
+                        pageYOffset: pageYOffset,
+                        target: {
+                            treePath: treePath,
+                            tagName: etarget.tagName,
+                            localName: etarget.localName,
+                            name: etarget.name,
+                            title: etarget.title,
+                            id: etarget.id,
+                            className: typeof etarget.className === 'string' ? etarget.className : '',
+                            width: $el.outerWidth(),
+                            height: $el.outerHeight(),
+                            x: left,
+                            y: top,
+                            dx: 0,
+                            dy: 0,
+                            localX: e.pageX - left,
+                            localY: e.pageY - top,
+                            relX: (e.pageX - left) / $el.outerWidth(),
+                            relY: (e.pageY - top) / $el.outerHeight()
+                        },
+                        duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
+                        time: e.timeStamp - rec.modified
 
                     };
-                    this.checkTaskCompletion();
 
-                }
-
-                if (save) {
-
-                    //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
-
-                    var rec = this.activeRecord,
-                        events = rec.events,
-                        elen = events.length,
-                        lastEvent = events[elen - 1] || null,
-                        milesTotal = this.getNDCMousePath(rec),
-                        clientNDC = this.getNDC(e.clientX, e.clientY),
-                        pageNDC = this.getNDC(e.pageX, e.pageY),
-                        pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
-                        $el = $(etarget),
-                        offs = $el.offset(),
-                        left = offs.left,
-                        top = offs.top,
-                        event = {
-                            recId: this.sessionId,
-                            timeStamp: e.timeStamp,
-                            index: elen,
-                            location: location,
-                            ndc: {
-                                x: clientNDC.x,
-                                y: clientNDC.y,
-                                pageX: pageNDC.x,
-                                pageY: pageNDC.y,
-                                pageXOffset: pageOffsetNDC.x,
-                                pageYOffset: pageOffsetNDC.y
-                            },
-                            bubbles: true,
-                            cancelBubble: e.cancelBubble,
-                            cancelable: e.cancelable,
-                            defaultPrevented: e.defaultPrevented,
-                            returnValue: true,
-                            type: etype,
-                            char: e.char,
-                            shiftKey: e.shiftKey,
-                            altKey: e.altKey,
-                            ctrlKey: e.ctrlKey,
-                            button: e.button,
-                            which: e.which,
-                            charCode: e.charCode,
-                            deltaX: e.deltaX,
-                            deltaY: e.deltaY,
-                            deltaZ: e.deltaZ,
-                            deltaMode: e.deltaMode,
-                            x: e.clientX,
-                            y: e.clientY,
-                            clientX: e.clientX,
-                            clientY: e.clientY,
-                            pageX: e.pageX,
-                            pageY: e.pageY,
-                            winWidth: window.innerWidth,
-                            winHeight: window.innerHeight,
-                            docHeight: document.body.scrollHeight,
-                            docWidth: document.body.scrollWidth,
-                            pageXOffset: pageXOffset,
-                            pageYOffset: pageYOffset,
-                            target: {
-                                treePath: treePath,
-                                tagName: etarget.tagName,
-                                localName: etarget.localName,
-                                name: etarget.name,
-                                title: etarget.title,
-                                id: etarget.id,
-                                className: typeof etarget.className === 'string' ? etarget.className : '',
-                                width: $el.outerWidth(),
-                                height: $el.outerHeight(),
-                                x: left,
-                                y: top,
-                                dx: 0,
-                                dy: 0,
-                                localX: e.pageX - left,
-                                localY: e.pageY - top,
-                                relX: (e.pageX - left) / $el.outerWidth(),
-                                relY: (e.pageY - top) / $el.outerHeight()
-                            },
-                            duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
-                            time: e.timeStamp - rec.modified
-
-                        };
-
-                    if (lastEvent && lastEvent.type === etype
-                        && lastEvent.target.treePath === event.target.treePath
-                        && !etype.match(/scroll|wheel/i)) {
-
-                        return;
-
-                    }
-
-                    event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
-                    event.drag = event.milesLast && etype === 'mouseup';
-                    event.miles = milesTotal + event.milesLast;
-
-                    if (etarget.dataset) {
-
-                        event.target.dcipherName = etarget.dataset.dcipherName;
-                        event.target.dcipherAction = etarget.dataset.dcipherAction;
-
-                    }
-                    if (etype === 'mouseup' && event.milesLast === 0) {
-
-                        event = events.pop();
-                        event.type = etype = 'click';
-
-                        lastEvent = events[elen - 1];
-                        if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
-
-                            events.pop();
-                            event.type = etype = 'dblclick';
-
-                        }
-
-                    }
-
-                    if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
-
-                        event.dx = left - lastEvent.target.x;
-                        event.dy = top - lastEvent.target.y;
-
-                    }
-
-                    if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
-
-                        rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
-                        event.eventNo = rec.eventsStat[etype];
-
-                    }
-
-                    if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
-
-                        lastEvent.eventNo = rec.eventsStat['wheel'];
-
-                    }
-
-                    if (event.drag) {
-
-                        rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
-                        event.eventNo = rec.eventsStat['drag'];
-
-                    }
-
-                    /*
-                     var sd = 0;
-                     rec.events.forEach(function (e) {
-
-                     if (e.type === 'wheel') {
-
-                     sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
-
-                     }
-
-                     });
-                     */
-                    event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
-                    //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
-                    event.kpiLast = event.kpi;
-                    /*
-                     event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
-
-                     console.debug('-------> event.kpiLast', event.kpiLast);
-                     */
-
-                    events.push(event);
-                    rec.mouseMilesTotal = milesTotal;
-                    this.updateStatString(e);
-
-                }
-
-                return this;
-
-            };
-
-            this.setupDOMListeners = function setupDOMListeners() {
-
-                var self = this;
-
-                console.log('Setting up DOM listeners...');
-
-                function setElementListeners(arr) {
-
-                    arr.each(function (i, el) {
-
-                        for (var k in el) {
-
-                            if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
-
-                                el.addEventListener(k.substr(2), function (e) {
-
-                                    self.saveEvent(e);
-
-                                });
-                                console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
-
-                            }
-
-                        }
-                        setElementListeners($(el).children());
-
-                    });
-
-                }
-
-                setElementListeners($('body').children(":not('#d-cipher-container, script')"));
-                console.log('DOM listeners has been set up...');
-
-            };
-
-            this.getTreePath = function getTreePath(el) {
-
-                var path = '',
-                    found = false;
-
-                function parseTree(node, cid) {
-
-                    if (found) {
-
-                        return;
-
-                    }
-
-                    var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
-
-                    for (var i = 0, len = ch.length; i < len; i++) {
-
-                        if (ch[i] === el) {
-
-                            path = cid + '-' + i;
-                            found = true;
-                            break;
-
-                        } else {
-
-                            parseTree(ch[i], cid + '-' + i);
-
-                        }
-
-                    }
-
-                }
-
-                parseTree($('body')[0], '0');
-                return path;
-
-            };
-
-            this.getElementByTreePath = function getElementByTreePath(path) {
-
-                var pa = path.split('-'),
-                    el = $('body')[0];
-
-                pa.shift();
-
-                pa.forEach(function (p) {
-
-                    if (el) {
-
-                        el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
-
-                    }
-
-                });
-
-                //console.debug('--> element: ', el);
-
-                return el || window;
-
-            };
-
-            this.getDistance = function getDistance(p1, p2) {
-
-                var asp = window.innerWidth / window.innerHeight;
-
-                return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
-
-            };
-
-            this.getNDCMousePath = function getNDCMousePath(rec) {
-
-                var self = this,
-                    path = 0;
-
-                rec.events.forEach(function (e, idx, arr) {
-
-                    if (idx > 0) {
-
-                        path += self.getDistance(arr[idx - 1].ndc, e.ndc);
-
-                    }
-
-                });
-
-                return path;
-
-            };
-
-            this.getNDC = function getNDC() {
-
-                var pos;
-
-                if (arguments.length === 1) {
-
-                    pos = arguments[0];
-
-                } else {
-
-                    pos = {
-
-                        x: arguments[0],
-                        y: arguments[1]
-
-                    }
-
-                }
-
-                return {
-
-                    x: 2 * pos.x / window.innerWidth - 1,
-                    y: 1 - 2 * pos.y / window.innerHeight
-
-                }
-
-            };
-
-            this.getSC = function getSC() {
-
-                var pos;
-
-                if (arguments.length === 1) {
-
-                    pos = arguments[0];
-
-                } else {
-
-                    pos = {
-
-                        x: arguments[0],
-                        y: arguments[1]
-
-                    }
-
-                }
-
-                return {
-
-                    x: (pos.x + 1) * window.innerWidth / 2,
-                    y: (1 - pos.y) * window.innerHeight / 2
-
-                }
-
-            };
-
-            this.calcSC = function calcSC(rec) {
-
-                var self = this;
-
-                rec.events.forEach(function (e) {
-
-                    self.getTargetScreenPars(e);
-
-                });
-
-            };
-
-            this.showTLTooltip = function showTLTooltip(e) {
-
-                var self = this,
-                    event = this.getTimelineEvent(e),
-                    $tt = $(this.getDomElement('timelineTooltip')),
-                    $he = $(this.getDomElement('highlightEvent')),
-                    $tl = $(this.getDomElement('timeline'));
-
-                function getEventInfo(e) {
-
-                    var rId = e.recId,
-                        rec = self.getRecordById(rId),
-                        etarget = e.target,
-                        html = '';
-
-                    if (etarget.dcipherName) {
-
-                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                    }
-
-                    if (etarget.dcipherAction) {
-
-                        html += '<tr>' +
-                                '<td class="tt-name">' + loc._Action + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
-                                '</tr><tr>' +
-                                '<td colspan = "2" class = "empty-row"></td>' +
-                                '</tr><br />';
-
-                    }
-
-                    html += '<tr>' +
-                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                            '</tr><tr>' +
-                            '<td colspan = "2" class = "empty-row"></td>' +
-                            '</tr>';
-
-                    html += '<tr>' +
-                            //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._Distance + ':</td>' +
-                            '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._KPI + ':</td>' +
-                            '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
-                            '</tr>';
-
-                    return html;
-                }
-
-                if (event) {
-
-                    var loc = this.loc,
-                    //pos = $tl.offset(),
-                        x = event.clientX/* + pos.left*/,
-                        y = event.clientY/*y + pos.top*/,
-                        html = '<table>', w, h, top, left;
-
-                    if (!$tl.data('eiTID')) {
-
-                        $tl.data('eiTID', setTimeout(function () {
-
-                            $tt.hide();
-                            self.showEventsInfo(event);
-
-                        }, 2000));
-
-                    }
-
-                    $tl.css('cursor', 'pointer');
-                    if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
-
-                        $he.css({top: event.event.y, left: event.event.x}).show();
-
-                    } else {
-
-                        $he.hide();
-
-                    }
-                    html += getEventInfo(event.event) + '</table>';
-                    $tt.html(html);
-                    w = $tt.outerWidth();
-                    h = $tt.outerHeight();
-
-                    if (y + 20 + h < window.innerHeight) {
-
-                        top = y + 20;
-
-                    } else {
-
-                        top = y - h - 10;
-
-                    }
-
-                    if (x - w / 2 - 5 < 0) {
-
-                        left = 5;
-
-                    } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                        left = window.innerWidth - w - 5;
-
-                    } else {
-
-                        left = x - w / 2;
-
-                    }
-
-                    $tt.css('top', top).css('left', left)
-                        .show();
-
-                } else {
-
-                    $tl.css('cursor', 'default');
-                    $tt.hide();
-                    $he.hide();
-                    $(this.getDomElement('eventInfo')).hide();
-                    if ($tl.data('eiTID')) {
-
-                        clearTimeout($tl.data('eiTID'));
-                        $tl.data('eiTID', null);
-
-                    }
-
-                }
-
-            };
-
-            this.showMouseTooltip = function showMouseTooltip(event) {
-
-                var self = this,
-                    loc = self.loc,
-                    $tt = $(self.getDomElement('mTooltip')),
-                    cnvh = self.getDomElement('canvasHolder'),
-                    $cnvh = $(cnvh),
-                    x = event.clientX, y = event.clientY,
-                    evts = self.getEventsUnderMouse(x, y),
-                    html = '<table>', evt, rec,
-                    w, h, top, left;
-
-                function getEventInfo(e) {
-
-                    var rId = e.recId,
-                        rec = self.getRecordById(rId),
-                        etarget = e.target,
-                        html = '';
-
-                    if (etarget.dcipherName) {
-
-                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                    }
-
-                    if (etarget.dcipherAction) {
-
-                        html += '<tr>' +
-                                '<td class="tt-name">' + loc._Action + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
-                                '</tr>';
-
-                    }
-
-                    html += '<tr>' +
-                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                            '</tr><tr>' +
-                            '<td colspan = "2" class = "empty-row"></td>' +
-                            '</tr>';
-
-                    return html;
-                }
-
-                if (evts.length) {
-
-                    $cnvh.css('cursor', 'pointer');
-
-                    if (!$cnvh.data('eiTID')) {
-
-                        $cnvh.data('eiTID', setTimeout(function () {
-
-                            $(self.getDomElement('eventInfo')).hide();
-                            self.showEventsInfo();
-
-                        }, 2000));
-
-                    }
-
-                    evt = evts[0];
-                    rId = evt.recId;
-                    html += getEventInfo(evt);
-
-                    evts.forEach(function (e) {
-
-                        rec = self.getRecordById(rId);
-
-                        if (rId !== e.recId) {
-
-                            rId = e.recId;
-                            html += getEventInfo(e);
-
-                        }
-
-                        html += '<tr>' +
-                                //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                                '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                                '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + loc._Distance + ':</td>' +
-                                '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + loc._KPI + ':</td>' +
-                                '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
-                                '</tr>';
-
-                    });
-
-                    $tt.html(html + '</table>');
-                    w = $tt.outerWidth();
-                    h = $tt.outerHeight();
-
-                    if (y + 20 + h < window.innerHeight) {
-
-                        top = y + 20;
-
-                    } else {
-
-                        top = y - h - 10;
-
-                    }
-
-                    if (x - w / 2 - 5 < 0) {
-
-                        left = 5;
-
-                    } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                        left = window.innerWidth - w - 5;
-
-                    } else {
-
-                        left = x - w / 2;
-
-                    }
-
-                    $tt.css({
-                        'top': top,
-                        'left': left
-                    }).show();
-
-                } else if (event.target.parentNode.id !== self.domId['timeline']) {
-
-                    $(self.getDomElement('eventInfo')).hide();
-                    $(self.getDomElement('timelineCircle')).hide();
-                    $cnvh.css('cursor', 'default');
-                    if ($cnvh.data('eiTID')) {
-
-                        clearTimeout($cnvh.data('eiTID'));
-                        $cnvh.data('eiTID', null);
-
-                    }
-                    $tt.hide();
-
-                }
-
-                //console.debug(html);
-
-            };
-
-            this.showEventsInfo = function (event) {
-
-                var self = this,
-                    loc = this.loc,
-                    evts = this.eventsUnderMouse,
-                    $eInf = $(this.getDomElement('eventInfo')),
-                    dx = 0, dy = 0, html = '<table>', rec,
-                    top, left, x, y, w, h, shift = 10;
-
-                evt = evts[0] || event.event;
-
-                if (!evt) {
+                if (lastEvent && lastEvent.type === etype
+                    && lastEvent.target.treePath === event.target.treePath
+                    && !etype.match(/scroll|wheel/i)) {
 
                     return;
 
                 }
 
-                function getRecordInfo(rec) {
+                event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
+                event.drag = event.milesLast && etype === 'mouseup';
+                event.miles = milesTotal + event.milesLast;
 
-                    var clicks = rec.eventsStat['click'],
-                        showEvents = ['click', 'wheel', 'drag'];
+                if (etarget.dataset) {
 
-                    html = '<tr>' +
-                           /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
-                           '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
-                           '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
-                           '</tr><tr>' +
-                           '<td colspan = "2" class = "empty-row"></td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
-                           '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Duration + ': </td>' +
-                           '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Events + ': </td>' +
-                           '<td class= "tt-value">' + rec.eventsQty + '</td>' +
-                           '</tr><tr>';
+                    event.target.dcipherName = etarget.dataset.dcipherName;
+                    event.target.dcipherAction = etarget.dataset.dcipherAction;
 
-                    showEvents.forEach(function (k) {
-
-                            if (rec.eventsStat[k]) {
-
-                                html += '<td class= "tt-name">' + loc[k] + ': </td>' +
-                                        '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
-                                        '</tr><tr>';
-
-                            }
-
-                        }
-                    );
-
-                    html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
-                            '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
-                            '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class= "tt-name">' + loc._KPI + ': </td>' +
-                            '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
-                            '</tr>';
-
-                    return html;
                 }
+                if (etype === 'mouseup' && event.milesLast === 0) {
 
-                rId = evt.recId;
-                rec = self.getRecordById(rId);
+                    event = events.pop();
+                    event.type = etype = 'click';
 
-                html += getRecordInfo(rec);
+                    lastEvent = events[elen - 1];
+                    if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
 
-                evts.forEach(function (e) {
-
-                    dx += e.x;
-                    dy += e.y;
-
-                    if (rId !== e.recId) {
-
-                        rId = e.recId;
-                        rec = self.getRecordById(rId);
-                        html += '<tr><td></td></tr>' + getRecordInfo(rec);
+                        events.pop();
+                        event.type = etype = 'dblclick';
 
                     }
 
-                    /*
-                     html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
-                     + ' #' + e.eventNo
-                     + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
-                     */
+                }
 
-                    html += '<tr>' +
-                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._Distance + ':</td>' +
-                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                            '</tr>';
+                if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
+
+                    event.dx = left - lastEvent.target.x;
+                    event.dy = top - lastEvent.target.y;
+
+                }
+
+                if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
+
+                    rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
+                    event.eventNo = rec.eventsStat[etype];
+
+                }
+
+                if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
+
+                    lastEvent.eventNo = rec.eventsStat['wheel'];
+
+                }
+
+                if (event.drag) {
+
+                    rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
+                    event.eventNo = rec.eventsStat['drag'];
+
+                }
+
+                /*
+                 var sd = 0;
+                 rec.events.forEach(function (e) {
+
+                 if (e.type === 'wheel') {
+
+                 sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+
+                 }
+
+                 });
+                 */
+                event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
+                event.kpiLast = event.kpi;
+                /*
+                 event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+
+                 console.debug('-------> event.kpiLast', event.kpiLast);
+                 */
+
+                events.push(event);
+                rec.mouseMilesTotal = milesTotal;
+                this.updateStatString(e);
+
+            }
+
+            return this;
+
+        };
+
+        this.setupDOMListeners = function setupDOMListeners() {
+
+            var self = this;
+
+            console.log('Setting up DOM listeners...');
+
+            function setElementListeners(arr) {
+
+                arr.each(function (i, el) {
+
+                    for (var k in el) {
+
+                        if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
+
+                            el.addEventListener(k.substr(2), function (e) {
+
+                                self.saveEvent(e);
+
+                            });
+                            console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
+
+                        }
+
+                    }
+                    setElementListeners($(el).children());
 
                 });
 
-                $eInf.html(html + '</table>');
-                w = $eInf.outerWidth();
-                h = $eInf.outerHeight();
-                x = event ? event.clientX : dx / evts.length;
-                y = event ? event.clientY : dy / evts.length;
+            }
 
-                if (y - h - shift > 5) {
+            setElementListeners($('body').children(":not('#d-cipher-container, script')"));
+            console.log('DOM listeners has been set up...');
 
-                    top = y - h - shift;
+        };
 
-                } else /*if ( y + h + shift > window.innerHeight)*/ {
+        this.getTreePath = function getTreePath(el) {
 
-                    top = y + shift;
+            var path = '',
+                found = false;
+
+            function parseTree(node, cid) {
+
+                if (found) {
+
+                    return;
+
+                }
+
+                var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
+
+                for (var i = 0, len = ch.length; i < len; i++) {
+
+                    if (ch[i] === el) {
+
+                        path = cid + '-' + i;
+                        found = true;
+                        break;
+
+                    } else {
+
+                        parseTree(ch[i], cid + '-' + i);
+
+                    }
+
+                }
+
+            }
+
+            parseTree($('body')[0], '0');
+            return path;
+
+        };
+
+        this.getElementByTreePath = function getElementByTreePath(path) {
+
+            var pa = path.split('-'),
+                el = $('body')[0];
+
+            pa.shift();
+
+            pa.forEach(function (p) {
+
+                if (el) {
+
+                    el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
+
+                }
+
+            });
+
+            //console.debug('--> element: ', el);
+
+            return el || window;
+
+        };
+
+        this.getDistance = function getDistance(p1, p2) {
+
+            var asp = window.innerWidth / window.innerHeight;
+
+            return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
+
+        };
+
+        this.getNDCMousePath = function getNDCMousePath(rec) {
+
+            var self = this,
+                path = 0;
+
+            rec.events.forEach(function (e, idx, arr) {
+
+                if (idx > 0) {
+
+                    path += self.getDistance(arr[idx - 1].ndc, e.ndc);
+
+                }
+
+            });
+
+            return path;
+
+        };
+
+        this.getNDC = function getNDC() {
+
+            var pos;
+
+            if (arguments.length === 1) {
+
+                pos = arguments[0];
+
+            } else {
+
+                pos = {
+
+                    x: arguments[0],
+                    y: arguments[1]
+
+                }
+
+            }
+
+            return {
+
+                x: 2 * pos.x / window.innerWidth - 1,
+                y: 1 - 2 * pos.y / window.innerHeight
+
+            }
+
+        };
+
+        this.getSC = function getSC() {
+
+            var pos;
+
+            if (arguments.length === 1) {
+
+                pos = arguments[0];
+
+            } else {
+
+                pos = {
+
+                    x: arguments[0],
+                    y: arguments[1]
+
+                }
+
+            }
+
+            return {
+
+                x: (pos.x + 1) * window.innerWidth / 2,
+                y: (1 - pos.y) * window.innerHeight / 2
+
+            }
+
+        };
+
+        this.calcSC = function calcSC(rec) {
+
+            var self = this;
+
+            rec.events.forEach(function (e) {
+
+                self.getTargetScreenPars(e);
+
+            });
+
+        };
+
+        this.showTLTooltip = function showTLTooltip(e) {
+
+            var self = this,
+                event = this.getTimelineEvent(e),
+                $tt = $(this.getDomElement('timelineTooltip')),
+                $he = $(this.getDomElement('highlightEvent')),
+                $tl = $(this.getDomElement('timeline'));
+
+            function getEventInfo(e) {
+
+                var rId = e.recId,
+                    rec = self.getRecordById(rId),
+                    etarget = e.target,
+                    html = '';
+
+                if (etarget.dcipherName) {
+
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
+
+                }
+
+                if (etarget.dcipherAction) {
+
+                    html += '<tr>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</tr><tr>' +
+                            '<td colspan = "2" class = "empty-row"></td>' +
+                            '</tr><br />';
+
+                }
+
+                html += '<tr>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
+                        '</tr><tr>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
+                        '</tr>';
+
+                html += '<tr>' +
+                        //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._KPI + ':</td>' +
+                        '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                        '</tr>';
+
+                return html;
+            }
+
+            if (event) {
+
+                var loc = this.loc,
+                //pos = $tl.offset(),
+                    x = event.clientX/* + pos.left*/,
+                    y = event.clientY/*y + pos.top*/,
+                    html = '<table>', w, h, top, left;
+
+                if (!$tl.data('eiTID')) {
+
+                    $tl.data('eiTID', setTimeout(function () {
+
+                        $tt.hide();
+                        self.showEventsInfo(event);
+
+                    }, 2000));
+
+                }
+
+                $tl.css('cursor', 'pointer');
+                if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
+
+                    $he.css({top: event.event.y, left: event.event.x}).show();
+
+                } else {
+
+                    $he.hide();
+
+                }
+                html += getEventInfo(event.event) + '</table>';
+                $tt.html(html);
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
+
+                if (y + 20 + h < window.innerHeight) {
+
+                    top = y + 20;
+
+                } else {
+
+                    top = y - h - 10;
 
                 }
 
@@ -1575,1508 +1280,1826 @@
 
                 }
 
-                $eInf.css('top', top).css('left', left).show();
-                $(this.getDomElement('mTooltip')).hide();
+                $tt.css('top', top).css('left', left)
+                    .show();
 
-            };
+            } else {
 
-            this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
+                $tl.css('cursor', 'default');
+                $tt.hide();
+                $he.hide();
+                $(this.getDomElement('eventInfo')).hide();
+                if ($tl.data('eiTID')) {
 
-                var self = this,
-                    recs = this.db.records,
-                    abs = Math.abs,
-                    th = 5,
-                    evts = [];
-
-                recs.forEach(function (r) {
-
-                    if (r.active && r.visible) {
-
-                        var ea = r.events.filter(function (e, i, arr) {
-
-                            return abs(x - e.x) < th && abs(y - e.y) < th
-                                   && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
-                                   && self.drawEventList.indexOf(e.type) > -1;
-
-                        });
-
-                        if (ea && ea.length) {
-
-                            [].push.apply(evts, ea);
-
-                        }
-
-                    }
-                });
-
-                this.eventsUnderMouse = evts;
-
-                return evts;
-
-            };
-
-            this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
-
-                if (self.eventsUnderMouse.length) {
-
-                    //self.showEventsInfo();
-                    self.showTimelineEvent(self.eventsUnderMouse[0]);
+                    clearTimeout($tl.data('eiTID'));
+                    $tl.data('eiTID', null);
 
                 }
 
-            };
+            }
 
-            this.updateStatString = function updateStatString(e) {
+        };
 
-                var loc = this.loc,
-                    rec = this.activeRecord,
-                    evt = rec.events[rec.events.length - 1],
-                    ms = rec.modified,
-                    miles = evt ? evt.miles : 0,
-                    timeString = this.getTimeString(1 * new Date() - ms),
-                    clicks = rec.eventsStat.click || 0,
-                    drags = rec.eventsStat.drag || 0,
-                    wheels = rec.eventsStat.wheel || 0,
-                    el = document.elementFromPoint(this.mouse.x, this.mouse.y),
-                    trg = el.name || el.id || el.className,
-                //type = e ? loc[e.type] : '',
-                    msg = ''; //loc._Recording + '.';
+        this.showMouseTooltip = function showMouseTooltip(event) {
 
-                msg += /*loc._Time + ': ' +*/ timeString + ' ';
-                msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
-                msg += loc._Clicks + ': ' + clicks + ' | ';
-                msg += loc._Drags + ': ' + drags + ' | ';
-                msg += loc._Wheels + ': ' + wheels + ' | ';
-                if (trg) {
+            var self = this,
+                loc = self.loc,
+                $tt = $(self.getDomElement('mTooltip')),
+                cnvh = self.getDomElement('canvasHolder'),
+                $cnvh = $(cnvh),
+                x = event.clientX, y = event.clientY,
+                evts = self.getEventsUnderMouse(x, y),
+                html = '<table>', evt, rec,
+                w, h, top, left;
 
-                    msg += loc._Target + ': ' + trg + ' | ';
+            function getEventInfo(e) {
 
-                }
-                msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
+                var rId = e.recId,
+                    rec = self.getRecordById(rId),
+                    etarget = e.target,
+                    html = '';
 
-                if (e && e.type === 'keypress') {
+                if (etarget.dcipherName) {
 
-                    msg += '; key: ' + String.fromCharCode(e.charCode);
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
                 }
 
-                this.getDomElement('stat').innerText = msg;
-                //console.debug(msg);
-                return this;
+                if (etarget.dcipherAction) {
 
-            };
+                    html += '<tr>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</tr>';
 
-            this.getTimeString = function getTimeString(ms) {
+                }
 
-                var time = ms / 1000,
-                    hours, mins, secs, html = '';
-
-                hours = Math.floor(time / 3600);
-                mins = Math.floor((time - hours * 3600) / 60);
-                secs = Math.floor(time - hours * 3600 - mins * 60);
-                html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
-                html += mins < 10 ? '0' + mins + ':' : mins + ':';
-                html += secs < 10 ? '0' + secs : secs;
+                html += '<tr>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
+                        '</tr><tr>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
+                        '</tr>';
 
                 return html;
+            }
 
-            };
+            if (evts.length) {
 
-            this.getRecordById = function getRecordById(id) {
+                $cnvh.css('cursor', 'pointer');
 
-                var records = this.db.records,
-                    r = null;
+                if (!$cnvh.data('eiTID')) {
 
-                for (var i = 0, rl = records.length; i < rl; i++) {
+                    $cnvh.data('eiTID', setTimeout(function () {
 
-                    if (records[i].id == id) {
+                        $(self.getDomElement('eventInfo')).hide();
+                        self.showEventsInfo();
 
-                        r = records[i];
-                        break;
+                    }, 2000));
+
+                }
+
+                evt = evts[0];
+                rId = evt.recId;
+                html += getEventInfo(evt);
+
+                evts.forEach(function (e) {
+
+                    rec = self.getRecordById(rId);
+
+                    if (rId !== e.recId) {
+
+                        rId = e.recId;
+                        html += getEventInfo(e);
 
                     }
 
-                }
+                    html += '<tr>' +
+                            //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._Distance + ':</td>' +
+                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._KPI + ':</td>' +
+                            '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                            '</tr>';
 
-                return r;
+                });
 
-            };
+                $tt.html(html + '</table>');
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
 
-            this.getDomElement = function getDomElement(name) {
+                if (y + 20 + h < window.innerHeight) {
 
-                return document.getElementById(this.domId[name]);
-
-            };
-
-            this.hideSpiderGraph = function hideSpiderGraph(sId) {
-
-                var cnvh = this.getDomElement('canvasHolder');
-
-                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
-
-                // Hide canvas holder div if no active session
-                if (!$('canvas.cnv:visible', cnvh).length) {
-
-                    $(cnvh).hide();
-                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
-
-                }
-
-                this.getRecordById(sId).visible = false;
-                if (this.activeRecord.id === sId) {
-
-                    this.clearTimeline();
-
-                }
-
-            };
-
-            this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
-
-                var rec = this.getRecordById(sId);
-
-                if (!rec) {
-
-                    return;
-
-                }
-
-                var cnvh = this.getDomElement('canvasHolder'),
-                    cnv = $('#cnvId-' + rec.id, cnvh)[0];
-
-                $(cnvh).show();
-                $(cnv).show();
-
-                if (!rec.drawn || start || end) {
-
-                    this.drawSpiderGraph(sId, start, end);
+                    top = y + 20;
 
                 } else {
 
-                    $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+                    top = y - h - 10;
 
                 }
 
-                rec.visible = true;
+                if (x - w / 2 - 5 < 0) {
 
-            };
+                    left = 5;
 
-            this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
+                } else if (x + w / 2 + 5 > window.innerWidth) {
 
-                var self = this,
-                    rec = this.getRecordById(sId);
+                    left = window.innerWidth - w - 5;
 
-                if (!rec) {
+                } else {
 
-                    return;
+                    left = x - w / 2;
 
                 }
 
-                var cnvh = this.getDomElement('canvasHolder'),
-                    data = rec.events.slice(start || 0, end || rec.events.length),
-                    cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
-                    ctx = cnv.getContext('2d');
+                $tt.css({
+                    'top': top,
+                    'left': left
+                }).show();
 
-                ctx.clearRect(0, 0, cnv.width, cnv.height);
-                ctx.beginPath();
+            } else if (event.target.parentNode.id !== self.domId['timeline']) {
 
-                // Draw lines
-                data.forEach(function (e, i, ea) {
+                $(self.getDomElement('eventInfo')).hide();
+                $(self.getDomElement('timelineCircle')).hide();
+                $cnvh.css('cursor', 'default');
+                if ($cnvh.data('eiTID')) {
 
-                    var pe = ea[i - 1],
-                        pos = self.getTargetScreenPars(e),
-                        ppos = pe ? self.getTargetScreenPars(pe) : {},
-                        ex = pos.x,
-                        ey = pos.y;
+                    clearTimeout($cnvh.data('eiTID'));
+                    $cnvh.data('eiTID', null);
 
-                    if (e.type === 'start') {
+                }
+                $tt.hide();
 
-                    } else if (e.drag) {
+            }
 
-                        // Draw line to last mouse down position
-                        //ctx.lineTo(pe.x, pe.y);
-                        ctx.stroke();
-                        ctx.save();
+            //console.debug(html);
 
-                        // Draw dashed line from last mouse down position
-                        ctx.beginPath();
-                        ctx.setLineDash([5, 5]);
-                        ctx.moveTo(ppos.x, ppos.y);
-                        ctx.lineTo(ex, ey);
-                        ctx.stroke();
-                        ctx.restore();
+        };
 
-                        // Begin new path and move start to current mouse position
-                        ctx.beginPath();
-                        ctx.moveTo(ex, ey);
+        this.showEventsInfo = function (event) {
 
-                    } else if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
+            var self = this,
+                loc = this.loc,
+                evts = this.eventsUnderMouse,
+                $eInf = $(this.getDomElement('eventInfo')),
+                dx = 0, dy = 0, html = '<table>', rec,
+                top, left, x, y, w, h, shift = 10;
 
-                        ctx.lineTo(ex, ey);
+            evt = evts[0] || event.event;
+
+            if (!evt) {
+
+                return;
+
+            }
+
+            function getRecordInfo(rec) {
+
+                var clicks = rec.eventsStat['click'],
+                    showEvents = ['click', 'wheel', 'drag'];
+
+                html = '<tr>' +
+                       /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
+                       '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
+                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
+                       '</tr><tr>' +
+                       '<td colspan = "2" class = "empty-row"></td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
+                       '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Duration + ': </td>' +
+                       '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Events + ': </td>' +
+                       '<td class= "tt-value">' + rec.eventsQty + '</td>' +
+                       '</tr><tr>';
+
+                showEvents.forEach(function (k) {
+
+                        if (rec.eventsStat[k]) {
+
+                            html += '<td class= "tt-name">' + loc[k] + ': </td>' +
+                                    '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
+                                    '</tr><tr>';
+
+                        }
 
                     }
+                );
 
-                });
-                ctx.stroke();
+                html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._KPI + ': </td>' +
+                        '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
+                        '</tr>';
 
-                // Draw event pictograms
-                ctx.setLineDash([]);
-                ctx.beginPath();
-                data.forEach(function (e, i, ea) {
+                return html;
+            }
 
-                    var pe = ea[i - 1],
-                        pos = self.getTargetScreenPars(e),
-                        ex = pos.x,
-                        ey = pos.y;
+            rId = evt.recId;
+            rec = self.getRecordById(rId);
 
-                    if (!e.type.match(/wheel|scroll/i)) {
+            html += getRecordInfo(rec);
 
-                        self.drawEventPict(ctx, e.type, ex, ey);
+            evts.forEach(function (e) {
 
-                    } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
+                dx += e.x;
+                dy += e.y;
 
-                        self.drawEventPict(ctx, 'wheel', ex, ey);
+                if (rId !== e.recId) {
 
-                    }
+                    rId = e.recId;
+                    rec = self.getRecordById(rId);
+                    html += '<tr><td></td></tr>' + getRecordInfo(rec);
 
-                });
+                }
 
-                ctx.stroke();
-                ctx.fill();
+                /*
+                 html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
+                 + ' #' + e.eventNo
+                 + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
+                 */
 
-                if (start === undefined && end === undefined) {
+                html += '<tr>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '</tr>';
 
-/*
-                    $(cnvh).show().on('mousemove', {self: this}, function (e) {
+            });
 
-                        self.showMouseTooltip(e);
-                        self.highlightTimeLineEvent(e);
+            $eInf.html(html + '</table>');
+            w = $eInf.outerWidth();
+            h = $eInf.outerHeight();
+            x = event ? event.clientX : dx / evts.length;
+            y = event ? event.clientY : dy / evts.length;
+
+            if (y - h - shift > 5) {
+
+                top = y - h - shift;
+
+            } else /*if ( y + h + shift > window.innerHeight)*/ {
+
+                top = y + shift;
+
+            }
+
+            if (x - w / 2 - 5 < 0) {
+
+                left = 5;
+
+            } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                left = window.innerWidth - w - 5;
+
+            } else {
+
+                left = x - w / 2;
+
+            }
+
+            $eInf.css('top', top).css('left', left).show();
+            $(this.getDomElement('mTooltip')).hide();
+
+        };
+
+        this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
+
+            var self = this,
+                recs = this.db.records,
+                abs = Math.abs,
+                th = 5,
+                evts = [];
+
+            recs.forEach(function (r) {
+
+                if (r.active && r.visible) {
+
+                    var ea = r.events.filter(function (e, i, arr) {
+
+                        return abs(x - e.x) < th && abs(y - e.y) < th
+                               && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
+                               && self.drawEventList.indexOf(e.type) > -1;
 
                     });
-*/
-                    $(cnv).show();
-                    rec.drawn = true;
-                    this.checkRecordCheckbox(sId);
+
+                    if (ea && ea.length) {
+
+                        [].push.apply(evts, ea);
+
+                    }
+
+                }
+            });
+
+            this.eventsUnderMouse = evts;
+
+            return evts;
+
+        };
+
+        this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
+
+            if (self.eventsUnderMouse.length) {
+
+                //self.showEventsInfo();
+                self.showTimelineEvent(self.eventsUnderMouse[0]);
+
+            }
+
+        };
+
+        this.updateStatString = function updateStatString(e) {
+
+            var loc = this.loc,
+                rec = this.activeRecord,
+                evt = rec.events[rec.events.length - 1],
+                ms = rec.modified,
+                miles = evt ? evt.miles : 0,
+                timeString = this.getTimeString(1 * new Date() - ms),
+                clicks = rec.eventsStat.click || 0,
+                drags = rec.eventsStat.drag || 0,
+                wheels = rec.eventsStat.wheel || 0,
+                el = document.elementFromPoint(this.mouse.x, this.mouse.y),
+                trg = el.name || el.id || el.className,
+            //type = e ? loc[e.type] : '',
+                msg = ''; //loc._Recording + '.';
+
+            msg += /*loc._Time + ': ' +*/ timeString + ' ';
+            msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
+            msg += loc._Clicks + ': ' + clicks + ' | ';
+            msg += loc._Drags + ': ' + drags + ' | ';
+            msg += loc._Wheels + ': ' + wheels + ' | ';
+            if (trg) {
+
+                msg += loc._Target + ': ' + trg + ' | ';
+
+            }
+            msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
+
+            if (e && e.type === 'keypress') {
+
+                msg += '; key: ' + String.fromCharCode(e.charCode);
+
+            }
+
+            this.getDomElement('stat').innerText = msg;
+            //console.debug(msg);
+            return this;
+
+        };
+
+        this.getTimeString = function getTimeString(ms) {
+
+            var time = ms / 1000,
+                hours, mins, secs, html = '';
+
+            hours = Math.floor(time / 3600);
+            mins = Math.floor((time - hours * 3600) / 60);
+            secs = Math.floor(time - hours * 3600 - mins * 60);
+            html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
+            html += mins < 10 ? '0' + mins + ':' : mins + ':';
+            html += secs < 10 ? '0' + secs : secs;
+
+            return html;
+
+        };
+
+        this.getRecordById = function getRecordById(id) {
+
+            var records = this.db.records,
+                r = null;
+
+            for (var i = 0, rl = records.length; i < rl; i++) {
+
+                if (records[i].id == id) {
+
+                    r = records[i];
+                    break;
 
                 }
 
-                return this;
+            }
 
-            };
+            return r;
 
-            this.clearTimeline = function clearTimeline() {
+        };
 
-                var cnv = $('canvas', this.getDomElement('timeline'))[0],
-                    ctx = cnv.getContext('2d'),
-                    cw = window.innerWidth,
-                    ch = $(this.getDomElement('timeline')).height();
+        this.getDomElement = function getDomElement(name) {
 
-                ctx.clearRect(0, 0, cw, ch);
+            return document.getElementById(this.domId[name]);
 
-            };
+        };
 
-            this.drawTimeline = function drawTimeline(rec) {
+        this.hideSpiderGraph = function hideSpiderGraph(sId) {
 
-                this.showTimelineStat(rec);
+            var cnvh = this.getDomElement('canvasHolder');
 
-                var self = this,
-                    events = rec.events,
-                    cnv = $('canvas', this.getDomElement('timeline'))[0],
-                    ctx = cnv.getContext('2d'),
-                    cw = window.innerWidth,
-                    $tl = $(this.getDomElement('timeline')),
-                    ch = $tl.height(),
-                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    offsetLeft = this.timeLineOffsetLeft,
-                    offsetTop = ch / 2,
-                    cy = window.innerHeight - ch + offsetTop,
-                    width = cw - offsetLeft - offsetRight,
-                    pxs = width / rec.duration,
-                    posx = offsetLeft,
-                    posx0, pe;
+            $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
 
-                this.timeLineEvents = [];
-                cnv.width = cw;
-                cnv.height = ch;
-                $(cnv).width(cw);
-                $(cnv).height(ch);
+            // Hide canvas holder div if no active session
+            if (!$('canvas.cnv:visible', cnvh).length) {
 
-                if (this.endEventIndex) {
+                $(cnvh).hide();
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
-                    this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
+            }
 
-                } /*else {
+            this.getRecordById(sId).visible = false;
+            if (this.activeRecord.id === sId) {
 
-                    this.drawTLCursor(rec.duration, rec.duration);
+                this.clearTimeline();
+
+            }
+
+        };
+
+        this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
+
+            var rec = this.getRecordById(sId);
+
+            if (!rec) {
+
+                return;
+
+            }
+
+            var cnvh = this.getDomElement('canvasHolder'),
+                cnv = $('#cnvId-' + rec.id, cnvh)[0];
+
+            $(cnvh).show();
+            $(cnv).show();
+
+            if (!rec.drawn || start || end) {
+
+                this.drawSpiderGraph(sId, start, end);
+
+            } else {
+
+                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+
+            }
+
+            rec.visible = true;
+
+        };
+
+        this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
+
+            var self = this,
+                rec = this.getRecordById(sId);
+
+            if (!rec) {
+
+                return;
+
+            }
+
+            var cnvh = this.getDomElement('canvasHolder'),
+                data = rec.events.slice(start || 0, end || rec.events.length),
+                cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
+                ctx = cnv.getContext('2d');
+
+            ctx.clearRect(0, 0, cnv.width, cnv.height);
+            ctx.beginPath();
+
+            // Draw lines
+            data.forEach(function (e, i, ea) {
+
+                var pe = ea[i - 1],
+                    pos = self.getTargetScreenPars(e),
+                    ppos = pe ? self.getTargetScreenPars(pe) : {},
+                    ex = pos.x,
+                    ey = pos.y;
+
+                if (e.type === 'start') {
+
+                } else if (e.drag) {
+
+                    // Draw line to last mouse down position
+                    //ctx.lineTo(pe.x, pe.y);
+                    ctx.stroke();
+                    ctx.save();
+
+                    // Draw dashed line from last mouse down position
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    ctx.moveTo(ppos.x, ppos.y);
+                    ctx.lineTo(ex, ey);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Begin new path and move start to current mouse position
+                    ctx.beginPath();
+                    ctx.moveTo(ex, ey);
+
+                } else if ((pe && !pe.type.match(/wheel|scroll/i)) || !e.type.match(/wheel|scroll/i)) {
+
+                    ctx.lineTo(ex, ey);
 
                 }
-*/
-                this.drawTLBrackets();
 
-                ctx.lineWidth = 2.0;
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = rec.color;
-                ctx.clearRect(0, 0, cw, ch);
-                ctx.moveTo(offsetLeft, offsetTop);
-                self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
-                ctx.stroke();
+            });
+            ctx.stroke();
 
-                events.forEach(function (e, i, arr) {
+            // Draw event pictograms
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            data.forEach(function (e, i, ea) {
 
-                    //console.debug('---> posx:', posx);
-                    //console.debug('---> e.time:', e.time);
+                var pe = ea[i - 1],
+                    pos = self.getTargetScreenPars(e),
+                    ex = pos.x,
+                    ey = pos.y;
 
-                    if (e.eventNo) {
+                if (!e.type.match(/wheel|scroll/i)) {
 
-                        pe = arr[i - 1];
-                        posx0 = posx;
-                        posx = offsetLeft + pxs * e.time;
+                    self.drawEventPict(ctx, e.type, ex, ey);
 
-                        self.timeLineEvents.push({
+                } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
 
-                            type: 'timeline',
-                            clientX: posx,
-                            clientY: cy,
-                            target: $('canvas', '#' + self.domId.timeline)[0],
-                            x: posx,
-                            y: offsetTop,
-                            event: e
+                    self.drawEventPict(ctx, 'wheel', ex, ey);
 
-                        });
+                }
+
+            });
+
+            ctx.stroke();
+            ctx.fill();
+
+            if (start === undefined && end === undefined) {
+
+                /*
+                 $(cnvh).show().on('mousemove', {self: this}, function (e) {
+
+                 self.showMouseTooltip(e);
+                 self.highlightTimeLineEvent(e);
+
+                 });
+                 */
+                $(cnv).show();
+                rec.drawn = true;
+                this.checkRecordCheckbox(sId);
+
+            }
+
+            return this;
+
+        };
+
+        this.clearTimeline = function clearTimeline() {
+
+            var cnv = $('canvas', this.getDomElement('timeline'))[0],
+                ctx = cnv.getContext('2d'),
+                cw = window.innerWidth,
+                ch = $(this.getDomElement('timeline')).height();
+
+            ctx.clearRect(0, 0, cw, ch);
+
+        };
+
+        this.drawTimeline = function drawTimeline(rec) {
+
+            this.showTimelineStat(rec);
+
+            var self = this,
+                events = rec.events,
+                cnv = $('canvas', this.getDomElement('timeline'))[0],
+                ctx = cnv.getContext('2d'),
+                cw = window.innerWidth,
+                $tl = $(this.getDomElement('timeline')),
+                ch = $tl.height(),
+                offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                offsetLeft = this.timeLineOffsetLeft,
+                offsetTop = ch / 2,
+                cy = window.innerHeight - ch + offsetTop,
+                width = cw - offsetLeft - offsetRight,
+                pxs = width / rec.duration,
+                posx = offsetLeft,
+                posx0, pe;
+
+            this.timeLineEvents = [];
+            cnv.width = cw;
+            cnv.height = ch;
+            $(cnv).width(cw);
+            $(cnv).height(ch);
+
+            if (this.endEventIndex) {
+
+                this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
+
+            }
+            /*else {
+
+             this.drawTLCursor(rec.duration, rec.duration);
+
+             }
+             */
+            this.drawTLBrackets();
+
+            ctx.lineWidth = 2.0;
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = rec.color;
+            ctx.clearRect(0, 0, cw, ch);
+            ctx.moveTo(offsetLeft, offsetTop);
+            self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
+            ctx.stroke();
+
+            events.forEach(function (e, i, arr) {
+
+                //console.debug('---> posx:', posx);
+                //console.debug('---> e.time:', e.time);
+
+                if (e.eventNo) {
+
+                    pe = arr[i - 1];
+                    posx0 = posx;
+                    posx = offsetLeft + pxs * e.time;
+
+                    self.timeLineEvents.push({
+
+                        type: 'timeline',
+                        clientX: posx,
+                        clientY: cy,
+                        target: $('canvas', '#' + self.domId.timeline)[0],
+                        x: posx,
+                        y: offsetTop,
+                        event: e
+
+                    });
+
+                    ctx.beginPath();
+                    ctx.moveTo(posx0, offsetTop);
+                    if (e.drag) {
+
+                        ctx.setLineDash([3, 3]);
+
+                    }
+                    if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
+
+                        ctx.setLineDash([1, 2]);
+
+                    }
+                    ctx.lineTo(posx, offsetTop);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    if (i) {
 
                         ctx.beginPath();
-                        ctx.moveTo(posx0, offsetTop);
-                        if (e.drag) {
-
-                            ctx.setLineDash([3, 3]);
-
-                        }
-                        if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
-
-                            ctx.setLineDash([1, 2]);
-
-                        }
-                        ctx.lineTo(posx, offsetTop);
+                        self.drawEventPict(ctx, pe.type, posx0, offsetTop);
                         ctx.stroke();
-                        ctx.setLineDash([]);
-
-                        if (i) {
-
-                            ctx.beginPath();
-                            self.drawEventPict(ctx, pe.type, posx0, offsetTop);
-                            ctx.stroke();
-                            ctx.fill();
-
-                        }
-
-                    }
-                });
-
-                self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
-                ctx.stroke();
-                ctx.fill();
-
-            };
-
-            this.drawTLCursor = function (pos, total) {
-
-                var pars = this.getTimeLineCursorPars(pos, total);
-
-                $(this.getDomElement('timelineCursor')).css(pars).show();
-
-            };
-
-            this.drawTLBrackets = function (time1, time2) {
-
-                var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
-                    t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeRecord.duration,
-                    pars = this.getTimeLineBracketsPars(t1, t2);
-
-                $(this.getDomElement('timelineBrackets')).css(pars).show();
-
-            };
-
-            this.showTimelineStat = function (rec) {
-
-                var loc = this.loc,
-                    html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
-                           + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
-                           + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
-                           + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
-
-                $(this.getDomElement('timelineInfo')).html(html);
-
-            };
-
-            this.getTimelineEvent = function getTimelineEvent(e) {
-
-                var te = this.timeLineEvents,
-                    abs = Math.abs,
-                    th = 7, evt, event = null,
-                    i, il = te.length;
-
-                for (i = 0; i < il; i++) {
-
-                    evt = te[i];
-                    if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
-
-                        event = evt;
-                        break;
+                        ctx.fill();
 
                     }
 
                 }
+            });
 
-                return event;
+            self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
+            ctx.stroke();
+            ctx.fill();
 
-            };
+        };
 
-            this.showTimelineEvent = function showTimelineEvent(event) {
+        this.drawTLCursor = function (pos, total) {
 
-                this.sessionId = event.recId;
-                this.activeRecord = this.getRecordById(event.recId);
-                this.startEventIndex = 0;
-                this.endEventIndex = event.index;
-                this.appMode = 'timeline';
-                this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
-                this.drawTLCursor(event.time, this.activeRecord.duration);
-                this.drawTLBrackets(this.timeBrackets[0], event.time);
-                if (window.location.pathname !== event.location) {
+            var pars = this.getTimeLineCursorPars(pos, total);
 
-                    window.location = event.location;
+            $(this.getDomElement('timelineCursor')).css(pars).show();
 
-                }
+        };
 
-            };
+        this.drawTLBrackets = function (time1, time2) {
 
-            this.drawEventPict = function (ctx, type, x, y) {
+            var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
+                t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeRecord.duration,
+                pars = this.getTimeLineBracketsPars(t1, t2);
 
-                if (this.drawEventList.indexOf(type) > -1) {
+            $(this.getDomElement('timelineBrackets')).css(pars).show();
 
-                    var endAngle = 2 * Math.PI, d = 3;
+        };
 
-                    if (type === 'start') {
+        this.showTimelineStat = function (rec) {
 
-                        ctx.moveTo(x - 1, y - 3);
-                        ctx.lineTo(x - 1, y + 3);
+            var loc = this.loc,
+                html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
+                       + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
+                       + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
+                       + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
 
-                    } else if (type === 'click') {
+            $(this.getDomElement('timelineInfo')).html(html);
 
-                        ctx.moveTo(x + d, y);
-                        ctx.arc(x, y, d, 0, endAngle, true);
+        };
 
-                    } else if (type === 'dblclick') {
+        this.getTimelineEvent = function getTimelineEvent(e) {
 
-                        ctx.moveTo(x + d, y);
-                        ctx.arc(x, y, d, 0, endAngle, true);
-                        ctx.moveTo(x + 2 * d, y);
-                        ctx.arc(x, y, 2 * d, 0, endAngle, true);
+            var te = this.timeLineEvents,
+                abs = Math.abs,
+                th = 7, evt, event = null,
+                i, il = te.length;
 
-                    } else if (type === 'mousedown') {
+            for (i = 0; i < il; i++) {
 
-                        ctx.moveTo(x + 3, y - 2);
-                        ctx.lineTo(x, y + 3);
-                        ctx.lineTo(x - 3, y - 2);
-                        ctx.lineTo(x + 3, y - 2);
+                evt = te[i];
+                if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
 
-                    } else if (type === 'mouseup') {
-
-                        ctx.moveTo(x - 3, y + 2);
-                        ctx.lineTo(x, y - 3);
-                        ctx.lineTo(x + 3, y + 2);
-                        ctx.lineTo(x - 3, y + 2);
-
-                    } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
-
-                        ctx.moveTo(x + 1, y);
-                        ctx.arc(x, y, 1, 0, endAngle, true);
-
-                    } else if (type.match(/wheel|scroll/i)) {
-
-                        ctx.moveTo(x - 3, y - 1);
-                        ctx.lineTo(x, y - 4);
-                        ctx.lineTo(x + 3, y - 1);
-                        //ctx.lineTo(x - 3, y - 1);
-                        ctx.closePath();
-
-                        /*
-                         ctx.moveTo(x + 2, y);
-                         ctx.arc(x, y, 2, 0, endAngle, true);
-                         */
-
-                        ctx.moveTo(x - 3, y + 1);
-                        ctx.lineTo(x, y + 4);
-                        ctx.lineTo(x + 3, y + 1);
-                        //ctx.lineTo(x - 3, y + 1);
-                        ctx.closePath();
-
-                        /*
-                         ctx.strokeRect(x - 3, y - 2, 1.5, 4);
-                         ctx.fillRect(x - 3, y - 2, 1.5, 4);
-                         ctx.strokeRect(x, y - 2, 1.5, 4);
-                         ctx.fillRect(x, y - 2, 1.5, 4);
-                         */
-
-                    }
+                    event = evt;
+                    break;
 
                 }
 
-            };
+            }
 
-            this.playSession = function playSession(sId, eventIndex) {
+            return event;
 
-                var self = this,
-                    rec = this.getRecordById(sId);
+        };
 
-                if (!rec) {
+        this.showTimelineEvent = function showTimelineEvent(event) {
 
-                    this.resetApp('');
-                    return;
+            this.sessionId = event.recId;
+            this.activeRecord = this.getRecordById(event.recId);
+            this.startEventIndex = 0;
+            this.endEventIndex = event.index;
+            this.appMode = 'timeline';
+            this.drawTLBrackets(this.timeBrackets[0], event.time);
+            this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
+            this.drawTLCursor(event.time, this.activeRecord.duration);
+            if (window.location.pathname !== event.location) {
 
-                }
+                window.location = event.location;
 
-                var cnt = eventIndex || this.endEventIndex || 0,
-                    delay = 20, speed = 2,
-                    sData = rec.events,
-                    pars = this.getTargetScreenPars(sData[cnt]),
-                    el = pars.element,
-                    cnvh = this.getDomElement('canvasHolder'),
-                    cnv = $('#cnvId-' + rec.id, cnvh)[0],
-                    ctx = cnv.getContext('2d'),
-                    $cur = $(self.getDomElement('cursor')),
-                    $tlCursor = $(self.getDomElement('timelineCursor')),
-                    clickDelay = this.clickDelay,
-                    mOverElement,
-                    mOverClass = self.domId['mouseOverClass'];
+            }
 
-                function playEvent(pars) {
+        };
 
-                    var e = sData[cnt],
-                        etype = e.type;
+        this.drawEventPict = function (ctx, type, x, y) {
 
-                    pars = pars || self.getTargetScreenPars(e);
-                    el = pars.element;
-                    self.endEventIndex = cnt;
+            if (this.drawEventList.indexOf(type) > -1) {
 
-                    console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
+                var endAngle = 2 * Math.PI, d = 3;
+
+                if (type === 'start') {
+
+                    ctx.moveTo(x - 1, y - 3);
+                    ctx.lineTo(x - 1, y + 3);
+
+                } else if (type === 'click') {
+
+                    ctx.moveTo(x + d, y);
+                    ctx.arc(x, y, d, 0, endAngle, true);
+
+                } else if (type === 'dblclick') {
+
+                    ctx.moveTo(x + d, y);
+                    ctx.arc(x, y, d, 0, endAngle, true);
+                    ctx.moveTo(x + 2 * d, y);
+                    ctx.arc(x, y, 2 * d, 0, endAngle, true);
+
+                } else if (type === 'mousedown') {
+
+                    ctx.moveTo(x + 3, y - 2);
+                    ctx.lineTo(x, y + 3);
+                    ctx.lineTo(x - 3, y - 2);
+                    ctx.lineTo(x + 3, y - 2);
+
+                } else if (type === 'mouseup') {
+
+                    ctx.moveTo(x - 3, y + 2);
+                    ctx.lineTo(x, y - 3);
+                    ctx.lineTo(x + 3, y + 2);
+                    ctx.lineTo(x - 3, y + 2);
+
+                } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
+
+                    ctx.moveTo(x + 1, y);
+                    ctx.arc(x, y, 1, 0, endAngle, true);
+
+                } else if (type.match(/wheel|scroll/i)) {
+
+                    ctx.moveTo(x - 3, y - 1);
+                    ctx.lineTo(x, y - 4);
+                    ctx.lineTo(x + 3, y - 1);
+                    //ctx.lineTo(x - 3, y - 1);
+                    ctx.closePath();
+
                     /*
-                     if (pars.winScrollX || pars.winScrollY) {
-
-                     window.scrollTo(pars.winScrollX, pars.winScrollY);
-
-                     }
+                     ctx.moveTo(x + 2, y);
+                     ctx.arc(x, y, 2, 0, endAngle, true);
                      */
 
-                    if (etype === 'click') {
+                    ctx.moveTo(x - 3, y + 1);
+                    ctx.lineTo(x, y + 4);
+                    ctx.lineTo(x + 3, y + 1);
+                    //ctx.lineTo(x - 3, y + 1);
+                    ctx.closePath();
 
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
+                    /*
+                     ctx.strokeRect(x - 3, y - 2, 1.5, 4);
+                     ctx.fillRect(x - 3, y - 2, 1.5, 4);
+                     ctx.strokeRect(x, y - 2, 1.5, 4);
+                     ctx.fillRect(x, y - 2, 1.5, 4);
+                     */
+
+                }
+
+            }
+
+        };
+
+        this.playSession = function playSession(sId, eventIndex) {
+
+            var self = this,
+                rec = this.getRecordById(sId);
+
+            if (!rec) {
+
+                this.resetApp('');
+                return;
+
+            }
+
+            var cnt = eventIndex || this.endEventIndex || 0,
+                delay = 20, speed = 2,
+                sData = rec.events,
+                pars = this.getTargetScreenPars(sData[cnt]),
+                el = pars.element,
+                cnvh = this.getDomElement('canvasHolder'),
+                cnv = $('#cnvId-' + rec.id, cnvh)[0],
+                ctx = cnv.getContext('2d'),
+                $cur = $(self.getDomElement('cursor')),
+                $tlCursor = $(self.getDomElement('timelineCursor')),
+                clickDelay = this.clickDelay,
+                mOverElement,
+                mOverClass = self.domId['mouseOverClass'];
+
+            function playEvent(pars) {
+
+                var e = sData[cnt],
+                    etype = e.type;
+
+                pars = pars || self.getTargetScreenPars(e);
+                el = pars.element;
+                self.endEventIndex = cnt;
+
+                console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
+                /*
+                 if (pars.winScrollX || pars.winScrollY) {
+
+                 window.scrollTo(pars.winScrollX, pars.winScrollY);
+
+                 }
+                 */
+
+                if (etype === 'click') {
+
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
+
+                    self.showMouseDown(pars.x, pars.y);
+                    setTimeout(function () {
+
+                        self.hideMouseDown();
+
+                    }, clickDelay);
+
+                } else if (etype === 'dblclick') {
+
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
+                    el.dispatchEvent(new MouseEvent('dblclick', e));
+
+                    self.showDblClick(pars.x, pars.y);
+
+                } else if (etype === 'mousedown' || etype === 'mouseup') {
+
+                    el.dispatchEvent(new MouseEvent(etype, e));
+
+                    if (etype === 'mousedown') {
 
                         self.showMouseDown(pars.x, pars.y);
+
+                    } else if (etype === 'mouseup') {
+
                         setTimeout(function () {
 
                             self.hideMouseDown();
 
                         }, clickDelay);
 
-                    } else if (etype === 'dblclick') {
-
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
-                        el.dispatchEvent(new MouseEvent('dblclick', e));
-
-                        self.showDblClick(pars.x, pars.y);
-
-                    } else if (etype === 'mousedown' || etype === 'mouseup') {
-
-                        el.dispatchEvent(new MouseEvent(etype, e));
-
-                        if (etype === 'mousedown') {
-
-                            self.showMouseDown(pars.x, pars.y);
-
-                        } else if (etype === 'mouseup') {
-
-                            setTimeout(function () {
-
-                                self.hideMouseDown();
-
-                            }, clickDelay);
-
-                        }
-
-                    } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
-
-                        el.dispatchEvent(new MouseEvent(etype, e));
-
-                    } else if (etype.match(/wheel|scroll/i)) {
-
-                        //window.scrollTo(pars.winScrollX, pars.winScrollY);
-                        window.scrollTo(e.pageXOffset, e.pageYOffset);
-                        el.dispatchEvent(new WheelEvent(etype, e));
-                        //$(el).offset({top: pars.top, left: pars.left});
-
                     }
 
-                    $(cnv).css('cursor', 'none');
+                } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
 
-                    setTimeout(function () {
+                    el.dispatchEvent(new MouseEvent(etype, e));
 
-                        moveCursor(pars);
+                } else if (etype.match(/wheel|scroll/i)) {
 
-                    }, 0);
-
-                }
-
-                function moveCursor(pars) {
-
-                    var e1 = sData[cnt],
-                        e2 = sData[++cnt];
-
-                    if (e1 && e2) {
-
-                        var recDuration = rec.duration,
-                            etime = e1.time,
-                            dur = e2.timeStamp - e1.timeStamp,
-                            pars1 = pars || self.getTargetScreenPars(e1),
-                            pars2 = self.getTargetScreenPars(e2),
-                            step = 0,
-                            dt = speed * delay,
-                            steps = dur / dt,
-                            dx = pars2.x - pars1.x,
-                            dy = pars2.y - pars1.y,
-                            mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
-
-                        function drawStep() {
-
-                            var x0, y0, x, y, el, dts;
-
-                            x0 = pars1.x + dx * step;
-                            y0 = pars1.y + dy * step;
-                            step++;
-
-                            if (step < steps) {
-
-                                x = pars1.x + dx * step;
-                                y = pars1.y + dy * step;
-                                dts = etime + step * dt;
-                                self.drawTLCursor(dts, recDuration);
-                                self.drawTLBrackets(self.timeBrackets[0], dts);
-                                setTimeout(drawStep, delay);
-
-                            } else {
-
-                                x = pars2.x;
-                                y = pars2.y;
-                                self.drawTLCursor(e2.time, recDuration);
-                                self.drawTLBrackets(self.timeBrackets[0], e2.time);
-                                setTimeout(function () {
-
-                                    playEvent(pars2);
-
-                                }, e2.type === 'mouseover' ? 0 : clickDelay);
-
-                            }
-
-                            $(cnvh).hide();
-                            el = document.elementFromPoint(x, y);
-                            $(cnvh).show();
-                            $(cnv).css('cursor', 'none');
-
-                            el.dispatchEvent(new MouseEvent('mousemove', {
-
-                                bubbles: true,
-                                cancelable: false,
-                                button: e1.button,
-                                which: e1.which,
-                                clientX: x,
-                                clientY: y,
-                                pageX: x,
-                                pageY: y,
-                                view: window
-
-                            }));
-
-                            if (!mouseDown) {
-
-                                /*
-                                 if (mOverElement !== el) {
-
-                                 if (mOverElement) {
-
-                                 mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                                 //$(mOverElement).removeClass(mOverClass);
-
-                                 }
-                                 if (self.addMouseOverClass(el, ':hover')) {
-
-                                 $(el).addClass(mOverClass);
-
-                                 }
-
-                                 el.dispatchEvent(new MouseEvent('mouseover', {
-
-                                 clientX: x,
-                                 clientY: y,
-                                 pageX: x,
-                                 pageY: y,
-                                 view: window
-
-                                 }));
-                                 mOverElement = el;
-
-                                 }
-                                 */
-
-                            } else {
-
-                                self.showMouseDown(x, y);
-                                ctx.save();
-                                ctx.setLineDash([3, 5]);
-
-                            }
-
-                            $cur.css('top', y).css('left', x);
-                            ctx.beginPath();
-
-                            ctx.moveTo(x0, y0);
-                            ctx.lineTo(x, y);
-                            ctx.stroke();
-
-                            if (mouseDown) {
-
-                                ctx.restore();
-
-                            }
-
-                            if (step === 1) {
-
-                                ctx.beginPath();
-                                self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
-                                ctx.stroke();
-                                ctx.fill();
-
-                            }
-
-                        }
-
-                        function scrollWindow(x, y, dx, dy) {
-
-                            var wx = window.pageXOffset,
-                                wy = window.pageYOffset,
-                                call = false;
-
-                            dx = dx || (x - wx) / 10;
-                            dy = dy || (y - wy) / 10;
-
-                            if ((dx > 0 && wx < x && wx + dx < x)
-                                || dx < 0 && wx > x && wx + dx > x) {
-
-                                wx += dx;
-                                call = true;
-
-                            } else {
-
-                                wx = x;
-
-                            }
-
-                            if ((dy > 0 && wy < y && wy + dy < y)
-                                || dy < 0 && wy > y && wy + dy > y) {
-
-                                wy += dy;
-                                call = true;
-
-                            } else {
-
-                                wy = y;
-
-                            }
-
-                            window.scrollTo(wx, wy);
-
-                            if (call) {
-
-                                setTimeout(function () {
-
-                                    scrollWindow(x, y, dx, dy);
-
-                                }, 20);
-
-                            }
-
-                        }
-
-                        if (pars2.winScrollX || pars2.winScrollY) {
-
-                            //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
-                            scrollWindow(pars2.winScrollX, pars2.winScrollY);
-
-                        }
-
-                        self.drawTLCursor(etime, recDuration);
-                        self.drawTLBrackets(self.timeBrackets[0], etime);
-                        if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
-
-                            if (steps) {
-
-                                dx = dx / steps;
-                                dy = dy / steps;
-
-                            }
-                            //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
-                            setTimeout(drawStep, delay);
-
-                        } else {
-
-                            //setTimeout(function () {
-
-                            playEvent(pars2);
-
-                            //}, 0);
-
-                        }
-
-                    } else {
-
-                        // End of play
-                        $cur.hide();
-                        $(mOverElement).removeClass(mOverClass);
-                        self.removeMouseOverStyle();
-                        $(cnv).css('cursor', 'default');
-                        if (cnt === sData.length) {
-
-                            self.drawSpiderGraph(rec.id);
-
-                        } else {
-
-                            self.drawSpiderGraph(rec.id, 0, cnt);
-
-                        }
-                        self.appMode = '';
-                        sessionStorage.removeItem('dcipherState');
-
-                    }
-
-                }
-
-                //this.appMode = 'play';
-                this.sessionId = sId;
-                this.activeRecord = rec;
-
-                // Reload initial session location on replay start
-                if (!cnt) {
-
-                    this.endEventIndex = 1;
-                    this.resetApp('play', sData[1].location);
-                    return;
-
-                } else {
-
-                    this.appMode = 'play';
+                    //window.scrollTo(pars.winScrollX, pars.winScrollY);
+                    window.scrollTo(e.pageXOffset, e.pageYOffset);
+                    el.dispatchEvent(new WheelEvent(etype, e));
+                    //$(el).offset({top: pars.top, left: pars.left});
 
                 }
 
                 $(cnv).css('cursor', 'none');
-                el.dispatchEvent(new MouseEvent('mousemove', {
-
-                    bubbles: true,
-                    cancelable: false,
-                    clientX: pars.x,
-                    clientY: pars.y,
-                    pageX: pars.x,
-                    pageY: pars.y,
-                    view: window
-
-                }));
-                mOverElement = el;
-                this.addMouseOverClass(el, ':hover');
-                $(el).addClass(mOverClass);
-                $(cnv).show();
-                $cur.show();
-                $tlCursor.show();
-                this.hideRecList();
-                this.setActiveRecord(sId);
-                this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
-                ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
-                ctx.strokeStyle = rec.color;
-                //if (eventIndex !== undefined) {
-
-                    this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
-
-                //}
 
                 setTimeout(function () {
 
-                    //if (cnt) {
+                    moveCursor(pars);
 
-                    playEvent(pars);
+                }, 0);
 
-                    //} else {
+            }
 
-                    //moveCursor(pars);
+            function moveCursor(pars) {
 
-                    //}
+                var e1 = sData[cnt],
+                    e2 = sData[++cnt];
 
-                }, clickDelay);
+                if (e1 && e2) {
 
-            };
+                    var recDuration = rec.duration,
+                        etime = e1.time,
+                        dur = e2.timeStamp - e1.timeStamp,
+                        pars1 = pars || self.getTargetScreenPars(e1),
+                        pars2 = self.getTargetScreenPars(e2),
+                        step = 0,
+                        dt = speed * delay,
+                        steps = dur / dt,
+                        dx = pars2.x - pars1.x,
+                        dy = pars2.y - pars1.y,
+                        mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
 
-            this.getTargetScreenPars = function getTargetScreenPars(e) {
+                    function drawStep() {
 
-                var etarget = e.target,
-                    winW = window.innerWidth,
-                    winH = window.innerHeight,
-                    winScrollX = 0,
-                    winScrollY = 0,
-                    x = e.x,
-                    y = e.y,
-                    el = null, $el = null;
+                        var x0, y0, x, y, el, dts;
 
-                if (!etarget.element || (etarget.element && etarget.element === window)) {
+                        x0 = pars1.x + dx * step;
+                        y0 = pars1.y + dy * step;
+                        step++;
 
-                    el = this.getElementByTreePath(etarget.treePath);
-                    $el = $(el);
+                        if (step < steps) {
 
-                } else {
+                            x = pars1.x + dx * step;
+                            y = pars1.y + dy * step;
+                            dts = etime + step * dt;
+                            self.drawTLCursor(dts, recDuration);
+                            self.drawTLBrackets(self.timeBrackets[0], dts);
+                            setTimeout(drawStep, delay);
 
-                    el = etarget.element;
-                    $el = $(el);
+                        } else {
 
-                }
+                            x = pars2.x;
+                            y = pars2.y;
+                            self.drawTLCursor(e2.time, recDuration);
+                            self.drawTLBrackets(self.timeBrackets[0], e2.time);
+                            setTimeout(function () {
 
-                if ($el && etarget.tagName === el.tagName
-                    && etarget.id === el.id
-                    && etarget.title === el.title
-                    //&& etarget.dcipherName === el.dataset.dcipherName
-                    //&& etarget.dcipherAction === el.dataset.dcipherAction
-                    && $(el).is(':visible')
-                    && !e.type.match(/wheel|scroll/i)
-                ) {
+                                playEvent(pars2);
 
-                    var offset = $el.offset(),
-                        elX = offset.left,
-                        elY = offset.top,
-                        elW = $el.outerWidth(),
-                        elH = $el.outerHeight(),
-                        locX = elW * etarget.relX,
-                        locY = elH * etarget.relY,
-                        cpx = 20,
-                        cpy = 20;
-
-                    etarget.element = el;
-                    /*
-                     x = elX + locX;
-                     y = elY + locY;
-                     */
-
-                    if (x + cpx > pageXOffset + winW) {
-
-                        winScrollX = x + cpx - winW;
-                        x -= winScrollX;
-
-                    }
-
-                    if (y + cpy > pageYOffset + winH) {
-
-                        winScrollY = y + cpy - winH;
-                        y -= winScrollY;
-
-                    }
-
-                    /*
-                     e.pageX += x - e.x;
-                     e.pageY += y - e.y;
-                     e.clientX = x;
-                     e.clientY = y;
-                     e.x = x;
-                     e.y = y;
-                     */
-
-                }
-
-                return {
-
-                    element: el,
-                    x: x,
-                    y: y,
-                    left: elX + etarget.dx,
-                    top: elY + etarget.dy,
-                    localX: locX,
-                    localY: locY,
-                    width: elW,
-                    height: elH,
-                    winScrollX: winScrollX,
-                    winScrollY: winScrollY
-
-                }
-
-            };
-
-            this.removeMouseOverStyle = function removeMoverStyle() {
-
-                $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
-
-            };
-            this.addMouseOverClass = function getPseudoClass(el, pclass) {
-
-                var sheets = document.styleSheets,
-                    rules, s, r, selectorText, rule,
-                    selectors = [],
-                    styles = '', styleNode = document.createElement('style'),
-                    mouseOverStyleId = this.domId.mouseOverStyle,
-                    $container = $('#' + this.domId.container);
-
-                if (el.id) {
-
-                    selectors.push('#' + el.id + pclass);
-
-                }
-
-                if (el.className && typeof el.className === 'string') {
-
-                    el.className.split(" ").forEach(function (s) {
-
-                        if (s) {
-
-                            selectors.push('.' + s + pclass);
+                            }, e2.type === 'mouseover' ? 0 : clickDelay);
 
                         }
 
-                    });
+                        $(cnvh).hide();
+                        el = document.elementFromPoint(x, y);
+                        $(cnvh).show();
+                        $(cnv).css('cursor', 'none');
 
-                }
+                        el.dispatchEvent(new MouseEvent('mousemove', {
 
-                for (s = 0; s < sheets.length; s++) {
+                            bubbles: true,
+                            cancelable: false,
+                            button: e1.button,
+                            which: e1.which,
+                            clientX: x,
+                            clientY: y,
+                            pageX: x,
+                            pageY: y,
+                            view: window
 
-                    rules = sheets[s].rules || sheets[s].cssRules || [];
+                        }));
 
-                    for (r = 0; r < rules.length; r++) {
+                        if (!mouseDown) {
 
-                        rule = rules[r];
-                        selectorText = rule.selectorText;
+                            /*
+                             if (mOverElement !== el) {
 
-                        selectors.forEach(function (c) {
+                             if (mOverElement) {
 
-                            if (selectorText && selectorText.match(new RegExp(c))) {
+                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                             //$(mOverElement).removeClass(mOverClass);
 
-                                var ct = rule.cssText;
+                             }
+                             if (self.addMouseOverClass(el, ':hover')) {
 
-                                styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
+                             $(el).addClass(mOverClass);
 
-                                //console.debug('---> cssObj: ', cssObj);
+                             }
 
-                            }
+                             el.dispatchEvent(new MouseEvent('mouseover', {
 
-                        });
+                             clientX: x,
+                             clientY: y,
+                             pageX: x,
+                             pageY: y,
+                             view: window
+
+                             }));
+                             mOverElement = el;
+
+                             }
+                             */
+
+                        } else {
+
+                            self.showMouseDown(x, y);
+                            ctx.save();
+                            ctx.setLineDash([3, 5]);
+
+                        }
+
+                        $cur.css('top', y).css('left', x);
+                        ctx.beginPath();
+
+                        ctx.moveTo(x0, y0);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
+
+                        if (mouseDown) {
+
+                            ctx.restore();
+
+                        }
+
+                        if (step === 1) {
+
+                            ctx.beginPath();
+                            self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
+                            ctx.stroke();
+                            ctx.fill();
+
+                        }
+
                     }
 
-                }
+                    function scrollWindow(x, y, dx, dy) {
 
-                $('#' + mouseOverStyleId, $container).remove();
+                        var wx = window.pageXOffset,
+                            wy = window.pageYOffset,
+                            call = false;
 
-                if (styles) {
+                        dx = dx || (x - wx) / 10;
+                        dy = dy || (y - wy) / 10;
 
-                    $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
-                    $container.append(styleNode);
-                    return true;
+                        if ((dx > 0 && wx < x && wx + dx < x)
+                            || dx < 0 && wx > x && wx + dx > x) {
+
+                            wx += dx;
+                            call = true;
+
+                        } else {
+
+                            wx = x;
+
+                        }
+
+                        if ((dy > 0 && wy < y && wy + dy < y)
+                            || dy < 0 && wy > y && wy + dy > y) {
+
+                            wy += dy;
+                            call = true;
+
+                        } else {
+
+                            wy = y;
+
+                        }
+
+                        window.scrollTo(wx, wy);
+
+                        if (call) {
+
+                            setTimeout(function () {
+
+                                scrollWindow(x, y, dx, dy);
+
+                            }, 20);
+
+                        }
+
+                    }
+
+                    if (pars2.winScrollX || pars2.winScrollY) {
+
+                        //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
+                        scrollWindow(pars2.winScrollX, pars2.winScrollY);
+
+                    }
+
+                    self.drawTLCursor(etime, recDuration);
+                    self.drawTLBrackets(self.timeBrackets[0], etime);
+                    if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
+
+                        if (steps) {
+
+                            dx = dx / steps;
+                            dy = dy / steps;
+
+                        }
+                        //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
+                        setTimeout(drawStep, delay);
+
+                    } else {
+
+                        //setTimeout(function () {
+
+                        playEvent(pars2);
+
+                        //}, 0);
+
+                    }
 
                 } else {
 
-                    return false;
+                    // End of play
+                    $cur.hide();
+                    $(mOverElement).removeClass(mOverClass);
+                    self.removeMouseOverStyle();
+                    $(cnv).css('cursor', 'default');
+                    if (cnt === sData.length) {
 
-                }
+                        self.drawSpiderGraph(rec.id, self.startEventIndex);
 
-            };
+                    } else {
 
-            this.toggleRecList = function toggleRecList() {
-
-                var rlId = this.domId['records'],
-                    rbId = this.domId['butList'],
-                    $rl = $('#' + rlId);
-
-                function hideReclist(e) {
-
-                    if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
-
-                        $rl.hide();
+                        self.drawSpiderGraph(rec.id, 0, cnt);
 
                     }
+                    self.appMode = '';
+                    sessionStorage.removeItem('dcipherState');
 
                 }
 
-                if (!$rl.is(':visible') && this.db.records.length) {
+            }
 
-                    this.setRecListPosition();
-                    $rl.show();
-                    $('body').on('click', hideReclist);
+            //this.appMode = 'play';
+            this.sessionId = sId;
+            this.activeRecord = rec;
 
-                } else {
+            // Reload initial session location on replay start
+            if (!cnt || cnt === sData.length - 1) {
 
-                    $rl.hide();
-                    $('body').off('click', hideReclist);
+                this.endEventIndex = 1;
+                this.resetApp('play', sData[1].location);
+                return;
+
+            } else {
+
+                this.appMode = 'play';
+
+            }
+
+            $(cnv).css('cursor', 'none');
+            el.dispatchEvent(new MouseEvent('mousemove', {
+
+                bubbles: true,
+                cancelable: false,
+                clientX: pars.x,
+                clientY: pars.y,
+                pageX: pars.x,
+                pageY: pars.y,
+                view: window
+
+            }));
+            mOverElement = el;
+            this.addMouseOverClass(el, ':hover');
+            $(el).addClass(mOverClass);
+            $(cnv).show();
+            $cur.show();
+            $tlCursor.show();
+            this.hideRecList();
+            this.setActiveRecord(sId);
+            this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+            ctx.strokeStyle = rec.color;
+            //if (eventIndex !== undefined) {
+
+            this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
+
+            //}
+
+            setTimeout(function () {
+
+                //if (cnt) {
+
+                playEvent(pars);
+
+                //} else {
+
+                //moveCursor(pars);
+
+                //}
+
+            }, clickDelay);
+
+        };
+
+        this.getTargetScreenPars = function getTargetScreenPars(e) {
+
+            var etarget = e.target,
+                winW = window.innerWidth,
+                winH = window.innerHeight,
+                winScrollX = 0,
+                winScrollY = 0,
+                x = e.x,
+                y = e.y,
+                el = null, $el = null;
+
+            if (!etarget.element || (etarget.element && etarget.element === window)) {
+
+                el = this.getElementByTreePath(etarget.treePath);
+                $el = $(el);
+
+            } else {
+
+                el = etarget.element;
+                $el = $(el);
+
+            }
+
+            if ($el && etarget.tagName === el.tagName
+                && etarget.id === el.id
+                && etarget.title === el.title
+                //&& etarget.dcipherName === el.dataset.dcipherName
+                //&& etarget.dcipherAction === el.dataset.dcipherAction
+                && $(el).is(':visible')
+                && !e.type.match(/wheel|scroll/i)
+            ) {
+
+                var offset = $el.offset(),
+                    elX = offset.left,
+                    elY = offset.top,
+                    elW = $el.outerWidth(),
+                    elH = $el.outerHeight(),
+                    locX = elW * etarget.relX,
+                    locY = elH * etarget.relY,
+                    cpx = 20,
+                    cpy = 20;
+
+                etarget.element = el;
+                /*
+                 x = elX + locX;
+                 y = elY + locY;
+                 */
+
+                if (x + cpx > pageXOffset + winW) {
+
+                    winScrollX = x + cpx - winW;
+                    x -= winScrollX;
 
                 }
 
-            };
+                if (y + cpy > pageYOffset + winH) {
 
-            this.setRecListPosition = function setRecListPosition() {
-
-                var $butList = $(this.getDomElement('butList')),
-                    p = $butList.offset(),
-                    $rl = $(this.getDomElement('records')),
-                    hidden = $rl.css('display') === 'none';
-
-                if (hidden) {
-
-                    $rl.css('display', 'block')
-                        .css('visibility', 'hidden');
+                    winScrollY = y + cpy - winH;
+                    y -= winScrollY;
 
                 }
 
                 /*
-                 $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
-                 .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
+                 e.pageX += x - e.x;
+                 e.pageY += y - e.y;
+                 e.clientX = x;
+                 e.clientY = y;
+                 e.x = x;
+                 e.y = y;
                  */
-                if (hidden) {
 
-                    $rl.css('visibility', 'visible')
-                        .css('display', 'none');
+            }
 
-                }
+            return {
 
-            };
+                element: el,
+                x: x,
+                y: y,
+                left: elX + etarget.dx,
+                top: elY + etarget.dy,
+                localX: locX,
+                localY: locY,
+                width: elW,
+                height: elH,
+                winScrollX: winScrollX,
+                winScrollY: winScrollY
 
-            this.createRecordList = function createRecordList() {
+            }
 
-                var self = this,
-                    recListDiv = this.getDomElement('records'),
-                    cnvHolder = this.getDomElement('canvasHolder'),
-                    visRecs = {}, actRecs = {},
-                    rec, butShow, butDel, butPlay, inpName, nChckb,
-                    cnv, ctx, butCp, cpInp, cpSp;
+        };
 
-                if (!this.db.records.length) {
+        this.removeMouseOverStyle = function removeMoverStyle() {
 
-                    $(recListDiv).hide();
-                    $(cnvHolder).hide();
-                    $(this.getDomElement('butList')).hide();
-                    return;
+            $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
 
-                }
+        };
+        this.addMouseOverClass = function getPseudoClass(el, pclass) {
 
-                // Get all visible records
-                $('input:checkbox', recListDiv).each(function () {
+            var sheets = document.styleSheets,
+                rules, s, r, selectorText, rule,
+                selectors = [],
+                styles = '', styleNode = document.createElement('style'),
+                mouseOverStyleId = this.domId.mouseOverStyle,
+                $container = $('#' + this.domId.container);
 
-                    visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
+            if (el.id) {
 
-                });
+                selectors.push('#' + el.id + pclass);
 
-                // Get all active records
-                $('.rec', recListDiv).each(function () {
+            }
 
-                    actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
+            if (el.className && typeof el.className === 'string') {
 
-                });
+                el.className.split(" ").forEach(function (s) {
 
-                if (!visRecs.length) {
+                    if (s) {
 
-                    $(cnvHolder).hide();
-
-                }
-                $(recListDiv).children().remove();
-                $(cnvHolder).children('.cnv').remove();
-                this.db.records.forEach(function (r, idx) {
-
-                    // Restore visibility and active flags
-                    r.visible = visRecs[r.id];
-                    r.active = actRecs[r.id];
-                    r.drawn = false;
-                    self.calcSC(r);
-
-                    // Record canvas
-                    cnv = document.createElement('canvas');
-                    cnv.setAttribute('data-dcipher-rec-id', r.id);
-                    cnv.height = window.innerHeight;
-                    cnv.width = window.innerWidth;
-                    cnv.id = 'cnvId-' + r.id;
-                    cnv.className = 'cnv';
-                    ctx = cnv.getContext('2d');
-                    ctx.lineWidth = 1.5;
-                    ctx.fillStyle = 'white';
-                    ctx.strokeStyle = r.color;
-                    ctx.lineCap = 'square';
-                    ctx.lineJoin = 'miter';
-                    ctx.miterLimit = 4.0;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 3.0;
-                    ctx.shadowBlur = 4.0;
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                    cnvHolder.appendChild(cnv);
-
-                    // Record div
-                    rec = document.createElement('div');
-                    rec.id = 'recId-' + r.id;
-                    rec.className = 'rec' + (actRecs[r.id] ? ' active' : '');
-                    rec.setAttribute('data-dcipher-rec-id', r.id);
-
-                    // Show record button
-                    nChckb = document.createElement('input');
-                    nChckb.setAttribute('data-dcipher-rec-id', r.id);
-                    nChckb.setAttribute('cnv-id', idx);
-                    nChckb.type = 'checkbox';
-                    nChckb.id = 'showRecId-' + r.id;
-                    nChckb.value = r.id;
-                    nChckb.className = "chckb-show";
-                    nChckb.checked = visRecs[r.id];
-                    rec.appendChild(nChckb);
-
-                    butShow = document.createElement('label');
-                    butShow.setAttribute('data-dcipher-rec-id', r.id);
-                    butShow.setAttribute('cnv-id', idx);
-                    butShow.htmlFor = 'showRecId-' + r.id;
-                    butShow.className = 'show';
-                    butShow.title = dCipher.loc._Toggle_record;
-                    rec.appendChild(butShow);
-
-                    // Delete Record button
-                    butDel = document.createElement('div');
-                    butDel.setAttribute('data-dcipher-rec-id', r.id);
-                    butDel.id = 'delRecId-' + r.id;
-                    butDel.className = 'del';
-                    butDel.innerHTML = '&#10005;';
-                    butDel.title = dCipher.loc._Delete_record;
-                    rec.appendChild(butDel);
-
-                    // Color picker
-                    cpInp = document.createElement('input');
-                    cpInp.type = 'hidden';
-                    cpInp.value = r.color;
-
-                    cpSp = document.createElement('span');
-                    cpSp.className = 'input-group-addon cp-span';
-                    cpi = document.createElement('i');
-                    cpi.className = 'cp-i';
-                    cpi.style.backgroundColor = r.color;
-                    cpi.title = dCipher.loc._Change_color;
-                    cpSp.appendChild(cpi);
-
-                    butCp = document.createElement('div');
-                    butCp.setAttribute('data-dcipher-rec-id', r.id);
-                    butCp.id = 'cpId-' + r.id;
-                    butCp.className = 'cp-container input-group';
-                    butCp.appendChild(cpInp);
-                    butCp.appendChild(cpSp);
-                    rec.appendChild(butCp);
-
-                    // Play record button
-                    /*
-                     butPlay = document.createElement('div');
-                     butPlay.setAttribute('data-dcipher-rec-id', r.id);
-                     butPlay.id = 'playRecId-' + r.id;
-                     butPlay.className = 'play';
-                     butPlay.title = dCipher.loc._Play_record;
-                     rec.appendChild(butPlay);
-                     */
-
-                    // Edit name field
-                    inpName = document.createElement('input');
-                    inpName.setAttribute('data-dcipher-rec-id', r.id);
-                    inpName.placeholder = self.loc._Name_placeholder;
-                    inpName.type = 'text';
-                    inpName.value = r.name;
-                    inpName.disabled = true;
-                    inpName.id = 'recNameId-' + r.id;
-                    inpName.className = 'rec-name';
-                    rec.appendChild(inpName);
-
-                    recListDiv.appendChild(rec);
-                    self.setRecListPosition();
-
-                    // Define listeners
-                    nChckb.addEventListener('change', function () {
-
-                        var $el = $(this);
-
-                        if ($el.prop('checked')) {
-
-                            self.showSpiderGraph($el.attr('data-dcipher-rec-id'));
-
-                        } else {
-
-                            self.unsetActiveRecord($el.attr('data-dcipher-rec-id'));
-
-                        }
-
-                    });
-
-                    butDel.addEventListener('click', function () {
-
-                        self.deleteRecord($(this).attr('data-dcipher-rec-id'));
-
-                    });
-
-                    /*
-                     butPlay.addEventListener('click', function () {
-
-                     self.playSession($(this).attr('data-dcipher-rec-id'));
-
-                     });
-                     */
-
-                    inpName.addEventListener('change', function () {
-
-                        var $el = $(this);
-                        self.updateRecordName($el.attr('data-dcipher-rec-id'), $el.val());
-                        //$el.attr('disabled', true);
-
-                    });
-
-                    inpName.addEventListener('blur', function () {
-
-                        var $el = $(this);
-                        $el.attr('disabled', true);
-
-                    });
-
-                    rec.addEventListener('dblclick', function () {
-
-                        var $el = $('input[type="text"]', this);
-                        $el.attr('disabled', false).focus();
-
-                    });
-
-                    rec.addEventListener('click', function (e) {
-
-                        var $el = $(e.target),
-                            id = $el.attr('data-dcipher-rec-id');
-
-                        if ($el.attr('type') === 'text') {
-
-                            self.showSpiderGraph(id);
-                            self.setActiveRecord(id);
-
-                        }
-
-                    });
-
-                    // Draw record spidergraph if active
-                    if (visRecs[r.id]) {
-
-                        self.showSpiderGraph(r.id);
-
-                        if (actRecs[r.id]) {
-
-                            self.drawTimeline(r);
-
-                        }
+                        selectors.push('.' + s + pclass);
 
                     }
 
-                    $(butCp).colorpicker({
-
-                        format: 'rgba',
-                        container: butCp,
-                        //align: 'right',
-                        customClass: 'cp-pos',
-                        colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
-
-                    }).on('hidePicker.bs-colorpicker', function () {
-                        //
-                        var $el = $(this);
-
-                        self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
-
-                    });
-
                 });
 
-            };
+            }
 
-            this.setActiveRecord = function setActiveRecord(id) {
+            for (s = 0; s < sheets.length; s++) {
 
-                var self = this,
-                    recs = this.getDomElement('records'),
-                    $rec = $('#recId-' + id, recs),
-                    $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
+                rules = sheets[s].rules || sheets[s].cssRules || [];
 
-                $('.rec', recs).removeClass('active');
-                $rec.addClass('active');
+                for (r = 0; r < rules.length; r++) {
 
-                this.db.records.forEach(function (r) {
+                    rule = rules[r];
+                    selectorText = rule.selectorText;
 
-                    if (r.id == id) {
+                    selectors.forEach(function (c) {
 
-                        r.active = true;
-                        r.visible = true;
-                        self.activeRecord = r;
-                        self.sessionId = r.id;
-                        if (self.appMode !== 'timeline') {
+                        if (selectorText && selectorText.match(new RegExp(c))) {
 
-                            self.startEventIndex = 0;
-                            self.endEventIndex = 0; //r.events.length - 1;
-                            self.timeBrackets = [0, r.duration];
+                            var ct = rule.cssText;
+
+                            styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
+
+                            //console.debug('---> cssObj: ', cssObj);
 
                         }
-                        self.drawTimeline(r);
+
+                    });
+                }
+
+            }
+
+            $('#' + mouseOverStyleId, $container).remove();
+
+            if (styles) {
+
+                $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
+                $container.append(styleNode);
+                return true;
+
+            } else {
+
+                return false;
+
+            }
+
+        };
+
+        this.toggleRecList = function toggleRecList() {
+
+            var rlId = this.domId['records'],
+                rbId = this.domId['butList'],
+                $rl = $('#' + rlId);
+
+            function hideReclist(e) {
+
+                if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
+
+                    $rl.hide();
+
+                }
+
+            }
+
+            if (!$rl.is(':visible') && this.db.records.length) {
+
+                this.setRecListPosition();
+                $rl.show();
+                $('body').on('click', hideReclist);
+
+            } else {
+
+                $rl.hide();
+                $('body').off('click', hideReclist);
+
+            }
+
+        };
+
+        this.setRecListPosition = function setRecListPosition() {
+
+            var $butList = $(this.getDomElement('butList')),
+                p = $butList.offset(),
+                $rl = $(this.getDomElement('records')),
+                hidden = $rl.css('display') === 'none';
+
+            if (hidden) {
+
+                $rl.css('display', 'block')
+                    .css('visibility', 'hidden');
+
+            }
+
+            /*
+             $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
+             .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
+             */
+            if (hidden) {
+
+                $rl.css('visibility', 'visible')
+                    .css('display', 'none');
+
+            }
+
+        };
+
+        this.createRecordList = function createRecordList() {
+
+            var self = this,
+                recListDiv = this.getDomElement('records'),
+                cnvHolder = this.getDomElement('canvasHolder'),
+                visRecs = {}, actRecs = {},
+                rec, butShow, butDel, butPlay, inpName, nChckb,
+                cnv, ctx, butCp, cpInp, cpSp;
+
+            if (!this.db.records.length) {
+
+                $(recListDiv).hide();
+                $(cnvHolder).hide();
+                $(this.getDomElement('butList')).hide();
+                return;
+
+            }
+
+            // Get all visible records
+            $('input:checkbox', recListDiv).each(function () {
+
+                visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
+
+            });
+
+            // Get all active records
+            $('.rec', recListDiv).each(function () {
+
+                actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
+
+            });
+
+            if (!visRecs.length) {
+
+                $(cnvHolder).hide();
+
+            }
+            $(recListDiv).children().remove();
+            $(cnvHolder).children('.cnv').remove();
+            this.db.records.forEach(function (r, idx) {
+
+                // Restore visibility and active flags
+                r.visible = visRecs[r.id];
+                r.active = actRecs[r.id];
+                r.drawn = false;
+                self.calcSC(r);
+
+                // Record canvas
+                cnv = document.createElement('canvas');
+                cnv.setAttribute('data-dcipher-rec-id', r.id);
+                cnv.height = window.innerHeight;
+                cnv.width = window.innerWidth;
+                cnv.id = 'cnvId-' + r.id;
+                cnv.className = 'cnv';
+                ctx = cnv.getContext('2d');
+                ctx.lineWidth = 1.5;
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = r.color;
+                ctx.lineCap = 'square';
+                ctx.lineJoin = 'miter';
+                ctx.miterLimit = 4.0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 3.0;
+                ctx.shadowBlur = 4.0;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                cnvHolder.appendChild(cnv);
+
+                // Record div
+                rec = document.createElement('div');
+                rec.id = 'recId-' + r.id;
+                rec.className = 'rec' + (actRecs[r.id] ? ' active' : '');
+                rec.setAttribute('data-dcipher-rec-id', r.id);
+
+                // Show record button
+                nChckb = document.createElement('input');
+                nChckb.setAttribute('data-dcipher-rec-id', r.id);
+                nChckb.setAttribute('cnv-id', idx);
+                nChckb.type = 'checkbox';
+                nChckb.id = 'showRecId-' + r.id;
+                nChckb.value = r.id;
+                nChckb.className = "chckb-show";
+                nChckb.checked = visRecs[r.id];
+                rec.appendChild(nChckb);
+
+                butShow = document.createElement('label');
+                butShow.setAttribute('data-dcipher-rec-id', r.id);
+                butShow.setAttribute('cnv-id', idx);
+                butShow.htmlFor = 'showRecId-' + r.id;
+                butShow.className = 'show';
+                butShow.title = dCipher.loc._Toggle_record;
+                rec.appendChild(butShow);
+
+                // Delete Record button
+                butDel = document.createElement('div');
+                butDel.setAttribute('data-dcipher-rec-id', r.id);
+                butDel.id = 'delRecId-' + r.id;
+                butDel.className = 'del';
+                butDel.innerHTML = '&#10005;';
+                butDel.title = dCipher.loc._Delete_record;
+                rec.appendChild(butDel);
+
+                // Color picker
+                cpInp = document.createElement('input');
+                cpInp.type = 'hidden';
+                cpInp.value = r.color;
+
+                cpSp = document.createElement('span');
+                cpSp.className = 'input-group-addon cp-span';
+                cpi = document.createElement('i');
+                cpi.className = 'cp-i';
+                cpi.style.backgroundColor = r.color;
+                cpi.title = dCipher.loc._Change_color;
+                cpSp.appendChild(cpi);
+
+                butCp = document.createElement('div');
+                butCp.setAttribute('data-dcipher-rec-id', r.id);
+                butCp.id = 'cpId-' + r.id;
+                butCp.className = 'cp-container input-group';
+                butCp.appendChild(cpInp);
+                butCp.appendChild(cpSp);
+                rec.appendChild(butCp);
+
+                // Play record button
+                /*
+                 butPlay = document.createElement('div');
+                 butPlay.setAttribute('data-dcipher-rec-id', r.id);
+                 butPlay.id = 'playRecId-' + r.id;
+                 butPlay.className = 'play';
+                 butPlay.title = dCipher.loc._Play_record;
+                 rec.appendChild(butPlay);
+                 */
+
+                // Edit name field
+                inpName = document.createElement('input');
+                inpName.setAttribute('data-dcipher-rec-id', r.id);
+                inpName.placeholder = self.loc._Name_placeholder;
+                inpName.type = 'text';
+                inpName.value = r.name;
+                inpName.disabled = true;
+                inpName.id = 'recNameId-' + r.id;
+                inpName.className = 'rec-name';
+                rec.appendChild(inpName);
+
+                recListDiv.appendChild(rec);
+                self.setRecListPosition();
+
+                // Define listeners
+                nChckb.addEventListener('change', function () {
+
+                    var $el = $(this);
+
+                    if ($el.prop('checked')) {
+
+                        self.showSpiderGraph($el.attr('data-dcipher-rec-id'));
 
                     } else {
 
-                        r.active = false;
+                        self.unsetActiveRecord($el.attr('data-dcipher-rec-id'));
 
                     }
 
                 });
 
-                if (!$chkb.prop('checked')) {
+                butDel.addEventListener('click', function () {
 
-                    $chkb.prop('checked', true);
-
-                }
-
-            };
-
-            this.unsetActiveRecord = function unsetActiveRecord(id) {
-
-                $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-                this.getRecordById(id).active = false;
-                this.hideSpiderGraph(id);
-
-            };
-
-            this.deleteRecord = function deleteRecord(id) {
-
-                var self = this;
-
-                this.db.deleteRecord(id).then(function () {
-
-                    self.createRecordList();
-
-                }, function (e, msg) {
-
-                    console.warn('[WARN] Could not delete record. Error:', msg);
+                    self.deleteRecord($(this).attr('data-dcipher-rec-id'));
 
                 });
 
-            };
+                /*
+                 butPlay.addEventListener('click', function () {
 
-            this.updateRecordName = function updateRecordName(id, name) {
+                 self.playSession($(this).attr('data-dcipher-rec-id'));
 
-                var self = this,
-                    rec = this.getRecordById(id);
+                 });
+                 */
 
-                rec.name = name;
+                inpName.addEventListener('change', function () {
+
+                    var $el = $(this);
+                    self.updateRecordName($el.attr('data-dcipher-rec-id'), $el.val());
+                    //$el.attr('disabled', true);
+
+                });
+
+                inpName.addEventListener('blur', function () {
+
+                    var $el = $(this);
+                    $el.attr('disabled', true);
+
+                });
+
+                rec.addEventListener('dblclick', function () {
+
+                    var $el = $('input[type="text"]', this);
+                    $el.attr('disabled', false).focus();
+
+                });
+
+                rec.addEventListener('click', function (e) {
+
+                    var $el = $(e.target),
+                        id = $el.attr('data-dcipher-rec-id');
+
+                    if ($el.attr('type') === 'text') {
+
+                        self.showSpiderGraph(id);
+                        self.setActiveRecord(id);
+
+                    }
+
+                });
+
+                // Draw record spidergraph if active
+                if (visRecs[r.id]) {
+
+                    self.showSpiderGraph(r.id);
+
+                    if (actRecs[r.id]) {
+
+                        self.drawTimeline(r);
+
+                    }
+
+                }
+
+                $(butCp).colorpicker({
+
+                    format: 'rgba',
+                    container: butCp,
+                    //align: 'right',
+                    customClass: 'cp-pos',
+                    colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
+
+                }).on('hidePicker.bs-colorpicker', function () {
+                    //
+                    var $el = $(this);
+
+                    self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
+
+                });
+
+            });
+
+        };
+
+        this.setActiveRecord = function setActiveRecord(id) {
+
+            var self = this,
+                recs = this.getDomElement('records'),
+                $rec = $('#recId-' + id, recs),
+                $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
+
+            $('.rec', recs).removeClass('active');
+            $rec.addClass('active');
+
+            this.db.records.forEach(function (r) {
+
+                if (r.id == id) {
+
+                    r.active = true;
+                    r.visible = true;
+                    self.activeRecord = r;
+                    self.sessionId = r.id;
+                    if (!self.appMode) {
+
+                        self.startEventIndex = 0;
+                        self.endEventIndex = 0;
+                        self.timeBrackets = [0, r.duration];
+
+                    }
+                    self.drawTimeline(r);
+
+                } else {
+
+                    r.active = false;
+
+                }
+
+            });
+
+            if (!$chkb.prop('checked')) {
+
+                $chkb.prop('checked', true);
+
+            }
+
+        };
+
+        this.unsetActiveRecord = function unsetActiveRecord(id) {
+
+            $('#recId-' + id, this.getDomElement('records')).removeClass('active');
+            this.getRecordById(id).active = false;
+            this.hideSpiderGraph(id);
+
+        };
+
+        this.deleteRecord = function deleteRecord(id) {
+
+            var self = this;
+
+            this.db.deleteRecord(id).then(function () {
+
+                self.createRecordList();
+
+            }, function (e, msg) {
+
+                console.warn('[WARN] Could not delete record. Error:', msg);
+
+            });
+
+        };
+
+        this.updateRecordName = function updateRecordName(id, name) {
+
+            var self = this,
+                rec = this.getRecordById(id);
+
+            rec.name = name;
+            delete rec.drawn;
+            this.db.putRecord(id, rec).then(function () {
+
+                self.createRecordList();
+                self.setActiveRecord(id);
+                self.showSpiderGraph(id);
+
+            }, function (e, msg) {
+
+                console.warn('[WARN] Could not update record. Error:', msg);
+
+            });
+
+        };
+
+        this.updateRecordColor = function updateRecordColor(id, color) {
+
+            var self = this,
+                rec = this.getRecordById(id);
+
+            if (rec.color !== color) {
+
+                rec.color = color;
                 delete rec.drawn;
                 this.db.putRecord(id, rec).then(function () {
 
                     self.createRecordList();
-                    self.setActiveRecord(id);
-                    self.showSpiderGraph(id);
 
                 }, function (e, msg) {
 
@@ -3084,1098 +3107,1099 @@
 
                 });
 
-            };
+            }
 
-            this.updateRecordColor = function updateRecordColor(id, color) {
+        };
 
-                var self = this,
-                    rec = this.getRecordById(id);
+        this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
 
-                if (rec.color !== color) {
+            $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
+            this.getRecordById(sId).visible = true;
 
-                    rec.color = color;
-                    delete rec.drawn;
-                    this.db.putRecord(id, rec).then(function () {
+        };
 
-                        self.createRecordList();
+        this.hideRecList = function hideRecList() {
 
-                    }, function (e, msg) {
+            $(this.getDomElement('records')).hide();
 
-                        console.warn('[WARN] Could not update record. Error:', msg);
+        };
 
-                    });
+        this.showMouseClick = function showMouseClick(x, y) {
 
-                }
+            var $el = $(this.getDomElement('click'));
 
-            };
+            function showClick() {
 
-            this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
+                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                    .show().fadeOut();
 
-                $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
-                this.getRecordById(sId).visible = true;
+            }
 
-            };
+            setTimeout(showClick, 0);
 
-            this.hideRecList = function hideRecList() {
+        };
 
-                $(this.getDomElement('records')).hide();
+        this.showDblClick = function showMouseClick(x, y) {
 
-            };
+            var self = this,
+                $el = $(this.getDomElement('dblClick'));
 
-            this.showMouseClick = function showMouseClick(x, y) {
+            function showClick() {
 
-                var $el = $(this.getDomElement('click'));
+                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                    .show();
 
-                function showClick() {
+                setTimeout(function () {
 
-                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                        .show().fadeOut();
+                    $el.fadeOut('fast');
 
-                }
+                }, self.clickDelay);
 
-                setTimeout(showClick, 0);
+            }
 
-            };
+            this.showMouseClick(x, y);
+            setTimeout(showClick, 0);
 
-            this.showDblClick = function showMouseClick(x, y) {
+        };
 
-                var self = this,
-                    $el = $(this.getDomElement('dblClick'));
+        this.showMouseDown = function showMouseDown(x, y) {
 
-                function showClick() {
+            var $el = $(this.getDomElement('click'));
 
-                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                        .show();
+            $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
 
-                    setTimeout(function () {
+        };
 
-                        $el.fadeOut('fast');
+        this.hideMouseDown = function hideMouseDown() {
 
-                    }, self.clickDelay);
+            $(this.getDomElement('click')).fadeOut('fast');
 
-                }
+        };
 
-                this.showMouseClick(x, y);
-                setTimeout(showClick, 0);
+        this.mouseMoveHandler = function mouseMoveHandler(e) {
 
-            };
+            e.data.self.mouse = {
 
-            this.showMouseDown = function showMouseDown(x, y) {
+                x: e.clientX,
+                y: e.clientY
 
-                var $el = $(this.getDomElement('click'));
+            }
 
-                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
+        };
 
-            };
+        this.saveState = function saveState() {
 
-            this.hideMouseDown = function hideMouseDown() {
-
-                $(this.getDomElement('click')).fadeOut('fast');
-
-            };
-
-            this.mouseMoveHandler = function mouseMoveHandler(e) {
-
-                e.data.self.mouse = {
-
-                    x: e.clientX,
-                    y: e.clientY
-
-                }
-
-            };
-
-            this.saveState = function saveState() {
-
-                if (this.appMode) {
-
-                    if (this.appMode === 'test') {
-
-                        this.checkTaskCompletion();
-
-                    }
-
-                    this.activeRecord.events.forEach(function (e) {
-
-                        delete e.target.element;
-
-                    });
-
-                    sessionStorage.setItem('dcipherState', JSON.stringify({
-
-                        user: this.user,
-                        appMode: this.appMode,
-                        activeRecord: this.activeRecord,
-                        sessionId: this.sessionId,
-                        startEventIndex: this.startEventIndex,
-                        endEventIndex: this.endEventIndex,
-                        testCase: this.testCase,
-                        currentTask: this.currentTask,
-                        currentEvent: this.currentEvent,
-                        timeBrackets: this.timeBrackets
-
-                    }));
-
-                } else {
-
-                    sessionStorage.removeItem('dcipherState');
-
-                }
-            };
-
-            this.restoreState = function restoreState() {
-
-                var self = this,
-                    state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
-
-                for (var k in state) {
-
-                    if (state[k]) {
-
-                        this[k] = state[k];
-
-                    }
-
-                }
-
-                if (this.appMode === 'record' || this.appMode === 'test') {
-
-                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                    $(this.getDomElement('butList')).hide();
-                    $('body').on('mousemove', function (e) {
-
-                        self.catchEvents(e);
-
-                    });
-                    $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
-
-                        self.updateStatString();
-
-                    }, 100)).fadeIn();
-
-                } else if (this.appMode === 'play') {
-
-                    this.showSpiderGraph(this.activeRecord.id, 0, this.endEventIndex + 1);
-                    setTimeout(function () {
-
-                        self.playSession(self.activeRecord.id, self.endEventIndex);
-
-                    }, 1000);
-
-                } else if (this.appMode === 'timeline') {
-
-                    var event = this.activeRecord.events[this.endEventIndex],
-                        tEvt;
-
-                    this.setActiveRecord(this.activeRecord.id);
-                    this.showSpiderGraph(this.activeRecord.id, this.startEventIndex, this.endEventIndex + 1);
-
-                    tEvt = this.timeLineEvents.find(function (e) {
-
-                        return e.event.index === event.index;
-
-                    });
-                    this.showTLTooltip(tEvt);
-                    this.drawTLBrackets();
-                    sessionStorage.removeItem('dcipherState');
-                    this.appMode = '';
-
-                }
-
-                if (this.appMode !== 'test') {
-
-                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
-
-                }
+            if (this.appMode) {
 
                 if (this.appMode === 'test') {
 
-                    for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
-
-                        this.activateTaskStep(i, true);
-
-                    }
+                    this.checkTaskCompletion();
 
                 }
 
-            };
+                this.activeRecord.events.forEach(function (e) {
 
-            this.resetState = function resetState() {
-
-                sessionStorage.removeItem('dcipherState');
-                if (this.activeRecord) {
-
-                    var loc = this.activeRecord.events[0].location;
-
-                    this.activeRecord = null;
-                    this.appMode = '';
-                    this.endEventIndex = 0;
-                    window.location = loc;
-
-                }
-
-            };
-
-            this.createTaskList = function () {
-
-                var self = this,
-                    $tb = $(this.getDomElement('taskBar')),
-                    tl = this.testCase,
-                    w = $tb.outerHeight(),
-                    rp = window.innerWidth - w * (tl.length),
-                    d, sn, sd;
-
-                function activateTaskStep(e) {
-
-                    var currentTask = self.currentTask,
-                        step = 1 * $(e.target).attr('step'),
-                        newTask = tl[step];
-                    cs = currentTask ? currentTask.step : -1;
-
-                    e.stopPropagation();
-
-                    if (newTask.active || newTask.done) {
-
-                        for (var i = tl.length - 1; i >= step; i--) {
-
-                            if (tl[i].active || tl[i].done) {
-
-                                self.deactivateTaskStep(i);
-
-                            }
-
-                        }
-
-                    } else {
-
-                        while (++cs < step) {
-
-                            self.activateTaskStep(cs, true);
-
-                        }
-                        self.activateTaskStep(cs);
-
-                    }
-
-                }
-
-                tl.forEach(function (t, i) {
-
-                    t.done = false;
-                    d = document.createElement('div');
-                    d.className = 'd-cipher-task';
-                    d.style.left = rp + w * i + 'px';
-
-                    sn = document.createElement('span');
-                    sn.className = 'step-number';
-                    sn.innerHTML = i + 1;
-                    sn.setAttribute('step', i);
-                    d.appendChild(sn);
-
-                    sd = document.createElement('span');
-                    sd.className = 'task-description';
-                    sd.innerText = t.description;
-                    d.appendChild(sd);
-                    $tb.append(d);
-
-                    sn.addEventListener('click', function (e) {
-
-                        activateTaskStep(e);
-
-                    });
+                    delete e.target.element;
 
                 });
 
-                d = document.createElement('div');
-                d.className = 'd-cipher-task-done';
-                d.innerHTML = this.loc._Test_done;
-                $tb.append(d);
+                sessionStorage.setItem('dcipherState', JSON.stringify({
 
-            };
+                    user: this.user,
+                    appMode: this.appMode,
+                    activeRecord: this.activeRecord,
+                    sessionId: this.sessionId,
+                    startEventIndex: this.startEventIndex,
+                    endEventIndex: this.endEventIndex,
+                    testCase: this.testCase,
+                    currentTask: this.currentTask,
+                    currentEvent: this.currentEvent,
+                    timeBrackets: this.timeBrackets
 
-            this.activateTaskStep = function (step, restore) {
+                }));
 
-                var self = this,
-                    tb = this.getDomElement('taskBar'),
-                    div = $('div', tb)[step],
-                    pdiv = $('div', tb)[step - 1],
-                    task = this.testCase[step],
-                    $div = $(div),
-                    left = (2 + step) * ($(div).height() + 2);
+            } else {
 
-                function endOfTest() {
+                sessionStorage.removeItem('dcipherState');
 
-                    $('.d-cipher-task-done', tb).fadeOut();
-                    //window.location = self.testCase[0].events[0].location;
+            }
+        };
+
+        this.restoreState = function restoreState() {
+
+            var self = this,
+                state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+
+            for (var k in state) {
+
+                if (state[k]) {
+
+                    this[k] = state[k];
 
                 }
 
-                if (task === this.currentTask && this.currentTask.active) {
+            }
 
-                    this.deactivateTaskStep(step);
+            if (this.appMode === 'record' || this.appMode === 'test') {
+
+                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                $(this.getDomElement('butList')).hide();
+                $('body').on('mousemove', function (e) {
+
+                    self.catchEvents(e);
+
+                });
+                $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+
+                    self.updateStatString();
+
+                }, 100)).fadeIn();
+
+            } else if (this.appMode === 'play') {
+
+                this.showSpiderGraph(this.activeRecord.id, 0, this.endEventIndex + 1);
+                setTimeout(function () {
+
+                    self.playSession(self.activeRecord.id, self.endEventIndex);
+
+                }, 1000);
+
+            } else if (this.appMode === 'timeline') {
+
+                var event = this.activeRecord.events[this.endEventIndex],
+                    tEvt;
+
+                this.setActiveRecord(this.activeRecord.id);
+                this.showSpiderGraph(this.activeRecord.id, this.startEventIndex, this.endEventIndex + 1);
+
+                tEvt = this.timeLineEvents.find(function (e) {
+
+                    return e.event.index === event.index;
+
+                });
+                this.showTLTooltip(tEvt);
+                this.drawTLBrackets();
+                sessionStorage.removeItem('dcipherState');
+                this.appMode = '';
+
+            }
+
+            if (this.appMode !== 'test') {
+
+                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+
+            }
+
+            if (this.appMode === 'test') {
+
+                for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
+
+                    this.activateTaskStep(i, true);
+
+                }
+
+            }
+
+        };
+
+        this.resetState = function resetState() {
+
+            sessionStorage.removeItem('dcipherState');
+            if (this.activeRecord) {
+
+                var loc = this.activeRecord.events[0].location;
+
+                this.activeRecord = null;
+                this.appMode = '';
+                this.endEventIndex = 0;
+                window.location = loc;
+
+            }
+
+        };
+
+        this.createTaskList = function () {
+
+            var self = this,
+                $tb = $(this.getDomElement('taskBar')),
+                tl = this.testCase,
+                w = $tb.outerHeight(),
+                rp = window.innerWidth - w * (tl.length),
+                d, sn, sd;
+
+            function activateTaskStep(e) {
+
+                var currentTask = self.currentTask,
+                    step = 1 * $(e.target).attr('step'),
+                    newTask = tl[step];
+                cs = currentTask ? currentTask.step : -1;
+
+                e.stopPropagation();
+
+                if (newTask.active || newTask.done) {
+
+                    for (var i = tl.length - 1; i >= step; i--) {
+
+                        if (tl[i].active || tl[i].done) {
+
+                            self.deactivateTaskStep(i);
+
+                        }
+
+                    }
 
                 } else {
 
-                    if (pdiv) {
+                    while (++cs < step) {
 
-                        if (this.currentTask) {
-
-                            this.currentTask.done = true;
-                            this.currentTask.active = false;
-
-                        }
-
-                        $('span.step-number', pdiv).html('✓').removeClass('active');
+                        self.activateTaskStep(cs, true);
 
                     }
-
-                    if (step < this.testCase.length) {
-
-                        $div.css({
-
-                            left: left,
-                            transition: restore ? '' : 'left 0.2s ease-out 0.15s'
-
-                        });
-
-                        $('span.step-number', div).addClass('active');
-
-                        this.currentTask = task;
-                        this.currentTask.done = false;
-                        this.currentTask.active = true;
-
-                        if (!step && !this.appMode) {
-
-                            this.toggleRecMode();
-                            this.resetApp('test', task.events[0].location, restore);
-
-                        }
-
-                    } else {
-
-                        this.resetTasklist();
-                        this.appMode = 'record';
-                        this.toggleRecMode();
-                        $('.d-cipher-task-done', tb).fadeIn();
-                        setTimeout(endOfTest, 2000);
-
-                    }
+                    self.activateTaskStep(cs);
 
                 }
 
-            };
+            }
 
-            this.deactivateTaskStep = function (step) {
+            tl.forEach(function (t, i) {
 
-                var tb = this.getDomElement('taskBar'),
-                    div = $('div', tb)[step],
-                    $div = $(div),
-                    $spn = $('span.step-number', div),
-                    left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
-                    task = this.testCase[step];
+                t.done = false;
+                d = document.createElement('div');
+                d.className = 'd-cipher-task';
+                d.style.left = rp + w * i + 'px';
 
-                $div.css({
+                sn = document.createElement('span');
+                sn.className = 'step-number';
+                sn.innerHTML = i + 1;
+                sn.setAttribute('step', i);
+                d.appendChild(sn);
 
-                    left: left,
-                    transition: 'left 0.2s ease-out 0.15s'
+                sd = document.createElement('span');
+                sd.className = 'task-description';
+                sd.innerText = t.description;
+                d.appendChild(sd);
+                $tb.append(d);
+
+                sn.addEventListener('click', function (e) {
+
+                    activateTaskStep(e);
 
                 });
-                $spn.removeClass('active').trigger('mouseout');
-                task.done = false;
-                task.active = false;
-                task.events.forEach(function (e) {
 
-                    e.done = false;
+            });
 
-                });
-                if (!step) {
+            d = document.createElement('div');
+            d.className = 'd-cipher-task-done';
+            d.innerHTML = this.loc._Test_done;
+            $tb.append(d);
+
+        };
+
+        this.activateTaskStep = function (step, restore) {
+
+            var self = this,
+                tb = this.getDomElement('taskBar'),
+                div = $('div', tb)[step],
+                pdiv = $('div', tb)[step - 1],
+                task = this.testCase[step],
+                $div = $(div),
+                left = (2 + step) * ($(div).height() + 2);
+
+            function endOfTest() {
+
+                $('.d-cipher-task-done', tb).fadeOut();
+                //window.location = self.testCase[0].events[0].location;
+
+            }
+
+            if (task === this.currentTask && this.currentTask.active) {
+
+                this.deactivateTaskStep(step);
+
+            } else {
+
+                if (pdiv) {
+
+                    if (this.currentTask) {
+
+                        this.currentTask.done = true;
+                        this.currentTask.active = false;
+
+                    }
+
+                    $('span.step-number', pdiv).html('✓').removeClass('active');
+
+                }
+
+                if (step < this.testCase.length) {
+
+                    $div.css({
+
+                        left: left,
+                        transition: restore ? '' : 'left 0.2s ease-out 0.15s'
+
+                    });
+
+                    $('span.step-number', div).addClass('active');
+
+                    this.currentTask = task;
+                    this.currentTask.done = false;
+                    this.currentTask.active = true;
+
+                    if (!step && !this.appMode) {
+
+                        this.toggleRecMode();
+                        this.resetApp('test', task.events[0].location, restore);
+
+                    }
+
+                } else {
 
                     this.resetTasklist();
                     this.appMode = 'record';
                     this.toggleRecMode();
-
-                } else {
-
-                    var cs = step - 1,
-                        ctask = this.testCase[cs];
-
-                    this.currentTask = ctask;
-                    $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
-                    ctask.active = true;
-                    ctask.done = false;
-                    ctask.events.forEach(function (e) {
-
-                        e.done = false;
-
-                    });
+                    $('.d-cipher-task-done', tb).fadeIn();
+                    setTimeout(endOfTest, 2000);
 
                 }
 
-            };
+            }
 
-            this.checkTaskCompletion = function () {
+        };
 
-                var e = this.currentEvent,
-                    el = e ? this.getElementByTreePath(e.treePath) : null,
-                    evts = this.currentTask ? this.currentTask.events : null;
+        this.deactivateTaskStep = function (step) {
 
-                if (e && evts && evts.length) {
+            var tb = this.getDomElement('taskBar'),
+                div = $('div', tb)[step],
+                $div = $(div),
+                $spn = $('span.step-number', div),
+                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
+                task = this.testCase[step];
 
-                    for (var i = 0, len = evts.length; i < len; i++) {
+            $div.css({
 
-                        var evt = evts[i],
-                            treePath = e.treePath,
-                            offset = $(el).offset(),
-                            ww = window.innerWidth,
-                            wh = window.innerHeight,
-                            pX = pageXOffset,
-                            pY = pageYOffset,
-                            re = new RegExp('^' + evt.treePath),
-                            vis;
-
-                        vis = offset.top < (pY + wh) && offset.top > pY
-                              && offset.left < pX + ww && offset.left > pX;
-
-                        if (vis && evt.type === e.type
-                            && treePath.match(re)
-                            && evt.location === e.location) {
-
-                            evt.done = true;
-                            if (evt.alternate && evt.alternate.length) {
-
-                                evt.alternate.forEach(function (i) {
-
-                                    evts[i].done = true;
-
-                                });
-
-                            }
-                            break;
-
-                        }
-
-                    }
-
-                    if (!evts.filter(function (e) {
-
-                            return !e.done;
-
-                        }).length) {
-
-                        this.activateTaskStep(this.currentTask.step + 1);
-
-                    }
-
-                }
-
-            };
-
-            this.resetApp = function (mode, path, restore) {
-
-                localStorage.removeItem('Stroller.active');
-                localStorage.removeItem('Stroller.name');
-                localStorage.removeItem('Stroller.price');
-                localStorage.removeItem('Stroller.stroller');
-                localStorage.removeItem('Stroller.modules.Base');
-                localStorage.removeItem('Stroller.modules.Frame');
-                localStorage.removeItem('Stroller.modules.TF');
-                sessionStorage.removeItem('basket');
-                this.appMode = mode;
-                if (!restore && path /*&& window.location.pathname !== path*/) {
-
-                    window.location.pathname = path;
-
-                }
-
-            };
-
-            this.resetTasklist = function () {
-
-                var $tb = $(this.getDomElement('taskBar')),
-                    tl = this.testCase,
-                    $tasks = $('div', $tb),
-                    w = $tb.outerHeight(),
-                    rp = window.innerWidth - w * (tl.length),
-                    d;
-
-                tl.forEach(function (t, i) {
-
-                    t.done = false;
-                    t.active = false;
-                    t.events.forEach(function (e) {
-
-                        e.done = false;
-
-                    });
-                    d = $tasks[i];
-                    $(d).css('left', rp + w * i);
-                    $('.step-number', d).html(i + 1).removeClass('active');
-
-                });
-
-                this.currentTask = null;
-                this.currentEvent = null;
-                sessionStorage.removeItem('dcipherState');
-
-            };
-
-            this.highlightTimeLineEvent = function (e) {
-
-                var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
-                    evt = evts ? evts[0] : null,
-                    rec = evt ? this.getRecordById(evt.recId) : null,
-                    tl = this.getDomElement('timeline'),
-                    $tlc = $(this.getDomElement('timelineCircle'));
-
-                if (rec && rec.active) {
-
-                    $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
-
-                } else if (e.target === tl) {
-
-                    $tlc.hide();
-
-                }
-
-            };
-
-            this.getTimeLineCursorPars = function (time, duration) {
-
-                var offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    tl = this.getDomElement('timeline'),
-                    width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
-                    pxs = width / duration,
-                    top = $(tl).height() / 2,
-                    left = this.timeLineOffsetLeft + pxs * time;
-
-                return {
-
-                    top: top,
-                    left: left
-                }
-
-            };
-
-            this.getTimeLineBracketsPars = function (time1, time2) {
-
-                var rec = this.activeRecord,
-                    duration = rec.duration,
-                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
-                    left = this.timeLineOffsetLeft + pxs * time1,
-                    width = this.timeLineOffsetLeft + pxs * time2 - left;
-
-                this.timeBrackets = [time1, time2];
-                return {
-
-                    width: width,
-                    left: left
-                }
-
-            };
-
-            this.moveTimelineBracket = function (e) {
-
-            };
-
-        }; // End of DCipher class
-
-        var dCipher = new DCipher();
-
-        function initDomElements() {
-
-            var bdy = document.getElementsByTagName('body')[0],
-                dMain = document.createElement('div'),
-                link = document.createElement('link'),
-                cnvDiv = document.createElement('div'),
-                stat = document.createElement('div'),
-                menu = document.createElement('div'),
-                butRec = document.createElement('div'),
-                rec = document.createElement('div'),
-                butPlay = document.createElement('div'),
-                play = document.createElement('div'),
-                butList = document.createElement('div'),
-                recs = document.createElement('div'),
-                recList = document.createElement('div'),
-                click = document.createElement('div'),
-                dblclick = document.createElement('div'),
-                evtHlt = document.createElement('div'),
-                cursor = document.createElement('div'),
-                mTT = document.createElement('div'),
-                eInf = document.createElement('div'),
-                tLine = document.createElement('div'),
-                tlTT = document.createElement('div'),
-                tlCursor = document.createElement('div'),
-                tlBrackets = document.createElement('div'),
-                tlLeftBracket = document.createElement('div'),
-                tlRightBracket = document.createElement('div'),
-                tlCircle = document.createElement('div'),
-                tlInfo = document.createElement('div'),
-                tlCnv = document.createElement('canvas'),
-                topMenu = document.createElement('div'),
-                taskBar = document.createElement('div'),
-                startTest = document.createElement('span');
-
-                // D-Cipher container
-            dMain.id = dCipher.domId.container;
-            bdy.appendChild(dMain);
-
-            // Init styles
-            link.rel = 'stylesheet';
-            link.type = 'text/css';
-            link.media = 'all';
-            link.href = dCipher.baseURL + dCipher.cssURL;
-            bdy.insertBefore(link, document.getElementById(dMain.id));
-
-            // Init canvas holder
-            cnvDiv.id = dCipher.domId.canvasHolder;
-            cnvDiv.width = window.innerWidth;
-            cnvDiv.height = window.innerHeight;
-            dMain.appendChild(cnvDiv);
-
-            // Status bar
-            stat.id = dCipher.domId.stat;
-            dMain.appendChild(stat);
-
-            // Click spot
-            click.id = dCipher.domId.click;
-            cnvDiv.appendChild(click);
-
-            // Double click spot
-            dblclick.id = dCipher.domId.dblClick;
-            cnvDiv.appendChild(dblclick);
-
-            // Highlight event spot
-            evtHlt.id = dCipher.domId.highlightEvent;
-            cnvDiv.appendChild(evtHlt);
-
-            // Cursor
-            cursor.id = dCipher.domId.cursor;
-            cnvDiv.appendChild(cursor);
-
-            // Time line
-            tLine.id = dCipher.domId.timeline;
-            tlInfo.id = dCipher.domId.timelineInfo;
-            tlCursor.id = dCipher.domId.timelineCursor;
-            tlBrackets.id = dCipher.domId.timelineBrackets;
-            tlBrackets.className = 'brackets';
-            tlRightBracket.className = 'right-bracket';
-            tlLeftBracket.className = 'left-bracket';
-            tlCircle.id = dCipher.domId.timelineCircle;
-            tlBrackets.appendChild(tlRightBracket);
-            tlBrackets.appendChild(tlLeftBracket);
-            tLine.appendChild(tlInfo);
-            tLine.appendChild(tlCursor);
-            tLine.appendChild(tlCnv);
-            tLine.appendChild(tlBrackets);
-            tLine.appendChild(tlCircle);
-            cnvDiv.appendChild(tLine);
-
-            // Time line event info popup
-            tlTT.id = dCipher.domId.timelineTooltip;
-            dMain.appendChild(tlTT);
-
-            // Mouse tooltip
-            mTT.id = dCipher.domId.mTooltip;
-            dMain.appendChild(mTT);
-
-            // Event info popup
-            eInf.id = dCipher.domId.eventInfo;
-            dMain.appendChild(eInf);
-
-            // Record button
-            butRec.id = dCipher.domId.butRecord;
-            butRec.className = 'btn rec';
-            butRec.title = dCipher.loc._Record_session;
-            rec.className = 'rec';
-            butRec.appendChild(rec);
-            topMenu.appendChild(butRec);
-
-            // Play button
-            butPlay.id = dCipher.domId.butPlay;
-            butPlay.className = 'btn play';
-            butPlay.title = dCipher.loc._Play_record;
-            play.className = 'play';
-            //butPlay.style.display = 'none';
-            butPlay.appendChild(play);
-            topMenu.appendChild(butPlay);
-
-            // Record list button
-            butList.id = dCipher.domId.butList;
-            butList.className = 'btn';
-            recs.className = 'recs';
-            butList.title = dCipher.loc._Show_records;
-            butList.appendChild(recs);
-
-            // Record list
-            recList.id = 'd-cipher-rec-list';
-
-            // D-Cipher menu
-            menu.id = dCipher.domId.menu;
-            //menu.appendChild(butRec);
-            //menu.appendChild(butPlay);
-            menu.appendChild(butList);
-            dMain.appendChild(menu);
-            dMain.appendChild(recList);
-
-            // Top menu
-            topMenu.id = dCipher.domId.topMenu;
-            taskBar.id = dCipher.domId.taskBar;
-            //taskBar.innerHTML = dCipher.loc._Start_task;
-            startTest.className = 'start-test';
-            startTest.innerHTML = dCipher.loc._Start_test;
-            taskBar.appendChild(startTest);
-            topMenu.appendChild(taskBar);
-            bdy.insertBefore(topMenu, bdy.firstChild);
-
-            cnvDiv.addEventListener('click', function (e) {
-
-                dCipher.canvasHolderClickHandler(e, dCipher);
+                left: left,
+                transition: 'left 0.2s ease-out 0.15s'
 
             });
+            $spn.removeClass('active').trigger('mouseout');
+            task.done = false;
+            task.active = false;
+            task.events.forEach(function (e) {
 
-            cnvDiv.addEventListener('mousemove', function (e) {
-
-                dCipher.showMouseTooltip(e);
-                dCipher.highlightTimeLineEvent(e);
-
-            });
-
-            tlCnv.addEventListener('mousemove', function (e) {
-
-                dCipher.showTLTooltip(e);
+                e.done = false;
 
             });
-
-            tlCnv.addEventListener('click', function (e) {
-
-                var evt = dCipher.getTimelineEvent(e);
-
-                if (evt) {
-
-                    dCipher.showTimelineEvent(evt.event);
-
-                }
-
-            });
-
-            tlBrackets.addEventListener('mousemove', function (e) {
-
-                dCipher.showTLTooltip(e);
-
-            });
-
-            tlBrackets.addEventListener('click', function (e) {
-
-                var evt = dCipher.getTimelineEvent(e);
-
-                if (evt) {
-
-                    dCipher.showTimelineEvent(evt.event);
-
-                }
-
-            });
-
-            tlLeftBracket.addEventListener('mousemove', function (e) {
-
-                dCipher.moveTimelineBracket(e);
-
-            });
-
-            tlLeftBracket.addEventListener('mousemove', function (e) {
-
-                dCipher.moveTimelineBracket(e);
-
-            });
-
-            butRec.addEventListener('click', function (e) {
-
-                e.stopPropagation();
-                if (dCipher.appMode === 'test') {
-                    dCipher.resetTasklist();
-
-                }
-                dCipher.toggleRecMode(e);
-
-            });
-
-            butPlay.addEventListener('click', function () {
-
-                var sId = dCipher.sessionId;
-
-                if (sId) {
-
-                    dCipher.playSession(sId);
-
-                }
-
-            });
-
-            butList.addEventListener('click', function () {
-
-                dCipher.toggleRecList(this);
-
-            });
-
-            startTest.addEventListener('click', function () {
-
-                dCipher.activateTaskStep(0);
-
-            });
-
-            window.addEventListener('click', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('mousedown', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('mouseup', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('dragstart', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('dragend', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('keydown', function (e) {
-
-                if (e.keyCode === 27) {
-
-                    dCipher.resetState();
-
-                } else {
-
-                    dCipher.saveEvent(e);
-
-                }
-
-            });
-
-            window.addEventListener('wheel', function (e) {
-
-                dCipher.saveEvent(e);
-
-            });
-
-            window.addEventListener('resize', function (e) {
-
-                var $recs = $(dCipher.getDomElement('records'));
-
-                clearTimeout($recs.data('tid'));
-
-                $recs.data('tid', setTimeout(function () {
-
-                    dCipher.createRecordList(e);
-
-                }, 500));
-
-            });
-
-            window.addEventListener('beforeunload', function () {
-
-                dCipher.saveState();
-
-            });
-
-            overridePrototype();
-
-            /*
-             var observer = new MutationObserver(function (mutations) {
-
-             for (var i = 0, len = mutations.length; i < len; i++) {
-
-             for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
-
-             var node = mutations[i].addedNodes[j];
-
-             for (var p in node) {
-
-             if (node.className === 'colorpicker-hot-spot') {
-
-             console.debug('########### NODE: ', node);
-
-             }
-
-             if (p.hasOwnProperty(p) && p.match(/^onmouse/i)){
-
-             node.addEventListener(p.substring(2), function () {
-
-             dCipher.saveEvent(e);
-
-             });
-             console.debug('====> MUTATION OBSERVER: added listener to node', node);
-
-             }
-
-             }
-
-             }
-
-             }
-
-             });
-             observer.observe(bdy, { childList: true });
-             */
-
-            setTimeout(checkJQuery, 500);
-
-        }
-
-        function checkJQuery(cnt) {
-
-            cnt = isNaN(cnt) ? 50 : cnt;
-
-            if (window.jQuery || window.$) {
-
-                console.debug('Found jQuery, init IndexedDB...');
-                initJQueryPlugins();
-                if ($.indexedDB) {
-
-                    console.debug('IndexedDB initialized, initialize D-Cipher.');
-                    dCipher.init();
-
-                }
+            if (!step) {
+
+                this.resetTasklist();
+                this.appMode = 'record';
+                this.toggleRecMode();
 
             } else {
 
-                cnt--;
+                var cs = step - 1,
+                    ctask = this.testCase[cs];
 
-                if (cnt) {
+                this.currentTask = ctask;
+                $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
+                ctask.active = true;
+                ctask.done = false;
+                ctask.events.forEach(function (e) {
 
-                    checkJQuery(cnt);
-
-                } else {
-
-                    loadJQuery();
-
-                }
-
-            }
-
-        }
-
-        function loadJQuery() {
-
-            console.debug('Loading jQuery');
-
-            var script = document.createElement('script');
-
-            script.async = 'async';
-            script.type = 'text/javascript';
-            script.src = 'jquery-2.1.4.min.js';
-            document.getElementsByTagName('head')[0].appendChild(script);
-            setTimeout(checkJQuery, 500);
-
-        }
-
-        function overridePrototype() {
-
-            Element.prototype._addEventListener = Element.prototype.addEventListener;
-            Element.prototype.addEventListener = function (type, handler, useCapture) {
-
-                useCapture = useCapture === void 0 ? false : useCapture;
-                var node = this;
-
-                node._addEventListener(type, handler, useCapture);
-
-                if (!node.eventListenerList) {
-
-                    node.eventListenerList = {};
-
-                }
-
-                if (!node.eventListenerList[type]) {
-
-                    node.eventListenerList[type] = [];
-
-                    if (handler.toString().match(/stopPropagation|preventDefault/)
-                        || type === 'mouseover' || type === 'mouseout'
-                        || type === 'mouseenter' || type === 'mouseleave'
-                        || type === 'mousedown' || type === 'mouseup'
-                        || type.match(/scroll|wheel/i)
-                    ) {
-
-                        node._addEventListener(type, function (e) {
-
-                            dCipher.saveEvent(e);
-
-                        });
-
-                        //console.debug('JS listener --> Element: %s, Event added: ', this, type);
-                        //console.debug('Handler: ', handler.toString());
-
-                    }
-
-                }
-
-                node.eventListenerList[type].push({
-
-                    type: type,
-                    handler: handler,
-                    useCapture: useCapture
+                    e.done = false;
 
                 });
 
-            };
+            }
 
-            Element.prototype._removeEventListener = Element.prototype.removeEventListener;
-            Element.prototype.removeEventListener = function (type, handler, useCapture) {
+        };
 
-                var node = this;
+        this.checkTaskCompletion = function () {
 
-                node._removeEventListener(type, handler, useCapture);
+            var e = this.currentEvent,
+                el = e ? this.getElementByTreePath(e.treePath) : null,
+                evts = this.currentTask ? this.currentTask.events : null;
 
-                if (node.eventListenerList && node.eventListenerList[type]) {
+            if (e && evts && evts.length) {
 
-                    node.eventListenerList[type] = node.eventListenerList[type].filter(function (listener) {
+                for (var i = 0, len = evts.length; i < len; i++) {
 
-                        return listener.handler.toString() !== handler.toString();
+                    var evt = evts[i],
+                        treePath = e.treePath,
+                        offset = $(el).offset(),
+                        ww = window.innerWidth,
+                        wh = window.innerHeight,
+                        pX = pageXOffset,
+                        pY = pageYOffset,
+                        re = new RegExp('^' + evt.treePath),
+                        vis;
 
-                    });
+                    vis = offset.top < (pY + wh) && offset.top > pY
+                          && offset.left < pX + ww && offset.left > pX;
 
-                    if (node.eventListenerList[type].length === 0) {
+                    if (vis && evt.type === e.type
+                        && treePath.match(re)
+                        && evt.location === e.location) {
 
-                        delete node.eventListenerList[type];
-                        node._removeEventListener(type, function (e) {
+                        evt.done = true;
+                        if (evt.alternate && evt.alternate.length) {
 
-                            dCipher.saveEvent(e);
+                            evt.alternate.forEach(function (i) {
 
-                        });
+                                evts[i].done = true;
+
+                            });
+
+                        }
+                        break;
 
                     }
 
                 }
 
-            };
+                if (!evts.filter(function (e) {
 
-            Array.prototype.last = function (array) {
+                        return !e.done;
 
-                return array[array.length - 1];
+                    }).length) {
+
+                    this.activateTaskStep(this.currentTask.step + 1);
+
+                }
+
+            }
+
+        };
+
+        this.resetApp = function (mode, path, restore) {
+
+            localStorage.removeItem('Stroller.active');
+            localStorage.removeItem('Stroller.name');
+            localStorage.removeItem('Stroller.price');
+            localStorage.removeItem('Stroller.stroller');
+            localStorage.removeItem('Stroller.modules.Base');
+            localStorage.removeItem('Stroller.modules.Frame');
+            localStorage.removeItem('Stroller.modules.TF');
+            sessionStorage.removeItem('basket');
+            this.appMode = mode;
+            if (!restore && path /*&& window.location.pathname !== path*/) {
+
+                window.location.pathname = path;
+
+            }
+
+        };
+
+        this.resetTasklist = function () {
+
+            var $tb = $(this.getDomElement('taskBar')),
+                tl = this.testCase,
+                $tasks = $('div', $tb),
+                w = $tb.outerHeight(),
+                rp = window.innerWidth - w * (tl.length),
+                d;
+
+            tl.forEach(function (t, i) {
+
+                t.done = false;
+                t.active = false;
+                t.events.forEach(function (e) {
+
+                    e.done = false;
+
+                });
+                d = $tasks[i];
+                $(d).css('left', rp + w * i);
+                $('.step-number', d).html(i + 1).removeClass('active');
+
+            });
+
+            this.currentTask = null;
+            this.currentEvent = null;
+            sessionStorage.removeItem('dcipherState');
+
+        };
+
+        this.highlightTimeLineEvent = function (e) {
+
+            var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
+                evt = evts ? evts[0] : null,
+                rec = evt ? this.getRecordById(evt.recId) : null,
+                tl = this.getDomElement('timeline'),
+                $tlc = $(this.getDomElement('timelineCircle'));
+
+            if (rec && rec.active) {
+
+                $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
+
+            } else if (e.target === tl) {
+
+                $tlc.hide();
+
+            }
+
+        };
+
+        this.getTimeLineCursorPars = function (time, duration) {
+
+            var offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                tl = this.getDomElement('timeline'),
+                width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
+                pxs = width / duration,
+                top = $(tl).height() / 2,
+                left = this.timeLineOffsetLeft + pxs * time;
+
+            return {
+
+                top: top,
+                left: left
+            }
+
+        };
+
+        this.getTimeLineBracketsPars = function (time1, time2) {
+
+            var rec = this.activeRecord,
+                duration = rec.duration,
+                offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
+                left = this.timeLineOffsetLeft + pxs * time1,
+                width = this.timeLineOffsetLeft + pxs * time2 - left;
+
+            this.timeBrackets = [time1, time2];
+            this.startEventIndex = rec.events.find(function (e) { return e.time >= time1; }).index;
+            this.endEventIndex = rec.events.find(function (e) { return e.time >= time2; }).index;
+            return { width: width, left: left };
+        };
+
+        this.moveTimelineBracket = function (e) {
+
+            if (this.tlMouse.down) {
+
+                var $tb = $('#' + this.domId.timelineBrackets),
+                    t1 = this.timeBrackets[0],
+                    t2 = this.timeBrackets[1],
+                    tframe = t2 - t1,
+                    tppx = tframe / $tb.width(),
+                    dt = (e.clientX - this.tlMouse.x) * tppx;
+
+                if (this.tlMouse.target === 'left-bracket' && t1 + dt >= 0) {
+
+                    this.drawTLBrackets(t1 + dt, t2)
+
+                } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeRecord.duration) {
+
+                    this.drawTLBrackets(t1, t2 + dt)
+                }
+
+                this.tlMouse.x = e.clientX;
+                this.tlMouse.y = e.clientY;
+
+            }
+
+        };
+
+    }; // End of DCipher class
+
+    var dCipher = new DCipher();
+
+    function initDomElements() {
+
+        var bdy = document.getElementsByTagName('body')[0],
+            dMain = document.createElement('div'),
+            link = document.createElement('link'),
+            cnvDiv = document.createElement('div'),
+            stat = document.createElement('div'),
+            menu = document.createElement('div'),
+            butRec = document.createElement('div'),
+            rec = document.createElement('div'),
+            butPlay = document.createElement('div'),
+            play = document.createElement('div'),
+            butList = document.createElement('div'),
+            recs = document.createElement('div'),
+            recList = document.createElement('div'),
+            click = document.createElement('div'),
+            dblclick = document.createElement('div'),
+            evtHlt = document.createElement('div'),
+            cursor = document.createElement('div'),
+            mTT = document.createElement('div'),
+            eInf = document.createElement('div'),
+            tLine = document.createElement('div'),
+            tlTT = document.createElement('div'),
+            tlCursor = document.createElement('div'),
+            tlBrackets = document.createElement('div'),
+            tlLeftBracket = document.createElement('div'),
+            tlRightBracket = document.createElement('div'),
+            tlCircle = document.createElement('div'),
+            tlInfo = document.createElement('div'),
+            tlCnv = document.createElement('canvas'),
+            topMenu = document.createElement('div'),
+            taskBar = document.createElement('div'),
+            startTest = document.createElement('span');
+
+        // D-Cipher container
+        dMain.id = dCipher.domId.container;
+        bdy.appendChild(dMain);
+
+        // Init styles
+        link.rel = 'stylesheet';
+        link.type = 'text/css';
+        link.media = 'all';
+        link.href = dCipher.baseURL + dCipher.cssURL;
+        bdy.insertBefore(link, document.getElementById(dMain.id));
+
+        // Init canvas holder
+        cnvDiv.id = dCipher.domId.canvasHolder;
+        cnvDiv.width = window.innerWidth;
+        cnvDiv.height = window.innerHeight;
+        dMain.appendChild(cnvDiv);
+
+        // Status bar
+        stat.id = dCipher.domId.stat;
+        dMain.appendChild(stat);
+
+        // Click spot
+        click.id = dCipher.domId.click;
+        cnvDiv.appendChild(click);
+
+        // Double click spot
+        dblclick.id = dCipher.domId.dblClick;
+        cnvDiv.appendChild(dblclick);
+
+        // Highlight event spot
+        evtHlt.id = dCipher.domId.highlightEvent;
+        cnvDiv.appendChild(evtHlt);
+
+        // Cursor
+        cursor.id = dCipher.domId.cursor;
+        cnvDiv.appendChild(cursor);
+
+        // Time line
+        tLine.id = dCipher.domId.timeline;
+        tlInfo.id = dCipher.domId.timelineInfo;
+        tlCursor.id = dCipher.domId.timelineCursor;
+        tlBrackets.id = dCipher.domId.timelineBrackets;
+        tlBrackets.className = 'brackets';
+        tlRightBracket.className = 'right-bracket';
+        tlLeftBracket.className = 'left-bracket';
+        tlCircle.id = dCipher.domId.timelineCircle;
+        tlBrackets.appendChild(tlRightBracket);
+        tlBrackets.appendChild(tlLeftBracket);
+        tLine.appendChild(tlInfo);
+        tLine.appendChild(tlCursor);
+        tLine.appendChild(tlCnv);
+        tLine.appendChild(tlBrackets);
+        tLine.appendChild(tlCircle);
+        cnvDiv.appendChild(tLine);
+
+        // Time line event info popup
+        tlTT.id = dCipher.domId.timelineTooltip;
+        dMain.appendChild(tlTT);
+
+        // Mouse tooltip
+        mTT.id = dCipher.domId.mTooltip;
+        dMain.appendChild(mTT);
+
+        // Event info popup
+        eInf.id = dCipher.domId.eventInfo;
+        dMain.appendChild(eInf);
+
+        // Record button
+        butRec.id = dCipher.domId.butRecord;
+        butRec.className = 'btn rec';
+        butRec.title = dCipher.loc._Record_session;
+        rec.className = 'rec';
+        butRec.appendChild(rec);
+        topMenu.appendChild(butRec);
+
+        // Play button
+        butPlay.id = dCipher.domId.butPlay;
+        butPlay.className = 'btn play';
+        butPlay.title = dCipher.loc._Play_record;
+        play.className = 'play';
+        //butPlay.style.display = 'none';
+        butPlay.appendChild(play);
+        topMenu.appendChild(butPlay);
+
+        // Record list button
+        butList.id = dCipher.domId.butList;
+        butList.className = 'btn';
+        recs.className = 'recs';
+        butList.title = dCipher.loc._Show_records;
+        butList.appendChild(recs);
+
+        // Record list
+        recList.id = 'd-cipher-rec-list';
+
+        // D-Cipher menu
+        menu.id = dCipher.domId.menu;
+        //menu.appendChild(butRec);
+        //menu.appendChild(butPlay);
+        menu.appendChild(butList);
+        dMain.appendChild(menu);
+        dMain.appendChild(recList);
+
+        // Top menu
+        topMenu.id = dCipher.domId.topMenu;
+        taskBar.id = dCipher.domId.taskBar;
+        //taskBar.innerHTML = dCipher.loc._Start_task;
+        startTest.className = 'start-test';
+        startTest.innerHTML = dCipher.loc._Start_test;
+        taskBar.appendChild(startTest);
+        topMenu.appendChild(taskBar);
+        bdy.insertBefore(topMenu, bdy.firstChild);
+
+        cnvDiv.addEventListener('click', function (e) {
+
+            dCipher.canvasHolderClickHandler(e, dCipher);
+
+        });
+
+        cnvDiv.addEventListener('mousemove', function (e) {
+
+            dCipher.showMouseTooltip(e);
+            dCipher.highlightTimeLineEvent(e);
+
+        });
+
+        tLine.addEventListener('mousemove', function (e) {
+
+            dCipher.showTLTooltip(e);
+
+        });
+
+        tLine.addEventListener('click', function (e) {
+
+            var evt = dCipher.getTimelineEvent(e);
+
+            if (evt) {
+
+                dCipher.showTimelineEvent(evt.event);
+
+            }
+
+        });
+
+        tLine.addEventListener('mousedown', function (e) {
+
+            dCipher.tlMouse.x = e.clientX;
+            dCipher.tlMouse.x = e.clientX;
+            dCipher.tlMouse.down = e.which === 1;
+            dCipher.tlMouse.target = e.target.className;
+
+        });
+
+        tLine.addEventListener('mouseup', function (e) {
+
+            var evt = dCipher.activeRecord.events[dCipher.endEventIndex];
+
+            dCipher.tlMouse.down = false;
+            dCipher.tlMouse.target = '';
+            dCipher.drawSpiderGraph(dCipher.activeRecord.id, dCipher.startEventIndex, dCipher.endEventIndex);
+            if (evt.location !== window.location.pathname) {
+
+                dCipher.appMode = 'timeline';
+                window.location = evt.location;
+
+            }
+
+
+        });
+
+        tLine.addEventListener('mousemove', function (e) {
+
+            dCipher.moveTimelineBracket(e);
+
+        });
+
+        butRec.addEventListener('click', function (e) {
+
+            e.stopPropagation();
+            if (dCipher.appMode === 'test') {
+                dCipher.resetTasklist();
+
+            }
+            dCipher.toggleRecMode(e);
+
+        });
+
+        butPlay.addEventListener('click', function () {
+
+            var sId = dCipher.sessionId;
+
+            if (sId) {
+
+                dCipher.playSession(sId);
+
+            }
+
+        });
+
+        butList.addEventListener('click', function () {
+
+            dCipher.toggleRecList(this);
+
+        });
+
+        startTest.addEventListener('click', function () {
+
+            dCipher.activateTaskStep(0);
+
+        });
+
+        window.addEventListener('click', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('mousedown', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('mouseup', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('dragstart', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('dragend', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('keydown', function (e) {
+
+            if (e.keyCode === 27) {
+
+                dCipher.resetState();
+
+            } else {
+
+                dCipher.saveEvent(e);
+
+            }
+
+        });
+
+        window.addEventListener('wheel', function (e) {
+
+            dCipher.saveEvent(e);
+
+        });
+
+        window.addEventListener('resize', function (e) {
+
+            var $recs = $(dCipher.getDomElement('records'));
+
+            clearTimeout($recs.data('tid'));
+
+            $recs.data('tid', setTimeout(function () {
+
+                dCipher.createRecordList(e);
+
+            }, 500));
+
+        });
+
+        window.addEventListener('beforeunload', function () {
+
+            dCipher.saveState();
+
+        });
+
+        overridePrototype();
+
+        /*
+         var observer = new MutationObserver(function (mutations) {
+
+         for (var i = 0, len = mutations.length; i < len; i++) {
+
+         for (var j = 0, nl = mutations[i].addedNodes.length; j < nl; j++) {
+
+         var node = mutations[i].addedNodes[j];
+
+         for (var p in node) {
+
+         if (node.className === 'colorpicker-hot-spot') {
+
+         console.debug('########### NODE: ', node);
+
+         }
+
+         if (p.hasOwnProperty(p) && p.match(/^onmouse/i)){
+
+         node.addEventListener(p.substring(2), function () {
+
+         dCipher.saveEvent(e);
+
+         });
+         console.debug('====> MUTATION OBSERVER: added listener to node', node);
+
+         }
+
+         }
+
+         }
+
+         }
+
+         });
+         observer.observe(bdy, { childList: true });
+         */
+
+        setTimeout(checkJQuery, 500);
+
+    }
+
+    function checkJQuery(cnt) {
+
+        cnt = isNaN(cnt) ? 50 : cnt;
+
+        if (window.jQuery || window.$) {
+
+            console.debug('Found jQuery, init IndexedDB...');
+            initJQueryPlugins();
+            if ($.indexedDB) {
+
+                console.debug('IndexedDB initialized, initialize D-Cipher.');
+                dCipher.init();
+
+            }
+
+        } else {
+
+            cnt--;
+
+            if (cnt) {
+
+                checkJQuery(cnt);
+
+            } else {
+
+                loadJQuery();
 
             }
 
         }
 
-        document.addEventListener('DOMContentLoaded', initDomElements);
+    }
 
-    })
+    function loadJQuery() {
+
+        console.debug('Loading jQuery');
+
+        var script = document.createElement('script');
+
+        script.async = 'async';
+        script.type = 'text/javascript';
+        script.src = 'jquery-2.1.4.min.js';
+        document.getElementsByTagName('head')[0].appendChild(script);
+        setTimeout(checkJQuery, 500);
+
+    }
+
+    function overridePrototype() {
+
+        Element.prototype._addEventListener = Element.prototype.addEventListener;
+        Element.prototype.addEventListener = function (type, handler, useCapture) {
+
+            useCapture = useCapture === void 0 ? false : useCapture;
+            var node = this;
+
+            node._addEventListener(type, handler, useCapture);
+
+            if (!node.eventListenerList) {
+
+                node.eventListenerList = {};
+
+            }
+
+            if (!node.eventListenerList[type]) {
+
+                node.eventListenerList[type] = [];
+
+                if (handler.toString().match(/stopPropagation|preventDefault/)
+                    || type === 'mouseover' || type === 'mouseout'
+                    || type === 'mouseenter' || type === 'mouseleave'
+                    || type === 'mousedown' || type === 'mouseup'
+                    || type.match(/scroll|wheel/i)
+                ) {
+
+                    node._addEventListener(type, function (e) {
+
+                        dCipher.saveEvent(e);
+
+                    });
+
+                    //console.debug('JS listener --> Element: %s, Event added: ', this, type);
+                    //console.debug('Handler: ', handler.toString());
+
+                }
+
+            }
+
+            node.eventListenerList[type].push({
+
+                type: type,
+                handler: handler,
+                useCapture: useCapture
+
+            });
+
+        };
+
+        Element.prototype._removeEventListener = Element.prototype.removeEventListener;
+        Element.prototype.removeEventListener = function (type, handler, useCapture) {
+
+            var node = this;
+
+            node._removeEventListener(type, handler, useCapture);
+
+            if (node.eventListenerList && node.eventListenerList[type]) {
+
+                node.eventListenerList[type] = node.eventListenerList[type].filter(function (listener) {
+
+                    return listener.handler.toString() !== handler.toString();
+
+                });
+
+                if (node.eventListenerList[type].length === 0) {
+
+                    delete node.eventListenerList[type];
+                    node._removeEventListener(type, function (e) {
+
+                        dCipher.saveEvent(e);
+
+                    });
+
+                }
+
+            }
+
+        };
+
+        Array.prototype.last = function (array) {
+
+            return array[array.length - 1];
+
+        }
+
+    }
+
+    document.addEventListener('DOMContentLoaded', initDomElements);
+
+})
 (window, document);
 
 // jQuery plugins
