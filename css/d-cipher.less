@@ -279,8 +279,8 @@
   display: none;
   padding: 2px 0;
   border: solid 4px transparent;
-  border-top-color: white;
-  border-bottom-color: white;
+  //border-top-color: white;
+  //border-bottom-color: white;
   transform: scale(1, 2.2) translate(-4px, -2.5px);
 }
 
@@ -300,16 +300,31 @@
     //height: inherit;
     //background-color: magenta;
   }
-  .cursor-bg{
+  .brackets{
     position: absolute;
+    top: 0;
     display: none;
     height: 52px;
-    z-index: -1;
+    //z-index: -1;
     width: 0;
     background-color: rgba(0, 0, 0, 0.1);
     border-right: solid 1px white;
     border-left: solid 1px white;
-    transform: translate(0, -26px);
+    .left-bracket, .right-bracket{
+      width: 6px;
+      height: inherit;
+      cursor: ew-resize;
+      //background-color: red;
+      margin: 0;
+      padding: 0;
+    }
+    .right-bracket{
+      float: right;
+      margin-right: -4px;
+    }
+    .left-bracket{
+      margin-left: -3px;
+    }
   }
 }
 

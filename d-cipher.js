@@ -3,1375 +3,1206 @@
  */
 (function (window, document) {
 
-    var Strings = {
+        var Strings = {
 
-        en: {
+            en: {
 
-            _Recording: 'Recording',
-            _Clicks: 'Clicks',
-            _Wheels: 'Wheels',
-            _Drags: 'Drags',
-            _Events: 'Events',
-            _Type: 'Type',
-            _Time: 'Time',
-            _Mouse_miles: 'Mouse miles',
-            _Distance: "Distance",
-            _Path: 'Path',
-            _from: 'from',
-            _Target: 'Target',
-            _Action: 'Action',
-            _No_name: 'No name',
-            _Anonym: 'Anonym',
-            _Record_session: 'Record session',
-            _Show_records: 'Show session list',
-            _Name_placeholder: 'Enter name',
-            _Toggle_record: 'Show / hide session',
-            _Delete_record: 'Delete session',
-            _Play_record: 'Simulate session',
-            _Change_color: 'Change color',
-            _Event: 'Event',
-            _Event_list: 'Events list',
-            _Session: 'Session',
-            _Session_name: 'Session',
-            _Created: 'Created',
-            _Modified: 'Modified',
-            _Author: 'Author',
-            _Duration: 'Duration',
-            _Relative_mouse_speed: 'Relative mouse speed',
-            _Miles_sec: 'Distance / sec',
-            _Events_sec: 'Events / sec',
-            _Clicks_sec: 'Clicks / sec',
-            _KPI: "KPI power",
-            _KPI_event: "KPI Event",
-            _Start_test: "Start test",
-            _Default_record_name: "Test #",
-            _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
+                _Recording: 'Recording',
+                _Clicks: 'Clicks',
+                _Wheels: 'Wheels',
+                _Drags: 'Drags',
+                _Events: 'Events',
+                _Type: 'Type',
+                _Time: 'Time',
+                _Mouse_miles: 'Mouse miles',
+                _Distance: "Distance",
+                _Path: 'Path',
+                _from: 'from',
+                _Target: 'Target',
+                _Action: 'Action',
+                _No_name: 'No name',
+                _Anonym: 'Anonym',
+                _Record_session: 'Record session',
+                _Show_records: 'Show session list',
+                _Name_placeholder: 'Enter name',
+                _Toggle_record: 'Show / hide session',
+                _Delete_record: 'Delete session',
+                _Play_record: 'Simulate session',
+                _Change_color: 'Change color',
+                _Event: 'Event',
+                _Event_list: 'Events list',
+                _Session: 'Session',
+                _Session_name: 'Session',
+                _Created: 'Created',
+                _Modified: 'Modified',
+                _Author: 'Author',
+                _Duration: 'Duration',
+                _Relative_mouse_speed: 'Relative mouse speed',
+                _Miles_sec: 'Distance / sec',
+                _Events_sec: 'Events / sec',
+                _Clicks_sec: 'Clicks / sec',
+                _KPI: "KPI power",
+                _KPI_event: "KPI Event",
+                _Start_test: "Start test",
+                _Default_record_name: "Test #",
+                _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
 
-            start: 'Start',
-            mouseover: 'Mouse over',
-            mouseout: 'Mouse out',
-            mousedown: 'Mouse down',
-            mousemove: 'Mouse move',
-            mouseup: 'Mouse up',
-            drag: 'Drag',
-            click: 'Click',
-            dblclick: 'Double click',
-            keydown: 'Key down',
-            wheel: 'Wheel',
-            mousewheel: 'Wheel',
-            DOMMouseScroll: 'Wheel',
-            sec: 'sec',
-            mc: 'mc',
-            evs: 'evs',
-            mm: 'mm',
-            mp: 'mp',
-            kpi: 'kpi',
-            cds: 'cds'
-        },
+                start: 'Start',
+                mouseover: 'Mouse over',
+                mouseout: 'Mouse out',
+                mousedown: 'Mouse down',
+                mousemove: 'Mouse move',
+                mouseup: 'Mouse up',
+                drag: 'Drag',
+                click: 'Click',
+                dblclick: 'Double click',
+                keydown: 'Key down',
+                wheel: 'Wheel',
+                mousewheel: 'Wheel',
+                DOMMouseScroll: 'Wheel',
+                sec: 'sec',
+                mc: 'mc',
+                evs: 'evs',
+                mm: 'mm',
+                mp: 'mp',
+                kpi: 'kpi',
+                cds: 'cds'
+            },
 
-        ru: {},
+            ru: {},
 
-        de: {}
-
-    };
-
-    // Indexed DB class
-    var IDB = function () {
-
-        this.dbName = 'dCipherDB';
-        this.tables = {
-
-            'sessions': 'sessions'
+            de: {}
 
         };
-        this.records = [];
 
-        this.init = function init() {
+        // Indexed DB class
+        var IDB = function () {
 
-            var self = this,
-                tables = self.tables;
+            this.dbName = 'dCipherDB';
+            this.tables = {
 
-            $.indexedDB(self.dbName).done(function (db) {
+                'sessions': 'sessions'
 
-                var ok = true,
-                    database = db;
+            };
+            this.records = [];
 
-                console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
-                            ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
+            this.init = function init() {
 
-                // Check if all stores are in the database
-                $.each(tables, function (s) {
+                var self = this,
+                    tables = self.tables;
 
-                    if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
+                $.indexedDB(self.dbName).done(function (db) {
 
-                        ok = false;
+                    var ok = true,
+                        database = db;
+
+                    console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
+                                ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
+
+                    // Check if all stores are in the database
+                    $.each(tables, function (s) {
+
+                        if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
+
+                            ok = false;
+
+                        }
+
+                    });
+
+                    if (!ok) {
+
+                        if (db.version) {
+
+                            console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
+
+                        }
+
+                        setTimeout(function () {
+
+                            self.upgradeDB(database);
+
+                        }, 10);
 
                     }
 
                 });
 
-                if (!ok) {
+            };
 
-                    if (db.version) {
+            this.upgradeDB = function upgradeDB(db) {
 
-                        console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
+                var ver = 1 + db.version,
+                    tables = this.tables;
 
-                    }
+                $.indexedDB(this.dbName, {
 
-                    setTimeout(function () {
+                    'version': ver,
+                    'upgrade': function (t) {
 
-                        self.upgradeDB(database);
+                        var s, k;
 
-                    }, 10);
+                        for (s in db.objectStoreNames) {
 
-                }
+                            if (db.objectStoreNames.hasOwnProperty(s)) {
 
-            });
+                                t.deleteObjectStore(db.objectStoreNames[s]);
+                                console.log('[INFO] dbAdapter: Upgrade database, delete object store "', db.objectStoreNames[s], '".');
 
-        };
-
-        this.upgradeDB = function upgradeDB(db) {
-
-            var ver = 1 + db.version,
-                tables = this.tables;
-
-            $.indexedDB(this.dbName, {
-
-                'version': ver,
-                'upgrade': function (t) {
-
-                    var s, k;
-
-                    for (s in db.objectStoreNames) {
-
-                        if (db.objectStoreNames.hasOwnProperty(s)) {
-
-                            t.deleteObjectStore(db.objectStoreNames[s]);
-                            console.log('[INFO] dbAdapter: Upgrade database, delete object store "', db.objectStoreNames[s], '".');
-
+                            }
                         }
-                    }
 
-                    for (k in tables) {
+                        for (k in tables) {
 
-                        if (tables.hasOwnProperty(k)) {
+                            if (tables.hasOwnProperty(k)) {
 
-                            t.createObjectStore(tables[k]);
-                            console.log('[INFO] dbAdapter: Upgrade database, create object store "' +
-                                        tables[k] + '".');
+                                t.createObjectStore(tables[k]);
+                                console.log('[INFO] dbAdapter: Upgrade database, create object store "' +
+                                            tables[k] + '".');
+                            }
                         }
+
                     }
 
-                }
+                }).done(function (db) {
 
-            }).done(function (db) {
+                    console.log('[INFO] dbAdapter: Indexed database and object storage available. Data base version: ' + db.version + '; storages : ' + db.objectStoreNames.length);
 
-                console.log('[INFO] dbAdapter: Indexed database and object storage available. Data base version: ' + db.version + '; storages : ' + db.objectStoreNames.length);
+                }).fail(function (error) {
 
-            }).fail(function (error) {
+                    console.error('[ERROR] DB Adapter: ', error.message);
+                    console.warn('[WARNING] dbAdapter: Indexed database not available. ' + error.message);
 
-                console.error('[ERROR] DB Adapter: ', error.message);
-                console.warn('[WARNING] dbAdapter: Indexed database not available. ' + error.message);
+                });
 
-            });
+            };
 
-        };
+            this.getRecord = function getRecord(id) {
 
-        this.getRecord = function getRecord(id) {
+                return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
 
-            return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
+            };
 
-        };
+            this.putRecord = function putRecord(id, data) {
 
-        this.putRecord = function putRecord(id, data) {
+                var self = this;
 
-            var self = this;
+                data.events.forEach(function (e) {
 
-            data.events.forEach(function (e) {
+                    delete e.target.element;
 
-                delete e.target.element;
+                });
 
-            });
+                return new Promise(function (resolve, reject) {
 
-            return new Promise(function (resolve, reject) {
+                    $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
+                        console.log('[INFO] dbAdapter: session data saved.');
+                        self.getAllRecords().done(resolve);
 
-                    console.log('[INFO] dbAdapter: session data saved.');
-                    self.getAllRecords().done(resolve);
+                    }).fail(function (e, msg) {
+
+                        console.warn('[INFO] dbAdapter: Failed to save session data. Error: ', msg);
+                        reject();
+
+                    });
+
+                });
+
+            };
+
+            this.deleteRecord = function deleteRecord(id) {
+
+                var self = this;
+
+                return new Promise(function (resolve, reject) {
+
+                    $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
+
+                        self.getAllRecords().done(function () {
+
+                            console.log('[INFO] dbAdapter: session data deleted.');
+                            resolve(self.records);
+
+                        });
+
+                    }).fail(function () {
+
+                        console.warn('[INFO] dbAdapter: Failed to delete session data.');
+                        reject();
+
+                    });
+
+                });
+
+            };
+
+            this.getAllRecords = function getAllRecords() {
+
+                var self = this,
+                    records = this.records = [];
+
+                return $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
+
+                    //console.log(r.value);
+                    records.push(r.value);
+
+                }).done(function (r, e) {
+
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.records);
 
                 }).fail(function (e, msg) {
 
-                    console.warn('[INFO] dbAdapter: Failed to save session data. Error: ', msg);
-                    reject();
+                    console.warn('[WARNING] dbAdapter: Failed to get all records. Error: ', msg);
 
                 });
 
-            });
+            };
 
-        };
+        }; // end of IDB class
 
-        this.deleteRecord = function deleteRecord(id) {
+        // DCipher class
+        var DCipher = function () {
 
-            var self = this;
+            //this.baseURL = '/dcipher-demo/';
+            this.baseURL = '/';
+            this.cssURL = 'css/d-cipher.css';
+            this.lang = 'en';
+            this.loc = Strings[this.lang];
+            this.domId = {
 
-            return new Promise(function (resolve, reject) {
+                container: 'd-cipher-container',
+                mouseOverStyle: 'd-cipher-mouseover-style',
+                mouseOverClass: 'd-cipher-mouseover',
+                cursor: 'd-cipher-cursor',
+                canvasHolder: 'd-cipher-canvas-holder',
+                menu: 'd-cipher-menu',
+                butRecord: 'd-cipher-menu-but-record',
+                butPlay: 'd-cipher-menu-but-play',
+                butList: 'd-cipher-menu-but-list',
+                stat: 'd-cipher-stat',
+                timeline: 'd-cipher-timeline',
+                timelineTooltip: 'd-cipher-timeline-tooltip',
+                timelineInfo: 'd-cipher-timeline-info',
+                timelineCursor: 'd-cipher-timeline-cursor',
+                timelineCircle: 'd-cipher-timeline-circle',
+                timelineBrackets: 'd-cipher-timeline-brackets',
+                click: 'd-cipher-click',
+                dblClick: 'd-cipher-dblclick',
+                highlightEvent: 'd-cipher-highlight-event',
+                records: 'd-cipher-rec-list',
+                mTooltip: 'd-cipher-m-tooltip',
+                eventInfo: 'd-cipher-event-info',
+                topMenu: 'd-cipher-topmenu',
+                taskBar: 'd-cipher-taskbar'
 
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
+            };
 
-                    self.getAllRecords().done(function () {
+            this.registerEventList = [
 
-                        console.log('[INFO] dbAdapter: session data deleted.');
-                        resolve(self.records);
+                'start',
+                'mouseover',
+                'mouseout',
+                'mousedown',
+                'mouseup',
+                //'click',
+                //'dblclick',
+                //'keydown',
+                'wheel',
+                'mousewheel',
+                'DOMMouseScroll'
+
+            ];
+
+            this.drawEventList = [
+
+                'start',
+                'mouseover',
+                //'mouseout',
+                'mousedown',
+                'mouseup',
+                'click',
+                'dblclick',
+                'keydown',
+                'wheel',
+                'mousewheel',
+                'DOMMouseScroll'
+
+            ];
+
+            this.elementEventFilters = {
+
+                path: ['mouseover', 'mouseout'],
+                circle: this.registerEventList
+
+            };
+
+            this.mouse = {
+
+                x: 0,
+                y: 0
+
+            };
+
+            this.testCases = [
+
+                [
+                    {
+                        step: 0,
+                        description: 'Find Cameleon stroller and configure to order',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-2-0-1-2-1-0-0-0",
+                                tagName: "A",
+                                location: '/bugaboo/A/index.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-2-0-2-1-0-0-0-1-0-1",
+                                tagName: "SPAN",
+                                location: '/bugaboo/A/index.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                                tagName: "A",
+                                location: '/bugaboo/A/bugaboo-cameleon3.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 1,
+                        description: 'Choose bassinet and select black canopy color',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                                tagName: "path",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 2,
+                        description: ' Add running accessory, and a cup holder',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                                tagName: "A",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                                tagName: "A",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 3,
+                        description: 'Purchase stroller, checking final cost total before completing',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                                alternate: [2],
+                                tagName: "A",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-2-0-1-2-0-0-1-2-0-0",
+                                alternate: [1],
+                                tagName: "A",
+                                location: '/bugaboo/A/create.html',
+                                done: false
+                            },
+                            /*
+                             {
+                             type: 'wheel',
+                             treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
+                             tagName: "DIV",
+                             location: '/bugaboo/A/cart.html',
+                             done: false
+                             },
+                             */
+                            {
+                                type: 'click',
+                                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                                //alternate: [4],
+                                tagName: "A",
+                                location: '/bugaboo/A/cart.html',
+                                done: false
+                            }/*,
+                             {
+                             type: 'click',
+                             treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
+                             alternate: [3],
+                             tagName: "A",
+                             location: '/bugaboo/A/cart.html',
+                             done: false
+                             }*/
+                        ]
+                    }
+                ],
+                [
+                    {
+                        step: 0,
+                        description: 'Find Cameleon stroller and configure to order',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-2-0-2-0-0-0-0-0-0",
+                                tagName: "A",
+                                location: '/bugaboo/B/index.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/bugaboo-cameleon3.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 1,
+                        description: 'Choose bassinet and select black canopy color',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                                tagName: "path",
+                                location: '/bugaboo/B/create.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 2,
+                        description: ' Add running accessory, and a cup holder',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/create.html',
+                                done: false
+                            }
+                        ]
+                    },
+                    {
+                        step: 3,
+                        description: 'Purchase stroller, checking final cost total before completing',
+                        done: false,
+                        active: false,
+                        events: [
+                            {
+                                type: 'mousedown',
+                                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/create.html',
+                                done: false
+                            },
+                            {
+                                type: 'click',
+                                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                                tagName: "SPAN",
+                                location: '/bugaboo/B/cart.html',
+                                done: false
+                            }
+                        ]
+                    }
+                ]
+            ];
+            ;
+            this.currentTask = null;
+            this.currentEvent = null;
+
+            this.db = new IDB();
+            this.user = {};
+            this.sessionId = '';
+            this.activeRecord = null;
+            this.startEventIndex = 0;
+            this.endEventIndex = 0;
+            this.timeBrackets = [0, 0];
+            this.appMode = '';
+            this.eventsUnderMouse = [];
+            this.timeLineEvents = [];
+            this.clickDelay = 200;
+            this.timeLineOffsetLeft = 100;
+
+            this.init = function init() {
+
+                var self = this;
+
+                self.db.init();
+                self.db.getAllRecords().done(function () {
+
+                    var recList = self.getDomElement('records'),
+                        path = window.location.pathname;
+
+                    if (path.match('/bugaboo/A/')) {
+
+                        self.testCase = self.testCases[0];
+
+                    } else if (path.match('/bugaboo/B/')) {
+
+                        self.testCase = self.testCases[1];
+
+                    }
+                    self.createRecordList();
+                    self.createTaskList();
+                    self.restoreState();
+
+                    $(recList).on('mouseout', function () {
+
+                        $(recList).data('tid', setTimeout(function () {
+
+                            $(recList).hide();
+
+                        }, 1000));
 
                     });
 
-                }).fail(function () {
+                    $(recList).on('mouseover', function () {
 
-                    console.warn('[INFO] dbAdapter: Failed to delete session data.');
-                    reject();
-
-                });
-
-            });
-
-        };
-
-        this.getAllRecords = function getAllRecords() {
-
-            var self = this,
-                records = this.records = [];
-
-            return $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
-
-                //console.log(r.value);
-                records.push(r.value);
-
-            }).done(function (r, e) {
-
-                //console.log('--> result: %s, event: %s', r, e);
-                //console.debug('Records: ', self.records);
-
-            }).fail(function (e, msg) {
-
-                console.warn('[WARNING] dbAdapter: Failed to get all records. Error: ', msg);
-
-            });
-
-        };
-
-    }; // end of IDB class
-
-    // DCipher class
-    var DCipher = function () {
-
-        //this.baseURL = '/dcipher-demo/';
-        this.baseURL = '/';
-        this.cssURL = 'css/d-cipher.css';
-        this.lang = 'en';
-        this.loc = Strings[this.lang];
-        this.domId = {
-
-            container: 'd-cipher-container',
-            mouseOverStyle: 'd-cipher-mouseover-style',
-            mouseOverClass: 'd-cipher-mouseover',
-            cursor: 'd-cipher-cursor',
-            canvasHolder: 'd-cipher-canvas-holder',
-            menu: 'd-cipher-menu',
-            butRecord: 'd-cipher-menu-but-record',
-            butPlay: 'd-cipher-menu-but-play',
-            butList: 'd-cipher-menu-but-list',
-            stat: 'd-cipher-stat',
-            timeline: 'd-cipher-timeline',
-            timelineTooltip: 'd-cipher-timeline-tooltip',
-            timelineInfo: 'd-cipher-timeline-info',
-            timelineCursor: 'd-cipher-timeline-cursor',
-            timelineCircle: 'd-cipher-timeline-circle',
-            timelineBrackets: 'd-cipher-timeline-brackets',
-            click: 'd-cipher-click',
-            dblClick: 'd-cipher-dblclick',
-            highlightEvent: 'd-cipher-highlight-event',
-            records: 'd-cipher-rec-list',
-            mTooltip: 'd-cipher-m-tooltip',
-            eventInfo: 'd-cipher-event-info',
-            topMenu: 'd-cipher-topmenu',
-            taskBar: 'd-cipher-taskbar'
-
-        };
-
-        this.registerEventList = [
-
-            'start',
-            'mouseover',
-            'mouseout',
-            'mousedown',
-            'mouseup',
-            //'click',
-            //'dblclick',
-            //'keydown',
-            'wheel',
-            'mousewheel',
-            'DOMMouseScroll'
-
-        ];
-
-        this.drawEventList = [
-
-            'start',
-            'mouseover',
-            //'mouseout',
-            'mousedown',
-            'mouseup',
-            'click',
-            'dblclick',
-            'keydown',
-            'wheel',
-            'mousewheel',
-            'DOMMouseScroll'
-
-        ];
-
-        this.elementEventFilters = {
-
-            path: ['mouseover', 'mouseout'],
-            circle: this.registerEventList
-
-        };
-
-        this.mouse = {
-
-            x: 0,
-            y: 0
-
-        };
-
-        this.testCases = [
-
-            [
-                {
-                    step: 0,
-                    description: 'Find Cameleon stroller and configure to order',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-1-2-1-0-0-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-2-1-0-0-0-1-0-1",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/bugaboo-cameleon3.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 1,
-                    description: 'Choose bassinet and select black canopy color',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                            tagName: "path",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 2,
-                    description: ' Add running accessory, and a cup holder',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 3,
-                    description: 'Purchase stroller, checking final cost total before completing',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
-                            alternate: [2],
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-1-2-0-0-1-2-0-0",
-                            alternate: [1],
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        /*
-                         {
-                         type: 'wheel',
-                         treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
-                         tagName: "DIV",
-                         location: '/bugaboo/A/cart.html',
-                         done: false
-                         },
-                         */
-                        {
-                            type: 'click',
-                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                            //alternate: [4],
-                            tagName: "A",
-                            location: '/bugaboo/A/cart.html',
-                            done: false
-                        }/*,
-                         {
-                         type: 'click',
-                         treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
-                         alternate: [3],
-                         tagName: "A",
-                         location: '/bugaboo/A/cart.html',
-                         done: false
-                         }*/
-                    ]
-                }
-            ],
-            [
-                {
-                    step: 0,
-                    description: 'Find Cameleon stroller and configure to order',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-2-0-0-0-0-0-0",
-                            tagName: "A",
-                            location: '/bugaboo/B/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/bugaboo-cameleon3.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 1,
-                    description: 'Choose bassinet and select black canopy color',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                            tagName: "path",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 2,
-                    description: ' Add running accessory, and a cup holder',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    step: 3,
-                    description: 'Purchase stroller, checking final cost total before completing',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'click',
-                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/cart.html',
-                            done: false
-                        }
-                    ]
-                }
-            ]
-        ];
-        ;
-        this.currentTask = null;
-        this.currentEvent = null;
-
-        this.db = new IDB();
-        this.user = {};
-        this.sessionId = '';
-        this.activeRecord = null;
-        this.startEventIndex = 0;
-        this.endEventIndex = 0;
-        this.appMode = '';
-        this.eventsUnderMouse = [];
-        this.timeLineEvents = [];
-        this.clickDelay = 200;
-        this.timeLineOffsetLeft = 100;
-
-        this.init = function init() {
-
-            var self = this;
-
-            self.db.init();
-            self.db.getAllRecords().done(function () {
-
-                var recList = self.getDomElement('records'),
-                    path = window.location.pathname;
-
-                if (path.match('/bugaboo/A/')) {
-
-                    self.testCase = self.testCases[0];
-
-                } else if (path.match('/bugaboo/B/')) {
-
-                    self.testCase = self.testCases[1];
-
-                }
-                self.createRecordList();
-                self.createTaskList();
-                self.restoreState();
-
-                $(recList).on('mouseout', function () {
-
-                    $(recList).data('tid', setTimeout(function () {
-
-                        $(recList).hide();
-
-                    }, 1000));
-
-                });
-
-                $(recList).on('mouseover', function () {
-
-                    clearTimeout($(recList).data('tid'));
-
-                });
-
-                $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
-
-                $('document').ready(function () {
-
-                    self.setupDOMListeners();
-
-                });
-
-            });
-
-        };
-
-        this.catchEvents = function catchEvents(e) {
-
-            var self = this,
-                el = document.elementFromPoint(e.clientX, e.clientY),
-                list = self.registerEventList,
-                type, p;
-
-            for (var i = 0, il = list.length; i < il; i++) {
-
-                p = list[i];
-                type = p;
-
-                if (typeof el['on' + p] === 'function'
-                    && (!el.eventListenerList || !el.eventListenerList[type])) {
-
-                    el.addEventListener(type, function (e) {
-
-                        self.saveEvent(e);
+                        clearTimeout($(recList).data('tid'));
 
                     });
-                    el.dispatchEvent(new MouseEvent(type, e));
 
-                }
+                    $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
 
-            }
+                    $('document').ready(function () {
 
-        };
+                        self.setupDOMListeners();
 
-        this.toggleRecMode = function toggleRecMode(e) {
+                    });
 
-            var self = this,
-                cnvh = this.getDomElement('canvasHolder'),
-                $stat = $(this.getDomElement('stat'));
+                });
 
-            function updateStats() {
+            };
 
-                self.updateStatString();
+            this.catchEvents = function catchEvents(e) {
 
-            }
+                var self = this,
+                    el = document.elementFromPoint(e.clientX, e.clientY),
+                    list = self.registerEventList,
+                    type, p;
 
-            function catchEvents(e) {
+                for (var i = 0, il = list.length; i < il; i++) {
 
-                self.catchEvents(e);
+                    p = list[i];
+                    type = p;
 
-            }
+                    if (typeof el['on' + p] === 'function'
+                        && (!el.eventListenerList || !el.eventListenerList[type])) {
 
-            if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+                        el.addEventListener(type, function (e) {
 
-                // Turn on record mode
-                this.resetApp(this.appMode || 'record', window.location.pathname);
+                            self.saveEvent(e);
 
-                var ts = 1 * new Date();
-                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                $(cnvh).hide();
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
-                $(this.getDomElement('butList')).hide();
-                $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
-                $('body').on('mousemove', catchEvents);
-                this.hideRecList();
-                this.sessionId = ts.toString();
-                this.activeRecord = {
-
-                    id: this.sessionId,
-                    name: this.loc._Default_record_name + this.db.records.length,
-                    description: '',
-                    created: ts,
-                    modified: ts,
-                    author: this.user.fullname || this.loc._Anonym,
-                    color: 'rgba(255, 0, 255, 1)',
-                    duration: 0,
-                    mouseMilesTotal: 0,
-                    events: [],
-                    eventsStat: {}
-
-                };
-
-                this.saveEvent(new MouseEvent('start', e));
-
-            } else {
-
-                // Turn off record mode
-                this.appMode = '';
-                $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
-
-                var rec = this.activeRecord;
-
-                $stat.fadeOut();
-                clearInterval($stat.data('tid'));
-                $('body').off('mousemove', catchEvents);
-
-                if (this.db.records.length) {
-
-                    $(this.getDomElement('butList')).show();
-
-                }
-
-                if (rec && rec.events && rec.events.length > 1) {
-
-                    var evt = rec.events[rec.events.length - 1];
-
-                    rec.duration = evt.time;
-                    rec.kpi = evt.kpi;
-                    rec.mouseMilesTotal = evt.miles;
-                    rec.eventsQty = 0;
-
-                    for (var et in rec.eventsStat) {
-
-                        rec.eventsQty += rec.eventsStat[et];
+                        });
+                        el.dispatchEvent(new MouseEvent(type, e));
 
                     }
 
-                    this.db.putRecord(this.sessionId, rec).then(function () {
+                }
 
-                        $(self.getDomElement('butList')).show();
-                        self.createRecordList();
-                        self.toggleRecList();
-                        $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
-                        self.setActiveRecord(self.sessionId);
-                        self.showSpiderGraph(self.sessionId);
-                        self.activeRecord = null;
+            };
 
-                    });
+            this.toggleRecMode = function toggleRecMode(e) {
+
+                var self = this,
+                    cnvh = this.getDomElement('canvasHolder'),
+                    $stat = $(this.getDomElement('stat'));
+
+                function updateStats() {
+
+                    self.updateStatString();
 
                 }
 
-            }
+                function catchEvents(e) {
 
-            return this;
+                    self.catchEvents(e);
 
-        };
+                }
 
-        this.saveEvent = function saveEvent(e) {
+                if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
-            var self = this,
-                etype = e.type,
-                etarget = e.target || document.getElementsByTagName('body')[0],
-                treePath = this.getTreePath(etarget),
-                location = document.location.pathname,
-                save = (this.appMode === 'record' || this.appMode === 'test') &&
-                       this.registerEventList.indexOf(etype) > -1
-                       && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
-                       && etarget.localName !== 'svg'
-                       && etarget.localName !== 'circle';
+                    // Turn on record mode
+                    this.resetApp(this.appMode || 'record', window.location.pathname);
 
-            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
-            //console.debug('TREE PATH: ', treePath);
-            //console.debug('tagName: ', etarget.tagName);
+                    var ts = 1 * new Date();
+                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                    $(cnvh).hide();
+                    $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
+                    $(this.getDomElement('butList')).hide();
+                    $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
+                    $('body').on('mousemove', catchEvents);
+                    this.hideRecList();
+                    this.sessionId = ts.toString();
+                    this.activeRecord = {
 
-            if (this.appMode === 'test') {
-
-                this.currentEvent = {
-
-                    type: etype,
-                    treePath: treePath,
-                    tagName: etarget.tagName,
-                    location: location
-
-                };
-                this.checkTaskCompletion();
-
-            }
-
-            if (save) {
-
-                //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
-
-                var rec = this.activeRecord,
-                    events = rec.events,
-                    elen = events.length,
-                    lastEvent = events[elen - 1] || null,
-                    milesTotal = this.getNDCMousePath(rec),
-                    clientNDC = this.getNDC(e.clientX, e.clientY),
-                    pageNDC = this.getNDC(e.pageX, e.pageY),
-                    pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
-                    $el = $(etarget),
-                    offs = $el.offset(),
-                    left = offs.left,
-                    top = offs.top,
-                    event = {
-                        recId: this.sessionId,
-                        timeStamp: e.timeStamp,
-                        index: elen,
-                        location: location,
-                        ndc: {
-                            x: clientNDC.x,
-                            y: clientNDC.y,
-                            pageX: pageNDC.x,
-                            pageY: pageNDC.y,
-                            pageXOffset: pageOffsetNDC.x,
-                            pageYOffset: pageOffsetNDC.y
-                        },
-                        bubbles: true,
-                        cancelBubble: e.cancelBubble,
-                        cancelable: e.cancelable,
-                        defaultPrevented: e.defaultPrevented,
-                        returnValue: true,
-                        type: etype,
-                        char: e.char,
-                        shiftKey: e.shiftKey,
-                        altKey: e.altKey,
-                        ctrlKey: e.ctrlKey,
-                        button: e.button,
-                        which: e.which,
-                        charCode: e.charCode,
-                        deltaX: e.deltaX,
-                        deltaY: e.deltaY,
-                        deltaZ: e.deltaZ,
-                        deltaMode: e.deltaMode,
-                        x: e.clientX,
-                        y: e.clientY,
-                        clientX: e.clientX,
-                        clientY: e.clientY,
-                        pageX: e.pageX,
-                        pageY: e.pageY,
-                        winWidth: window.innerWidth,
-                        winHeight: window.innerHeight,
-                        docHeight: document.body.scrollHeight,
-                        docWidth: document.body.scrollWidth,
-                        pageXOffset: pageXOffset,
-                        pageYOffset: pageYOffset,
-                        target: {
-                            treePath: treePath,
-                            tagName: etarget.tagName,
-                            localName: etarget.localName,
-                            name: etarget.name,
-                            title: etarget.title,
-                            id: etarget.id,
-                            className: typeof etarget.className === 'string' ? etarget.className : '',
-                            width: $el.outerWidth(),
-                            height: $el.outerHeight(),
-                            x: left,
-                            y: top,
-                            dx: 0,
-                            dy: 0,
-                            localX: e.pageX - left,
-                            localY: e.pageY - top,
-                            relX: (e.pageX - left) / $el.outerWidth(),
-                            relY: (e.pageY - top) / $el.outerHeight()
-                        },
-                        duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
-                        time: e.timeStamp - rec.modified
+                        id: this.sessionId,
+                        name: this.loc._Default_record_name + this.db.records.length,
+                        description: '',
+                        created: ts,
+                        modified: ts,
+                        author: this.user.fullname || this.loc._Anonym,
+                        color: 'rgba(255, 0, 255, 1)',
+                        duration: 0,
+                        mouseMilesTotal: 0,
+                        events: [],
+                        eventsStat: {}
 
                     };
 
-                if (lastEvent && lastEvent.type === etype
-                    && lastEvent.target.treePath === event.target.treePath
-                    && !etype.match(/scroll|wheel/i)) {
+                    this.saveEvent(new MouseEvent('start', e));
 
-                    return;
+                } else {
 
-                }
+                    // Turn off record mode
+                    this.appMode = '';
+                    $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
+                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
-                event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
-                event.drag = event.milesLast && etype === 'mouseup';
-                event.miles = milesTotal + event.milesLast;
+                    var rec = this.activeRecord;
 
-                if (etarget.dataset) {
+                    $stat.fadeOut();
+                    clearInterval($stat.data('tid'));
+                    $('body').off('mousemove', catchEvents);
 
-                    event.target.dcipherName = etarget.dataset.dcipherName;
-                    event.target.dcipherAction = etarget.dataset.dcipherAction;
+                    if (this.db.records.length) {
 
-                }
-                if (etype === 'mouseup' && event.milesLast === 0) {
+                        $(this.getDomElement('butList')).show();
 
-                    event = events.pop();
-                    event.type = etype = 'click';
+                    }
 
-                    lastEvent = events[elen - 1];
-                    if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
+                    if (rec && rec.events && rec.events.length > 1) {
 
-                        events.pop();
-                        event.type = etype = 'dblclick';
+                        var evt = rec.events[rec.events.length - 1];
+
+                        rec.duration = evt.time;
+                        rec.kpi = evt.kpi;
+                        rec.mouseMilesTotal = evt.miles;
+                        rec.eventsQty = 0;
+
+                        for (var et in rec.eventsStat) {
+
+                            rec.eventsQty += rec.eventsStat[et];
+
+                        }
+
+                        this.db.putRecord(this.sessionId, rec).then(function () {
+
+                            $(self.getDomElement('butList')).show();
+                            self.createRecordList();
+                            self.toggleRecList();
+                            $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
+                            self.setActiveRecord(self.sessionId);
+                            self.showSpiderGraph(self.sessionId);
+                            self.activeRecord = null;
+
+                        });
 
                     }
 
                 }
 
-                if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
+                return this;
 
-                    event.dx = left - lastEvent.target.x;
-                    event.dy = top - lastEvent.target.y;
+            };
+
+            this.saveEvent = function saveEvent(e) {
+
+                var self = this,
+                    etype = e.type,
+                    etarget = e.target || document.getElementsByTagName('body')[0],
+                    treePath = this.getTreePath(etarget),
+                    location = document.location.pathname,
+                    save = (this.appMode === 'record' || this.appMode === 'test') &&
+                           this.registerEventList.indexOf(etype) > -1
+                           && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
+                           && etarget.localName !== 'svg'
+                           && etarget.localName !== 'circle';
+
+                console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
+                //console.debug('TREE PATH: ', treePath);
+                //console.debug('tagName: ', etarget.tagName);
+
+                if (this.appMode === 'test') {
+
+                    this.currentEvent = {
+
+                        type: etype,
+                        treePath: treePath,
+                        tagName: etarget.tagName,
+                        location: location
+
+                    };
+                    this.checkTaskCompletion();
 
                 }
 
-                if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
+                if (save) {
 
-                    rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
-                    event.eventNo = rec.eventsStat[etype];
+                    //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
-                }
+                    var rec = this.activeRecord,
+                        events = rec.events,
+                        elen = events.length,
+                        lastEvent = events[elen - 1] || null,
+                        milesTotal = this.getNDCMousePath(rec),
+                        clientNDC = this.getNDC(e.clientX, e.clientY),
+                        pageNDC = this.getNDC(e.pageX, e.pageY),
+                        pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
+                        $el = $(etarget),
+                        offs = $el.offset(),
+                        left = offs.left,
+                        top = offs.top,
+                        event = {
+                            recId: this.sessionId,
+                            timeStamp: e.timeStamp,
+                            index: elen,
+                            location: location,
+                            ndc: {
+                                x: clientNDC.x,
+                                y: clientNDC.y,
+                                pageX: pageNDC.x,
+                                pageY: pageNDC.y,
+                                pageXOffset: pageOffsetNDC.x,
+                                pageYOffset: pageOffsetNDC.y
+                            },
+                            bubbles: true,
+                            cancelBubble: e.cancelBubble,
+                            cancelable: e.cancelable,
+                            defaultPrevented: e.defaultPrevented,
+                            returnValue: true,
+                            type: etype,
+                            char: e.char,
+                            shiftKey: e.shiftKey,
+                            altKey: e.altKey,
+                            ctrlKey: e.ctrlKey,
+                            button: e.button,
+                            which: e.which,
+                            charCode: e.charCode,
+                            deltaX: e.deltaX,
+                            deltaY: e.deltaY,
+                            deltaZ: e.deltaZ,
+                            deltaMode: e.deltaMode,
+                            x: e.clientX,
+                            y: e.clientY,
+                            clientX: e.clientX,
+                            clientY: e.clientY,
+                            pageX: e.pageX,
+                            pageY: e.pageY,
+                            winWidth: window.innerWidth,
+                            winHeight: window.innerHeight,
+                            docHeight: document.body.scrollHeight,
+                            docWidth: document.body.scrollWidth,
+                            pageXOffset: pageXOffset,
+                            pageYOffset: pageYOffset,
+                            target: {
+                                treePath: treePath,
+                                tagName: etarget.tagName,
+                                localName: etarget.localName,
+                                name: etarget.name,
+                                title: etarget.title,
+                                id: etarget.id,
+                                className: typeof etarget.className === 'string' ? etarget.className : '',
+                                width: $el.outerWidth(),
+                                height: $el.outerHeight(),
+                                x: left,
+                                y: top,
+                                dx: 0,
+                                dy: 0,
+                                localX: e.pageX - left,
+                                localY: e.pageY - top,
+                                relX: (e.pageX - left) / $el.outerWidth(),
+                                relY: (e.pageY - top) / $el.outerHeight()
+                            },
+                            duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
+                            time: e.timeStamp - rec.modified
 
-                if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
+                        };
 
-                    lastEvent.eventNo = rec.eventsStat['wheel'];
+                    if (lastEvent && lastEvent.type === etype
+                        && lastEvent.target.treePath === event.target.treePath
+                        && !etype.match(/scroll|wheel/i)) {
 
-                }
+                        return;
 
-                if (event.drag) {
+                    }
 
-                    rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
-                    event.eventNo = rec.eventsStat['drag'];
+                    event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
+                    event.drag = event.milesLast && etype === 'mouseup';
+                    event.miles = milesTotal + event.milesLast;
 
-                }
+                    if (etarget.dataset) {
 
-                /*
-                 var sd = 0;
-                 rec.events.forEach(function (e) {
+                        event.target.dcipherName = etarget.dataset.dcipherName;
+                        event.target.dcipherAction = etarget.dataset.dcipherAction;
 
-                 if (e.type === 'wheel') {
+                    }
+                    if (etype === 'mouseup' && event.milesLast === 0) {
 
-                 sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+                        event = events.pop();
+                        event.type = etype = 'click';
 
-                 }
+                        lastEvent = events[elen - 1];
+                        if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
 
-                 });
-                 */
-                event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
-                //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
-                event.kpiLast = event.kpi;
-                /*
-                 event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
-
-                 console.debug('-------> event.kpiLast', event.kpiLast);
-                 */
-
-                events.push(event);
-                rec.mouseMilesTotal = milesTotal;
-                this.updateStatString(e);
-
-            }
-
-            return this;
-
-        };
-
-        this.setupDOMListeners = function setupDOMListeners() {
-
-            var self = this;
-
-            console.log('Setting up DOM listeners...');
-
-            function setElementListeners(arr) {
-
-                arr.each(function (i, el) {
-
-                    for (var k in el) {
-
-                        if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
-
-                            el.addEventListener(k.substr(2), function (e) {
-
-                                self.saveEvent(e);
-
-                            });
-                            console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
+                            events.pop();
+                            event.type = etype = 'dblclick';
 
                         }
 
                     }
-                    setElementListeners($(el).children());
+
+                    if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
+
+                        event.dx = left - lastEvent.target.x;
+                        event.dy = top - lastEvent.target.y;
+
+                    }
+
+                    if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
+
+                        rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
+                        event.eventNo = rec.eventsStat[etype];
+
+                    }
+
+                    if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
+
+                        lastEvent.eventNo = rec.eventsStat['wheel'];
+
+                    }
+
+                    if (event.drag) {
+
+                        rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
+                        event.eventNo = rec.eventsStat['drag'];
+
+                    }
+
+                    /*
+                     var sd = 0;
+                     rec.events.forEach(function (e) {
+
+                     if (e.type === 'wheel') {
+
+                     sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+
+                     }
+
+                     });
+                     */
+                    event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                    //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
+                    event.kpiLast = event.kpi;
+                    /*
+                     event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+
+                     console.debug('-------> event.kpiLast', event.kpiLast);
+                     */
+
+                    events.push(event);
+                    rec.mouseMilesTotal = milesTotal;
+                    this.updateStatString(e);
+
+                }
+
+                return this;
+
+            };
+
+            this.setupDOMListeners = function setupDOMListeners() {
+
+                var self = this;
+
+                console.log('Setting up DOM listeners...');
+
+                function setElementListeners(arr) {
+
+                    arr.each(function (i, el) {
+
+                        for (var k in el) {
+
+                            if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
+
+                                el.addEventListener(k.substr(2), function (e) {
+
+                                    self.saveEvent(e);
+
+                                });
+                                console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
+
+                            }
+
+                        }
+                        setElementListeners($(el).children());
+
+                    });
+
+                }
+
+                setElementListeners($('body').children(":not('#d-cipher-container, script')"));
+                console.log('DOM listeners has been set up...');
+
+            };
+
+            this.getTreePath = function getTreePath(el) {
+
+                var path = '',
+                    found = false;
+
+                function parseTree(node, cid) {
+
+                    if (found) {
+
+                        return;
+
+                    }
+
+                    var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
+
+                    for (var i = 0, len = ch.length; i < len; i++) {
+
+                        if (ch[i] === el) {
+
+                            path = cid + '-' + i;
+                            found = true;
+                            break;
+
+                        } else {
+
+                            parseTree(ch[i], cid + '-' + i);
+
+                        }
+
+                    }
+
+                }
+
+                parseTree($('body')[0], '0');
+                return path;
+
+            };
+
+            this.getElementByTreePath = function getElementByTreePath(path) {
+
+                var pa = path.split('-'),
+                    el = $('body')[0];
+
+                pa.shift();
+
+                pa.forEach(function (p) {
+
+                    if (el) {
+
+                        el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
+
+                    }
 
                 });
 
-            }
+                //console.debug('--> element: ', el);
 
-            setElementListeners($('body').children(":not('#d-cipher-container, script')"));
-            console.log('DOM listeners has been set up...');
+                return el || window;
 
-        };
+            };
 
-        this.getTreePath = function getTreePath(el) {
+            this.getDistance = function getDistance(p1, p2) {
 
-            var path = '',
-                found = false;
+                var asp = window.innerWidth / window.innerHeight;
 
-            function parseTree(node, cid) {
+                return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
 
-                if (found) {
+            };
 
-                    return;
+            this.getNDCMousePath = function getNDCMousePath(rec) {
 
-                }
+                var self = this,
+                    path = 0;
 
-                var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
+                rec.events.forEach(function (e, idx, arr) {
 
-                for (var i = 0, len = ch.length; i < len; i++) {
+                    if (idx > 0) {
 
-                    if (ch[i] === el) {
+                        path += self.getDistance(arr[idx - 1].ndc, e.ndc);
 
-                        path = cid + '-' + i;
-                        found = true;
-                        break;
+                    }
 
-                    } else {
+                });
 
-                        parseTree(ch[i], cid + '-' + i);
+                return path;
+
+            };
+
+            this.getNDC = function getNDC() {
+
+                var pos;
+
+                if (arguments.length === 1) {
+
+                    pos = arguments[0];
+
+                } else {
+
+                    pos = {
+
+                        x: arguments[0],
+                        y: arguments[1]
 
                     }
 
                 }
 
-            }
+                return {
 
-            parseTree($('body')[0], '0');
-            return path;
-
-        };
-
-        this.getElementByTreePath = function getElementByTreePath(path) {
-
-            var pa = path.split('-'),
-                el = $('body')[0];
-
-            pa.shift();
-
-            pa.forEach(function (p) {
-
-                if (el) {
-
-                    el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
+                    x: 2 * pos.x / window.innerWidth - 1,
+                    y: 1 - 2 * pos.y / window.innerHeight
 
                 }
 
-            });
+            };
 
-            //console.debug('--> element: ', el);
+            this.getSC = function getSC() {
 
-            return el || window;
+                var pos;
 
-        };
+                if (arguments.length === 1) {
 
-        this.getDistance = function getDistance(p1, p2) {
+                    pos = arguments[0];
 
-            var asp = window.innerWidth / window.innerHeight;
+                } else {
 
-            return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
+                    pos = {
 
-        };
+                        x: arguments[0],
+                        y: arguments[1]
 
-        this.getNDCMousePath = function getNDCMousePath(rec) {
-
-            var self = this,
-                path = 0;
-
-            rec.events.forEach(function (e, idx, arr) {
-
-                if (idx > 0) {
-
-                    path += self.getDistance(arr[idx - 1].ndc, e.ndc);
+                    }
 
                 }
 
-            });
+                return {
 
-            return path;
-
-        };
-
-        this.getNDC = function getNDC() {
-
-            var pos;
-
-            if (arguments.length === 1) {
-
-                pos = arguments[0];
-
-            } else {
-
-                pos = {
-
-                    x: arguments[0],
-                    y: arguments[1]
+                    x: (pos.x + 1) * window.innerWidth / 2,
+                    y: (1 - pos.y) * window.innerHeight / 2
 
                 }
 
-            }
+            };
 
-            return {
+            this.calcSC = function calcSC(rec) {
 
-                x: 2 * pos.x / window.innerWidth - 1,
-                y: 1 - 2 * pos.y / window.innerHeight
+                var self = this;
 
-            }
+                rec.events.forEach(function (e) {
 
-        };
+                    self.getTargetScreenPars(e);
 
-        this.getSC = function getSC() {
+                });
 
-            var pos;
+            };
 
-            if (arguments.length === 1) {
+            this.showTLTooltip = function showTLTooltip(e) {
 
-                pos = arguments[0];
+                var self = this,
+                    event = this.getTimelineEvent(e),
+                    $tt = $(this.getDomElement('timelineTooltip')),
+                    $he = $(this.getDomElement('highlightEvent')),
+                    $tl = $(this.getDomElement('timeline'));
 
-            } else {
+                function getEventInfo(e) {
 
-                pos = {
+                    var rId = e.recId,
+                        rec = self.getRecordById(rId),
+                        etarget = e.target,
+                        html = '';
 
-                    x: arguments[0],
-                    y: arguments[1]
+                    if (etarget.dcipherName) {
 
-                }
+                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
-            }
+                    }
 
-            return {
+                    if (etarget.dcipherAction) {
 
-                x: (pos.x + 1) * window.innerWidth / 2,
-                y: (1 - pos.y) * window.innerHeight / 2
+                        html += '<tr>' +
+                                '<td class="tt-name">' + loc._Action + ':</td>' +
+                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                                '</tr><tr>' +
+                                '<td colspan = "2" class = "empty-row"></td>' +
+                                '</tr><br />';
 
-            }
-
-        };
-
-        this.calcSC = function calcSC(rec) {
-
-            var self = this;
-
-            rec.events.forEach(function (e) {
-
-                self.getTargetScreenPars(e);
-
-            });
-
-        };
-
-        this.showTLTooltip = function showTLTooltip(e) {
-
-            var self = this,
-                event = this.getTimelineEvent(e),
-                $tt = $(this.getDomElement('timelineTooltip')),
-                $he = $(this.getDomElement('highlightEvent')),
-                $tl = $(this.getDomElement('timeline'));
-
-            function getEventInfo(e) {
-
-                var rId = e.recId,
-                    rec = self.getRecordById(rId),
-                    etarget = e.target,
-                    html = '';
-
-                if (etarget.dcipherName) {
-
-                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                }
-
-                if (etarget.dcipherAction) {
+                    }
 
                     html += '<tr>' +
-                            '<td class="tt-name">' + loc._Action + ':</td>' +
-                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
                             '</tr><tr>' +
                             '<td colspan = "2" class = "empty-row"></td>' +
-                            '</tr><br />';
-
-                }
-
-                html += '<tr>' +
-                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                        '</tr><tr>' +
-                        '<td colspan = "2" class = "empty-row"></td>' +
-                        '</tr>';
-
-                html += '<tr>' +
-                        //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + loc._Distance + ':</td>' +
-                        '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + loc._KPI + ':</td>' +
-                        '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
-                        '</tr>';
-
-                return html;
-            }
-
-            if (event) {
-
-                var loc = this.loc,
-                //pos = $tl.offset(),
-                    x = event.clientX/* + pos.left*/,
-                    y = event.clientY/*y + pos.top*/,
-                    html = '<table>', w, h, top, left;
-
-                if (!$tl.data('eiTID')) {
-
-                    $tl.data('eiTID', setTimeout(function () {
-
-                        $tt.hide();
-                        self.showEventsInfo(event);
-
-                    }, 2000));
-
-                }
-
-                $tl.css('cursor', 'pointer');
-                if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
-
-                    $he.css({top: event.event.y, left: event.event.x}).show();
-
-                } else {
-
-                    $he.hide();
-
-                }
-                html += getEventInfo(event.event) + '</table>';
-                $tt.html(html);
-                w = $tt.outerWidth();
-                h = $tt.outerHeight();
-
-                if (y + 20 + h < window.innerHeight) {
-
-                    top = y + 20;
-
-                } else {
-
-                    top = y - h - 10;
-
-                }
-
-                if (x - w / 2 - 5 < 0) {
-
-                    left = 5;
-
-                } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                    left = window.innerWidth - w - 5;
-
-                } else {
-
-                    left = x - w / 2;
-
-                }
-
-                $tt.css('top', top).css('left', left)
-                    .show();
-
-            } else {
-
-                $tl.css('cursor', 'default');
-                $tt.hide();
-                $he.hide();
-                $(this.getDomElement('eventInfo')).hide();
-                if ($tl.data('eiTID')) {
-
-                    clearTimeout($tl.data('eiTID'));
-                    $tl.data('eiTID', null);
-
-                }
-
-            }
-
-        };
-
-        this.showMouseTooltip = function showMouseTooltip(event) {
-
-            var self = event.data.self,
-                loc = self.loc,
-                $tt = $(self.getDomElement('mTooltip')),
-                cnvh = self.getDomElement('canvasHolder'),
-                $cnvh = $(cnvh),
-                x = event.clientX, y = event.clientY,
-                evts = self.getEventsUnderMouse(x, y),
-                html = '<table>', evt, rec,
-                w, h, top, left;
-
-            function getEventInfo(e) {
-
-                var rId = e.recId,
-                    rec = self.getRecordById(rId),
-                    etarget = e.target,
-                    html = '';
-
-                if (etarget.dcipherName) {
-
-                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                }
-
-                if (etarget.dcipherAction) {
-
-                    html += '<tr>' +
-                            '<td class="tt-name">' + loc._Action + ':</td>' +
-                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
                             '</tr>';
-
-                }
-
-                html += '<tr>' +
-                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                        '</tr><tr>' +
-                        '<td colspan = "2" class = "empty-row"></td>' +
-                        '</tr>';
-
-                return html;
-            }
-
-            if (evts.length) {
-
-                $cnvh.css('cursor', 'pointer');
-
-                if (!$cnvh.data('eiTID')) {
-
-                    $cnvh.data('eiTID', setTimeout(function () {
-
-                        $(self.getDomElement('eventInfo')).hide();
-                        self.showEventsInfo();
-
-                    }, 2000));
-
-                }
-
-                evt = evts[0];
-                rId = evt.recId;
-                html += getEventInfo(evt);
-
-                evts.forEach(function (e) {
-
-                    rec = self.getRecordById(rId);
-
-                    if (rId !== e.recId) {
-
-                        rId = e.recId;
-                        html += getEventInfo(e);
-
-                    }
 
                     html += '<tr>' +
                             //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
@@ -1381,25 +1212,352 @@
                             '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._Distance + ':</td>' +
-                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                            '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
                             '</tr><tr>' +
                             '<td class="tt-name">' + loc._KPI + ':</td>' +
                             '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
                             '</tr>';
 
-                });
+                    return html;
+                }
 
-                $tt.html(html + '</table>');
-                w = $tt.outerWidth();
-                h = $tt.outerHeight();
+                if (event) {
 
-                if (y + 20 + h < window.innerHeight) {
+                    var loc = this.loc,
+                    //pos = $tl.offset(),
+                        x = event.clientX/* + pos.left*/,
+                        y = event.clientY/*y + pos.top*/,
+                        html = '<table>', w, h, top, left;
 
-                    top = y + 20;
+                    if (!$tl.data('eiTID')) {
+
+                        $tl.data('eiTID', setTimeout(function () {
+
+                            $tt.hide();
+                            self.showEventsInfo(event);
+
+                        }, 2000));
+
+                    }
+
+                    $tl.css('cursor', 'pointer');
+                    if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
+
+                        $he.css({top: event.event.y, left: event.event.x}).show();
+
+                    } else {
+
+                        $he.hide();
+
+                    }
+                    html += getEventInfo(event.event) + '</table>';
+                    $tt.html(html);
+                    w = $tt.outerWidth();
+                    h = $tt.outerHeight();
+
+                    if (y + 20 + h < window.innerHeight) {
+
+                        top = y + 20;
+
+                    } else {
+
+                        top = y - h - 10;
+
+                    }
+
+                    if (x - w / 2 - 5 < 0) {
+
+                        left = 5;
+
+                    } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                        left = window.innerWidth - w - 5;
+
+                    } else {
+
+                        left = x - w / 2;
+
+                    }
+
+                    $tt.css('top', top).css('left', left)
+                        .show();
 
                 } else {
 
-                    top = y - h - 10;
+                    $tl.css('cursor', 'default');
+                    $tt.hide();
+                    $he.hide();
+                    $(this.getDomElement('eventInfo')).hide();
+                    if ($tl.data('eiTID')) {
+
+                        clearTimeout($tl.data('eiTID'));
+                        $tl.data('eiTID', null);
+
+                    }
+
+                }
+
+            };
+
+            this.showMouseTooltip = function showMouseTooltip(event) {
+
+                var self = this,
+                    loc = self.loc,
+                    $tt = $(self.getDomElement('mTooltip')),
+                    cnvh = self.getDomElement('canvasHolder'),
+                    $cnvh = $(cnvh),
+                    x = event.clientX, y = event.clientY,
+                    evts = self.getEventsUnderMouse(x, y),
+                    html = '<table>', evt, rec,
+                    w, h, top, left;
+
+                function getEventInfo(e) {
+
+                    var rId = e.recId,
+                        rec = self.getRecordById(rId),
+                        etarget = e.target,
+                        html = '';
+
+                    if (etarget.dcipherName) {
+
+                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
+
+                    }
+
+                    if (etarget.dcipherAction) {
+
+                        html += '<tr>' +
+                                '<td class="tt-name">' + loc._Action + ':</td>' +
+                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                                '</tr>';
+
+                    }
+
+                    html += '<tr>' +
+                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
+                            '</tr><tr>' +
+                            '<td colspan = "2" class = "empty-row"></td>' +
+                            '</tr>';
+
+                    return html;
+                }
+
+                if (evts.length) {
+
+                    $cnvh.css('cursor', 'pointer');
+
+                    if (!$cnvh.data('eiTID')) {
+
+                        $cnvh.data('eiTID', setTimeout(function () {
+
+                            $(self.getDomElement('eventInfo')).hide();
+                            self.showEventsInfo();
+
+                        }, 2000));
+
+                    }
+
+                    evt = evts[0];
+                    rId = evt.recId;
+                    html += getEventInfo(evt);
+
+                    evts.forEach(function (e) {
+
+                        rec = self.getRecordById(rId);
+
+                        if (rId !== e.recId) {
+
+                            rId = e.recId;
+                            html += getEventInfo(e);
+
+                        }
+
+                        html += '<tr>' +
+                                //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                                '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                                '</tr><tr>' +
+                                '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                                '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                                '</tr><tr>' +
+                                '<td class="tt-name">' + loc._Distance + ':</td>' +
+                                '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                                '</tr><tr>' +
+                                '<td class="tt-name">' + loc._KPI + ':</td>' +
+                                '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                                '</tr>';
+
+                    });
+
+                    $tt.html(html + '</table>');
+                    w = $tt.outerWidth();
+                    h = $tt.outerHeight();
+
+                    if (y + 20 + h < window.innerHeight) {
+
+                        top = y + 20;
+
+                    } else {
+
+                        top = y - h - 10;
+
+                    }
+
+                    if (x - w / 2 - 5 < 0) {
+
+                        left = 5;
+
+                    } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                        left = window.innerWidth - w - 5;
+
+                    } else {
+
+                        left = x - w / 2;
+
+                    }
+
+                    $tt.css({
+                        'top': top,
+                        'left': left
+                    }).show();
+
+                } else if (event.target.parentNode.id !== self.domId['timeline']) {
+
+                    $(self.getDomElement('eventInfo')).hide();
+                    $(self.getDomElement('timelineCircle')).hide();
+                    $cnvh.css('cursor', 'default');
+                    if ($cnvh.data('eiTID')) {
+
+                        clearTimeout($cnvh.data('eiTID'));
+                        $cnvh.data('eiTID', null);
+
+                    }
+                    $tt.hide();
+
+                }
+
+                //console.debug(html);
+
+            };
+
+            this.showEventsInfo = function (event) {
+
+                var self = this,
+                    loc = this.loc,
+                    evts = this.eventsUnderMouse,
+                    $eInf = $(this.getDomElement('eventInfo')),
+                    dx = 0, dy = 0, html = '<table>', rec,
+                    top, left, x, y, w, h, shift = 10;
+
+                evt = evts[0] || event.event;
+
+                if (!evt) {
+
+                    return;
+
+                }
+
+                function getRecordInfo(rec) {
+
+                    var clicks = rec.eventsStat['click'],
+                        showEvents = ['click', 'wheel', 'drag'];
+
+                    html = '<tr>' +
+                           /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
+                           '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
+                           '</tr><tr>' +
+                           '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
+                           '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
+                           '</tr><tr>' +
+                           '<td colspan = "2" class = "empty-row"></td>' +
+                           '</tr><tr>' +
+                           '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
+                           '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
+                           '</tr><tr>' +
+                           '<td class= "tt-name">' + loc._Duration + ': </td>' +
+                           '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
+                           '</tr><tr>' +
+                           '<td class= "tt-name">' + loc._Events + ': </td>' +
+                           '<td class= "tt-value">' + rec.eventsQty + '</td>' +
+                           '</tr><tr>';
+
+                    showEvents.forEach(function (k) {
+
+                            if (rec.eventsStat[k]) {
+
+                                html += '<td class= "tt-name">' + loc[k] + ': </td>' +
+                                        '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
+                                        '</tr><tr>';
+
+                            }
+
+                        }
+                    );
+
+                    html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
+                            '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
+                            '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class= "tt-name">' + loc._KPI + ': </td>' +
+                            '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
+                            '</tr>';
+
+                    return html;
+                }
+
+                rId = evt.recId;
+                rec = self.getRecordById(rId);
+
+                html += getRecordInfo(rec);
+
+                evts.forEach(function (e) {
+
+                    dx += e.x;
+                    dy += e.y;
+
+                    if (rId !== e.recId) {
+
+                        rId = e.recId;
+                        rec = self.getRecordById(rId);
+                        html += '<tr><td></td></tr>' + getRecordInfo(rec);
+
+                    }
+
+                    /*
+                     html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
+                     + ' #' + e.eventNo
+                     + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
+                     */
+
+                    html += '<tr>' +
+                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._Distance + ':</td>' +
+                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                            '</tr>';
+
+                });
+
+                $eInf.html(html + '</table>');
+                w = $eInf.outerWidth();
+                h = $eInf.outerHeight();
+                x = event ? event.clientX : dx / evts.length;
+                y = event ? event.clientY : dy / evts.length;
+
+                if (y - h - shift > 5) {
+
+                    top = y - h - shift;
+
+                } else /*if ( y + h + shift > window.innerHeight)*/ {
+
+                    top = y + shift;
 
                 }
 
@@ -1417,565 +1575,426 @@
 
                 }
 
-                $tt.css({
-                    'top': top,
-                    'left': left
-                }).show();
+                $eInf.css('top', top).css('left', left).show();
+                $(this.getDomElement('mTooltip')).hide();
 
-            } else if (event.target.parentNode.id !== self.domId['timeline']) {
+            };
 
-                $(self.getDomElement('eventInfo')).hide();
-                $(self.getDomElement('timelineCircle')).hide();
-                $cnvh.css('cursor', 'default');
-                if ($cnvh.data('eiTID')) {
+            this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
 
-                    clearTimeout($cnvh.data('eiTID'));
-                    $cnvh.data('eiTID', null);
+                var self = this,
+                    recs = this.db.records,
+                    abs = Math.abs,
+                    th = 5,
+                    evts = [];
 
-                }
-                $tt.hide();
+                recs.forEach(function (r) {
 
-            }
+                    if (r.active && r.visible) {
 
-            //console.debug(html);
+                        var ea = r.events.filter(function (e, i, arr) {
 
-        };
+                            return abs(x - e.x) < th && abs(y - e.y) < th
+                                   && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
+                                   && self.drawEventList.indexOf(e.type) > -1;
 
-        this.showEventsInfo = function (event) {
+                        });
 
-            var self = this,
-                loc = this.loc,
-                evts = this.eventsUnderMouse,
-                $eInf = $(this.getDomElement('eventInfo')),
-                dx = 0, dy = 0, html = '<table>', rec,
-                top, left, x, y, w, h, shift = 10;
+                        if (ea && ea.length) {
 
-            evt = evts[0] || event.event;
-
-            if (!evt) {
-
-                return;
-
-            }
-
-            function getRecordInfo(rec) {
-
-                var clicks = rec.eventsStat['click'],
-                    showEvents = ['click', 'wheel', 'drag'];
-
-                html = '<tr>' +
-                       /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
-                       '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
-                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
-                       '</tr><tr>' +
-                       '<td colspan = "2" class = "empty-row"></td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
-                       '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._Duration + ': </td>' +
-                       '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
-                       '</tr><tr>' +
-                       '<td class= "tt-name">' + loc._Events + ': </td>' +
-                       '<td class= "tt-value">' + rec.eventsQty + '</td>' +
-                       '</tr><tr>';
-
-                showEvents.forEach(function (k) {
-
-                        if (rec.eventsStat[k]) {
-
-                            html += '<td class= "tt-name">' + loc[k] + ': </td>' +
-                                    '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
-                                    '</tr><tr>';
+                            [].push.apply(evts, ea);
 
                         }
 
                     }
-                );
+                });
 
-                html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
-                        '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
-                        '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class= "tt-name">' + loc._KPI + ': </td>' +
-                        '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
-                        '</tr>';
+                this.eventsUnderMouse = evts;
+
+                return evts;
+
+            };
+
+            this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
+
+                if (self.eventsUnderMouse.length) {
+
+                    //self.showEventsInfo();
+                    self.showTimelineEvent(self.eventsUnderMouse[0]);
+
+                }
+
+            };
+
+            this.updateStatString = function updateStatString(e) {
+
+                var loc = this.loc,
+                    rec = this.activeRecord,
+                    evt = rec.events[rec.events.length - 1],
+                    ms = rec.modified,
+                    miles = evt ? evt.miles : 0,
+                    timeString = this.getTimeString(1 * new Date() - ms),
+                    clicks = rec.eventsStat.click || 0,
+                    drags = rec.eventsStat.drag || 0,
+                    wheels = rec.eventsStat.wheel || 0,
+                    el = document.elementFromPoint(this.mouse.x, this.mouse.y),
+                    trg = el.name || el.id || el.className,
+                //type = e ? loc[e.type] : '',
+                    msg = ''; //loc._Recording + '.';
+
+                msg += /*loc._Time + ': ' +*/ timeString + ' ';
+                msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
+                msg += loc._Clicks + ': ' + clicks + ' | ';
+                msg += loc._Drags + ': ' + drags + ' | ';
+                msg += loc._Wheels + ': ' + wheels + ' | ';
+                if (trg) {
+
+                    msg += loc._Target + ': ' + trg + ' | ';
+
+                }
+                msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
+
+                if (e && e.type === 'keypress') {
+
+                    msg += '; key: ' + String.fromCharCode(e.charCode);
+
+                }
+
+                this.getDomElement('stat').innerText = msg;
+                //console.debug(msg);
+                return this;
+
+            };
+
+            this.getTimeString = function getTimeString(ms) {
+
+                var time = ms / 1000,
+                    hours, mins, secs, html = '';
+
+                hours = Math.floor(time / 3600);
+                mins = Math.floor((time - hours * 3600) / 60);
+                secs = Math.floor(time - hours * 3600 - mins * 60);
+                html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
+                html += mins < 10 ? '0' + mins + ':' : mins + ':';
+                html += secs < 10 ? '0' + secs : secs;
 
                 return html;
-            }
 
-            rId = evt.recId;
-            rec = self.getRecordById(rId);
+            };
 
-            html += getRecordInfo(rec);
+            this.getRecordById = function getRecordById(id) {
 
-            evts.forEach(function (e) {
+                var records = this.db.records,
+                    r = null;
 
-                dx += e.x;
-                dy += e.y;
+                for (var i = 0, rl = records.length; i < rl; i++) {
 
-                if (rId !== e.recId) {
+                    if (records[i].id == id) {
 
-                    rId = e.recId;
-                    rec = self.getRecordById(rId);
-                    html += '<tr><td></td></tr>' + getRecordInfo(rec);
-
-                }
-
-                /*
-                 html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
-                 + ' #' + e.eventNo
-                 + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
-                 */
-
-                html += '<tr>' +
-                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                        '</tr><tr>' +
-                        '<td class="tt-name">' + loc._Distance + ':</td>' +
-                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                        '</tr>';
-
-            });
-
-            $eInf.html(html + '</table>');
-            w = $eInf.outerWidth();
-            h = $eInf.outerHeight();
-            x = event ? event.clientX : dx / evts.length;
-            y = event ? event.clientY : dy / evts.length;
-
-            if (y - h - shift > 5) {
-
-                top = y - h - shift;
-
-            } else /*if ( y + h + shift > window.innerHeight)*/ {
-
-                top = y + shift;
-
-            }
-
-            if (x - w / 2 - 5 < 0) {
-
-                left = 5;
-
-            } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                left = window.innerWidth - w - 5;
-
-            } else {
-
-                left = x - w / 2;
-
-            }
-
-            $eInf.css('top', top).css('left', left).show();
-            $(this.getDomElement('mTooltip')).hide();
-
-        };
-
-        this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
-
-            var self = this,
-                recs = this.db.records,
-                abs = Math.abs,
-                th = 5,
-                evts = [];
-
-            recs.forEach(function (r) {
-
-                if (r.active && r.visible) {
-
-                    var ea = r.events.filter(function (e, i, arr) {
-
-                        return abs(x - e.x) < th && abs(y - e.y) < th
-                               && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
-                               && self.drawEventList.indexOf(e.type) > -1;
-
-                    });
-
-                    if (ea && ea.length) {
-
-                        [].push.apply(evts, ea);
+                        r = records[i];
+                        break;
 
                     }
 
                 }
-            });
 
-            this.eventsUnderMouse = evts;
+                return r;
 
-            return evts;
+            };
 
-        };
+            this.getDomElement = function getDomElement(name) {
 
-        this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
+                return document.getElementById(this.domId[name]);
 
-            if (self.eventsUnderMouse.length) {
+            };
 
-                //self.showEventsInfo();
-                self.showTimelineEvent(self.eventsUnderMouse[0]);
+            this.hideSpiderGraph = function hideSpiderGraph(sId) {
 
-            }
+                var cnvh = this.getDomElement('canvasHolder');
 
-        };
+                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
 
-        this.updateStatString = function updateStatString(e) {
+                // Hide canvas holder div if no active session
+                if (!$('canvas.cnv:visible', cnvh).length) {
 
-            var loc = this.loc,
-                rec = this.activeRecord,
-                evt = rec.events[rec.events.length - 1],
-                ms = rec.modified,
-                miles = evt ? evt.miles : 0,
-                timeString = this.getTimeString(1 * new Date() - ms),
-                clicks = rec.eventsStat.click || 0,
-                drags = rec.eventsStat.drag || 0,
-                wheels = rec.eventsStat.wheel || 0,
-                el = document.elementFromPoint(this.mouse.x, this.mouse.y),
-                trg = el.name || el.id || el.className,
-            //type = e ? loc[e.type] : '',
-                msg = ''; //loc._Recording + '.';
-
-            msg += /*loc._Time + ': ' +*/ timeString + ' ';
-            msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
-            msg += loc._Clicks + ': ' + clicks + ' | ';
-            msg += loc._Drags + ': ' + drags + ' | ';
-            msg += loc._Wheels + ': ' + wheels + ' | ';
-            if (trg) {
-
-                msg += loc._Target + ': ' + trg + ' | ';
-
-            }
-            msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
-
-            if (e && e.type === 'keypress') {
-
-                msg += '; key: ' + String.fromCharCode(e.charCode);
-
-            }
-
-            this.getDomElement('stat').innerText = msg;
-            //console.debug(msg);
-            return this;
-
-        };
-
-        this.getTimeString = function getTimeString(ms) {
-
-            var time = ms / 1000,
-                hours, mins, secs, html = '';
-
-            hours = Math.floor(time / 3600);
-            mins = Math.floor((time - hours * 3600) / 60);
-            secs = Math.floor(time - hours * 3600 - mins * 60);
-            html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
-            html += mins < 10 ? '0' + mins + ':' : mins + ':';
-            html += secs < 10 ? '0' + secs : secs;
-
-            return html;
-
-        };
-
-        this.getRecordById = function getRecordById(id) {
-
-            var records = this.db.records,
-                r = [];
-
-            for (var i = 0, rl = records.length; i < rl; i++) {
-
-                if (records[i].id == id) {
-
-                    r = records[i];
-                    break;
+                    $(cnvh).hide();
+                    $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
                 }
 
-            }
+                this.getRecordById(sId).visible = false;
+                if (this.activeRecord.id === sId) {
 
-            return r;
-
-        };
-
-        this.getDomElement = function getDomElement(name) {
-
-            return document.getElementById(this.domId[name]);
-
-        };
-
-        this.hideSpiderGraph = function hideSpiderGraph(sId) {
-
-            var cnvh = this.getDomElement('canvasHolder');
-
-            $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
-
-            // Hide canvas holder div if no active session
-            if (!$('canvas.cnv:visible', cnvh).length) {
-
-                $(cnvh).hide();
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
-
-            }
-
-            this.getRecordById(sId).visible = false;
-            if (this.activeRecord.id === sId) {
-
-                this.clearTimeline();
-
-            }
-
-        };
-
-        this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
-
-            var rec = this.getRecordById(sId),
-                cnvh = this.getDomElement('canvasHolder'),
-                cnv = $('#cnvId-' + rec.id, cnvh)[0];
-
-            $(cnvh).show();
-            $(cnv).show();
-
-            if (!rec.drawn || start || end) {
-
-                this.drawSpiderGraph(sId, start, end);
-
-            } else {
-
-                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
-
-            }
-
-            rec.visible = true;
-
-        };
-
-        this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
-
-            var self = this,
-                cnvh = this.getDomElement('canvasHolder'),
-                rec = this.getRecordById(sId),
-                data = rec.events.slice(start || 0, end || rec.events.length),
-                cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
-                ctx = cnv.getContext('2d');
-
-            ctx.clearRect(0, 0, cnv.width, cnv.height);
-            ctx.beginPath();
-
-            // Draw lines
-            data.forEach(function (e, i, ea) {
-
-                var pe = ea[i - 1],
-                    pos = self.getTargetScreenPars(e),
-                    ppos = pe ? self.getTargetScreenPars(pe) : {},
-                    ex = pos.x,
-                    ey = pos.y;
-
-                if (e.type === 'start') {
-
-                } else if (e.drag) {
-
-                    // Draw line to last mouse down position
-                    //ctx.lineTo(pe.x, pe.y);
-                    ctx.stroke();
-                    ctx.save();
-
-                    // Draw dashed line from last mouse down position
-                    ctx.beginPath();
-                    ctx.setLineDash([5, 5]);
-                    ctx.moveTo(ppos.x, ppos.y);
-                    ctx.lineTo(ex, ey);
-                    ctx.stroke();
-                    ctx.restore();
-
-                    // Begin new path and move start to current mouse position
-                    ctx.beginPath();
-                    ctx.moveTo(ex, ey);
-
-                } else if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
-
-                    ctx.lineTo(ex, ey);
+                    this.clearTimeline();
 
                 }
 
-            });
-            ctx.stroke();
+            };
 
-            // Draw event pictograms
-            ctx.setLineDash([]);
-            ctx.beginPath();
-            data.forEach(function (e, i, ea) {
+            this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
 
-                var pe = ea[i - 1],
-                    pos = self.getTargetScreenPars(e),
-                    ex = pos.x,
-                    ey = pos.y;
+                var rec = this.getRecordById(sId);
 
-                if (!e.type.match(/wheel|scroll/i)) {
+                if (!rec) {
 
-                    self.drawEventPict(ctx, e.type, ex, ey);
-
-                } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
-
-                    self.drawEventPict(ctx, 'wheel', ex, ey);
+                    return;
 
                 }
 
-            });
+                var cnvh = this.getDomElement('canvasHolder'),
+                    cnv = $('#cnvId-' + rec.id, cnvh)[0];
 
-            ctx.stroke();
-            ctx.fill();
+                $(cnvh).show();
+                $(cnv).show();
 
-            if (start === undefined && end === undefined) {
+                if (!rec.drawn || start || end) {
 
-                $(cnvh).show().on('mousemove', {self: this}, function (e) {
+                    this.drawSpiderGraph(sId, start, end);
 
-                    self.showMouseTooltip(e);
-                    self.highlightTimeLineEvent(e);
+                } else {
+
+                    $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+
+                }
+
+                rec.visible = true;
+
+            };
+
+            this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
+
+                var self = this,
+                    rec = this.getRecordById(sId);
+
+                if (!rec) {
+
+                    return;
+
+                }
+
+                var cnvh = this.getDomElement('canvasHolder'),
+                    data = rec.events.slice(start || 0, end || rec.events.length),
+                    cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
+                    ctx = cnv.getContext('2d');
+
+                ctx.clearRect(0, 0, cnv.width, cnv.height);
+                ctx.beginPath();
+
+                // Draw lines
+                data.forEach(function (e, i, ea) {
+
+                    var pe = ea[i - 1],
+                        pos = self.getTargetScreenPars(e),
+                        ppos = pe ? self.getTargetScreenPars(pe) : {},
+                        ex = pos.x,
+                        ey = pos.y;
+
+                    if (e.type === 'start') {
+
+                    } else if (e.drag) {
+
+                        // Draw line to last mouse down position
+                        //ctx.lineTo(pe.x, pe.y);
+                        ctx.stroke();
+                        ctx.save();
+
+                        // Draw dashed line from last mouse down position
+                        ctx.beginPath();
+                        ctx.setLineDash([5, 5]);
+                        ctx.moveTo(ppos.x, ppos.y);
+                        ctx.lineTo(ex, ey);
+                        ctx.stroke();
+                        ctx.restore();
+
+                        // Begin new path and move start to current mouse position
+                        ctx.beginPath();
+                        ctx.moveTo(ex, ey);
+
+                    } else if (!pe.type.match(/wheel|scroll/i) || !e.type.match(/wheel|scroll/i)) {
+
+                        ctx.lineTo(ex, ey);
+
+                    }
 
                 });
-                $(cnv).show();
-                rec.drawn = true;
-                this.checkRecordCheckbox(sId);
+                ctx.stroke();
 
-            }
+                // Draw event pictograms
+                ctx.setLineDash([]);
+                ctx.beginPath();
+                data.forEach(function (e, i, ea) {
 
-            return this;
+                    var pe = ea[i - 1],
+                        pos = self.getTargetScreenPars(e),
+                        ex = pos.x,
+                        ey = pos.y;
 
-        };
+                    if (!e.type.match(/wheel|scroll/i)) {
 
-        this.clearTimeline = function clearTimeline() {
+                        self.drawEventPict(ctx, e.type, ex, ey);
 
-            var cnv = $('canvas', this.getDomElement('timeline'))[0],
-                ctx = cnv.getContext('2d'),
-                cw = window.innerWidth,
-                ch = $(this.getDomElement('timeline')).height();
+                    } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
 
-            ctx.clearRect(0, 0, cw, ch);
+                        self.drawEventPict(ctx, 'wheel', ex, ey);
 
-        };
+                    }
 
-        this.drawTimeline = function drawTimeline(rec) {
+                });
 
-            this.showTimelineStat(rec);
+                ctx.stroke();
+                ctx.fill();
 
-            var self = this,
-                events = rec.events,
-                cnv = $('canvas', this.getDomElement('timeline'))[0],
-                ctx = cnv.getContext('2d'),
-                cw = window.innerWidth,
-                $tl = $(this.getDomElement('timeline')),
-                ch = $tl.height(),
-                offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                offsetLeft = this.timeLineOffsetLeft,
-                offsetTop = ch / 2,
-                cy = window.innerHeight - ch + offsetTop,
-                width = cw - offsetLeft - offsetRight,
-                pxs = width / rec.duration,
-                posx = offsetLeft,
-                posx0, pe;
+                if (start === undefined && end === undefined) {
 
-            this.timeLineEvents = [];
-            cnv.width = cw;
-            cnv.height = ch;
-            $(cnv).width(cw);
-            $(cnv).height(ch);
+/*
+                    $(cnvh).show().on('mousemove', {self: this}, function (e) {
 
-            if (this.endEventIndex) {
-
-                this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
-
-            } else {
-
-                this.drawTLCursor(rec.duration, rec.duration);
-
-            }
-
-            ctx.lineWidth = 2.0;
-            ctx.fillStyle = 'white';
-            ctx.strokeStyle = rec.color;
-            ctx.clearRect(0, 0, cw, ch);
-            ctx.moveTo(offsetLeft, offsetTop);
-            self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
-            ctx.stroke();
-
-            events.forEach(function (e, i, arr) {
-
-                //console.debug('---> posx:', posx);
-                //console.debug('---> e.time:', e.time);
-
-                if (e.eventNo) {
-
-                    pe = arr[i - 1];
-                    posx0 = posx;
-                    posx = offsetLeft + pxs * e.time;
-
-                    self.timeLineEvents.push({
-
-                        type: 'timeline',
-                        clientX: posx,
-                        clientY: cy,
-                        target: $('canvas', '#' + self.domId.timeline)[0],
-                        x: posx,
-                        y: offsetTop,
-                        event: e
+                        self.showMouseTooltip(e);
+                        self.highlightTimeLineEvent(e);
 
                     });
-
-                    ctx.beginPath();
-                    ctx.moveTo(posx0, offsetTop);
-                    if (e.drag) {
-
-                        ctx.setLineDash([3, 3]);
-
-                    }
-                    if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
-
-                        ctx.setLineDash([1, 2]);
-
-                    }
-                    ctx.lineTo(posx, offsetTop);
-                    ctx.stroke();
-                    ctx.setLineDash([]);
-
-                    if (i) {
-
-                        ctx.beginPath();
-                        self.drawEventPict(ctx, pe.type, posx0, offsetTop);
-                        ctx.stroke();
-                        ctx.fill();
-
-                    }
+*/
+                    $(cnv).show();
+                    rec.drawn = true;
+                    this.checkRecordCheckbox(sId);
 
                 }
-            });
 
-            self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
-            ctx.stroke();
-            ctx.fill();
+                return this;
 
-        };
+            };
 
-        this.drawTLCursor = function (pos, total) {
+            this.clearTimeline = function clearTimeline() {
 
-            var pars = this.getTimeLineCursorPars(pos, total),
-                offsetLeft = this.timeLineOffsetLeft;
+                var cnv = $('canvas', this.getDomElement('timeline'))[0],
+                    ctx = cnv.getContext('2d'),
+                    cw = window.innerWidth,
+                    ch = $(this.getDomElement('timeline')).height();
 
-            $(this.getDomElement('timelineCursor')).css(pars).show();
+                ctx.clearRect(0, 0, cw, ch);
 
-            $('.cursor-bg', this.getDomElement('timelineBrackets')).css({
+            };
 
-                top: $(this.getDomElement('timeline')).outerHeight() / 2,
-                left: offsetLeft,
-                width: pars.left - offsetLeft + 1
+            this.drawTimeline = function drawTimeline(rec) {
 
+                this.showTimelineStat(rec);
 
-            }).show();
+                var self = this,
+                    events = rec.events,
+                    cnv = $('canvas', this.getDomElement('timeline'))[0],
+                    ctx = cnv.getContext('2d'),
+                    cw = window.innerWidth,
+                    $tl = $(this.getDomElement('timeline')),
+                    ch = $tl.height(),
+                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                    offsetLeft = this.timeLineOffsetLeft,
+                    offsetTop = ch / 2,
+                    cy = window.innerHeight - ch + offsetTop,
+                    width = cw - offsetLeft - offsetRight,
+                    pxs = width / rec.duration,
+                    posx = offsetLeft,
+                    posx0, pe;
 
-        };
+                this.timeLineEvents = [];
+                cnv.width = cw;
+                cnv.height = ch;
+                $(cnv).width(cw);
+                $(cnv).height(ch);
+
+                if (this.endEventIndex) {
+
+                    this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
+
+                } /*else {
+
+                    this.drawTLCursor(rec.duration, rec.duration);
+
+                }
+*/
+                this.drawTLBrackets();
+
+                ctx.lineWidth = 2.0;
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = rec.color;
+                ctx.clearRect(0, 0, cw, ch);
+                ctx.moveTo(offsetLeft, offsetTop);
+                self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
+                ctx.stroke();
+
+                events.forEach(function (e, i, arr) {
+
+                    //console.debug('---> posx:', posx);
+                    //console.debug('---> e.time:', e.time);
+
+                    if (e.eventNo) {
+
+                        pe = arr[i - 1];
+                        posx0 = posx;
+                        posx = offsetLeft + pxs * e.time;
+
+                        self.timeLineEvents.push({
+
+                            type: 'timeline',
+                            clientX: posx,
+                            clientY: cy,
+                            target: $('canvas', '#' + self.domId.timeline)[0],
+                            x: posx,
+                            y: offsetTop,
+                            event: e
+
+                        });
+
+                        ctx.beginPath();
+                        ctx.moveTo(posx0, offsetTop);
+                        if (e.drag) {
+
+                            ctx.setLineDash([3, 3]);
+
+                        }
+                        if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
+
+                            ctx.setLineDash([1, 2]);
+
+                        }
+                        ctx.lineTo(posx, offsetTop);
+                        ctx.stroke();
+                        ctx.setLineDash([]);
+
+                        if (i) {
+
+                            ctx.beginPath();
+                            self.drawEventPict(ctx, pe.type, posx0, offsetTop);
+                            ctx.stroke();
+                            ctx.fill();
+
+                        }
+
+                    }
+                });
+
+                self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
+                ctx.stroke();
+                ctx.fill();
+
+            };
+
+            this.drawTLCursor = function (pos, total) {
+
+                var pars = this.getTimeLineCursorPars(pos, total);
+
+                $(this.getDomElement('timelineCursor')).css(pars).show();
+
+            };
+
+            this.drawTLBrackets = function (time1, time2) {
+
+                var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
+                    t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeRecord.duration,
+                    pars = this.getTimeLineBracketsPars(t1, t2);
+
+                $(this.getDomElement('timelineBrackets')).css(pars).show();
+
+            };
 
             this.showTimelineStat = function (rec) {
 
@@ -1992,17 +2011,13 @@
             this.getTimelineEvent = function getTimelineEvent(e) {
 
                 var te = this.timeLineEvents,
-                //pos = $(e.target).offset(),
                     abs = Math.abs,
-                //x = e.clientX - pos.left,
-                //y = e.clientY - pos.top,
-                    th = 5, evt, event = null,
+                    th = 7, evt, event = null,
                     i, il = te.length;
 
                 for (i = 0; i < il; i++) {
 
                     evt = te[i];
-                    //if (abs(x - evt.x) < th && abs(y - evt.y) < th) {
                     if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
 
                         event = evt;
@@ -2023,14 +2038,12 @@
                 this.startEventIndex = 0;
                 this.endEventIndex = event.index;
                 this.appMode = 'timeline';
+                this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
+                this.drawTLCursor(event.time, this.activeRecord.duration);
+                this.drawTLBrackets(this.timeBrackets[0], event.time);
                 if (window.location.pathname !== event.location) {
 
                     window.location = event.location;
-
-                } else {
-
-                    this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
-                    this.drawTLCursor(event.time, this.activeRecord.duration);
 
                 }
 
@@ -2113,9 +2126,17 @@
             this.playSession = function playSession(sId, eventIndex) {
 
                 var self = this,
-                    cnt = eventIndex || this.endEventIndex || 0,
+                    rec = this.getRecordById(sId);
+
+                if (!rec) {
+
+                    this.resetApp('');
+                    return;
+
+                }
+
+                var cnt = eventIndex || this.endEventIndex || 0,
                     delay = 20, speed = 2,
-                    rec = this.getRecordById(sId),
                     sData = rec.events,
                     pars = this.getTargetScreenPars(sData[cnt]),
                     el = pars.element,
@@ -2233,7 +2254,7 @@
 
                         function drawStep() {
 
-                            var x0, y0, x, y, el;
+                            var x0, y0, x, y, el, dts;
 
                             x0 = pars1.x + dx * step;
                             y0 = pars1.y + dy * step;
@@ -2243,7 +2264,9 @@
 
                                 x = pars1.x + dx * step;
                                 y = pars1.y + dy * step;
-                                self.drawTLCursor(etime + step * dt, recDuration);
+                                dts = etime + step * dt;
+                                self.drawTLCursor(dts, recDuration);
+                                self.drawTLBrackets(self.timeBrackets[0], dts);
                                 setTimeout(drawStep, delay);
 
                             } else {
@@ -2251,6 +2274,7 @@
                                 x = pars2.x;
                                 y = pars2.y;
                                 self.drawTLCursor(e2.time, recDuration);
+                                self.drawTLBrackets(self.timeBrackets[0], e2.time);
                                 setTimeout(function () {
 
                                     playEvent(pars2);
@@ -2396,6 +2420,7 @@
                         }
 
                         self.drawTLCursor(etime, recDuration);
+                        self.drawTLBrackets(self.timeBrackets[0], etime);
                         if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
 
                             if (steps) {
@@ -2434,7 +2459,6 @@
 
                         }
                         self.appMode = '';
-                        //self.sessionRec = null;
                         sessionStorage.removeItem('dcipherState');
 
                     }
@@ -2446,7 +2470,7 @@
                 this.activeRecord = rec;
 
                 // Reload initial session location on replay start
-                if (!cnt /*&& window.location.pathname !== sData[1].location*/) {
+                if (!cnt) {
 
                     this.endEventIndex = 1;
                     this.resetApp('play', sData[1].location);
@@ -2478,13 +2502,14 @@
                 $tlCursor.show();
                 this.hideRecList();
                 this.setActiveRecord(sId);
+                this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
                 ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
                 ctx.strokeStyle = rec.color;
-                if (eventIndex !== undefined) {
+                //if (eventIndex !== undefined) {
 
-                    this.showSpiderGraph(sId, 0, eventIndex + 1);
+                    this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
 
-                }
+                //}
 
                 setTimeout(function () {
 
@@ -2994,7 +3019,8 @@
                         if (self.appMode !== 'timeline') {
 
                             self.startEventIndex = 0;
-                            self.endEventIndex = r.events.length - 1;
+                            self.endEventIndex = 0; //r.events.length - 1;
+                            self.timeBrackets = [0, r.duration];
 
                         }
                         self.drawTimeline(r);
@@ -3185,7 +3211,8 @@
                         endEventIndex: this.endEventIndex,
                         testCase: this.testCase,
                         currentTask: this.currentTask,
-                        currentEvent: this.currentEvent
+                        currentEvent: this.currentEvent,
+                        timeBrackets: this.timeBrackets
 
                     }));
 
@@ -3249,6 +3276,7 @@
 
                     });
                     this.showTLTooltip(tEvt);
+                    this.drawTLBrackets();
                     sessionStorage.removeItem('dcipherState');
                     this.appMode = '';
 
@@ -3615,7 +3643,6 @@
 
                 var offsetRight = $(this.getDomElement('timelineInfo')).width(),
                     tl = this.getDomElement('timeline'),
-                    $tlc = $(this.getDomElement('timelineCursor')),
                     width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
                     pxs = width / duration,
                     top = $(tl).height() / 2,
@@ -3626,6 +3653,28 @@
                     top: top,
                     left: left
                 }
+
+            };
+
+            this.getTimeLineBracketsPars = function (time1, time2) {
+
+                var rec = this.activeRecord,
+                    duration = rec.duration,
+                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                    pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
+                    left = this.timeLineOffsetLeft + pxs * time1,
+                    width = this.timeLineOffsetLeft + pxs * time2 - left;
+
+                this.timeBrackets = [time1, time2];
+                return {
+
+                    width: width,
+                    left: left
+                }
+
+            };
+
+            this.moveTimelineBracket = function (e) {
 
             };
 
@@ -3657,16 +3706,18 @@
                 tLine = document.createElement('div'),
                 tlTT = document.createElement('div'),
                 tlCursor = document.createElement('div'),
-                tlCursorBg = document.createElement('div'),
+                tlBrackets = document.createElement('div'),
+                tlLeftBracket = document.createElement('div'),
+                tlRightBracket = document.createElement('div'),
                 tlCircle = document.createElement('div'),
                 tlInfo = document.createElement('div'),
-                tlCnv = document.createElement('canvas');
-            topMenu = document.createElement('div'),
+                tlCnv = document.createElement('canvas'),
+                topMenu = document.createElement('div'),
                 taskBar = document.createElement('div'),
-                startTest = document.createElement('span'),
+                startTest = document.createElement('span');
 
                 // D-Cipher container
-                dMain.id = dCipher.domId.container;
+            dMain.id = dCipher.domId.container;
             bdy.appendChild(dMain);
 
             // Init styles
@@ -3706,12 +3757,17 @@
             tLine.id = dCipher.domId.timeline;
             tlInfo.id = dCipher.domId.timelineInfo;
             tlCursor.id = dCipher.domId.timelineCursor;
-            tlCursorBg.className = 'cursor-bg';
+            tlBrackets.id = dCipher.domId.timelineBrackets;
+            tlBrackets.className = 'brackets';
+            tlRightBracket.className = 'right-bracket';
+            tlLeftBracket.className = 'left-bracket';
             tlCircle.id = dCipher.domId.timelineCircle;
-            tLine.appendChild(tlCursorBg);
+            tlBrackets.appendChild(tlRightBracket);
+            tlBrackets.appendChild(tlLeftBracket);
             tLine.appendChild(tlInfo);
             tLine.appendChild(tlCursor);
             tLine.appendChild(tlCnv);
+            tLine.appendChild(tlBrackets);
             tLine.appendChild(tlCircle);
             cnvDiv.appendChild(tLine);
 
@@ -3778,6 +3834,13 @@
 
             });
 
+            cnvDiv.addEventListener('mousemove', function (e) {
+
+                dCipher.showMouseTooltip(e);
+                dCipher.highlightTimeLineEvent(e);
+
+            });
+
             tlCnv.addEventListener('mousemove', function (e) {
 
                 dCipher.showTLTooltip(e);
@@ -3793,6 +3856,36 @@
                     dCipher.showTimelineEvent(evt.event);
 
                 }
+
+            });
+
+            tlBrackets.addEventListener('mousemove', function (e) {
+
+                dCipher.showTLTooltip(e);
+
+            });
+
+            tlBrackets.addEventListener('click', function (e) {
+
+                var evt = dCipher.getTimelineEvent(e);
+
+                if (evt) {
+
+                    dCipher.showTimelineEvent(evt.event);
+
+                }
+
+            });
+
+            tlLeftBracket.addEventListener('mousemove', function (e) {
+
+                dCipher.moveTimelineBracket(e);
+
+            });
+
+            tlLeftBracket.addEventListener('mousemove', function (e) {
+
+                dCipher.moveTimelineBracket(e);
 
             });
 
@@ -4082,1637 +4175,1636 @@
 
         document.addEventListener('DOMContentLoaded', initDomElements);
 
-    }
-    )
-    (window, document);
+    })
+(window, document);
 
 // jQuery plugins
-    function initJQueryPlugins() {
+function initJQueryPlugins() {
 
-        initColorPicker();
-        initIndexedDB();
+    initColorPicker();
+    initIndexedDB();
 
-        $.extend({
+    $.extend({
 
-            newGuid: function () {
+        newGuid: function () {
 
-                return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, function (c) {
 
-                    var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8;
-                    return v.toString(16);
+                var r = Math.random() * 16 | 0, v = c == 'x' ? r : r & 0x3 | 0x8;
+                return v.toString(16);
 
-                });
+            });
 
-            }
-
-        });
-
-    };
-
-// Indexed DB
-    function initIndexedDB() {
-
-        var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
-        var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
-        var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
-
-        IDBCursor.PREV = IDBCursor.PREV || "prev";
-        IDBCursor.NEXT = IDBCursor.NEXT || "next";
-
-        /**
-         * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
-         * supports strings
-         */
-        var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
-
-        function getDefaultTransaction(mode) {
-            var result = null;
-            switch (mode) {
-                case 0:
-                case 1:
-                case "readwrite":
-                case "readonly":
-                    result = mode;
-                    break;
-                default:
-                    result = IDBTransaction.READ_WRITE || "readwrite";
-            }
-            return result;
         }
 
-        $.extend({
-            /**
-             * The IndexedDB object used to open databases
-             * @param {Object} dbName - name of the database
-             * @param {Object} config - version, onupgradeneeded, onversionchange, schema
-             */
-            "indexedDB": function (dbName, config) {
-                if (config) {
-                    // Parse the config argument
-                    if (typeof config === "number") config = {
-                        "version": config
-                    };
+    });
 
-                    var version = config.version;
-                    if (config.schema && !version) {
-                        var max = -1;
-                        for (key in config.schema) {
-                            max = max > key ? max : key;
-                        }
-                        version = config.version || max;
-                    }
-                }
+};
 
-                var wrap = {
-                    "request": function (req, args) {
-                        return $.Deferred(function (dfd) {
-                            try {
-                                var idbRequest = typeof req === "function" ? req(args) : req;
-                                idbRequest.onsuccess = function (e) {
-                                    //console.log("Success", idbRequest, e, this);
-                                    dfd.resolveWith(idbRequest, [idbRequest.result, e]);
-                                };
-                                idbRequest.onerror = function (e) {
-                                    //console.log("Error", idbRequest, e, this);
-                                    dfd.rejectWith(idbRequest, [idbRequest.error, e]);
-                                };
-                                if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
-                                    idbRequest.onblocked = function (e) {
-                                        //console.log("Blocked", idbRequest, e, this);
-                                        var res;
-                                        try {
-                                            res = idbRequest.result;
-                                        }
-                                        catch (e) {
-                                            res = null; // Required for Older Chrome versions, accessing result causes error
-                                        }
-                                        dfd.notifyWith(idbRequest, [res, e]);
-                                    };
-                                }
-                                if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
-                                    idbRequest.onupgradeneeded = function (e) {
-                                        //console.log("Upgrade", idbRequest, e, this);
-                                        dfd.notifyWith(idbRequest, [idbRequest.result, e]);
-                                    };
-                                }
-                            }
-                            catch (e) {
-                                e.name = "exception";
-                                dfd.rejectWith(idbRequest, ["exception", e]);
-                            }
-                        });
-                    },
-                    // Wraps the IDBTransaction to return promises, and other dependent methods
-                    "transaction": function (idbTransaction) {
-                        return {
-                            "objectStore": function (storeName) {
-                                try {
-                                    return wrap.objectStore(idbTransaction.objectStore(storeName));
-                                }
-                                catch (e) {
-                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                                    return wrap.objectStore(null);
-                                }
-                            },
-                            "createObjectStore": function (storeName, storeParams) {
-                                try {
-                                    return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
-                                }
-                                catch (e) {
-                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                                }
-                            },
-                            "deleteObjectStore": function (storeName) {
-                                try {
-                                    idbTransaction.db.deleteObjectStore(storeName);
-                                }
-                                catch (e) {
-                                    idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
-                                }
-                            },
-                            "abort": function () {
-                                idbTransaction.abort();
-                            }
-                        };
-                    },
-                    "objectStore": function (idbObjectStore) {
-                        var result = {};
-                        // Define CRUD operations
-                        var crudOps = ["add", "put", "get", "delete", "clear", "count"];
-                        for (var i = 0; i < crudOps.length; i++) {
-                            result[crudOps[i]] = (function (op) {
-                                return function () {
-                                    return wrap.request(function (args) {
-                                        return idbObjectStore[op].apply(idbObjectStore, args);
-                                    }, arguments);
-                                };
-                            })(crudOps[i]);
-                        }
+// Indexed DB
+function initIndexedDB() {
 
-                        result.each = function (callback, range, direction) {
-                            return wrap.cursor(function () {
-                                if (direction) {
-                                    return idbObjectStore.openCursor(wrap.range(range), direction);
-                                } else {
-                                    return idbObjectStore.openCursor(wrap.range(range));
-                                }
-                            }, callback);
-                        };
+    var indexedDB = window.indexedDB || window.mozIndexedDB || window.webkitIndexedDB || window.msIndexedDB;
+    var IDBKeyRange = window.IDBKeyRange || window.webkitIDBKeyRange;
+    var IDBCursor = window.IDBCursor || window.webkitIDBCursor;
 
-                        result.index = function (name) {
-                            return wrap.index(function () {
-                                return idbObjectStore.index(name);
-                            });
-                        };
+    IDBCursor.PREV = IDBCursor.PREV || "prev";
+    IDBCursor.NEXT = IDBCursor.NEXT || "next";
 
-                        result.createIndex = function (prop, options, indexName) {
-                            if (arguments.length === 2 && typeof options === "string") {
-                                indexName = arguments[1];
-                                options = null;
-                            }
-                            if (!indexName) {
-                                indexName = prop;
-                            }
-                            return wrap.index(function () {
-                                return idbObjectStore.createIndex(indexName, prop, options);
-                            });
-                        };
+    /**
+     * Best to use the constant IDBTransaction since older version support numeric types while the latest spec
+     * supports strings
+     */
+    var IDBTransaction = window.IDBTransaction || window.webkitIDBTransaction;
 
-                        result.deleteIndex = function (indexName) {
-                            return idbObjectStore.deleteIndex(indexName);
-                        };
+    function getDefaultTransaction(mode) {
+        var result = null;
+        switch (mode) {
+            case 0:
+            case 1:
+            case "readwrite":
+            case "readonly":
+                result = mode;
+                break;
+            default:
+                result = IDBTransaction.READ_WRITE || "readwrite";
+        }
+        return result;
+    }
 
-                        return result;
-                    },
-
-                    "range": function (r) {
-                        if ($.isArray(r)) {
-                            if (r.length === 1) {
-                                return IDBKeyRange.only(r[0]);
-                            } else {
-                                return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
-                            }
-                        } else if (typeof r === "undefined") {
-                            return null;
-                        } else {
-                            return r;
-                        }
-                    },
-
-                    "cursor": function (idbCursor, callback) {
-                        return $.Deferred(function (dfd) {
-                            try {
-                                //console.log("Cursor request created", idbCursor);
-                                var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
-                                cursorReq.onsuccess = function (e) {
-                                    //console.log("Cursor successful");
-                                    if (!cursorReq.result) {
-                                        dfd.resolveWith(cursorReq, [null, e]);
-                                        return;
-                                    }
-                                    var elem = {
-                                        // Delete, update do not move
-                                        "delete": function () {
-                                            return wrap.request(function () {
-                                                return cursorReq.result["delete"]();
-                                            });
-                                        },
-                                        "update": function (data) {
-                                            return wrap.request(function () {
-                                                return cursorReq.result["update"](data);
-                                            });
-                                        },
-                                        "next": function (key) {
-                                            this.data = key;
-                                        },
-                                        "key": cursorReq.result.key,
-                                        "value": cursorReq.result.value
-                                    };
-                                    //console.log("Cursor in progress", elem, e);
-                                    dfd.notifyWith(cursorReq, [elem, e]);
-                                    var result = callback.apply(cursorReq, [elem]);
-                                    //console.log("Iteration function returned", result);
-                                    try {
-                                        if (result === false) {
-                                            dfd.resolveWith(cursorReq, [null, e]);
-                                        } else if (typeof result === "number") {
-                                            cursorReq.result["advance"].apply(cursorReq.result, [result]);
-                                        } else {
-                                            if (elem.data) cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
-                                            else cursorReq.result["continue"]();
-                                        }
-                                    }
-                                    catch (e) {
-                                        //console.log("Exception when trying to advance cursor", cursorReq, e);
-                                        dfd.rejectWith(cursorReq, [cursorReq.result, e]);
-                                    }
-                                };
-                                cursorReq.onerror = function (e) {
-                                    //console.log("Cursor request errored out", e);
-                                    dfd.rejectWith(cursorReq, [cursorReq.result, e]);
-                                };
-                            }
-                            catch (e) {
-                                //console.log("An exception occured inside cursor", cursorReq, e);
-                                e.type = "exception";
-                                dfd.rejectWith(cursorReq, [null, e]);
-                            }
-                        });
-                    },
-
-                    "index": function (index) {
-                        try {
-                            var idbIndex = (typeof index === "function" ? index() : index);
-                        }
-                        catch (e) {
-                            idbIndex = null;
-                        }
-                        //console.logidbIndex, index);
-                        return {
-                            "each": function (callback, range, direction) {
-                                return wrap.cursor(function () {
-                                    if (direction) {
-                                        return idbIndex.openCursor(wrap.range(range), direction);
-                                    } else {
-                                        return idbIndex.openCursor(wrap.range(range));
-                                    }
-
-                                }, callback);
-                            },
-                            "eachKey": function (callback, range, direction) {
-                                return wrap.cursor(function () {
-                                    if (direction) {
-                                        return idbIndex.openKeyCursor(wrap.range(range), direction);
-                                    } else {
-                                        return idbIndex.openKeyCursor(wrap.range(range));
-                                    }
-                                }, callback);
-                            },
-                            "get": function (key) {
-                                if (typeof idbIndex.get === "function") {
-                                    return wrap.request(idbIndex.get(key));
-                                } else {
-                                    return idbIndex.openCursor(wrap.range(key));
-                                }
-                            },
-                            "getKey": function (key) {
-                                if (typeof idbIndex.getKey === "function") {
-                                    return wrap.request(idbIndex.getKey(key));
-                                } else {
-                                    return idbIndex.openKeyCursor(wrap.range(key));
-                                }
-                            }
-                        };
-                    }
+    $.extend({
+        /**
+         * The IndexedDB object used to open databases
+         * @param {Object} dbName - name of the database
+         * @param {Object} config - version, onupgradeneeded, onversionchange, schema
+         */
+        "indexedDB": function (dbName, config) {
+            if (config) {
+                // Parse the config argument
+                if (typeof config === "number") config = {
+                    "version": config
                 };
 
-                // Start with opening the database
-                var dbPromise = wrap.request(function () {
-                    //console.log("Trying to open DB with", version);
-                    return version ? indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
-                });
-                dbPromise.then(function (db, e) {
-                    //console.log("DB opened at", db.version);
-                    db.onversionchange = function () {
-                        // Try to automatically close the database if there is a version change request
-                        if (!(config && config.onversionchange && config.onversionchange() !== false)) {
-                            db.close();
-                        }
-                    };
-                }, function (error, e) {
-                    //console.logerror, e);
-                    // Nothing much to do if an error occurs
-                }, function (db, e) {
-                    if (e && e.type === "upgradeneeded") {
-                        if (config && config.schema) {
-                            // Assuming that version is always an integer
-                            //console.log("Upgrading DB to ", db.version);
-                            for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
-                                typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
+                var version = config.version;
+                if (config.schema && !version) {
+                    var max = -1;
+                    for (key in config.schema) {
+                        max = max > key ? max : key;
+                    }
+                    version = config.version || max;
+                }
+            }
+
+            var wrap = {
+                "request": function (req, args) {
+                    return $.Deferred(function (dfd) {
+                        try {
+                            var idbRequest = typeof req === "function" ? req(args) : req;
+                            idbRequest.onsuccess = function (e) {
+                                //console.log("Success", idbRequest, e, this);
+                                dfd.resolveWith(idbRequest, [idbRequest.result, e]);
+                            };
+                            idbRequest.onerror = function (e) {
+                                //console.log("Error", idbRequest, e, this);
+                                dfd.rejectWith(idbRequest, [idbRequest.error, e]);
+                            };
+                            if (typeof idbRequest.onblocked !== "undefined" && idbRequest.onblocked === null) {
+                                idbRequest.onblocked = function (e) {
+                                    //console.log("Blocked", idbRequest, e, this);
+                                    var res;
+                                    try {
+                                        res = idbRequest.result;
+                                    }
+                                    catch (e) {
+                                        res = null; // Required for Older Chrome versions, accessing result causes error
+                                    }
+                                    dfd.notifyWith(idbRequest, [res, e]);
+                                };
+                            }
+                            if (typeof idbRequest.onupgradeneeded !== "undefined" && idbRequest.onupgradeneeded === null) {
+                                idbRequest.onupgradeneeded = function (e) {
+                                    //console.log("Upgrade", idbRequest, e, this);
+                                    dfd.notifyWith(idbRequest, [idbRequest.result, e]);
+                                };
                             }
                         }
-                        if (config && typeof config.upgrade === "function") {
-                            config.upgrade.call(this, wrap.transaction(this.transaction));
+                        catch (e) {
+                            e.name = "exception";
+                            dfd.rejectWith(idbRequest, ["exception", e]);
+                        }
+                    });
+                },
+                // Wraps the IDBTransaction to return promises, and other dependent methods
+                "transaction": function (idbTransaction) {
+                    return {
+                        "objectStore": function (storeName) {
+                            try {
+                                return wrap.objectStore(idbTransaction.objectStore(storeName));
+                            }
+                            catch (e) {
+                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                                return wrap.objectStore(null);
+                            }
+                        },
+                        "createObjectStore": function (storeName, storeParams) {
+                            try {
+                                return wrap.objectStore(idbTransaction.db.createObjectStore(storeName, storeParams));
+                            }
+                            catch (e) {
+                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                            }
+                        },
+                        "deleteObjectStore": function (storeName) {
+                            try {
+                                idbTransaction.db.deleteObjectStore(storeName);
+                            }
+                            catch (e) {
+                                idbTransaction.readyState !== idbTransaction.DONE && idbTransaction.abort();
+                            }
+                        },
+                        "abort": function () {
+                            idbTransaction.abort();
+                        }
+                    };
+                },
+                "objectStore": function (idbObjectStore) {
+                    var result = {};
+                    // Define CRUD operations
+                    var crudOps = ["add", "put", "get", "delete", "clear", "count"];
+                    for (var i = 0; i < crudOps.length; i++) {
+                        result[crudOps[i]] = (function (op) {
+                            return function () {
+                                return wrap.request(function (args) {
+                                    return idbObjectStore[op].apply(idbObjectStore, args);
+                                }, arguments);
+                            };
+                        })(crudOps[i]);
+                    }
+
+                    result.each = function (callback, range, direction) {
+                        return wrap.cursor(function () {
+                            if (direction) {
+                                return idbObjectStore.openCursor(wrap.range(range), direction);
+                            } else {
+                                return idbObjectStore.openCursor(wrap.range(range));
+                            }
+                        }, callback);
+                    };
+
+                    result.index = function (name) {
+                        return wrap.index(function () {
+                            return idbObjectStore.index(name);
+                        });
+                    };
+
+                    result.createIndex = function (prop, options, indexName) {
+                        if (arguments.length === 2 && typeof options === "string") {
+                            indexName = arguments[1];
+                            options = null;
+                        }
+                        if (!indexName) {
+                            indexName = prop;
+                        }
+                        return wrap.index(function () {
+                            return idbObjectStore.createIndex(indexName, prop, options);
+                        });
+                    };
+
+                    result.deleteIndex = function (indexName) {
+                        return idbObjectStore.deleteIndex(indexName);
+                    };
+
+                    return result;
+                },
+
+                "range": function (r) {
+                    if ($.isArray(r)) {
+                        if (r.length === 1) {
+                            return IDBKeyRange.only(r[0]);
+                        } else {
+                            return IDBKeyRange.bound(r[0], r[1], r[2] || true, r[3] || true);
+                        }
+                    } else if (typeof r === "undefined") {
+                        return null;
+                    } else {
+                        return r;
+                    }
+                },
+
+                "cursor": function (idbCursor, callback) {
+                    return $.Deferred(function (dfd) {
+                        try {
+                            //console.log("Cursor request created", idbCursor);
+                            var cursorReq = typeof idbCursor === "function" ? idbCursor() : idbCursor;
+                            cursorReq.onsuccess = function (e) {
+                                //console.log("Cursor successful");
+                                if (!cursorReq.result) {
+                                    dfd.resolveWith(cursorReq, [null, e]);
+                                    return;
+                                }
+                                var elem = {
+                                    // Delete, update do not move
+                                    "delete": function () {
+                                        return wrap.request(function () {
+                                            return cursorReq.result["delete"]();
+                                        });
+                                    },
+                                    "update": function (data) {
+                                        return wrap.request(function () {
+                                            return cursorReq.result["update"](data);
+                                        });
+                                    },
+                                    "next": function (key) {
+                                        this.data = key;
+                                    },
+                                    "key": cursorReq.result.key,
+                                    "value": cursorReq.result.value
+                                };
+                                //console.log("Cursor in progress", elem, e);
+                                dfd.notifyWith(cursorReq, [elem, e]);
+                                var result = callback.apply(cursorReq, [elem]);
+                                //console.log("Iteration function returned", result);
+                                try {
+                                    if (result === false) {
+                                        dfd.resolveWith(cursorReq, [null, e]);
+                                    } else if (typeof result === "number") {
+                                        cursorReq.result["advance"].apply(cursorReq.result, [result]);
+                                    } else {
+                                        if (elem.data) cursorReq.result["continue"].apply(cursorReq.result, [elem.data]);
+                                        else cursorReq.result["continue"]();
+                                    }
+                                }
+                                catch (e) {
+                                    //console.log("Exception when trying to advance cursor", cursorReq, e);
+                                    dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+                                }
+                            };
+                            cursorReq.onerror = function (e) {
+                                //console.log("Cursor request errored out", e);
+                                dfd.rejectWith(cursorReq, [cursorReq.result, e]);
+                            };
+                        }
+                        catch (e) {
+                            //console.log("An exception occured inside cursor", cursorReq, e);
+                            e.type = "exception";
+                            dfd.rejectWith(cursorReq, [null, e]);
+                        }
+                    });
+                },
+
+                "index": function (index) {
+                    try {
+                        var idbIndex = (typeof index === "function" ? index() : index);
+                    }
+                    catch (e) {
+                        idbIndex = null;
+                    }
+                    //console.logidbIndex, index);
+                    return {
+                        "each": function (callback, range, direction) {
+                            return wrap.cursor(function () {
+                                if (direction) {
+                                    return idbIndex.openCursor(wrap.range(range), direction);
+                                } else {
+                                    return idbIndex.openCursor(wrap.range(range));
+                                }
+
+                            }, callback);
+                        },
+                        "eachKey": function (callback, range, direction) {
+                            return wrap.cursor(function () {
+                                if (direction) {
+                                    return idbIndex.openKeyCursor(wrap.range(range), direction);
+                                } else {
+                                    return idbIndex.openKeyCursor(wrap.range(range));
+                                }
+                            }, callback);
+                        },
+                        "get": function (key) {
+                            if (typeof idbIndex.get === "function") {
+                                return wrap.request(idbIndex.get(key));
+                            } else {
+                                return idbIndex.openCursor(wrap.range(key));
+                            }
+                        },
+                        "getKey": function (key) {
+                            if (typeof idbIndex.getKey === "function") {
+                                return wrap.request(idbIndex.getKey(key));
+                            } else {
+                                return idbIndex.openKeyCursor(wrap.range(key));
+                            }
+                        }
+                    };
+                }
+            };
+
+            // Start with opening the database
+            var dbPromise = wrap.request(function () {
+                //console.log("Trying to open DB with", version);
+                return version ? indexedDB.open(dbName, parseInt(version)) : indexedDB.open(dbName);
+            });
+            dbPromise.then(function (db, e) {
+                //console.log("DB opened at", db.version);
+                db.onversionchange = function () {
+                    // Try to automatically close the database if there is a version change request
+                    if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+                        db.close();
+                    }
+                };
+            }, function (error, e) {
+                //console.logerror, e);
+                // Nothing much to do if an error occurs
+            }, function (db, e) {
+                if (e && e.type === "upgradeneeded") {
+                    if (config && config.schema) {
+                        // Assuming that version is always an integer
+                        //console.log("Upgrading DB to ", db.version);
+                        for (var i = e.oldVersion + 1; i <= e.newVersion; i++) {
+                            typeof config.schema[i] === "function" && config.schema[i].call(this, wrap.transaction(this.transaction));
                         }
                     }
-                });
+                    if (config && typeof config.upgrade === "function") {
+                        config.upgrade.call(this, wrap.transaction(this.transaction));
+                    }
+                }
+            });
 
-                return $.extend(dbPromise, {
-                    "cmp": function (key1, key2) {
-                        return indexedDB.cmp(key1, key2);
-                    },
-                    "deleteDatabase": function () {
-                        // Kinda looks ugly coz DB is opened before it needs to be deleted.
-                        // Blame it on the API
-                        return $.Deferred(function (dfd) {
-                            dbPromise.then(function (db, e) {
-                                db.close();
-                                wrap.request(function () {
-                                    return indexedDB.deleteDatabase(dbName);
-                                }).then(function (result, e) {
-                                    dfd.resolveWith(this, [result, e]);
-                                }, function (error, e) {
-                                    dfd.rejectWith(this, [error, e]);
-                                }, function (db, e) {
-                                    dfd.notifyWith(this, [db, e]);
-                                });
+            return $.extend(dbPromise, {
+                "cmp": function (key1, key2) {
+                    return indexedDB.cmp(key1, key2);
+                },
+                "deleteDatabase": function () {
+                    // Kinda looks ugly coz DB is opened before it needs to be deleted.
+                    // Blame it on the API
+                    return $.Deferred(function (dfd) {
+                        dbPromise.then(function (db, e) {
+                            db.close();
+                            wrap.request(function () {
+                                return indexedDB.deleteDatabase(dbName);
+                            }).then(function (result, e) {
+                                dfd.resolveWith(this, [result, e]);
                             }, function (error, e) {
                                 dfd.rejectWith(this, [error, e]);
                             }, function (db, e) {
                                 dfd.notifyWith(this, [db, e]);
                             });
+                        }, function (error, e) {
+                            dfd.rejectWith(this, [error, e]);
+                        }, function (db, e) {
+                            dfd.notifyWith(this, [db, e]);
                         });
-                    },
-                    "transaction": function (storeNames, mode) {
-                        !$.isArray(storeNames) && (storeNames = [storeNames]);
-                        mode = getDefaultTransaction(mode);
-                        return $.Deferred(function (dfd) {
-                            dbPromise.then(function (db, e) {
-                                var idbTransaction;
-                                try {
-                                    //console.log("DB Opened, now trying to create a transaction", storeNames, mode);
-                                    idbTransaction = db.transaction(storeNames, mode);
-                                    //console.log("Created a transaction", idbTransaction, mode, storeNames);
-                                    idbTransaction.onabort = idbTransaction.onerror = function (e) {
-                                        dfd.rejectWith(idbTransaction, [e]);
-                                    };
-                                    idbTransaction.oncomplete = function (e) {
-                                        dfd.resolveWith(idbTransaction, [e]);
-                                    };
-                                }
-                                catch (e) {
-                                    //console.log("Creating a traction failed", e, storeNames, mode, this);
-                                    e.type = "exception";
-                                    dfd.rejectWith(this, [e]);
-                                    return;
-                                }
-                                try {
-                                    dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
-                                }
-                                catch (e) {
-                                    e.type = "exception";
-                                    dfd.rejectWith(this, [e]);
-                                }
-                            }, function (err, e) {
-                                dfd.rejectWith(this, [e, err]);
-                            }, function (res, e) {
-                                //console.log("Database open is blocked or upgrade needed", res, e.type);
-                                //dfd.notifyWith(this, ["", e]);
-                            });
-
-                        });
-                    },
-                    "objectStore": function (storeName, mode) {
-                        var me = this, result = {};
-
-                        function op(callback) {
-                            return $.Deferred(function (dfd) {
-                                function onTransactionProgress(trans, callback) {
-                                    try {
-                                        //console.log("Finally, returning the object store", trans);
-                                        callback(trans.objectStore(storeName)).then(function (result, e) {
-                                            dfd.resolveWith(this, [result, e]);
-                                        }, function (err, e) {
-                                            dfd.rejectWith(this, [err, e]);
-                                        });
-                                    }
-                                    catch (e) {
-                                        //console.log("Duh, an exception occured", e);
-                                        e.name = "exception";
-                                        dfd.rejectWith(trans, [e, e]);
-                                    }
-                                }
-
-                                me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
-                                    //console.log("Transaction completed");
-                                    // Nothing to do when transaction is complete
-                                }, function (err, e) {
-                                    // If transaction fails, CrudOp fails
-                                    if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
-                                        //console.log("Object Not found, so will try to create one now");
-                                        var db = this.result;
-                                        db.close();
-                                        dbPromise = wrap.request(function () {
-                                            //console.log("Now trying to open the database again", db.version);
-                                            return indexedDB.open(dbName, (parseInt(db.version, 10) || 1) + 1);
-                                        });
-                                        dbPromise.then(function (db, e) {
-                                            //console.log("Database opened, tto open transaction", db.version);
-                                            db.onversionchange = function () {
-                                                // Try to automatically close the database if there is a version change request
-                                                if (!(config && config.onversionchange && config.onversionchange() !== false)) {
-                                                    db.close();
-                                                }
-                                            };
-                                            me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
-                                                //console.log("Transaction completed when trying to create object store");
-                                                // Nothing much to do
-                                            }, function (err, e) {
-                                                dfd.rejectWith(this, [err, e]);
-                                            }, function (trans, e) {
-                                                //console.log("Transaction in progress, when object store was not found", this, trans, e);
-                                                onTransactionProgress(trans, callback);
-                                            });
-                                        }, function (err, e) {
-                                            dfd.rejectWith(this, [err, e]);
-                                        }, function (db, e) {
-                                            if (e.type === "upgradeneeded") {
-                                                try {
-                                                    //console.log("Now trying to create an object store", e.type);
-                                                    db.createObjectStore(storeName, mode === true ? {
-                                                        "autoIncrement": true
-                                                    } : mode);
-                                                    //console.log("Object store created", storeName, db);
-                                                }
-                                                catch (ex) {
-                                                    //console.log("Exception when trying ot create a new object store", ex);
-                                                    dfd.rejectWith(this, [ex, e]);
-                                                }
-                                            }
-                                        });
-                                    } else {
-                                        //console.log("Error in transaction inside object store", err);
-                                        dfd.rejectWith(this, [err, e]);
-                                    }
-                                }, function (trans) {
-                                    //console.log("Transaction is in progress", trans);
-                                    onTransactionProgress(trans, callback);
-                                });
-                            });
-                        }
-
-                        function crudOp(opName, args) {
-                            return op(function (wrappedObjectStore) {
-                                return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
-                            });
-                        }
-
-                        function indexOp(opName, indexName, args) {
-                            return op(function (wrappedObjectStore) {
-                                var index = wrappedObjectStore.index(indexName);
-                                return index[opName].apply(index[opName], args);
-                            });
-                        }
-
-                        var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
-                        for (var i = 0; i < crud.length; i++) {
-                            result[crud[i]] = (function (op) {
-                                return function () {
-                                    return crudOp(op, arguments);
+                    });
+                },
+                "transaction": function (storeNames, mode) {
+                    !$.isArray(storeNames) && (storeNames = [storeNames]);
+                    mode = getDefaultTransaction(mode);
+                    return $.Deferred(function (dfd) {
+                        dbPromise.then(function (db, e) {
+                            var idbTransaction;
+                            try {
+                                //console.log("DB Opened, now trying to create a transaction", storeNames, mode);
+                                idbTransaction = db.transaction(storeNames, mode);
+                                //console.log("Created a transaction", idbTransaction, mode, storeNames);
+                                idbTransaction.onabort = idbTransaction.onerror = function (e) {
+                                    dfd.rejectWith(idbTransaction, [e]);
                                 };
-                            })(crud[i]);
-                        }
+                                idbTransaction.oncomplete = function (e) {
+                                    dfd.resolveWith(idbTransaction, [e]);
+                                };
+                            }
+                            catch (e) {
+                                //console.log("Creating a traction failed", e, storeNames, mode, this);
+                                e.type = "exception";
+                                dfd.rejectWith(this, [e]);
+                                return;
+                            }
+                            try {
+                                dfd.notifyWith(idbTransaction, [wrap.transaction(idbTransaction)]);
+                            }
+                            catch (e) {
+                                e.type = "exception";
+                                dfd.rejectWith(this, [e]);
+                            }
+                        }, function (err, e) {
+                            dfd.rejectWith(this, [e, err]);
+                        }, function (res, e) {
+                            //console.log("Database open is blocked or upgrade needed", res, e.type);
+                            //dfd.notifyWith(this, ["", e]);
+                        });
 
-                        result.index = function (indexName) {
-                            return {
-                                "each": function (callback, range, direction) {
-                                    return indexOp("each", indexName, [callback, range, direction]);
-                                },
-                                "eachKey": function (callback, range, direction) {
-                                    return indexOp("eachKey", indexName, [callback, range, direction]);
-                                },
-                                "get": function (key) {
-                                    return indexOp("get", indexName, [key]);
-                                },
-                                "getKey": function (key) {
-                                    return indexOp("getKey", indexName, [key]);
+                    });
+                },
+                "objectStore": function (storeName, mode) {
+                    var me = this, result = {};
+
+                    function op(callback) {
+                        return $.Deferred(function (dfd) {
+                            function onTransactionProgress(trans, callback) {
+                                try {
+                                    //console.log("Finally, returning the object store", trans);
+                                    callback(trans.objectStore(storeName)).then(function (result, e) {
+                                        dfd.resolveWith(this, [result, e]);
+                                    }, function (err, e) {
+                                        dfd.rejectWith(this, [err, e]);
+                                    });
                                 }
-                            };
-                        };
+                                catch (e) {
+                                    //console.log("Duh, an exception occured", e);
+                                    e.name = "exception";
+                                    dfd.rejectWith(trans, [e, e]);
+                                }
+                            }
 
-                        return result;
+                            me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
+                                //console.log("Transaction completed");
+                                // Nothing to do when transaction is complete
+                            }, function (err, e) {
+                                // If transaction fails, CrudOp fails
+                                if (err.code === err.NOT_FOUND_ERR && (mode === true || typeof mode === "object")) {
+                                    //console.log("Object Not found, so will try to create one now");
+                                    var db = this.result;
+                                    db.close();
+                                    dbPromise = wrap.request(function () {
+                                        //console.log("Now trying to open the database again", db.version);
+                                        return indexedDB.open(dbName, (parseInt(db.version, 10) || 1) + 1);
+                                    });
+                                    dbPromise.then(function (db, e) {
+                                        //console.log("Database opened, tto open transaction", db.version);
+                                        db.onversionchange = function () {
+                                            // Try to automatically close the database if there is a version change request
+                                            if (!(config && config.onversionchange && config.onversionchange() !== false)) {
+                                                db.close();
+                                            }
+                                        };
+                                        me.transaction(storeName, getDefaultTransaction(mode)).then(function () {
+                                            //console.log("Transaction completed when trying to create object store");
+                                            // Nothing much to do
+                                        }, function (err, e) {
+                                            dfd.rejectWith(this, [err, e]);
+                                        }, function (trans, e) {
+                                            //console.log("Transaction in progress, when object store was not found", this, trans, e);
+                                            onTransactionProgress(trans, callback);
+                                        });
+                                    }, function (err, e) {
+                                        dfd.rejectWith(this, [err, e]);
+                                    }, function (db, e) {
+                                        if (e.type === "upgradeneeded") {
+                                            try {
+                                                //console.log("Now trying to create an object store", e.type);
+                                                db.createObjectStore(storeName, mode === true ? {
+                                                    "autoIncrement": true
+                                                } : mode);
+                                                //console.log("Object store created", storeName, db);
+                                            }
+                                            catch (ex) {
+                                                //console.log("Exception when trying ot create a new object store", ex);
+                                                dfd.rejectWith(this, [ex, e]);
+                                            }
+                                        }
+                                    });
+                                } else {
+                                    //console.log("Error in transaction inside object store", err);
+                                    dfd.rejectWith(this, [err, e]);
+                                }
+                            }, function (trans) {
+                                //console.log("Transaction is in progress", trans);
+                                onTransactionProgress(trans, callback);
+                            });
+                        });
                     }
-                });
-            }
-        });
 
-        $.indexedDB.IDBCursor = IDBCursor;
-        $.indexedDB.IDBTransaction = IDBTransaction;
-        $.idb = $.indexedDB;
-    };
+                    function crudOp(opName, args) {
+                        return op(function (wrappedObjectStore) {
+                            return wrappedObjectStore[opName].apply(wrappedObjectStore, args);
+                        });
+                    }
+
+                    function indexOp(opName, indexName, args) {
+                        return op(function (wrappedObjectStore) {
+                            var index = wrappedObjectStore.index(indexName);
+                            return index[opName].apply(index[opName], args);
+                        });
+                    }
+
+                    var crud = ["add", "delete", "get", "put", "clear", "count", "each"];
+                    for (var i = 0; i < crud.length; i++) {
+                        result[crud[i]] = (function (op) {
+                            return function () {
+                                return crudOp(op, arguments);
+                            };
+                        })(crud[i]);
+                    }
+
+                    result.index = function (indexName) {
+                        return {
+                            "each": function (callback, range, direction) {
+                                return indexOp("each", indexName, [callback, range, direction]);
+                            },
+                            "eachKey": function (callback, range, direction) {
+                                return indexOp("eachKey", indexName, [callback, range, direction]);
+                            },
+                            "get": function (key) {
+                                return indexOp("get", indexName, [key]);
+                            },
+                            "getKey": function (key) {
+                                return indexOp("getKey", indexName, [key]);
+                            }
+                        };
+                    };
+
+                    return result;
+                }
+            });
+        }
+    });
+
+    $.indexedDB.IDBCursor = IDBCursor;
+    $.indexedDB.IDBTransaction = IDBTransaction;
+    $.idb = $.indexedDB;
+};
 
 // Bootstrap color picker
-    /*!
-     * Bootstrap Colorpicker
-     * http://mjolnic.github.io/bootstrap-colorpicker/
-     *
-     * Originally written by (c) 2012 Stefan Petre
-     * Licensed under the Apache License v2.0
-     * http://www.apache.org/licenses/LICENSE-2.0.txt
-     *
-     * @todo Update DOCS
-     */
+/*!
+ * Bootstrap Colorpicker
+ * http://mjolnic.github.io/bootstrap-colorpicker/
+ *
+ * Originally written by (c) 2012 Stefan Petre
+ * Licensed under the Apache License v2.0
+ * http://www.apache.org/licenses/LICENSE-2.0.txt
+ *
+ * @todo Update DOCS
+ */
 
-    /*
-     (function(factory) {
-     "use strict";
-     if (typeof exports === 'object') {
-     module.exports = factory(window.jQuery);
-     } else if (typeof define === 'function' && define.amd) {
-     define(['jquery'], factory);
-     } else if (window.jQuery && !window.jQuery.fn.colorpicker) {
-     factory(window.jQuery);
-     }
-     }
-     */
+/*
+ (function(factory) {
+ "use strict";
+ if (typeof exports === 'object') {
+ module.exports = factory(window.jQuery);
+ } else if (typeof define === 'function' && define.amd) {
+ define(['jquery'], factory);
+ } else if (window.jQuery && !window.jQuery.fn.colorpicker) {
+ factory(window.jQuery);
+ }
+ }
+ */
 
-    function initColorPicker() {
-        'use strict';
+function initColorPicker() {
+    'use strict';
 
-        // Color object
-        var Color = function (val, customColors) {
-            this.value = {
-                h: 0,
-                s: 0,
-                b: 0,
-                a: 1
-            };
-            this.origFormat = null; // original string format
-            if (customColors) {
-                $.extend(this.colors, customColors);
-            }
-            if (val) {
-                if (val.toLowerCase !== undefined) {
-                    // cast to string
-                    val = val + '';
-                    this.setColor(val);
-                } else if (val.h !== undefined) {
-                    this.value = val;
-                }
-            }
+    // Color object
+    var Color = function (val, customColors) {
+        this.value = {
+            h: 0,
+            s: 0,
+            b: 0,
+            a: 1
         };
+        this.origFormat = null; // original string format
+        if (customColors) {
+            $.extend(this.colors, customColors);
+        }
+        if (val) {
+            if (val.toLowerCase !== undefined) {
+                // cast to string
+                val = val + '';
+                this.setColor(val);
+            } else if (val.h !== undefined) {
+                this.value = val;
+            }
+        }
+    };
 
-        Color.prototype = {
-            constructor: Color,
-            // 140 predefined colors from the HTML Colors spec
-            colors: {
-                "aliceblue": "#f0f8ff",
-                "antiquewhite": "#faebd7",
-                "aqua": "#00ffff",
-                "aquamarine": "#7fffd4",
-                "azure": "#f0ffff",
-                "beige": "#f5f5dc",
-                "bisque": "#ffe4c4",
-                "black": "#000000",
-                "blanchedalmond": "#ffebcd",
-                "blue": "#0000ff",
-                "blueviolet": "#8a2be2",
-                "brown": "#a52a2a",
-                "burlywood": "#deb887",
-                "cadetblue": "#5f9ea0",
-                "chartreuse": "#7fff00",
-                "chocolate": "#d2691e",
-                "coral": "#ff7f50",
-                "cornflowerblue": "#6495ed",
-                "cornsilk": "#fff8dc",
-                "crimson": "#dc143c",
-                "cyan": "#00ffff",
-                "darkblue": "#00008b",
-                "darkcyan": "#008b8b",
-                "darkgoldenrod": "#b8860b",
-                "darkgray": "#a9a9a9",
-                "darkgreen": "#006400",
-                "darkkhaki": "#bdb76b",
-                "darkmagenta": "#8b008b",
-                "darkolivegreen": "#556b2f",
-                "darkorange": "#ff8c00",
-                "darkorchid": "#9932cc",
-                "darkred": "#8b0000",
-                "darksalmon": "#e9967a",
-                "darkseagreen": "#8fbc8f",
-                "darkslateblue": "#483d8b",
-                "darkslategray": "#2f4f4f",
-                "darkturquoise": "#00ced1",
-                "darkviolet": "#9400d3",
-                "deeppink": "#ff1493",
-                "deepskyblue": "#00bfff",
-                "dimgray": "#696969",
-                "dodgerblue": "#1e90ff",
-                "firebrick": "#b22222",
-                "floralwhite": "#fffaf0",
-                "forestgreen": "#228b22",
-                "fuchsia": "#ff00ff",
-                "gainsboro": "#dcdcdc",
-                "ghostwhite": "#f8f8ff",
-                "gold": "#ffd700",
-                "goldenrod": "#daa520",
-                "gray": "#808080",
-                "green": "#008000",
-                "greenyellow": "#adff2f",
-                "honeydew": "#f0fff0",
-                "hotpink": "#ff69b4",
-                "indianred": "#cd5c5c",
-                "indigo": "#4b0082",
-                "ivory": "#fffff0",
-                "khaki": "#f0e68c",
-                "lavender": "#e6e6fa",
-                "lavenderblush": "#fff0f5",
-                "lawngreen": "#7cfc00",
-                "lemonchiffon": "#fffacd",
-                "lightblue": "#add8e6",
-                "lightcoral": "#f08080",
-                "lightcyan": "#e0ffff",
-                "lightgoldenrodyellow": "#fafad2",
-                "lightgrey": "#d3d3d3",
-                "lightgreen": "#90ee90",
-                "lightpink": "#ffb6c1",
-                "lightsalmon": "#ffa07a",
-                "lightseagreen": "#20b2aa",
-                "lightskyblue": "#87cefa",
-                "lightslategray": "#778899",
-                "lightsteelblue": "#b0c4de",
-                "lightyellow": "#ffffe0",
-                "lime": "#00ff00",
-                "limegreen": "#32cd32",
-                "linen": "#faf0e6",
-                "magenta": "#ff00ff",
-                "maroon": "#800000",
-                "mediumaquamarine": "#66cdaa",
-                "mediumblue": "#0000cd",
-                "mediumorchid": "#ba55d3",
-                "mediumpurple": "#9370d8",
-                "mediumseagreen": "#3cb371",
-                "mediumslateblue": "#7b68ee",
-                "mediumspringgreen": "#00fa9a",
-                "mediumturquoise": "#48d1cc",
-                "mediumvioletred": "#c71585",
-                "midnightblue": "#191970",
-                "mintcream": "#f5fffa",
-                "mistyrose": "#ffe4e1",
-                "moccasin": "#ffe4b5",
-                "navajowhite": "#ffdead",
-                "navy": "#000080",
-                "oldlace": "#fdf5e6",
-                "olive": "#808000",
-                "olivedrab": "#6b8e23",
-                "orange": "#ffa500",
-                "orangered": "#ff4500",
-                "orchid": "#da70d6",
-                "palegoldenrod": "#eee8aa",
-                "palegreen": "#98fb98",
-                "paleturquoise": "#afeeee",
-                "palevioletred": "#d87093",
-                "papayawhip": "#ffefd5",
-                "peachpuff": "#ffdab9",
-                "peru": "#cd853f",
-                "pink": "#ffc0cb",
-                "plum": "#dda0dd",
-                "powderblue": "#b0e0e6",
-                "purple": "#800080",
-                "red": "#ff0000",
-                "rosybrown": "#bc8f8f",
-                "royalblue": "#4169e1",
-                "saddlebrown": "#8b4513",
-                "salmon": "#fa8072",
-                "sandybrown": "#f4a460",
-                "seagreen": "#2e8b57",
-                "seashell": "#fff5ee",
-                "sienna": "#a0522d",
-                "silver": "#c0c0c0",
-                "skyblue": "#87ceeb",
-                "slateblue": "#6a5acd",
-                "slategray": "#708090",
-                "snow": "#fffafa",
-                "springgreen": "#00ff7f",
-                "steelblue": "#4682b4",
-                "tan": "#d2b48c",
-                "teal": "#008080",
-                "thistle": "#d8bfd8",
-                "tomato": "#ff6347",
-                "turquoise": "#40e0d0",
-                "violet": "#ee82ee",
-                "wheat": "#f5deb3",
-                "white": "#ffffff",
-                "whitesmoke": "#f5f5f5",
-                "yellow": "#ffff00",
-                "yellowgreen": "#9acd32",
-                "transparent": "transparent"
-            },
-            _sanitizeNumber: function (val) {
-                if (typeof val === 'number') {
-                    return val;
-                }
-                if (isNaN(val) || (val === null) || (val === '') || (val === undefined)) {
-                    return 1;
-                }
-                if (val.toLowerCase !== undefined) {
-                    return parseFloat(val);
-                }
+    Color.prototype = {
+        constructor: Color,
+        // 140 predefined colors from the HTML Colors spec
+        colors: {
+            "aliceblue": "#f0f8ff",
+            "antiquewhite": "#faebd7",
+            "aqua": "#00ffff",
+            "aquamarine": "#7fffd4",
+            "azure": "#f0ffff",
+            "beige": "#f5f5dc",
+            "bisque": "#ffe4c4",
+            "black": "#000000",
+            "blanchedalmond": "#ffebcd",
+            "blue": "#0000ff",
+            "blueviolet": "#8a2be2",
+            "brown": "#a52a2a",
+            "burlywood": "#deb887",
+            "cadetblue": "#5f9ea0",
+            "chartreuse": "#7fff00",
+            "chocolate": "#d2691e",
+            "coral": "#ff7f50",
+            "cornflowerblue": "#6495ed",
+            "cornsilk": "#fff8dc",
+            "crimson": "#dc143c",
+            "cyan": "#00ffff",
+            "darkblue": "#00008b",
+            "darkcyan": "#008b8b",
+            "darkgoldenrod": "#b8860b",
+            "darkgray": "#a9a9a9",
+            "darkgreen": "#006400",
+            "darkkhaki": "#bdb76b",
+            "darkmagenta": "#8b008b",
+            "darkolivegreen": "#556b2f",
+            "darkorange": "#ff8c00",
+            "darkorchid": "#9932cc",
+            "darkred": "#8b0000",
+            "darksalmon": "#e9967a",
+            "darkseagreen": "#8fbc8f",
+            "darkslateblue": "#483d8b",
+            "darkslategray": "#2f4f4f",
+            "darkturquoise": "#00ced1",
+            "darkviolet": "#9400d3",
+            "deeppink": "#ff1493",
+            "deepskyblue": "#00bfff",
+            "dimgray": "#696969",
+            "dodgerblue": "#1e90ff",
+            "firebrick": "#b22222",
+            "floralwhite": "#fffaf0",
+            "forestgreen": "#228b22",
+            "fuchsia": "#ff00ff",
+            "gainsboro": "#dcdcdc",
+            "ghostwhite": "#f8f8ff",
+            "gold": "#ffd700",
+            "goldenrod": "#daa520",
+            "gray": "#808080",
+            "green": "#008000",
+            "greenyellow": "#adff2f",
+            "honeydew": "#f0fff0",
+            "hotpink": "#ff69b4",
+            "indianred": "#cd5c5c",
+            "indigo": "#4b0082",
+            "ivory": "#fffff0",
+            "khaki": "#f0e68c",
+            "lavender": "#e6e6fa",
+            "lavenderblush": "#fff0f5",
+            "lawngreen": "#7cfc00",
+            "lemonchiffon": "#fffacd",
+            "lightblue": "#add8e6",
+            "lightcoral": "#f08080",
+            "lightcyan": "#e0ffff",
+            "lightgoldenrodyellow": "#fafad2",
+            "lightgrey": "#d3d3d3",
+            "lightgreen": "#90ee90",
+            "lightpink": "#ffb6c1",
+            "lightsalmon": "#ffa07a",
+            "lightseagreen": "#20b2aa",
+            "lightskyblue": "#87cefa",
+            "lightslategray": "#778899",
+            "lightsteelblue": "#b0c4de",
+            "lightyellow": "#ffffe0",
+            "lime": "#00ff00",
+            "limegreen": "#32cd32",
+            "linen": "#faf0e6",
+            "magenta": "#ff00ff",
+            "maroon": "#800000",
+            "mediumaquamarine": "#66cdaa",
+            "mediumblue": "#0000cd",
+            "mediumorchid": "#ba55d3",
+            "mediumpurple": "#9370d8",
+            "mediumseagreen": "#3cb371",
+            "mediumslateblue": "#7b68ee",
+            "mediumspringgreen": "#00fa9a",
+            "mediumturquoise": "#48d1cc",
+            "mediumvioletred": "#c71585",
+            "midnightblue": "#191970",
+            "mintcream": "#f5fffa",
+            "mistyrose": "#ffe4e1",
+            "moccasin": "#ffe4b5",
+            "navajowhite": "#ffdead",
+            "navy": "#000080",
+            "oldlace": "#fdf5e6",
+            "olive": "#808000",
+            "olivedrab": "#6b8e23",
+            "orange": "#ffa500",
+            "orangered": "#ff4500",
+            "orchid": "#da70d6",
+            "palegoldenrod": "#eee8aa",
+            "palegreen": "#98fb98",
+            "paleturquoise": "#afeeee",
+            "palevioletred": "#d87093",
+            "papayawhip": "#ffefd5",
+            "peachpuff": "#ffdab9",
+            "peru": "#cd853f",
+            "pink": "#ffc0cb",
+            "plum": "#dda0dd",
+            "powderblue": "#b0e0e6",
+            "purple": "#800080",
+            "red": "#ff0000",
+            "rosybrown": "#bc8f8f",
+            "royalblue": "#4169e1",
+            "saddlebrown": "#8b4513",
+            "salmon": "#fa8072",
+            "sandybrown": "#f4a460",
+            "seagreen": "#2e8b57",
+            "seashell": "#fff5ee",
+            "sienna": "#a0522d",
+            "silver": "#c0c0c0",
+            "skyblue": "#87ceeb",
+            "slateblue": "#6a5acd",
+            "slategray": "#708090",
+            "snow": "#fffafa",
+            "springgreen": "#00ff7f",
+            "steelblue": "#4682b4",
+            "tan": "#d2b48c",
+            "teal": "#008080",
+            "thistle": "#d8bfd8",
+            "tomato": "#ff6347",
+            "turquoise": "#40e0d0",
+            "violet": "#ee82ee",
+            "wheat": "#f5deb3",
+            "white": "#ffffff",
+            "whitesmoke": "#f5f5f5",
+            "yellow": "#ffff00",
+            "yellowgreen": "#9acd32",
+            "transparent": "transparent"
+        },
+        _sanitizeNumber: function (val) {
+            if (typeof val === 'number') {
+                return val;
+            }
+            if (isNaN(val) || (val === null) || (val === '') || (val === undefined)) {
                 return 1;
-            },
-            isTransparent: function (strVal) {
-                if (!strVal) {
-                    return false;
-                }
-                strVal = strVal.toLowerCase().trim();
-                return (strVal === 'transparent') || (strVal.match(/#?00000000/)) || (strVal.match(/(rgba|hsla)\(0,0,0,0?\.?0\)/));
-            },
-            rgbaIsTransparent: function (rgba) {
-                return ((rgba.r === 0) && (rgba.g === 0) && (rgba.b === 0) && (rgba.a === 0));
-            },
-            //parse a string to HSB
-            setColor: function (strVal) {
-                strVal = strVal.toLowerCase().trim();
-                if (strVal) {
-                    if (this.isTransparent(strVal)) {
-                        this.value = {
+            }
+            if (val.toLowerCase !== undefined) {
+                return parseFloat(val);
+            }
+            return 1;
+        },
+        isTransparent: function (strVal) {
+            if (!strVal) {
+                return false;
+            }
+            strVal = strVal.toLowerCase().trim();
+            return (strVal === 'transparent') || (strVal.match(/#?00000000/)) || (strVal.match(/(rgba|hsla)\(0,0,0,0?\.?0\)/));
+        },
+        rgbaIsTransparent: function (rgba) {
+            return ((rgba.r === 0) && (rgba.g === 0) && (rgba.b === 0) && (rgba.a === 0));
+        },
+        //parse a string to HSB
+        setColor: function (strVal) {
+            strVal = strVal.toLowerCase().trim();
+            if (strVal) {
+                if (this.isTransparent(strVal)) {
+                    this.value = {
+                        h: 0,
+                        s: 0,
+                        b: 0,
+                        a: 0
+                    };
+                } else {
+                    this.value = this.stringToHSB(strVal) || {
                             h: 0,
                             s: 0,
                             b: 0,
-                            a: 0
-                        };
+                            a: 1
+                        }; // if parser fails, defaults to black
+                }
+            }
+        },
+        stringToHSB: function (strVal) {
+            strVal = strVal.toLowerCase();
+            var alias;
+            if (typeof this.colors[strVal] !== 'undefined') {
+                strVal = this.colors[strVal];
+                alias = 'alias';
+            }
+            var that = this,
+                result = false;
+            $.each(this.stringParsers, function (i, parser) {
+                var match = parser.re.exec(strVal),
+                    values = match && parser.parse.apply(that, [match]),
+                    format = alias || parser.format || 'rgba';
+                if (values) {
+                    if (format.match(/hsla?/)) {
+                        result = that.RGBtoHSB.apply(that, that.HSLtoRGB.apply(that, values));
                     } else {
-                        this.value = this.stringToHSB(strVal) || {
-                                h: 0,
-                                s: 0,
-                                b: 0,
-                                a: 1
-                            }; // if parser fails, defaults to black
+                        result = that.RGBtoHSB.apply(that, values);
                     }
+                    that.origFormat = format;
+                    return false;
                 }
-            },
-            stringToHSB: function (strVal) {
-                strVal = strVal.toLowerCase();
-                var alias;
-                if (typeof this.colors[strVal] !== 'undefined') {
-                    strVal = this.colors[strVal];
-                    alias = 'alias';
-                }
-                var that = this,
-                    result = false;
-                $.each(this.stringParsers, function (i, parser) {
-                    var match = parser.re.exec(strVal),
-                        values = match && parser.parse.apply(that, [match]),
-                        format = alias || parser.format || 'rgba';
-                    if (values) {
-                        if (format.match(/hsla?/)) {
-                            result = that.RGBtoHSB.apply(that, that.HSLtoRGB.apply(that, values));
-                        } else {
-                            result = that.RGBtoHSB.apply(that, values);
-                        }
-                        that.origFormat = format;
-                        return false;
-                    }
-                    return true;
-                });
-                return result;
-            },
-            setHue: function (h) {
-                this.value.h = 1 - h;
-            },
-            setSaturation: function (s) {
-                this.value.s = s;
-            },
-            setBrightness: function (b) {
-                this.value.b = 1 - b;
-            },
-            setAlpha: function (a) {
-                this.value.a = parseInt((1 - a) * 100, 10) / 100;
-            },
-            toRGB: function (h, s, b, a) {
-                if (!h) {
-                    h = this.value.h;
-                    s = this.value.s;
-                    b = this.value.b;
-                }
-                h *= 360;
-                var R, G, B, X, C;
-                h = (h % 360) / 60;
-                C = b * s;
-                X = C * (1 - Math.abs(h % 2 - 1));
-                R = G = B = b - C;
-
-                h = ~~h;
-                R += [C, X, 0, 0, X, C][h];
-                G += [X, C, C, X, 0, 0][h];
-                B += [0, 0, X, C, C, X][h];
-                return {
-                    r: Math.round(R * 255),
-                    g: Math.round(G * 255),
-                    b: Math.round(B * 255),
-                    a: a || this.value.a
-                };
-            },
-            toHex: function (h, s, b, a) {
-                var rgb = this.toRGB(h, s, b, a);
-                if (this.rgbaIsTransparent(rgb)) {
-                    return 'transparent';
-                }
-                return '#' + ((1 << 24) | (parseInt(rgb.r) << 16) | (parseInt(rgb.g) << 8) | parseInt(rgb.b)).toString(16).substr(1);
-            },
-            toHSL: function (h, s, b, a) {
-                h = h || this.value.h;
-                s = s || this.value.s;
-                b = b || this.value.b;
-                a = a || this.value.a;
-
-                var H = h,
-                    L = (2 - s) * b,
-                    S = s * b;
-                if (L > 0 && L <= 1) {
-                    S /= L;
-                } else {
-                    S /= 2 - L;
-                }
-                L /= 2;
-                if (S > 1) {
-                    S = 1;
-                }
-                return {
-                    h: isNaN(H) ? 0 : H,
-                    s: isNaN(S) ? 0 : S,
-                    l: isNaN(L) ? 0 : L,
-                    a: isNaN(a) ? 0 : a
-                };
-            },
-            toAlias: function (r, g, b, a) {
-                var rgb = this.toHex(r, g, b, a);
-                for (var alias in this.colors) {
-                    if (this.colors[alias] === rgb) {
-                        return alias;
-                    }
-                }
-                return false;
-            },
-            RGBtoHSB: function (r, g, b, a) {
-                r /= 255;
-                g /= 255;
-                b /= 255;
-
-                var H, S, V, C;
-                V = Math.max(r, g, b);
-                C = V - Math.min(r, g, b);
-                H = (C === 0 ? null :
-                     V === r ? (g - b) / C :
-                     V === g ? (b - r) / C + 2 :
-                     (r - g) / C + 4
-                );
-                H = ((H + 360) % 6) * 60 / 360;
-                S = C === 0 ? 0 : C / V;
-                return {
-                    h: this._sanitizeNumber(H),
-                    s: S,
-                    b: V,
-                    a: this._sanitizeNumber(a)
-                };
-            },
-            HueToRGB: function (p, q, h) {
-                if (h < 0) {
-                    h += 1;
-                } else if (h > 1) {
-                    h -= 1;
-                }
-                if ((h * 6) < 1) {
-                    return p + (q - p) * h * 6;
-                } else if ((h * 2) < 1) {
-                    return q;
-                } else if ((h * 3) < 2) {
-                    return p + (q - p) * ((2 / 3) - h) * 6;
-                } else {
-                    return p;
-                }
-            },
-            HSLtoRGB: function (h, s, l, a) {
-                if (s < 0) {
-                    s = 0;
-                }
-                var q;
-                if (l <= 0.5) {
-                    q = l * (1 + s);
-                } else {
-                    q = l + s - (l * s);
-                }
-
-                var p = 2 * l - q;
-
-                var tr = h + (1 / 3);
-                var tg = h;
-                var tb = h - (1 / 3);
-
-                var r = Math.round(this.HueToRGB(p, q, tr) * 255);
-                var g = Math.round(this.HueToRGB(p, q, tg) * 255);
-                var b = Math.round(this.HueToRGB(p, q, tb) * 255);
-                return [r, g, b, this._sanitizeNumber(a)];
-            },
-            toString: function (format) {
-                format = format || 'rgba';
-                var c = false;
-                switch (format) {
-                    case 'rgb':
-                    {
-                        c = this.toRGB();
-                        if (this.rgbaIsTransparent(c)) {
-                            return 'transparent';
-                        }
-                        return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
-                    }
-                        break;
-                    case 'rgba':
-                    {
-                        c = this.toRGB();
-                        return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')';
-                    }
-                        break;
-                    case 'hsl':
-                    {
-                        c = this.toHSL();
-                        return 'hsl(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%)';
-                    }
-                        break;
-                    case 'hsla':
-                    {
-                        c = this.toHSL();
-                        return 'hsla(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%,' + c.a + ')';
-                    }
-                        break;
-                    case 'hex':
-                    {
-                        return this.toHex();
-                    }
-                        break;
-                    case 'alias':
-                        return this.toAlias() || this.toHex();
-                    default:
-                    {
-                        return c;
-                    }
-                        break;
-                }
-            },
-            // a set of RE's that can match strings and generate color tuples.
-            // from John Resig color plugin
-            // https://github.com/jquery/jquery-color/
-            stringParsers: [{
-                re: /rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*?\)/,
-                format: 'rgb',
-                parse: function (execResult) {
-                    return [
-                        execResult[1],
-                        execResult[2],
-                        execResult[3],
-                        1
-                    ];
-                }
-            }, {
-                re: /rgb\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
-                format: 'rgb',
-                parse: function (execResult) {
-                    return [
-                        2.55 * execResult[1],
-                        2.55 * execResult[2],
-                        2.55 * execResult[3],
-                        1
-                    ];
-                }
-            }, {
-                re: /rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-                format: 'rgba',
-                parse: function (execResult) {
-                    return [
-                        execResult[1],
-                        execResult[2],
-                        execResult[3],
-                        execResult[4]
-                    ];
-                }
-            }, {
-                re: /rgba\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-                format: 'rgba',
-                parse: function (execResult) {
-                    return [
-                        2.55 * execResult[1],
-                        2.55 * execResult[2],
-                        2.55 * execResult[3],
-                        execResult[4]
-                    ];
-                }
-            }, {
-                re: /hsl\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
-                format: 'hsl',
-                parse: function (execResult) {
-                    return [
-                        execResult[1] / 360,
-                        execResult[2] / 100,
-                        execResult[3] / 100,
-                        execResult[4]
-                    ];
-                }
-            }, {
-                re: /hsla\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
-                format: 'hsla',
-                parse: function (execResult) {
-                    return [
-                        execResult[1] / 360,
-                        execResult[2] / 100,
-                        execResult[3] / 100,
-                        execResult[4]
-                    ];
-                }
-            }, {
-                re: /#?([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
-                format: 'hex',
-                parse: function (execResult) {
-                    return [
-                        parseInt(execResult[1], 16),
-                        parseInt(execResult[2], 16),
-                        parseInt(execResult[3], 16),
-                        1
-                    ];
-                }
-            }, {
-                re: /#?([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/,
-                format: 'hex',
-                parse: function (execResult) {
-                    return [
-                        parseInt(execResult[1] + execResult[1], 16),
-                        parseInt(execResult[2] + execResult[2], 16),
-                        parseInt(execResult[3] + execResult[3], 16),
-                        1
-                    ];
-                }
+                return true;
+            });
+            return result;
+        },
+        setHue: function (h) {
+            this.value.h = 1 - h;
+        },
+        setSaturation: function (s) {
+            this.value.s = s;
+        },
+        setBrightness: function (b) {
+            this.value.b = 1 - b;
+        },
+        setAlpha: function (a) {
+            this.value.a = parseInt((1 - a) * 100, 10) / 100;
+        },
+        toRGB: function (h, s, b, a) {
+            if (!h) {
+                h = this.value.h;
+                s = this.value.s;
+                b = this.value.b;
             }
-            ],
-            colorNameToHex: function (name) {
-                if (typeof this.colors[name.toLowerCase()] !== 'undefined') {
-                    return this.colors[name.toLowerCase()];
-                }
-                return false;
-            }
-        };
+            h *= 360;
+            var R, G, B, X, C;
+            h = (h % 360) / 60;
+            C = b * s;
+            X = C * (1 - Math.abs(h % 2 - 1));
+            R = G = B = b - C;
 
-        var defaults = {
-            horizontal: false, // horizontal mode layout ?
-            inline: false, //forces to show the colorpicker as an inline element
-            color: false, //forces a color
-            format: false, //forces a format
-            input: 'input', // children input selector
-            container: false, // container selector
-            component: '.add-on, .input-group-addon', // children component selector
-            sliders: {
-                saturation: {
-                    maxLeft: 100,
-                    maxTop: 100,
-                    callLeft: 'setSaturation',
-                    callTop: 'setBrightness'
-                },
-                hue: {
-                    maxLeft: 0,
-                    maxTop: 100,
-                    callLeft: false,
-                    callTop: 'setHue'
-                },
-                alpha: {
-                    maxLeft: 0,
-                    maxTop: 100,
-                    callLeft: false,
-                    callTop: 'setAlpha'
-                }
-            },
-            slidersHorz: {
-                saturation: {
-                    maxLeft: 100,
-                    maxTop: 100,
-                    callLeft: 'setSaturation',
-                    callTop: 'setBrightness'
-                },
-                hue: {
-                    maxLeft: 100,
-                    maxTop: 0,
-                    callLeft: 'setHue',
-                    callTop: false
-                },
-                alpha: {
-                    maxLeft: 100,
-                    maxTop: 0,
-                    callLeft: 'setAlpha',
-                    callTop: false
-                }
-            },
-            template: '<div class="bs-colorpicker dropdown-menu">' +
-                      '<div class="bs-colorpicker-saturation"><i><b></b></i></div>' +
-                      '<div class="bs-colorpicker-hue"><i></i></div>' +
-                      '<div class="bs-colorpicker-alpha"><i></i></div>' +
-                      '<div class="bs-colorpicker-color"><div /></div>' +
-                      '<div class="bs-colorpicker-selectors"></div>' +
-                      '</div>',
-            align: 'right',
-            customClass: null,
-            colorSelectors: null
-        };
-
-        var Colorpicker = function (element, options) {
-            this.element = $(element).addClass('bs-colorpicker-element');
-            this.options = $.extend(true, {}, defaults, this.element.data(), options);
-            this.component = this.options.component;
-            this.component = (this.component !== false) ? this.element.find(this.component) : false;
-            if (this.component && (this.component.length === 0)) {
-                this.component = false;
+            h = ~~h;
+            R += [C, X, 0, 0, X, C][h];
+            G += [X, C, C, X, 0, 0][h];
+            B += [0, 0, X, C, C, X][h];
+            return {
+                r: Math.round(R * 255),
+                g: Math.round(G * 255),
+                b: Math.round(B * 255),
+                a: a || this.value.a
+            };
+        },
+        toHex: function (h, s, b, a) {
+            var rgb = this.toRGB(h, s, b, a);
+            if (this.rgbaIsTransparent(rgb)) {
+                return 'transparent';
             }
-            this.container = (this.options.container === true) ? this.element : this.options.container;
-            this.container = (this.container !== false) ? $(this.container) : false;
+            return '#' + ((1 << 24) | (parseInt(rgb.r) << 16) | (parseInt(rgb.g) << 8) | parseInt(rgb.b)).toString(16).substr(1);
+        },
+        toHSL: function (h, s, b, a) {
+            h = h || this.value.h;
+            s = s || this.value.s;
+            b = b || this.value.b;
+            a = a || this.value.a;
 
-            // Is the element an input? Should we search inside for any input?
-            this.input = this.element.is('input') ? this.element : (this.options.input ?
-                                                                    this.element.find(this.options.input) : false);
-            if (this.input && (this.input.length === 0)) {
-                this.input = false;
-            }
-            // Set HSB color
-            this.color = new Color(this.options.color !== false ? this.options.color : this.getValue(), this.options.colorSelectors);
-            this.format = this.options.format !== false ? this.options.format : this.color.origFormat;
-
-            // Setup picker
-            this.picker = $(this.options.template);
-            if (this.options.customClass) {
-                this.picker.addClass(this.options.customClass);
-            }
-            if (this.options.inline) {
-                this.picker.addClass('bs-colorpicker-inline bs-colorpicker-visible');
+            var H = h,
+                L = (2 - s) * b,
+                S = s * b;
+            if (L > 0 && L <= 1) {
+                S /= L;
             } else {
-                this.picker.addClass('bs-colorpicker-hidden');
+                S /= 2 - L;
             }
-            if (this.options.horizontal) {
-                this.picker.addClass('bs-colorpicker-horizontal');
+            L /= 2;
+            if (S > 1) {
+                S = 1;
             }
-            if (this.format === 'rgba' || this.format === 'hsla' || this.options.format === false) {
-                this.picker.addClass('bs-colorpicker-with-alpha');
-            }
-            if (this.options.align === 'right') {
-                this.picker.addClass('bs-colorpicker-right');
-            }
-            if (this.options.colorSelectors) {
-                var colorpicker = this;
-                $.each(this.options.colorSelectors, function (name, color) {
-                    var $btn = $('<i />').css('background-color', color).data('class', name);
-                    $btn.click(function () {
-                        colorpicker.setValue($(this).css('background-color'));
-                    });
-                    colorpicker.picker.find('.bs-colorpicker-selectors').append($btn);
-                });
-                this.picker.find('.bs-colorpicker-selectors').show();
-            }
-            this.picker.on('mousedown.bs-colorpicker touchstart.bs-colorpicker', $.proxy(this.mousedown, this));
-            this.picker.appendTo(this.container ? this.container : $('body'));
-
-            // Bind events
-            if (this.input !== false) {
-                this.input.on({
-                    'keyup.bs-colorpicker': $.proxy(this.keyup, this)
-                });
-                this.input.on({
-                    'change.bs-colorpicker': $.proxy(this.change, this)
-                });
-                if (this.component === false) {
-                    this.element.on({
-                        'focus.bs-colorpicker': $.proxy(this.show, this)
-                    });
-                }
-                if (this.options.inline === false) {
-                    this.element.on({
-                        'focusout.bs-colorpicker': $.proxy(this.hide, this)
-                    });
+            return {
+                h: isNaN(H) ? 0 : H,
+                s: isNaN(S) ? 0 : S,
+                l: isNaN(L) ? 0 : L,
+                a: isNaN(a) ? 0 : a
+            };
+        },
+        toAlias: function (r, g, b, a) {
+            var rgb = this.toHex(r, g, b, a);
+            for (var alias in this.colors) {
+                if (this.colors[alias] === rgb) {
+                    return alias;
                 }
             }
+            return false;
+        },
+        RGBtoHSB: function (r, g, b, a) {
+            r /= 255;
+            g /= 255;
+            b /= 255;
 
-            if (this.component !== false) {
-                this.component.on({
-                    'click.bs-colorpicker': $.proxy(this.show, this)
-                });
+            var H, S, V, C;
+            V = Math.max(r, g, b);
+            C = V - Math.min(r, g, b);
+            H = (C === 0 ? null :
+                 V === r ? (g - b) / C :
+                 V === g ? (b - r) / C + 2 :
+                 (r - g) / C + 4
+            );
+            H = ((H + 360) % 6) * 60 / 360;
+            S = C === 0 ? 0 : C / V;
+            return {
+                h: this._sanitizeNumber(H),
+                s: S,
+                b: V,
+                a: this._sanitizeNumber(a)
+            };
+        },
+        HueToRGB: function (p, q, h) {
+            if (h < 0) {
+                h += 1;
+            } else if (h > 1) {
+                h -= 1;
+            }
+            if ((h * 6) < 1) {
+                return p + (q - p) * h * 6;
+            } else if ((h * 2) < 1) {
+                return q;
+            } else if ((h * 3) < 2) {
+                return p + (q - p) * ((2 / 3) - h) * 6;
+            } else {
+                return p;
+            }
+        },
+        HSLtoRGB: function (h, s, l, a) {
+            if (s < 0) {
+                s = 0;
+            }
+            var q;
+            if (l <= 0.5) {
+                q = l * (1 + s);
+            } else {
+                q = l + s - (l * s);
             }
 
-            if ((this.input === false) && (this.component === false)) {
+            var p = 2 * l - q;
+
+            var tr = h + (1 / 3);
+            var tg = h;
+            var tb = h - (1 / 3);
+
+            var r = Math.round(this.HueToRGB(p, q, tr) * 255);
+            var g = Math.round(this.HueToRGB(p, q, tg) * 255);
+            var b = Math.round(this.HueToRGB(p, q, tb) * 255);
+            return [r, g, b, this._sanitizeNumber(a)];
+        },
+        toString: function (format) {
+            format = format || 'rgba';
+            var c = false;
+            switch (format) {
+                case 'rgb':
+                {
+                    c = this.toRGB();
+                    if (this.rgbaIsTransparent(c)) {
+                        return 'transparent';
+                    }
+                    return 'rgb(' + c.r + ',' + c.g + ',' + c.b + ')';
+                }
+                    break;
+                case 'rgba':
+                {
+                    c = this.toRGB();
+                    return 'rgba(' + c.r + ',' + c.g + ',' + c.b + ',' + c.a + ')';
+                }
+                    break;
+                case 'hsl':
+                {
+                    c = this.toHSL();
+                    return 'hsl(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%)';
+                }
+                    break;
+                case 'hsla':
+                {
+                    c = this.toHSL();
+                    return 'hsla(' + Math.round(c.h * 360) + ',' + Math.round(c.s * 100) + '%,' + Math.round(c.l * 100) + '%,' + c.a + ')';
+                }
+                    break;
+                case 'hex':
+                {
+                    return this.toHex();
+                }
+                    break;
+                case 'alias':
+                    return this.toAlias() || this.toHex();
+                default:
+                {
+                    return c;
+                }
+                    break;
+            }
+        },
+        // a set of RE's that can match strings and generate color tuples.
+        // from John Resig color plugin
+        // https://github.com/jquery/jquery-color/
+        stringParsers: [{
+            re: /rgb\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*?\)/,
+            format: 'rgb',
+            parse: function (execResult) {
+                return [
+                    execResult[1],
+                    execResult[2],
+                    execResult[3],
+                    1
+                ];
+            }
+        }, {
+            re: /rgb\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
+            format: 'rgb',
+            parse: function (execResult) {
+                return [
+                    2.55 * execResult[1],
+                    2.55 * execResult[2],
+                    2.55 * execResult[3],
+                    1
+                ];
+            }
+        }, {
+            re: /rgba\(\s*(\d{1,3})\s*,\s*(\d{1,3})\s*,\s*(\d{1,3})\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+            format: 'rgba',
+            parse: function (execResult) {
+                return [
+                    execResult[1],
+                    execResult[2],
+                    execResult[3],
+                    execResult[4]
+                ];
+            }
+        }, {
+            re: /rgba\(\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+            format: 'rgba',
+            parse: function (execResult) {
+                return [
+                    2.55 * execResult[1],
+                    2.55 * execResult[2],
+                    2.55 * execResult[3],
+                    execResult[4]
+                ];
+            }
+        }, {
+            re: /hsl\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*?\)/,
+            format: 'hsl',
+            parse: function (execResult) {
+                return [
+                    execResult[1] / 360,
+                    execResult[2] / 100,
+                    execResult[3] / 100,
+                    execResult[4]
+                ];
+            }
+        }, {
+            re: /hsla\(\s*(\d+(?:\.\d+)?)\s*,\s*(\d+(?:\.\d+)?)\%\s*,\s*(\d+(?:\.\d+)?)\%\s*(?:,\s*(\d+(?:\.\d+)?)\s*)?\)/,
+            format: 'hsla',
+            parse: function (execResult) {
+                return [
+                    execResult[1] / 360,
+                    execResult[2] / 100,
+                    execResult[3] / 100,
+                    execResult[4]
+                ];
+            }
+        }, {
+            re: /#?([a-fA-F0-9]{2})([a-fA-F0-9]{2})([a-fA-F0-9]{2})/,
+            format: 'hex',
+            parse: function (execResult) {
+                return [
+                    parseInt(execResult[1], 16),
+                    parseInt(execResult[2], 16),
+                    parseInt(execResult[3], 16),
+                    1
+                ];
+            }
+        }, {
+            re: /#?([a-fA-F0-9])([a-fA-F0-9])([a-fA-F0-9])/,
+            format: 'hex',
+            parse: function (execResult) {
+                return [
+                    parseInt(execResult[1] + execResult[1], 16),
+                    parseInt(execResult[2] + execResult[2], 16),
+                    parseInt(execResult[3] + execResult[3], 16),
+                    1
+                ];
+            }
+        }
+        ],
+        colorNameToHex: function (name) {
+            if (typeof this.colors[name.toLowerCase()] !== 'undefined') {
+                return this.colors[name.toLowerCase()];
+            }
+            return false;
+        }
+    };
+
+    var defaults = {
+        horizontal: false, // horizontal mode layout ?
+        inline: false, //forces to show the colorpicker as an inline element
+        color: false, //forces a color
+        format: false, //forces a format
+        input: 'input', // children input selector
+        container: false, // container selector
+        component: '.add-on, .input-group-addon', // children component selector
+        sliders: {
+            saturation: {
+                maxLeft: 100,
+                maxTop: 100,
+                callLeft: 'setSaturation',
+                callTop: 'setBrightness'
+            },
+            hue: {
+                maxLeft: 0,
+                maxTop: 100,
+                callLeft: false,
+                callTop: 'setHue'
+            },
+            alpha: {
+                maxLeft: 0,
+                maxTop: 100,
+                callLeft: false,
+                callTop: 'setAlpha'
+            }
+        },
+        slidersHorz: {
+            saturation: {
+                maxLeft: 100,
+                maxTop: 100,
+                callLeft: 'setSaturation',
+                callTop: 'setBrightness'
+            },
+            hue: {
+                maxLeft: 100,
+                maxTop: 0,
+                callLeft: 'setHue',
+                callTop: false
+            },
+            alpha: {
+                maxLeft: 100,
+                maxTop: 0,
+                callLeft: 'setAlpha',
+                callTop: false
+            }
+        },
+        template: '<div class="bs-colorpicker dropdown-menu">' +
+                  '<div class="bs-colorpicker-saturation"><i><b></b></i></div>' +
+                  '<div class="bs-colorpicker-hue"><i></i></div>' +
+                  '<div class="bs-colorpicker-alpha"><i></i></div>' +
+                  '<div class="bs-colorpicker-color"><div /></div>' +
+                  '<div class="bs-colorpicker-selectors"></div>' +
+                  '</div>',
+        align: 'right',
+        customClass: null,
+        colorSelectors: null
+    };
+
+    var Colorpicker = function (element, options) {
+        this.element = $(element).addClass('bs-colorpicker-element');
+        this.options = $.extend(true, {}, defaults, this.element.data(), options);
+        this.component = this.options.component;
+        this.component = (this.component !== false) ? this.element.find(this.component) : false;
+        if (this.component && (this.component.length === 0)) {
+            this.component = false;
+        }
+        this.container = (this.options.container === true) ? this.element : this.options.container;
+        this.container = (this.container !== false) ? $(this.container) : false;
+
+        // Is the element an input? Should we search inside for any input?
+        this.input = this.element.is('input') ? this.element : (this.options.input ?
+                                                                this.element.find(this.options.input) : false);
+        if (this.input && (this.input.length === 0)) {
+            this.input = false;
+        }
+        // Set HSB color
+        this.color = new Color(this.options.color !== false ? this.options.color : this.getValue(), this.options.colorSelectors);
+        this.format = this.options.format !== false ? this.options.format : this.color.origFormat;
+
+        // Setup picker
+        this.picker = $(this.options.template);
+        if (this.options.customClass) {
+            this.picker.addClass(this.options.customClass);
+        }
+        if (this.options.inline) {
+            this.picker.addClass('bs-colorpicker-inline bs-colorpicker-visible');
+        } else {
+            this.picker.addClass('bs-colorpicker-hidden');
+        }
+        if (this.options.horizontal) {
+            this.picker.addClass('bs-colorpicker-horizontal');
+        }
+        if (this.format === 'rgba' || this.format === 'hsla' || this.options.format === false) {
+            this.picker.addClass('bs-colorpicker-with-alpha');
+        }
+        if (this.options.align === 'right') {
+            this.picker.addClass('bs-colorpicker-right');
+        }
+        if (this.options.colorSelectors) {
+            var colorpicker = this;
+            $.each(this.options.colorSelectors, function (name, color) {
+                var $btn = $('<i />').css('background-color', color).data('class', name);
+                $btn.click(function () {
+                    colorpicker.setValue($(this).css('background-color'));
+                });
+                colorpicker.picker.find('.bs-colorpicker-selectors').append($btn);
+            });
+            this.picker.find('.bs-colorpicker-selectors').show();
+        }
+        this.picker.on('mousedown.bs-colorpicker touchstart.bs-colorpicker', $.proxy(this.mousedown, this));
+        this.picker.appendTo(this.container ? this.container : $('body'));
+
+        // Bind events
+        if (this.input !== false) {
+            this.input.on({
+                'keyup.bs-colorpicker': $.proxy(this.keyup, this)
+            });
+            this.input.on({
+                'change.bs-colorpicker': $.proxy(this.change, this)
+            });
+            if (this.component === false) {
                 this.element.on({
-                    'click.bs-colorpicker': $.proxy(this.show, this)
-                });
-            }
-
-            // for HTML5 input[type='color']
-            if ((this.input !== false) && (this.component !== false) && (this.input.attr('type') === 'color')) {
-
-                this.input.on({
-                    'click.bs-colorpicker': $.proxy(this.show, this),
                     'focus.bs-colorpicker': $.proxy(this.show, this)
                 });
             }
+            if (this.options.inline === false) {
+                this.element.on({
+                    'focusout.bs-colorpicker': $.proxy(this.hide, this)
+                });
+            }
+        }
+
+        if (this.component !== false) {
+            this.component.on({
+                'click.bs-colorpicker': $.proxy(this.show, this)
+            });
+        }
+
+        if ((this.input === false) && (this.component === false)) {
+            this.element.on({
+                'click.bs-colorpicker': $.proxy(this.show, this)
+            });
+        }
+
+        // for HTML5 input[type='color']
+        if ((this.input !== false) && (this.component !== false) && (this.input.attr('type') === 'color')) {
+
+            this.input.on({
+                'click.bs-colorpicker': $.proxy(this.show, this),
+                'focus.bs-colorpicker': $.proxy(this.show, this)
+            });
+        }
+        this.update();
+
+        $($.proxy(function () {
+            this.element.trigger('create');
+        }, this));
+    };
+
+    Colorpicker.Color = Color;
+
+    Colorpicker.prototype = {
+        constructor: Colorpicker,
+        destroy: function () {
+            this.picker.remove();
+            this.element.removeData('colorpicker').off('.bs-colorpicker');
+            if (this.input !== false) {
+                this.input.off('.bs-colorpicker');
+            }
+            if (this.component !== false) {
+                this.component.off('.bs-colorpicker');
+            }
+            this.element.removeClass('bs-colorpicker-element');
+            this.element.trigger({
+                type: 'destroy'
+            });
+        },
+        reposition: function () {
+            if (this.options.inline !== false || this.options.container) {
+                return false;
+            }
+            var type = this.container && this.container[0] !== document.body ? 'position' : 'offset';
+            var element = this.component || this.element;
+            var offset = element[type]();
+            if (this.options.align === 'right') {
+                offset.left -= this.picker.outerWidth() - element.outerWidth();
+            }
+            this.picker.css({
+                top: offset.top + element.outerHeight(),
+                left: offset.left
+            });
+        },
+        show: function (e) {
+            if (this.isDisabled()) {
+                return false;
+            }
+            this.picker.addClass('bs-colorpicker-visible').removeClass('bs-colorpicker-hidden');
+            this.reposition();
+            $(window).on('resize.bs-colorpicker', $.proxy(this.reposition, this));
+            if (e && (!this.hasInput() || this.input.attr('type') === 'color')) {
+                if (e.stopPropagation && e.preventDefault) {
+                    e.stopPropagation();
+                    e.preventDefault();
+                }
+            }
+            if (this.options.inline === false) {
+                $(window.document).on({
+                    'mousedown.bs-colorpicker': $.proxy(this.hide, this)
+                });
+            }
+            this.element.trigger({
+                type: 'showPicker',
+                color: this.color
+            });
+        },
+        hide: function () {
+            this.picker.addClass('bs-colorpicker-hidden').removeClass('bs-colorpicker-visible');
+            $(window).off('resize.bs-colorpicker', this.reposition);
+            $(document).off({
+                'mousedown.bs-colorpicker': this.hide
+            });
             this.update();
-
-            $($.proxy(function () {
-                this.element.trigger('create');
-            }, this));
-        };
-
-        Colorpicker.Color = Color;
-
-        Colorpicker.prototype = {
-            constructor: Colorpicker,
-            destroy: function () {
-                this.picker.remove();
-                this.element.removeData('colorpicker').off('.bs-colorpicker');
-                if (this.input !== false) {
-                    this.input.off('.bs-colorpicker');
-                }
-                if (this.component !== false) {
-                    this.component.off('.bs-colorpicker');
-                }
-                this.element.removeClass('bs-colorpicker-element');
-                this.element.trigger({
-                    type: 'destroy'
-                });
-            },
-            reposition: function () {
-                if (this.options.inline !== false || this.options.container) {
-                    return false;
-                }
-                var type = this.container && this.container[0] !== document.body ? 'position' : 'offset';
-                var element = this.component || this.element;
-                var offset = element[type]();
-                if (this.options.align === 'right') {
-                    offset.left -= this.picker.outerWidth() - element.outerWidth();
-                }
-                this.picker.css({
-                    top: offset.top + element.outerHeight(),
-                    left: offset.left
-                });
-            },
-            show: function (e) {
-                if (this.isDisabled()) {
-                    return false;
-                }
-                this.picker.addClass('bs-colorpicker-visible').removeClass('bs-colorpicker-hidden');
-                this.reposition();
-                $(window).on('resize.bs-colorpicker', $.proxy(this.reposition, this));
-                if (e && (!this.hasInput() || this.input.attr('type') === 'color')) {
-                    if (e.stopPropagation && e.preventDefault) {
-                        e.stopPropagation();
-                        e.preventDefault();
+            this.element.trigger({
+                type: 'hidePicker',
+                color: this.color
+            });
+        },
+        updateData: function (val) {
+            val = val || this.color.toString(this.format);
+            this.element.data('color', val);
+            return val;
+        },
+        updateInput: function (val) {
+            val = val || this.color.toString(this.format);
+            if (this.input !== false) {
+                if (this.options.colorSelectors) {
+                    var color = new Color(val, this.options.colorSelectors);
+                    var alias = color.toAlias();
+                    if (typeof this.options.colorSelectors[alias] !== 'undefined') {
+                        val = alias;
                     }
                 }
-                if (this.options.inline === false) {
-                    $(window.document).on({
-                        'mousedown.bs-colorpicker': $.proxy(this.hide, this)
-                    });
-                }
-                this.element.trigger({
-                    type: 'showPicker',
-                    color: this.color
-                });
-            },
-            hide: function () {
-                this.picker.addClass('bs-colorpicker-hidden').removeClass('bs-colorpicker-visible');
-                $(window).off('resize.bs-colorpicker', this.reposition);
-                $(document).off({
-                    'mousedown.bs-colorpicker': this.hide
-                });
-                this.update();
-                this.element.trigger({
-                    type: 'hidePicker',
-                    color: this.color
-                });
-            },
-            updateData: function (val) {
-                val = val || this.color.toString(this.format);
-                this.element.data('color', val);
-                return val;
-            },
-            updateInput: function (val) {
-                val = val || this.color.toString(this.format);
-                if (this.input !== false) {
-                    if (this.options.colorSelectors) {
-                        var color = new Color(val, this.options.colorSelectors);
-                        var alias = color.toAlias();
-                        if (typeof this.options.colorSelectors[alias] !== 'undefined') {
-                            val = alias;
-                        }
-                    }
-                    this.input.prop('value', val);
-                }
-                return val;
-            },
-            updatePicker: function (val) {
-                if (val !== undefined) {
-                    this.color = new Color(val, this.options.colorSelectors);
-                }
-                var sl = (this.options.horizontal === false) ? this.options.sliders : this.options.slidersHorz;
-                var icns = this.picker.find('i');
-                if (icns.length === 0) {
-                    return;
-                }
-                if (this.options.horizontal === false) {
-                    sl = this.options.sliders;
-                    icns.eq(1).css('top', sl.hue.maxTop * (1 - this.color.value.h)).end()
-                        .eq(2).css('top', sl.alpha.maxTop * (1 - this.color.value.a));
-                } else {
-                    sl = this.options.slidersHorz;
-                    icns.eq(1).css('left', sl.hue.maxLeft * (1 - this.color.value.h)).end()
-                        .eq(2).css('left', sl.alpha.maxLeft * (1 - this.color.value.a));
-                }
-                icns.eq(0).css({
-                    'top': sl.saturation.maxTop - this.color.value.b * sl.saturation.maxTop,
-                    'left': this.color.value.s * sl.saturation.maxLeft
-                });
-                this.picker.find('.bs-colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
-                this.picker.find('.bs-colorpicker-alpha').css('backgroundColor', this.color.toHex());
-                this.picker.find('.bs-colorpicker-color, .bs-colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
-                return val;
-            },
-            updateComponent: function (val) {
-                val = val || this.color.toString(this.format);
-                if (this.component !== false) {
-                    var icn = this.component.find('i').eq(0);
-                    if (icn.length > 0) {
-                        icn.css({
-                            'backgroundColor': val
-                        });
-                    } else {
-                        this.component.css({
-                            'backgroundColor': val
-                        });
-                    }
-                }
-                return val;
-            },
-            update: function (force) {
-                var val;
-                if ((this.getValue(false) !== false) || (force === true)) {
-                    // Update input/data only if the current value is not empty
-                    val = this.updateComponent();
-                    this.updateInput(val);
-                    this.updateData(val);
-                    this.updatePicker(); // only update picker if value is not empty
-                }
-                return val;
-
-            },
-            setValue: function (val) { // set color manually
+                this.input.prop('value', val);
+            }
+            return val;
+        },
+        updatePicker: function (val) {
+            if (val !== undefined) {
                 this.color = new Color(val, this.options.colorSelectors);
-                this.update(true);
-                this.element.trigger({
-                    type: 'changeColor',
-                    color: this.color,
-                    value: val
-                });
-            },
-            getValue: function (defaultValue) {
-                defaultValue = (defaultValue === undefined) ? '#000000' : defaultValue;
-                var val;
-                if (this.hasInput()) {
-                    val = this.input.val();
+            }
+            var sl = (this.options.horizontal === false) ? this.options.sliders : this.options.slidersHorz;
+            var icns = this.picker.find('i');
+            if (icns.length === 0) {
+                return;
+            }
+            if (this.options.horizontal === false) {
+                sl = this.options.sliders;
+                icns.eq(1).css('top', sl.hue.maxTop * (1 - this.color.value.h)).end()
+                    .eq(2).css('top', sl.alpha.maxTop * (1 - this.color.value.a));
+            } else {
+                sl = this.options.slidersHorz;
+                icns.eq(1).css('left', sl.hue.maxLeft * (1 - this.color.value.h)).end()
+                    .eq(2).css('left', sl.alpha.maxLeft * (1 - this.color.value.a));
+            }
+            icns.eq(0).css({
+                'top': sl.saturation.maxTop - this.color.value.b * sl.saturation.maxTop,
+                'left': this.color.value.s * sl.saturation.maxLeft
+            });
+            this.picker.find('.bs-colorpicker-saturation').css('backgroundColor', this.color.toHex(this.color.value.h, 1, 1, 1));
+            this.picker.find('.bs-colorpicker-alpha').css('backgroundColor', this.color.toHex());
+            this.picker.find('.bs-colorpicker-color, .bs-colorpicker-color div').css('backgroundColor', this.color.toString(this.format));
+            return val;
+        },
+        updateComponent: function (val) {
+            val = val || this.color.toString(this.format);
+            if (this.component !== false) {
+                var icn = this.component.find('i').eq(0);
+                if (icn.length > 0) {
+                    icn.css({
+                        'backgroundColor': val
+                    });
                 } else {
-                    val = this.element.data('color');
-                }
-                if ((val === undefined) || (val === '') || (val === null)) {
-                    // if not defined or empty, return default
-                    val = defaultValue;
-                }
-                return val;
-            },
-            hasInput: function () {
-                return (this.input !== false);
-            },
-            isDisabled: function () {
-                if (this.hasInput()) {
-                    return (this.input.prop('disabled') === true);
-                }
-                return false;
-            },
-            disable: function () {
-                if (this.hasInput()) {
-                    this.input.prop('disabled', true);
-                    this.element.trigger({
-                        type: 'disable',
-                        color: this.color,
-                        value: this.getValue()
+                    this.component.css({
+                        'backgroundColor': val
                     });
-                    return true;
                 }
-                return false;
-            },
-            enable: function () {
-                if (this.hasInput()) {
-                    this.input.prop('disabled', false);
-                    this.element.trigger({
-                        type: 'enable',
-                        color: this.color,
-                        value: this.getValue()
-                    });
-                    return true;
-                }
-                return false;
-            },
-            currentSlider: null,
-            mousePointer: {
-                left: 0,
-                top: 0
-            },
-            mousedown: function (e) {
-                if (!e.pageX && !e.pageY && e.originalEvent) {
-                    e.pageX = e.originalEvent.touches[0].pageX;
-                    e.pageY = e.originalEvent.touches[0].pageY;
-                }
-                e.stopPropagation();
-                e.preventDefault();
+            }
+            return val;
+        },
+        update: function (force) {
+            var val;
+            if ((this.getValue(false) !== false) || (force === true)) {
+                // Update input/data only if the current value is not empty
+                val = this.updateComponent();
+                this.updateInput(val);
+                this.updateData(val);
+                this.updatePicker(); // only update picker if value is not empty
+            }
+            return val;
 
-                var target = $(e.target);
+        },
+        setValue: function (val) { // set color manually
+            this.color = new Color(val, this.options.colorSelectors);
+            this.update(true);
+            this.element.trigger({
+                type: 'changeColor',
+                color: this.color,
+                value: val
+            });
+        },
+        getValue: function (defaultValue) {
+            defaultValue = (defaultValue === undefined) ? '#000000' : defaultValue;
+            var val;
+            if (this.hasInput()) {
+                val = this.input.val();
+            } else {
+                val = this.element.data('color');
+            }
+            if ((val === undefined) || (val === '') || (val === null)) {
+                // if not defined or empty, return default
+                val = defaultValue;
+            }
+            return val;
+        },
+        hasInput: function () {
+            return (this.input !== false);
+        },
+        isDisabled: function () {
+            if (this.hasInput()) {
+                return (this.input.prop('disabled') === true);
+            }
+            return false;
+        },
+        disable: function () {
+            if (this.hasInput()) {
+                this.input.prop('disabled', true);
+                this.element.trigger({
+                    type: 'disable',
+                    color: this.color,
+                    value: this.getValue()
+                });
+                return true;
+            }
+            return false;
+        },
+        enable: function () {
+            if (this.hasInput()) {
+                this.input.prop('disabled', false);
+                this.element.trigger({
+                    type: 'enable',
+                    color: this.color,
+                    value: this.getValue()
+                });
+                return true;
+            }
+            return false;
+        },
+        currentSlider: null,
+        mousePointer: {
+            left: 0,
+            top: 0
+        },
+        mousedown: function (e) {
+            if (!e.pageX && !e.pageY && e.originalEvent) {
+                e.pageX = e.originalEvent.touches[0].pageX;
+                e.pageY = e.originalEvent.touches[0].pageY;
+            }
+            e.stopPropagation();
+            e.preventDefault();
 
-                //detect the slider and set the limits and callbacks
-                var zone = target.closest('div');
-                var sl = this.options.horizontal ? this.options.slidersHorz : this.options.sliders;
-                if (!zone.is('.bs-colorpicker')) {
-                    if (zone.is('.bs-colorpicker-saturation')) {
-                        this.currentSlider = $.extend({}, sl.saturation);
-                    } else if (zone.is('.bs-colorpicker-hue')) {
-                        this.currentSlider = $.extend({}, sl.hue);
-                    } else if (zone.is('.bs-colorpicker-alpha')) {
-                        this.currentSlider = $.extend({}, sl.alpha);
-                    } else {
-                        return false;
-                    }
-                    var offset = zone.offset();
-                    //reference to guide's style
-                    this.currentSlider.guide = zone.find('i')[0].style;
-                    this.currentSlider.left = e.pageX - offset.left;
-                    this.currentSlider.top = e.pageY - offset.top;
-                    this.mousePointer = {
-                        left: e.pageX,
-                        top: e.pageY
-                    };
-                    //trigger mousemove to move the guide to the current position
-                    $(document).on({
-                        'mousemove.bs-colorpicker': $.proxy(this.mousemove, this),
-                        'touchmove.bs-colorpicker': $.proxy(this.mousemove, this),
-                        'mouseup.bs-colorpicker': $.proxy(this.mouseup, this),
-                        'touchend.bs-colorpicker': $.proxy(this.mouseup, this)
-                    }).trigger('mousemove');
+            var target = $(e.target);
+
+            //detect the slider and set the limits and callbacks
+            var zone = target.closest('div');
+            var sl = this.options.horizontal ? this.options.slidersHorz : this.options.sliders;
+            if (!zone.is('.bs-colorpicker')) {
+                if (zone.is('.bs-colorpicker-saturation')) {
+                    this.currentSlider = $.extend({}, sl.saturation);
+                } else if (zone.is('.bs-colorpicker-hue')) {
+                    this.currentSlider = $.extend({}, sl.hue);
+                } else if (zone.is('.bs-colorpicker-alpha')) {
+                    this.currentSlider = $.extend({}, sl.alpha);
+                } else {
+                    return false;
                 }
-                return false;
-            },
-            mousemove: function (e) {
-                if (!e.pageX && !e.pageY && e.originalEvent) {
-                    e.pageX = e.originalEvent.touches[0].pageX;
-                    e.pageY = e.originalEvent.touches[0].pageY;
+                var offset = zone.offset();
+                //reference to guide's style
+                this.currentSlider.guide = zone.find('i')[0].style;
+                this.currentSlider.left = e.pageX - offset.left;
+                this.currentSlider.top = e.pageY - offset.top;
+                this.mousePointer = {
+                    left: e.pageX,
+                    top: e.pageY
+                };
+                //trigger mousemove to move the guide to the current position
+                $(document).on({
+                    'mousemove.bs-colorpicker': $.proxy(this.mousemove, this),
+                    'touchmove.bs-colorpicker': $.proxy(this.mousemove, this),
+                    'mouseup.bs-colorpicker': $.proxy(this.mouseup, this),
+                    'touchend.bs-colorpicker': $.proxy(this.mouseup, this)
+                }).trigger('mousemove');
+            }
+            return false;
+        },
+        mousemove: function (e) {
+            if (!e.pageX && !e.pageY && e.originalEvent) {
+                e.pageX = e.originalEvent.touches[0].pageX;
+                e.pageY = e.originalEvent.touches[0].pageY;
+            }
+            e.stopPropagation();
+            e.preventDefault();
+            var left = Math.max(
+                0,
+                Math.min(
+                    this.currentSlider.maxLeft,
+                    this.currentSlider.left + ((e.pageX || this.mousePointer.left) - this.mousePointer.left)
+                )
+            );
+            var top = Math.max(
+                0,
+                Math.min(
+                    this.currentSlider.maxTop,
+                    this.currentSlider.top + ((e.pageY || this.mousePointer.top) - this.mousePointer.top)
+                )
+            );
+            this.currentSlider.guide.left = left + 'px';
+            this.currentSlider.guide.top = top + 'px';
+            if (this.currentSlider.callLeft) {
+                this.color[this.currentSlider.callLeft].call(this.color, left / this.currentSlider.maxLeft);
+            }
+            if (this.currentSlider.callTop) {
+                this.color[this.currentSlider.callTop].call(this.color, top / this.currentSlider.maxTop);
+            }
+            // Change format dynamically
+            // Only occurs if user choose the dynamic format by
+            // setting option format to false
+            if (this.currentSlider.callTop === 'setAlpha' && this.options.format === false) {
+
+                // Converting from hex / rgb to rgba
+                if (this.color.value.a !== 1) {
+                    this.format = 'rgba';
+                    this.color.origFormat = 'rgba';
                 }
-                e.stopPropagation();
-                e.preventDefault();
-                var left = Math.max(
-                    0,
-                    Math.min(
-                        this.currentSlider.maxLeft,
-                        this.currentSlider.left + ((e.pageX || this.mousePointer.left) - this.mousePointer.left)
-                    )
-                );
-                var top = Math.max(
-                    0,
-                    Math.min(
-                        this.currentSlider.maxTop,
-                        this.currentSlider.top + ((e.pageY || this.mousePointer.top) - this.mousePointer.top)
-                    )
-                );
-                this.currentSlider.guide.left = left + 'px';
-                this.currentSlider.guide.top = top + 'px';
-                if (this.currentSlider.callLeft) {
-                    this.color[this.currentSlider.callLeft].call(this.color, left / this.currentSlider.maxLeft);
+
+                // Converting from rgba to hex
+                else {
+                    this.format = 'hex';
+                    this.color.origFormat = 'hex';
                 }
-                if (this.currentSlider.callTop) {
-                    this.color[this.currentSlider.callTop].call(this.color, top / this.currentSlider.maxTop);
+            }
+            this.update(true);
+
+            this.element.trigger({
+                type: 'changeColor',
+                color: this.color
+            });
+            return false;
+        },
+        mouseup: function (e) {
+            e.stopPropagation();
+            e.preventDefault();
+            $(document).off({
+                'mousemove.bs-colorpicker': this.mousemove,
+                'touchmove.bs-colorpicker': this.mousemove,
+                'mouseup.bs-colorpicker': this.mouseup,
+                'touchend.bs-colorpicker': this.mouseup
+            });
+            return false;
+        },
+        change: function (e) {
+            this.keyup(e);
+        },
+        keyup: function (e) {
+            if ((e.keyCode === 38)) {
+                if (this.color.value.a < 1) {
+                    this.color.value.a = Math.round((this.color.value.a + 0.01) * 100) / 100;
                 }
+                this.update(true);
+            } else if ((e.keyCode === 40)) {
+                if (this.color.value.a > 0) {
+                    this.color.value.a = Math.round((this.color.value.a - 0.01) * 100) / 100;
+                }
+                this.update(true);
+            } else {
+                this.color = new Color(this.input.val(), this.options.colorSelectors);
                 // Change format dynamically
                 // Only occurs if user choose the dynamic format by
                 // setting option format to false
-                if (this.currentSlider.callTop === 'setAlpha' && this.options.format === false) {
-
-                    // Converting from hex / rgb to rgba
-                    if (this.color.value.a !== 1) {
-                        this.format = 'rgba';
-                        this.color.origFormat = 'rgba';
-                    }
-
-                    // Converting from rgba to hex
-                    else {
-                        this.format = 'hex';
-                        this.color.origFormat = 'hex';
-                    }
+                if (this.color.origFormat && this.options.format === false) {
+                    this.format = this.color.origFormat;
                 }
-                this.update(true);
-
-                this.element.trigger({
-                    type: 'changeColor',
-                    color: this.color
-                });
-                return false;
-            },
-            mouseup: function (e) {
-                e.stopPropagation();
-                e.preventDefault();
-                $(document).off({
-                    'mousemove.bs-colorpicker': this.mousemove,
-                    'touchmove.bs-colorpicker': this.mousemove,
-                    'mouseup.bs-colorpicker': this.mouseup,
-                    'touchend.bs-colorpicker': this.mouseup
-                });
-                return false;
-            },
-            change: function (e) {
-                this.keyup(e);
-            },
-            keyup: function (e) {
-                if ((e.keyCode === 38)) {
-                    if (this.color.value.a < 1) {
-                        this.color.value.a = Math.round((this.color.value.a + 0.01) * 100) / 100;
-                    }
-                    this.update(true);
-                } else if ((e.keyCode === 40)) {
-                    if (this.color.value.a > 0) {
-                        this.color.value.a = Math.round((this.color.value.a - 0.01) * 100) / 100;
-                    }
-                    this.update(true);
-                } else {
-                    this.color = new Color(this.input.val(), this.options.colorSelectors);
-                    // Change format dynamically
-                    // Only occurs if user choose the dynamic format by
-                    // setting option format to false
-                    if (this.color.origFormat && this.options.format === false) {
-                        this.format = this.color.origFormat;
-                    }
-                    if (this.getValue(false) !== false) {
-                        this.updateData();
-                        this.updateComponent();
-                        this.updatePicker();
-                    }
+                if (this.getValue(false) !== false) {
+                    this.updateData();
+                    this.updateComponent();
+                    this.updatePicker();
                 }
-                this.element.trigger({
-                    type: 'changeColor',
-                    color: this.color,
-                    value: this.input.val()
-                });
             }
-        };
-
-        $.colorpicker = Colorpicker;
-
-        $.fn.colorpicker = function (option) {
-            var pickerArgs = arguments,
-                rv;
-
-            var $returnValue = this.each(function () {
-                var $this = $(this),
-                    inst = $this.data('colorpicker'),
-                    options = ((typeof option === 'object') ? option : {});
-                if ((!inst) && (typeof option !== 'string')) {
-                    $this.data('colorpicker', new Colorpicker(this, options));
-                } else {
-                    if (typeof option === 'string') {
-                        rv = inst[option].apply(inst, Array.prototype.slice.call(pickerArgs, 1));
-                    }
-                }
+            this.element.trigger({
+                type: 'changeColor',
+                color: this.color,
+                value: this.input.val()
             });
-            if (option === 'getValue') {
-                return rv;
-            }
-            return $returnValue;
-        };
-
-        $.fn.colorpicker.constructor = Colorpicker;
-
+        }
     };
+
+    $.colorpicker = Colorpicker;
+
+    $.fn.colorpicker = function (option) {
+        var pickerArgs = arguments,
+            rv;
+
+        var $returnValue = this.each(function () {
+            var $this = $(this),
+                inst = $this.data('colorpicker'),
+                options = ((typeof option === 'object') ? option : {});
+            if ((!inst) && (typeof option !== 'string')) {
+                $this.data('colorpicker', new Colorpicker(this, options));
+            } else {
+                if (typeof option === 'string') {
+                    rv = inst[option].apply(inst, Array.prototype.slice.call(pickerArgs, 1));
+                }
+            }
+        });
+        if (option === 'getValue') {
+            return rv;
+        }
+        return $returnValue;
+    };
+
+    $.fn.colorpicker.constructor = Colorpicker;
+
+};
 
 
