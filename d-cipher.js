@@ -287,6 +287,7 @@
             timelineInfo: 'd-cipher-timeline-info',
             timelineCursor: 'd-cipher-timeline-cursor',
             timelineCircle: 'd-cipher-timeline-circle',
+            timelineBrackets: 'd-cipher-timeline-brackets',
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
             highlightEvent: 'd-cipher-highlight-event',
@@ -575,8 +576,9 @@
         this.db = new IDB();
         this.user = {};
         this.sessionId = '';
-        this.sessionRec = null;
-        this.eventIndex = 0;
+        this.activeRecord = null;
+        this.startEventIndex = 0;
+        this.endEventIndex = 0;
         this.appMode = '';
         this.eventsUnderMouse = [];
         this.timeLineEvents = [];
@@ -694,7 +696,7 @@
                 $('body').on('mousemove', catchEvents);
                 this.hideRecList();
                 this.sessionId = ts.toString();
-                this.sessionRec = {
+                this.activeRecord = {
 
                     id: this.sessionId,
                     name: this.loc._Default_record_name + this.db.records.length,
@@ -719,7 +721,7 @@
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
                 $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
-                var rec = this.sessionRec;
+                var rec = this.activeRecord;
 
                 $stat.fadeOut();
                 clearInterval($stat.data('tid'));
@@ -754,7 +756,7 @@
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId);
                         self.showSpiderGraph(self.sessionId);
-                        self.sessionRec = null;
+                        self.activeRecord = null;
 
                     });
 
@@ -801,7 +803,7 @@
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
-                var rec = this.sessionRec,
+                var rec = this.activeRecord,
                     events = rec.events,
                     elen = events.length,
                     lastEvent = events[elen - 1] || null,
@@ -1238,7 +1240,15 @@
                 }
 
                 $tl.css('cursor', 'pointer');
-                $he.css({top: event.event.y, left: event.event.x}).show();
+                if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
+
+                    $he.css({top: event.event.y, left: event.event.x}).show();
+
+                } else {
+
+                    $he.hide();
+
+                }
                 html += getEventInfo(event.event) + '</table>';
                 $tt.html(html);
                 w = $tt.outerWidth();
@@ -1618,7 +1628,7 @@
         this.updateStatString = function updateStatString(e) {
 
             var loc = this.loc,
-                rec = this.sessionRec,
+                rec = this.activeRecord,
                 evt = rec.events[rec.events.length - 1],
                 ms = rec.modified,
                 miles = evt ? evt.miles : 0,
@@ -1712,7 +1722,11 @@
             }
 
             this.getRecordById(sId).visible = false;
-            this.clearTimeline();
+            if (this.activeRecord.id === sId) {
+
+                this.clearTimeline();
+
+            }
 
         };
 
@@ -1844,7 +1858,7 @@
 
         };
 
-        this.drawTimeline = function drawTimeline(rec, start, end) {
+        this.drawTimeline = function drawTimeline(rec) {
 
             this.showTimelineStat(rec);
 
@@ -1870,13 +1884,13 @@
             $(cnv).width(cw);
             $(cnv).height(ch);
 
-            if (this.eventIndex) {
+            if (this.endEventIndex) {
 
-                this.drawTLCursor(events[this.eventIndex].time, rec.duration);
+                this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
 
             } else {
 
-                this.drawTLCursor(0, rec.duration);
+                this.drawTLCursor(rec.duration, rec.duration);
 
             }
 
@@ -1952,7 +1966,7 @@
 
             $(this.getDomElement('timelineCursor')).css(pars).show();
 
-            $('.cursor-bg', this.getDomElement('timelineCursorBg')).css({
+            $('.cursor-bg', this.getDomElement('timelineBrackets')).css({
 
                 top: $(this.getDomElement('timeline')).outerHeight() / 2,
                 left: offsetLeft,
@@ -2005,10 +2019,20 @@
             this.showTimelineEvent = function showTimelineEvent(event) {
 
                 this.sessionId = event.recId;
-                this.sessionRec = this.getRecordById(event.recId);
-                this.eventIndex = this.sessionRec.events.indexOf(event);
+                this.activeRecord = this.getRecordById(event.recId);
+                this.startEventIndex = 0;
+                this.endEventIndex = event.index;
                 this.appMode = 'timeline';
-                window.location = event.location;
+                if (window.location.pathname !== event.location) {
+
+                    window.location = event.location;
+
+                } else {
+
+                    this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
+                    this.drawTLCursor(event.time, this.activeRecord.duration);
+
+                }
 
             };
 
@@ -2089,7 +2113,7 @@
             this.playSession = function playSession(sId, eventIndex) {
 
                 var self = this,
-                    cnt = eventIndex || this.eventIndex || 0,
+                    cnt = eventIndex || this.endEventIndex || 0,
                     delay = 20, speed = 2,
                     rec = this.getRecordById(sId),
                     sData = rec.events,
@@ -2111,7 +2135,7 @@
 
                     pars = pars || self.getTargetScreenPars(e);
                     el = pars.element;
-                    self.eventIndex = cnt;
+                    self.endEventIndex = cnt;
 
                     console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
                     /*
@@ -2419,12 +2443,12 @@
 
                 //this.appMode = 'play';
                 this.sessionId = sId;
-                this.sessionRec = rec;
+                this.activeRecord = rec;
 
                 // Reload initial session location on replay start
                 if (!cnt /*&& window.location.pathname !== sData[1].location*/) {
 
-                    this.eventIndex = 1;
+                    this.endEventIndex = 1;
                     this.resetApp('play', sData[1].location);
                     return;
 
@@ -2965,9 +2989,15 @@
 
                         r.active = true;
                         r.visible = true;
-                        self.drawTimeline(r);
-                        self.sessionRec = r;
+                        self.activeRecord = r;
                         self.sessionId = r.id;
+                        if (self.appMode !== 'timeline') {
+
+                            self.startEventIndex = 0;
+                            self.endEventIndex = r.events.length - 1;
+
+                        }
+                        self.drawTimeline(r);
 
                     } else {
 
@@ -3139,7 +3169,7 @@
 
                     }
 
-                    this.sessionRec.events.forEach(function (e) {
+                    this.activeRecord.events.forEach(function (e) {
 
                         delete e.target.element;
 
@@ -3149,9 +3179,10 @@
 
                         user: this.user,
                         appMode: this.appMode,
-                        sessionRec: this.sessionRec,
+                        activeRecord: this.activeRecord,
                         sessionId: this.sessionId,
-                        eventIndex: this.eventIndex,
+                        startEventIndex: this.startEventIndex,
+                        endEventIndex: this.endEventIndex,
                         testCase: this.testCase,
                         currentTask: this.currentTask,
                         currentEvent: this.currentEvent
@@ -3197,20 +3228,20 @@
 
                 } else if (this.appMode === 'play') {
 
-                    this.showSpiderGraph(this.sessionRec.id, 0, this.eventIndex + 1);
+                    this.showSpiderGraph(this.activeRecord.id, 0, this.endEventIndex + 1);
                     setTimeout(function () {
 
-                        self.playSession(self.sessionRec.id, self.eventIndex);
+                        self.playSession(self.activeRecord.id, self.endEventIndex);
 
                     }, 1000);
 
                 } else if (this.appMode === 'timeline') {
 
-                    var event = this.sessionRec.events[this.eventIndex],
+                    var event = this.activeRecord.events[this.endEventIndex],
                         tEvt;
 
-                    this.setActiveRecord(this.sessionRec.id);
-                    this.showSpiderGraph(this.sessionRec.id);
+                    this.setActiveRecord(this.activeRecord.id);
+                    this.showSpiderGraph(this.activeRecord.id, this.startEventIndex, this.endEventIndex + 1);
 
                     tEvt = this.timeLineEvents.find(function (e) {
 
@@ -3244,13 +3275,13 @@
             this.resetState = function resetState() {
 
                 sessionStorage.removeItem('dcipherState');
-                if (this.sessionRec) {
+                if (this.activeRecord) {
 
-                    var loc = this.sessionRec.events[0].location;
+                    var loc = this.activeRecord.events[0].location;
 
-                    this.sessionRec = null;
+                    this.activeRecord = null;
                     this.appMode = '';
-                    this.eventIndex = 0;
+                    this.endEventIndex = 0;
                     window.location = loc;
 
                 }
@@ -4038,6 +4069,12 @@
                     }
 
                 }
+
+            };
+
+            Array.prototype.last = function (array) {
+
+                return array[array.length - 1];
 
             }
 
