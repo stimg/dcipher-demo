@@ -2128,7 +2128,18 @@
         this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
-                rec = this.getRecordById(sId);
+                rec = this.getRecordById(sId),
+                btn = this.getDomElement('butPlay');
+
+            if (btn.className.match(/play/i)) {
+
+                $(btn).removeClass('play').addClass('stop');
+
+            } else {
+
+                $(btn).removeClass('stop').addClass('play');
+
+            }
 
             if (!rec) {
 
@@ -2152,6 +2163,12 @@
                 mOverClass = self.domId['mouseOverClass'];
 
             function playEvent(pars) {
+
+                if (!self.appMode) {
+
+                    return;
+
+                }
 
                 var e = sData[cnt],
                     etype = e.type;
@@ -2262,7 +2279,7 @@
                         y0 = pars1.y + dy * step;
                         step++;
 
-                        if (step < steps) {
+                        if (step < steps && self.appMode) {
 
                             x = pars1.x + dx * step;
                             y = pars1.y + dy * step;
@@ -2277,12 +2294,23 @@
                             y = pars2.y;
                             self.drawTLCursor(e2.time, recDuration);
                             self.drawTLBrackets(self.timeBrackets[0], e2.time);
-                            setTimeout(function () {
+                            if (self.appMode) {
 
-                                playEvent(pars2);
+                                setTimeout(function () {
 
-                            }, e2.type === 'mouseover' ? 0 : clickDelay);
+                                    playEvent(pars2);
 
+                                }, e2.type === 'mouseover' ? 0 : clickDelay);
+
+                            } else {
+
+                                $cur.hide();
+                                $(mOverElement).removeClass(mOverClass);
+                                self.removeMouseOverStyle();
+                                $(cnv).css('cursor', 'default');
+                                return;
+
+                            }
                         }
 
                         $(cnvh).hide();
@@ -3257,6 +3285,7 @@
 
             } else if (this.appMode === 'play') {
 
+                $('div', this.getDomElement('butPlay')).removeClass('play').addClass('stop');
                 this.showSpiderGraph(this.activeRecord.id, 0, this.endEventIndex + 1);
                 setTimeout(function () {
 
@@ -3668,9 +3697,13 @@
                 width = this.timeLineOffsetLeft + pxs * time2 - left;
 
             this.timeBrackets = [time1, time2];
-            this.startEventIndex = rec.events.find(function (e) { return e.time >= time1; }).index;
-            this.endEventIndex = rec.events.find(function (e) { return e.time >= time2; }).index;
-            return { width: width, left: left };
+            this.startEventIndex = rec.events.find(function (e) {
+                return e.time >= time1;
+            }).index;
+            this.endEventIndex = rec.events.find(function (e) {
+                return e.time >= time2;
+            }).index;
+            return {width: width, left: left};
         };
 
         this.moveTimelineBracket = function (e) {
@@ -3904,7 +3937,6 @@
 
             }
 
-
         });
 
         tLine.addEventListener('mousemove', function (e) {
@@ -3917,6 +3949,7 @@
 
             e.stopPropagation();
             if (dCipher.appMode === 'test') {
+
                 dCipher.resetTasklist();
 
             }
@@ -3926,11 +3959,24 @@
 
         butPlay.addEventListener('click', function () {
 
-            var sId = dCipher.sessionId;
+            var sId = dCipher.sessionId,
+                $div = $('div', this);
+            
+            if ($div.hasClass('play')) {
 
-            if (sId) {
+                if (sId) {
 
-                dCipher.playSession(sId);
+                    $div.removeClass('play').addClass('stop');
+                    dCipher.playSession(sId);
+
+                }
+
+            } else {
+
+                $div.removeClass('stop').addClass('play');
+
+                dCipher.appMode = '';
+                sessionStorage.removeItem('dcipherState');
 
             }
 
