@@ -1237,7 +1237,7 @@
                         $tt.hide();
                         self.showEventsInfo(event);
 
-                    }, 2000));
+                    }, 5000));
 
                 }
 
@@ -1356,7 +1356,7 @@
                         $(self.getDomElement('eventInfo')).hide();
                         self.showEventsInfo();
 
-                    }, 2000));
+                    }, 5000));
 
                 }
 
