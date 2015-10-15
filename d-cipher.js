@@ -1237,7 +1237,7 @@
                         $tt.hide();
                         self.showEventsInfo(event);
 
-                    }, 5000));
+                    }, 2000));
 
                 }
 
