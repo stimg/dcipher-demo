@@ -11554,8 +11554,8 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
   color: #FFF; }
 
 .c3-configurator .selected h1 {
-  font-size: 36px;
-  line-height: 36px;
+  font-size: 22px;
+  line-height: 22px;
   margin-bottom: 10px; }
 
 .c3-configurator .selected h1 sup {
@@ -11725,7 +11725,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
   height: 121px;
   background-color: #FFF;
   z-index: 35;
-  display: none;
+  /*display: none;*/
   -webkit-tap-highlight-color: transparent;
   -webkit-touch-callout: none;
   -webkit-user-select: none;
@@ -11871,14 +11871,14 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
     left: 877px; } }
 @media only screen and (min-width: 1367px) and (max-width: 1919px) {
   .c3-configurator .selected {
-    left: 155px; }
+    left: 195px; }
 
   .c3-configurator .selected h5 {
     font-size: 23px;
     line-height: 23px; }
 
   .c3-configurator .total {
-    left: 155px; }
+    left: 195px; }
 
   .c3-configurator .total h2 {
     font-size: 37px;
@@ -11976,7 +11976,7 @@ body #addsearch-results.addsearch-m #addsearch-closelink {
     width: 50px; } }
 @media only screen and (max-width: 1366px) {
   .c3-configurator .selected, .c3-configurator .total {
-    left: 155px; }
+    left: 195px; }
 
   .c3-configurator .selected h1 {
     font-size: 22px;
