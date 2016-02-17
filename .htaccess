@@ -1,0 +1,4 @@
+AuthType Basic
+AuthName "D-Cipher Demo"
+AuthUserFile /mnt/webt/c3/57/56760157/htdocs/html/dcipher/.htpasswd
+Require valid-user
