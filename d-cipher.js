@@ -688,7 +688,7 @@
             if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
                 // Turn on record mode
-                this.resetApp(this.appMode || 'record', window.location.pathname);
+                //this.resetApp(this.appMode || 'record', window.location.pathname);
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -778,9 +778,10 @@
                 etarget = e.target || document.getElementsByTagName('body')[0],
                 treePath = this.getTreePath(etarget),
                 location = document.location.pathname,
+                controls = !!$(this.getDomElement('topMenu')).find(etarget).length,
                 save = (this.appMode === 'record' || this.appMode === 'test') &&
                        this.registerEventList.indexOf(etype) > -1
-                       && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
+                       && !($(this.getDomElement('container')).find(etarget).length || controls)
                        && etarget.localName !== 'svg'
                        && etarget.localName !== 'circle';
 
@@ -788,7 +789,7 @@
             //console.debug('TREE PATH: ', treePath);
             //console.debug('tagName: ', etarget.tagName);
 
-            if (this.appMode === 'test') {
+            if (this.appMode === 'test' && !controls) {
 
                 this.currentEvent = {
 
@@ -3269,6 +3270,12 @@
 
             }
 
+            if (this.currentTask) {
+
+                this.testCase[this.currentTask.step] = this.currentTask;
+
+            }
+
             if (this.appMode === 'record' || this.appMode === 'test') {
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -3322,11 +3329,7 @@
 
             if (this.appMode === 'test' && this.currentTask) {
 
-                for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
-
-                    this.activateTask(i, true);
-
-                }
+                this.activateTask(this.currentTask, true);
 
             }
 
@@ -3359,34 +3362,42 @@
 
             function mouseUpHandler(e) {
 
-                var currentTask = self.currentTask,
-                    tc = self.testCase,
+                var tc = self.testCase,
                     step = 1 * $(e.target).attr('step'),
-                    newTask = tc[step];
+                    clickedTask = tc[step],
+                    nextStep = step + 1;
 
-                cs = currentTask ? currentTask.step : -1;
                 e.stopPropagation();
 
-                if (newTask.active || newTask.done) {
+                if (clickedTask.done) {
 
-                    for (var i = tc.length - 1; i >= step; i--) {
+                    //self.setTaskUndone(clickedTask);
+                    self.activateTask(clickedTask);
 
-                        if (tc[i].active || tc[i].done) {
+                } else if (clickedTask.active) {
 
-                            self.deactivateTask(i);
+                    self.setTaskDone(clickedTask);
+                    if (nextStep < tc.length) {
 
-                        }
+                        self.activateTask(tc[nextStep]);
+
+                    } else {
+
+                        self.endOfTest();
 
                     }
 
                 } else {
 
-                    while (++cs < step) {
+                    if (!step && !self.appMode) {
 
-                        self.activateTask(cs, true);
+                        self.startTest();
+
+                    } else {
+
+                        self.activateTask(clickedTask);
 
                     }
-                    self.activateTask(cs);
 
                 }
 
@@ -3426,125 +3437,83 @@
 
         };
 
-        this.activateTask = function (step, restore) {
+        this.activateTask = function (task, force) {
 
-            var self = this,
-                tb = this.getDomElement('taskBar'),
-                div = $('div.d-cipher-task', tb)[step],
-                pdiv = $('div.d-cipher-task', tb)[step - 1],
-                task = this.testCase[step],
-                $div = $(div),
-                left = (2 + step) * ($(div).height() + 2);
+            if (task && (!task.active) || force) {
 
-            function endOfTest() {
+                var self = this,
+                    tc = this.testCase,
+                    step = task.step,
+                    tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[step],
+                    $div = $(div),
+                    dw = ($('.step-number', div).outerWidth()),
+                    ease = 'left 0.2s ease-out 0.15s',
+                    i, t;
 
-                $('.d-cipher-task-done', tb).fadeOut();
-                $(self.getDomElement('taskProgress')).hide();
-                //window.location = self.testCase[0].events[0].location;
+                for (i = 0; i < step; i++) {
 
-            }
+                    t = tc[i];
 
-            if (task === this.currentTask && this.currentTask.active) {
+                    this.setTaskDone(t, force);
+                    t.active = false;
 
-                this.deactivateTask(step);
+                    // Move previous tasks to the left
+                    $($('div.d-cipher-task', tb)[i]).css({
 
-            } else {
+                        left: dw * (i + 2) + 4,
+                        transition: force ? '' : ease
 
-                if (pdiv) {
-
-                    if (this.currentTask) {
-
-                        this.currentTask.done = true;
-                        this.currentTask.active = false;
-                        this.syncTaskEvents(this.currentTask);
-
-                    }
-
-                    $('span.step-number', pdiv).html('✓').removeClass('active');
-                    $('span.task-description', pdiv).hide();
+                    }).children('.step-number').removeClass('active');
 
                 }
 
-                if (step < this.testCase.length) {
+                i++;
+                for (il = tc.length; i < il; i++) {
 
-                    $div.css({
+                    this.deactivateTask(tc[i]);
 
-                        left: left,
-                        transition: restore ? '' : 'left 0.2s ease-out 0.15s'
+                }
 
-                    });
+                $div.css({
+
+                    left: dw * (step + 2) + 4,
+                    transition: force ? '' : ease
+
+                });
+
+                task.active = true;
+                self.currentTask = task;
+                setTimeout(function () {
 
                     $('span.step-number', div).addClass('active');
+                    self.setTaskUndone(task, force);
+                    self.setTestProgressBar();
 
-                    this.currentTask = task;
-                    this.currentTask.done = false;
-                    this.currentTask.active = true;
-                    this.syncTaskEvents(this.currentTask);
-
-                    if (!step && !this.appMode) {
-
-                        this.toggleRecMode();
-                        this.resetApp('test', task.events[0].location, restore);
-
-                    }
-
-                } else {
-
-                    this.resetTasklist();
-                    this.appMode = 'record';
-                    this.toggleRecMode();
-                    $('.d-cipher-task-done', tb).fadeIn();
-                    setTimeout(endOfTest, 2000);
-
-                }
-
-                this.setTestProgressBar();
+                }, 200);
 
             }
 
         };
 
-        this.deactivateTask = function (step) {
+        this.deactivateTask = function (task) {
 
             var tb = this.getDomElement('taskBar'),
+                step = task.step,
                 div = $('div', tb)[step],
                 $div = $(div),
                 $spn = $('span.step-number', div),
-                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
-                task = this.testCase[step];
+                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step);
 
+            task.active = false;
+            this.setTaskUndone(task);
+            $spn.removeClass('active').trigger('mouseout');
             $div.css({
 
                 left: left,
                 transition: 'left 0.2s ease-out 0.15s'
 
             });
-            $spn.removeClass('active').trigger('mouseout');
-            task.done = false;
-            task.active = false;
-            this.syncTaskEvents(task);
-
-            if (!step) {
-
-                this.resetTasklist();
-                this.appMode = 'record';
-                this.toggleRecMode();
-
-            } else {
-
-                var cs = step - 1,
-                    ctask = this.testCase[cs];
-
-                $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
-                $('span.task-description', div).show();
-                ctask.active = true;
-                ctask.done = false;
-                this.currentTask = ctask;
-                this.syncTaskEvents(ctask);
-
-            }
-
-            this.setTestProgressBar();
 
         };
 
@@ -3560,11 +3529,86 @@
 
         };
 
+        this.setTaskDone = function (task, force) {
+
+            if (task && (!task.done || force)) {
+
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
+
+                task.done = true;
+                if (!force) {
+
+                    this.syncTaskEvents(task);
+
+                }
+                $('span.step-number', div).html('✓');
+                $('span.task-description', div).hide();
+
+            }
+
+        };
+
+        this.setTaskUndone = function (task, force) {
+
+            if (task && (task.done || force)) {
+
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
+
+                task.done = false;
+                if (!force) {
+
+                    this.syncTaskEvents(task);
+
+                }
+                $('span.step-number', div).html(task.step + 1);
+                $('span.task-description', div).show();
+
+            }
+
+        };
+
+        this.startTest = function () {
+
+            var task = this.testCase[0];
+
+            this.toggleRecMode();
+            this.activateTask(task);
+            this.resetApp('test', task.events[0].location);
+
+
+        };
+
+        this.endOfTest = function () {
+
+            var self = this,
+                tb = this.getDomElement('taskBar');
+
+            function endOfTest() {
+
+                $('.d-cipher-task-done', tb).fadeOut();
+                $(self.getDomElement('taskProgress')).hide();
+                //window.location = self.testCase[0].events[0].location;
+
+            }
+
+            this.resetTasklist();
+            this.appMode = 'record';
+            this.toggleRecMode();
+            $('.d-cipher-task-done', tb).fadeIn();
+            setTimeout(endOfTest, 2000);
+
+        };
+
         this.checkTaskCompletion = function () {
 
             var e = this.currentEvent,
+                testCase = this.testCase,
+                currentTask = this.currentTask,
+                cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = this.currentTask ? this.currentTask.events : null;
+                evts = currentTask ? currentTask.events : null;
 
             if (e && evts && evts.length) {
 
@@ -3609,11 +3653,21 @@
 
                     }).length) {
 
-                    this.activateTask(this.currentTask.step + 1);
+                    if (cStep < testCase.length) {
+
+                        this.activateTask(testCase[cStep]);
+
+                    } else {
+
+                        this.endOfTest();
+
+                    }
+
+                } else {
+
+                    this.setTestProgressBar();
 
                 }
-
-                this.setTestProgressBar();
 
             }
 
@@ -3627,7 +3681,7 @@
                 len = tc.length,
                 finW = winW - butW * (len + 2);
 
-            function getEventsInfo () {
+            function getEventsInfo() {
 
                 var done = 0,
                     total = 0;
@@ -3635,11 +3689,13 @@
                 tc.forEach(function (t) {
 
                     total += t.events.length;
-                    done += t.events.filter(function (e) { return e.done }).length;
+                    done += t.events.filter(function (e) {
+                        return e.done
+                    }).length;
 
                 });
 
-                return { total: total, done: done };
+                return {total: total, done: done};
 
             }
 
@@ -4050,7 +4106,7 @@
 
         startTest.addEventListener('click', function () {
 
-            dCipher.activateTask(0);
+            dCipher.startTest();
 
         });
 
