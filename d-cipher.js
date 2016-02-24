@@ -689,6 +689,7 @@
 
                 // Turn on record mode
                 //this.resetApp(this.appMode || 'record', window.location.pathname);
+                this.resetApp(this.appMode || 'record');
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -702,6 +703,7 @@
                 this.activeRecord = {
 
                     id: this.sessionId,
+                    testCase: this.testCase,
                     name: this.loc._Default_record_name + this.db.records.length,
                     description: '',
                     created: ts,
@@ -824,6 +826,7 @@
                         timeStamp: e.timeStamp,
                         index: elen,
                         location: location,
+                        testTask: this.currentTask,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -1896,7 +1899,9 @@
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
                 posx = offsetLeft,
-                posx0, pe;
+                posx0, pe,
+                showTaskNumber = !!rec.testCase,
+                cTask = -1;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1920,6 +1925,7 @@
             ctx.lineWidth = 2.0;
             ctx.fillStyle = 'white';
             ctx.strokeStyle = rec.color;
+            ctx.font = "bold 14px 'Helvetica Neue'";
             ctx.clearRect(0, 0, cw, ch);
             ctx.moveTo(offsetLeft, offsetTop);
             self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
@@ -1947,6 +1953,24 @@
                         event: e
 
                     });
+
+                    // Draw task number
+                    if (showTaskNumber && cTask != e.testTask.step) {
+
+                        var tx = e.testTask.step ? posx : posx0;
+                        ctx.save();
+                        ctx.fillStyle = 'gray';
+                        ctx.strokeStyle = 'gray';
+                        ctx.lineWidth = 1.0;
+                        ctx.beginPath();
+                        ctx.moveTo(tx, 0);
+                        ctx.lineTo(tx, ch);
+                        ctx.stroke();
+                        ctx.fillText(e.testTask.step + 1, tx + 5, ch - 10);
+                        ctx.restore();
+                        cTask = e.testTask.step;
+
+                    }
 
                     ctx.beginPath();
                     ctx.moveTo(posx0, offsetTop);
@@ -2481,6 +2505,8 @@
                     $(mOverElement).removeClass(mOverClass);
                     self.removeMouseOverStyle();
                     $(cnv).css('cursor', 'default');
+                    $(btn).removeClass('stop').addClass('play');
+
                     if (cnt === sData.length) {
 
                         self.drawSpiderGraph(rec.id, self.startEventIndex);
@@ -3632,11 +3658,15 @@
                         && evt.location === e.location) {
 
                         evt.done = true;
+                        evt.testEvent = e;
+                        evt.testEventIndex = i;
                         if (evt.alternate && evt.alternate.length) {
 
-                            evt.alternate.forEach(function (i) {
+                            evt.alternate.forEach(function (ae) {
 
-                                evts[i].done = true;
+                                ae.done = true;
+                                ae.testEvent = e;
+                                ae.testEventIndex = i;
 
                             });
 
@@ -4075,24 +4105,28 @@
 
         butPlay.addEventListener('click', function () {
 
-            var sId = dCipher.sessionId,
-                $div = $('div', this);
+            if (dCipher.appMode !== 'test' && dCipher.appMode !== 'record' && dCipher.activeRecord) {
 
-            if ($div.hasClass('play')) {
+                var sId = dCipher.sessionId,
+                    $div = $('div', this);
 
-                if (sId) {
+                if ($div.hasClass('play')) {
 
-                    $div.removeClass('play').addClass('stop');
-                    dCipher.playSession(sId);
+                    if (sId) {
+
+                        $div.removeClass('play').addClass('stop');
+                        dCipher.playSession(sId);
+
+                    }
+
+                } else {
+
+                    $div.removeClass('stop').addClass('play');
+
+                    dCipher.appMode = '';
+                    sessionStorage.removeItem('dcipherState');
 
                 }
-
-            } else {
-
-                $div.removeClass('stop').addClass('play');
-
-                dCipher.appMode = '';
-                sessionStorage.removeItem('dcipherState');
 
             }
 
