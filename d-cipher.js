@@ -569,7 +569,7 @@
                 }
             ]
         ];
-        ;
+
         this.currentTask = null;
         this.currentEvent = null;
 
