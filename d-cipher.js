@@ -46,6 +46,7 @@
             _Start_test: "Start test",
             _Default_record_name: "Test #",
             _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
+            _No_active_record: "No active record",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -295,7 +296,8 @@
             mTooltip: 'd-cipher-m-tooltip',
             eventInfo: 'd-cipher-event-info',
             topMenu: 'd-cipher-topmenu',
-            taskBar: 'd-cipher-taskbar'
+            taskBar: 'd-cipher-taskbar',
+            taskProgress: 'd-cipher-task-progress'
 
         };
 
@@ -349,6 +351,7 @@
 
             [
                 {
+                    id: 1,
                     step: 0,
                     description: 'Find Cameleon stroller and configure to order',
                     done: false,
@@ -378,6 +381,7 @@
                     ]
                 },
                 {
+                    id: 2,
                     step: 1,
                     description: 'Choose bassinet and select black canopy color',
                     done: false,
@@ -400,6 +404,7 @@
                     ]
                 },
                 {
+                    id: 3,
                     step: 2,
                     description: ' Add running accessory, and a cup holder',
                     done: false,
@@ -422,6 +427,7 @@
                     ]
                 },
                 {
+                    id: 4,
                     step: 3,
                     description: 'Purchase stroller, checking final cost total before completing',
                     done: false,
@@ -480,6 +486,7 @@
             ],
             [
                 {
+                    id: 5,
                     step: 0,
                     description: 'Find Cameleon stroller and configure to order',
                     done: false,
@@ -502,6 +509,7 @@
                     ]
                 },
                 {
+                    id: 6,
                     step: 1,
                     description: 'Choose bassinet and select black canopy color',
                     done: false,
@@ -524,6 +532,7 @@
                     ]
                 },
                 {
+                    id: 7,
                     step: 2,
                     description: ' Add running accessory, and a cup holder',
                     done: false,
@@ -546,6 +555,7 @@
                     ]
                 },
                 {
+                    id: 8,
                     step: 3,
                     description: 'Purchase stroller, checking final cost total before completing',
                     done: false,
@@ -687,7 +697,8 @@
             if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
                 // Turn on record mode
-                this.resetApp(this.appMode || 'record', window.location.pathname);
+                //this.resetApp(this.appMode || 'record', window.location.pathname);
+                this.resetApp(this.appMode || 'record');
 
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -697,10 +708,12 @@
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 $('body').on('mousemove', catchEvents);
                 this.hideRecList();
+                this.unsetActiveRecord();
                 this.sessionId = ts.toString();
                 this.activeRecord = {
 
                     id: this.sessionId,
+                    testCase: this.testCase,
                     name: this.loc._Default_record_name + this.db.records.length,
                     description: '',
                     created: ts,
@@ -758,7 +771,6 @@
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId);
                         self.showSpiderGraph(self.sessionId);
-                        self.activeRecord = null;
 
                     });
 
@@ -777,9 +789,10 @@
                 etarget = e.target || document.getElementsByTagName('body')[0],
                 treePath = this.getTreePath(etarget),
                 location = document.location.pathname,
+                controls = !!$(this.getDomElement('topMenu')).find(etarget).length,
                 save = (this.appMode === 'record' || this.appMode === 'test') &&
                        this.registerEventList.indexOf(etype) > -1
-                       && !($(this.getDomElement('container')).find(etarget).length || $(this.getDomElement('topMenu')).find(etarget).length)
+                       && !($(this.getDomElement('container')).find(etarget).length || controls)
                        && etarget.localName !== 'svg'
                        && etarget.localName !== 'circle';
 
@@ -787,7 +800,7 @@
             //console.debug('TREE PATH: ', treePath);
             //console.debug('tagName: ', etarget.tagName);
 
-            if (this.appMode === 'test') {
+            if (this.appMode === 'test' && !controls) {
 
                 this.currentEvent = {
 
@@ -822,6 +835,7 @@
                         timeStamp: e.timeStamp,
                         index: elen,
                         location: location,
+                        testTask: this.currentTask,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -905,8 +919,8 @@
 
                     event = events.pop();
                     event.type = etype = 'click';
+                    lastEvent = events[events.length - 1];
 
-                    lastEvent = events[elen - 1];
                     if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
 
                         events.pop();
@@ -943,6 +957,11 @@
 
                 }
 
+                if (this.currentTask && (!lastEvent || lastEvent.testTask.id !== this.currentTask.id)) {
+
+                    event.firstInTask = true;
+
+                }
                 /*
                  var sd = 0;
                  rec.events.forEach(function (e) {
@@ -1169,6 +1188,7 @@
 
             var self = this,
                 event = this.getTimelineEvent(e),
+                task = this.getTimelineTask(e),
                 $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
                 $tl = $(this.getDomElement('timeline'));
@@ -1282,6 +1302,8 @@
 
                 $tt.css('top', top).css('left', left)
                     .show();
+
+            } else if (task) {
 
             } else {
 
@@ -1724,7 +1746,7 @@
             }
 
             this.getRecordById(sId).visible = false;
-            if (this.activeRecord.id === sId) {
+            if (this.activeRecord && this.activeRecord.id === sId) {
 
                 this.clearTimeline();
 
@@ -1867,12 +1889,26 @@
 
         this.clearTimeline = function clearTimeline() {
 
-            var cnv = $('canvas', this.getDomElement('timeline'))[0],
+            var cw = window.innerWidth,
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
                 ctx = cnv.getContext('2d'),
-                cw = window.innerWidth,
-                ch = $(this.getDomElement('timeline')).height();
+                tlh = $tl.height();
 
-            ctx.clearRect(0, 0, cw, ch);
+            ctx.clearRect(0, 0, cw, tlh);
+
+        };
+
+        this.resetTimeline = function () {
+
+            this.timeBrackets = [];
+            this.startEventIndex = 0;
+            this.endEventIndex = this.timeLineEvents.length - 1;
+            if (this.activeRecord) {
+
+                this.drawTimeline(this.activeRecord);
+
+            }
 
         };
 
@@ -1882,10 +1918,10 @@
 
             var self = this,
                 events = rec.events,
-                cnv = $('canvas', this.getDomElement('timeline'))[0],
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
-                $tl = $(this.getDomElement('timeline')),
                 ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = this.timeLineOffsetLeft,
@@ -1894,7 +1930,8 @@
                 width = cw - offsetLeft - offsetRight,
                 pxs = width / rec.duration,
                 posx = offsetLeft,
-                posx0, pe;
+                posx0, pe,
+                showTaskNumber = !!rec.testCase;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1918,6 +1955,7 @@
             ctx.lineWidth = 2.0;
             ctx.fillStyle = 'white';
             ctx.strokeStyle = rec.color;
+            ctx.font = "bold 14px 'Helvetica Neue'";
             ctx.clearRect(0, 0, cw, ch);
             ctx.moveTo(offsetLeft, offsetTop);
             self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
@@ -1945,6 +1983,24 @@
                         event: e
 
                     });
+
+                    // Draw task number
+                    if (showTaskNumber && e.testTask && e.firstInTask) {
+
+                        //var tx = e.testTask.step ? posx : posx0;
+                        var tx = posx;
+                        ctx.save();
+                        ctx.fillStyle = 'gray';
+                        ctx.strokeStyle = 'gray';
+                        ctx.lineWidth = 1.0;
+                        ctx.beginPath();
+                        ctx.moveTo(tx, 0);
+                        ctx.lineTo(tx, ch);
+                        ctx.stroke();
+                        ctx.fillText(e.testTask.step + 1, tx + 5, ch - 10);
+                        ctx.restore();
+
+                    }
 
                     ctx.beginPath();
                     ctx.moveTo(posx0, offsetTop);
@@ -1974,9 +2030,23 @@
                 }
             });
 
+            // Draw last task line
+            ctx.save();
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = 'gray';
+            ctx.beginPath();
+            ctx.moveTo(posx, 0);
+            ctx.lineTo(posx, ch);
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw last event pict
+            ctx.beginPath();
             self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
             ctx.stroke();
             ctx.fill();
+
+            $tl.show();
 
         };
 
@@ -2033,6 +2103,91 @@
 
         };
 
+        this.getTimelineTask = function (e) {
+
+            var te = this.timeLineEvents,
+                $tl = $(this.getDomElement('timeline')),
+                x, y = window.innerHeight - 20,
+                abs = Math.abs,
+                dx = 5, evt, task = null,
+                i, il = te.length;
+
+            for (i = 0; i < il; i++) {
+
+                evt = te[i];
+                if (evt.event.firstInTask) {
+
+                    // Move hot spot to previous event
+                    //x = i ? te[i - 1].clientX : evt.clientX;
+                    x = evt.clientX;
+
+                    if (abs(x + 10 - e.clientX) < dx && e.clientY > y) {
+
+                        task = evt.event.testTask;
+                        break;
+                    }
+
+                }
+
+                //console.log('e.clientX: ', e.clientX, '; evt.clientX + 10: ', (evt.clientX + 10));
+                //console.log('e.clientY: ', e.clientY, '; y: ', y);
+
+            }
+
+            if (task) {
+
+                console.log('Task: ', task.description);
+                $tl.css('cursor', 'pointer');
+
+            } else {
+
+                $tl.css('cursor', 'default');
+
+            }
+            return task;
+
+        };
+
+        this.getTaskTLEvents = function (task) {
+
+            if (task && this.timeLineEvents.length) {
+
+                var id = task.id;
+
+                return this.timeLineEvents.filter(function (e) {
+
+                    return e.event.testTask.id === id;
+
+                });
+
+
+            } else {
+
+                return null;
+
+            }
+
+        };
+
+        this.showTLTaskEvents = function (task) {
+
+            var evts = this.getTaskTLEvents(task),
+                e1 = evts[0].event,
+                e2 = evts[evts.length - 1].event;
+
+            // Move time bracket to the first event of the next task, just for design sake
+            if (e2.index + 1 < this.timeLineEvents.length) {
+
+                e2 = this.timeLineEvents[e2.index + 1].event;
+            }
+
+            this.showSpiderGraph(this.activeRecord.id, e1.index, e2.index);
+            this.drawTLBrackets(e1.time, e2.time);
+
+
+
+        };
+
         this.showTimelineEvent = function showTimelineEvent(event) {
 
             this.sessionId = event.recId;
@@ -2069,10 +2224,14 @@
 
                 } else if (type === 'dblclick') {
 
-                    ctx.moveTo(x + d, y);
-                    ctx.arc(x, y, d, 0, endAngle, true);
-                    ctx.moveTo(x + 2 * d, y);
-                    ctx.arc(x, y, 2 * d, 0, endAngle, true);
+                    var r = d - 1;
+                    ctx.moveTo(x + 2 * r, y);
+                    ctx.arc(x, y, 2 * r, 0, endAngle, true);
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.arc(x, y, r, 0, endAngle, true);
 
                 } else if (type === 'mousedown') {
 
@@ -2479,6 +2638,8 @@
                     $(mOverElement).removeClass(mOverClass);
                     self.removeMouseOverStyle();
                     $(cnv).css('cursor', 'default');
+                    $(btn).removeClass('stop').addClass('play');
+
                     if (cnt === sData.length) {
 
                         self.drawSpiderGraph(rec.id, self.startEventIndex);
@@ -3046,13 +3207,13 @@
                     r.visible = true;
                     self.activeRecord = r;
                     self.sessionId = r.id;
-                    if (!self.appMode) {
+                    //if (!self.appMode) {
 
-                        self.startEventIndex = 0;
-                        self.endEventIndex = 0;
-                        self.timeBrackets = [0, r.duration];
+                    self.startEventIndex = 0;
+                    self.endEventIndex = r.events.length - 1;
+                    self.timeBrackets = [0, r.duration];
 
-                    }
+                    //}
                     self.drawTimeline(r);
 
                 } else {
@@ -3073,15 +3234,38 @@
 
         this.unsetActiveRecord = function unsetActiveRecord(id) {
 
-            $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-            this.getRecordById(id).active = false;
-            this.hideSpiderGraph(id);
+            if (!id && this.activeRecord) {
+
+                id = this.activeRecord.id;
+
+            }
+
+            if (id) {
+
+                $('#recId-' + id, this.getDomElement('records')).removeClass('active');
+                if (this.db.records.length) {
+
+                    this.getRecordById(id).active = false;
+
+                }
+                this.hideSpiderGraph(id);
+
+            }
+
+            $(this.getDomElement('timelineInfo')).html('');
+            $(this.getDomElement('timeline')).hide();
 
         };
 
         this.deleteRecord = function deleteRecord(id) {
 
             var self = this;
+
+            if (id === this.activeRecord.id) {
+
+                this.unsetActiveRecord(id);
+
+            }
 
             this.db.deleteRecord(id).then(function () {
 
@@ -3268,6 +3452,12 @@
 
             }
 
+            if (this.currentTask) {
+
+                this.testCase[this.currentTask.step] = this.currentTask;
+
+            }
+
             if (this.appMode === 'record' || this.appMode === 'test') {
 
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -3319,13 +3509,9 @@
 
             }
 
-            if (this.appMode === 'test') {
+            if (this.appMode === 'test' && this.currentTask) {
 
-                for (var i = 0, end = this.currentTask.step + 1; i < end; i++) {
-
-                    this.activateTaskStep(i, true);
-
-                }
+                this.activateTask(this.currentTask, true);
 
             }
 
@@ -3350,47 +3536,56 @@
         this.createTaskList = function () {
 
             var self = this,
+                tc = this.testCase,
                 $tb = $(this.getDomElement('taskBar')),
-                tl = this.testCase,
                 w = $tb.outerHeight(),
-                rp = window.innerWidth - w * (tl.length),
+                rp = window.innerWidth - w * (tc.length),
                 d, sn, sd;
 
-            function activateTaskStep(e) {
+            function mouseUpHandler(e) {
 
-                var currentTask = self.currentTask,
+                var tc = self.testCase,
                     step = 1 * $(e.target).attr('step'),
-                    newTask = tl[step];
-                cs = currentTask ? currentTask.step : -1;
+                    clickedTask = tc[step],
+                    nextStep = step + 1;
 
                 e.stopPropagation();
 
-                if (newTask.active || newTask.done) {
+                if (clickedTask.done) {
 
-                    for (var i = tl.length - 1; i >= step; i--) {
+                    //self.setTaskUndone(clickedTask);
+                    self.activateTask(clickedTask);
 
-                        if (tl[i].active || tl[i].done) {
+                } else if (clickedTask.active) {
 
-                            self.deactivateTaskStep(i);
+                    self.setTaskDone(clickedTask);
+                    if (nextStep < tc.length) {
 
-                        }
+                        self.activateTask(tc[nextStep]);
+
+                    } else {
+
+                        self.endOfTest();
 
                     }
 
                 } else {
 
-                    while (++cs < step) {
+                    if (!step && !self.appMode) {
 
-                        self.activateTaskStep(cs, true);
+                        self.startTest();
+
+                    } else {
+
+                        self.activateTask(clickedTask);
 
                     }
-                    self.activateTaskStep(cs);
 
                 }
 
             }
 
-            tl.forEach(function (t, i) {
+            this.testCase.forEach(function (t, i) {
 
                 t.done = false;
                 d = document.createElement('div');
@@ -3409,9 +3604,9 @@
                 d.appendChild(sd);
                 $tb.append(d);
 
-                sn.addEventListener('click', function (e) {
+                sn.addEventListener('mousedown', function (e) {
 
-                    activateTaskStep(e);
+                    mouseUpHandler(e);
 
                 });
 
@@ -3424,131 +3619,177 @@
 
         };
 
-        this.activateTaskStep = function (step, restore) {
+        this.activateTask = function (task, force) {
 
-            var self = this,
-                tb = this.getDomElement('taskBar'),
-                div = $('div', tb)[step],
-                pdiv = $('div', tb)[step - 1],
-                task = this.testCase[step],
-                $div = $(div),
-                left = (2 + step) * ($(div).height() + 2);
+            if (task && (!task.active) || force) {
 
-            function endOfTest() {
+                var self = this,
+                    tc = this.testCase,
+                    step = task.step,
+                    tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[step],
+                    $div = $(div),
+                    dw = ($('.step-number', div).outerWidth()),
+                    ease = 'left 0.2s ease-out 0.15s',
+                    i, t;
 
-                $('.d-cipher-task-done', tb).fadeOut();
-                //window.location = self.testCase[0].events[0].location;
+                for (i = 0; i < step; i++) {
 
-            }
+                    t = tc[i];
 
-            if (task === this.currentTask && this.currentTask.active) {
+                    this.setTaskDone(t, force);
+                    t.active = false;
 
-                this.deactivateTaskStep(step);
+                    // Move previous tasks to the left
+                    $($('div.d-cipher-task', tb)[i]).css({
 
-            } else {
+                        left: dw * (i + 2) + 4,
+                        transition: force ? '' : ease
 
-                if (pdiv) {
-
-                    if (this.currentTask) {
-
-                        this.currentTask.done = true;
-                        this.currentTask.active = false;
-
-                    }
-
-                    $('span.step-number', pdiv).html('✓').removeClass('active');
+                    }).children('.step-number').removeClass('active');
 
                 }
 
-                if (step < this.testCase.length) {
+                i++;
+                for (il = tc.length; i < il; i++) {
 
-                    $div.css({
+                    this.deactivateTask(tc[i]);
 
-                        left: left,
-                        transition: restore ? '' : 'left 0.2s ease-out 0.15s'
+                }
 
-                    });
+                $div.css({
+
+                    left: dw * (step + 2) + 4,
+                    transition: force ? '' : ease
+
+                });
+
+                task.active = true;
+                self.currentTask = task;
+                setTimeout(function () {
 
                     $('span.step-number', div).addClass('active');
+                    self.setTaskUndone(task, force);
+                    self.setTestProgressBar();
 
-                    this.currentTask = task;
-                    this.currentTask.done = false;
-                    this.currentTask.active = true;
-
-                    if (!step && !this.appMode) {
-
-                        this.toggleRecMode();
-                        this.resetApp('test', task.events[0].location, restore);
-
-                    }
-
-                } else {
-
-                    this.resetTasklist();
-                    this.appMode = 'record';
-                    this.toggleRecMode();
-                    $('.d-cipher-task-done', tb).fadeIn();
-                    setTimeout(endOfTest, 2000);
-
-                }
+                }, 200);
 
             }
 
         };
 
-        this.deactivateTaskStep = function (step) {
+        this.deactivateTask = function (task) {
 
             var tb = this.getDomElement('taskBar'),
+                step = task.step,
                 div = $('div', tb)[step],
                 $div = $(div),
                 $spn = $('span.step-number', div),
-                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step),
-                task = this.testCase[step];
+                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step);
 
+            task.active = false;
+            this.setTaskUndone(task);
+            $spn.removeClass('active').trigger('mouseout');
             $div.css({
 
                 left: left,
                 transition: 'left 0.2s ease-out 0.15s'
 
             });
-            $spn.removeClass('active').trigger('mouseout');
-            task.done = false;
-            task.active = false;
+
+        };
+
+        this.syncTaskEvents = function (task) {
+
+            var done = task.done;
+
             task.events.forEach(function (e) {
 
-                e.done = false;
+                e.done = done;
 
             });
-            if (!step) {
 
-                this.resetTasklist();
-                this.appMode = 'record';
-                this.toggleRecMode();
+        };
 
-            } else {
+        this.setTaskDone = function (task, force) {
 
-                var cs = step - 1,
-                    ctask = this.testCase[cs];
+            if (task && (!task.done || force)) {
 
-                this.currentTask = ctask;
-                $('div > span.step-number[step=' + cs + ']', tb).html(step).addClass('active');
-                ctask.active = true;
-                ctask.done = false;
-                ctask.events.forEach(function (e) {
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
 
-                    e.done = false;
+                task.done = true;
+                if (!force) {
 
-                });
+                    this.syncTaskEvents(task);
+
+                }
+                $('span.step-number', div).html('✓');
+                $('span.task-description', div).hide();
 
             }
+
+        };
+
+        this.setTaskUndone = function (task, force) {
+
+            if (task && (task.done || force)) {
+
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
+
+                task.done = false;
+                if (!force) {
+
+                    this.syncTaskEvents(task);
+
+                }
+                $('span.step-number', div).html(task.step + 1);
+                $('span.task-description', div).show();
+
+            }
+
+        };
+
+        this.startTest = function () {
+
+            var task = this.testCase[0];
+
+            this.activateTask(task);
+            this.toggleRecMode();
+            this.resetApp('test', task.events[0].location);
+
+        };
+
+        this.endOfTest = function () {
+
+            var self = this,
+                tb = this.getDomElement('taskBar');
+
+            function endOfTest() {
+
+                $('.d-cipher-task-done', tb).fadeOut();
+                $(self.getDomElement('taskProgress')).hide();
+                //window.location = self.testCase[0].events[0].location;
+
+            }
+
+            this.resetTasklist();
+            this.appMode = 'record';
+            this.toggleRecMode();
+            $('.d-cipher-task-done', tb).fadeIn();
+            setTimeout(endOfTest, 2000);
 
         };
 
         this.checkTaskCompletion = function () {
 
             var e = this.currentEvent,
+                testCase = this.testCase,
+                currentTask = this.currentTask,
+                cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = this.currentTask ? this.currentTask.events : null;
+                evts = currentTask ? currentTask.events : null;
 
             if (e && evts && evts.length) {
 
@@ -3572,11 +3813,15 @@
                         && evt.location === e.location) {
 
                         evt.done = true;
+                        evt.testEvent = e;
+                        evt.testEventIndex = i;
                         if (evt.alternate && evt.alternate.length) {
 
-                            evt.alternate.forEach(function (i) {
+                            evt.alternate.forEach(function (ae) {
 
-                                evts[i].done = true;
+                                ae.done = true;
+                                ae.testEvent = e;
+                                ae.testEventIndex = i;
 
                             });
 
@@ -3593,11 +3838,63 @@
 
                     }).length) {
 
-                    this.activateTaskStep(this.currentTask.step + 1);
+                    if (cStep < testCase.length) {
+
+                        this.activateTask(testCase[cStep]);
+
+                    } else {
+
+                        this.endOfTest();
+
+                    }
+
+                } else {
+
+                    this.setTestProgressBar();
 
                 }
 
             }
+
+        };
+
+        this.setTestProgressBar = function () {
+
+            var tc = this.testCase,
+                winW = window.innerWidth,
+                butW = $('.step-number', this.getDomElement('taskBar')).width(),
+                len = tc.length,
+                finW = winW - butW * (len + 2);
+
+            function getEventsInfo() {
+
+                var done = 0,
+                    total = 0;
+
+                tc.forEach(function (t) {
+
+                    total += t.events.length;
+                    done += t.events.filter(function (e) {
+                        return e.done
+                    }).length;
+
+                });
+
+                return {total: total, done: done};
+
+            }
+
+            var ev = getEventsInfo(),
+                ct = this.currentTask ? (3 + this.currentTask.step) : 0;
+
+            $(this.getDomElement('taskProgress')).css({
+
+                width: finW * ev.done / ev.total,
+                left: butW * (ct),
+                transition: 'width 0.2s ease-out 0.1s',
+                display: 'block'
+
+            });
 
         };
 
@@ -3646,6 +3943,7 @@
 
             this.currentTask = null;
             this.currentEvent = null;
+            this.setTestProgressBar();
             sessionStorage.removeItem('dcipherState');
 
         };
@@ -3690,7 +3988,7 @@
         this.getTimeLineBracketsPars = function (time1, time2) {
 
             var rec = this.activeRecord,
-                duration = rec.duration,
+                duration = rec ? rec.duration : 0,
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
                 left = this.timeLineOffsetLeft + pxs * time1,
@@ -3769,6 +4067,7 @@
             tlCnv = document.createElement('canvas'),
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
+            taskProgress = document.createElement('span'),
             startTest = document.createElement('span');
 
         // D-Cipher container
@@ -3876,9 +4175,11 @@
         // Top menu
         topMenu.id = dCipher.domId.topMenu;
         taskBar.id = dCipher.domId.taskBar;
+        taskProgress.id = dCipher.domId.taskProgress;
         //taskBar.innerHTML = dCipher.loc._Start_task;
         startTest.className = 'start-test';
         startTest.innerHTML = dCipher.loc._Start_test;
+        taskBar.appendChild(taskProgress);
         taskBar.appendChild(startTest);
         topMenu.appendChild(taskBar);
         bdy.insertBefore(topMenu, bdy.firstChild);
@@ -3896,19 +4197,31 @@
 
         });
 
+        // Time line events listeners
         tLine.addEventListener('mousemove', function (e) {
 
             dCipher.showTLTooltip(e);
+            dCipher.moveTimelineBracket(e);
 
         });
 
         tLine.addEventListener('click', function (e) {
 
-            var evt = dCipher.getTimelineEvent(e);
+            var evt = dCipher.getTimelineEvent(e),
+                task = dCipher.getTimelineTask(e);
 
             if (evt) {
 
                 dCipher.showTimelineEvent(evt.event);
+
+            } else if (task) {
+
+                dCipher.showTLTaskEvents(task);
+
+            } else if (dCipher.activeRecord && (e.clientX < dCipher.timeLineOffsetLeft || e.target === dCipher.getDomElement('timelineInfo'))) {
+
+                dCipher.drawSpiderGraph(dCipher.activeRecord.id);
+                dCipher.resetTimeline(dCipher.activeRecord);
 
             }
 
@@ -3925,23 +4238,20 @@
 
         tLine.addEventListener('mouseup', function (e) {
 
-            var evt = dCipher.activeRecord.events[dCipher.endEventIndex];
+            //var evt = dCipher.activeRecord.events[dCipher.endEventIndex];
 
             dCipher.tlMouse.down = false;
             dCipher.tlMouse.target = '';
             dCipher.drawSpiderGraph(dCipher.activeRecord.id, dCipher.startEventIndex, dCipher.endEventIndex);
-            if (evt.location !== window.location.pathname) {
 
-                dCipher.appMode = 'timeline';
-                window.location = evt.location;
+            /* TODO: if we really need to move to another screen?
+             if (evt.location !== window.location.pathname) {
 
-            }
+             dCipher.appMode = 'timeline';
+             window.location = evt.location;
 
-        });
-
-        tLine.addEventListener('mousemove', function (e) {
-
-            dCipher.moveTimelineBracket(e);
+             }
+             */
 
         });
 
@@ -3959,24 +4269,28 @@
 
         butPlay.addEventListener('click', function () {
 
-            var sId = dCipher.sessionId,
-                $div = $('div', this);
-            
-            if ($div.hasClass('play')) {
+            if (dCipher.appMode !== 'test' && dCipher.appMode !== 'record' && dCipher.activeRecord) {
 
-                if (sId) {
+                var sId = dCipher.sessionId,
+                    $div = $('div', this);
 
-                    $div.removeClass('play').addClass('stop');
-                    dCipher.playSession(sId);
+                if ($div.hasClass('play')) {
+
+                    if (sId) {
+
+                        $div.removeClass('play').addClass('stop');
+                        dCipher.playSession(sId);
+
+                    }
+
+                } else {
+
+                    $div.removeClass('stop').addClass('play');
+
+                    dCipher.appMode = '';
+                    sessionStorage.removeItem('dcipherState');
 
                 }
-
-            } else {
-
-                $div.removeClass('stop').addClass('play');
-
-                dCipher.appMode = '';
-                sessionStorage.removeItem('dcipherState');
 
             }
 
@@ -3990,7 +4304,7 @@
 
         startTest.addEventListener('click', function () {
 
-            dCipher.activateTaskStep(0);
+            dCipher.startTest();
 
         });
 
