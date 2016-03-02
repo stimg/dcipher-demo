@@ -1899,6 +1899,19 @@
 
         };
 
+        this.resetTimeline = function () {
+
+            this.timeBrackets = [];
+            this.startEventIndex = 0;
+            this.endEventIndex = this.timeLineEvents.length - 1;
+            if (this.activeRecord) {
+
+                this.drawTimeline(this.activeRecord);
+
+            }
+
+        };
+
         this.drawTimeline = function drawTimeline(rec) {
 
             this.showTimelineStat(rec);
@@ -1974,7 +1987,8 @@
                     // Draw task number
                     if (showTaskNumber && e.testTask && e.firstInTask) {
 
-                        var tx = /*e.testTask.step ? posx : */posx0;
+                        //var tx = e.testTask.step ? posx : posx0;
+                        var tx = posx;
                         ctx.save();
                         ctx.fillStyle = 'gray';
                         ctx.strokeStyle = 'gray';
@@ -2093,18 +2107,25 @@
 
             var te = this.timeLineEvents,
                 $tl = $(this.getDomElement('timeline')),
-                y = window.innerHeight - 20,
+                x, y = window.innerHeight - 20,
                 abs = Math.abs,
-                th = 7, evt, task = null,
+                dx = 5, evt, task = null,
                 i, il = te.length;
 
             for (i = 0; i < il; i++) {
 
                 evt = te[i];
-                if (evt.event.testTask && abs(e.clientX - evt.clientX + 10) < th && e.clientY > y) {
+                if (evt.event.firstInTask) {
 
-                    task = evt.event.testTask;
-                    break;
+                    // Move hot spot to previous event
+                    //x = i ? te[i - 1].clientX : evt.clientX;
+                    x = evt.clientX;
+
+                    if (abs(x + 10 - e.clientX) < dx && e.clientY > y) {
+
+                        task = evt.event.testTask;
+                        break;
+                    }
 
                 }
 
@@ -2112,7 +2133,6 @@
                 //console.log('e.clientY: ', e.clientY, '; y: ', y);
 
             }
-
 
             if (task) {
 
@@ -2125,6 +2145,46 @@
 
             }
             return task;
+
+        };
+
+        this.getTaskTLEvents = function (task) {
+
+            if (task && this.timeLineEvents.length) {
+
+                var id = task.id;
+
+                return this.timeLineEvents.filter(function (e) {
+
+                    return e.event.testTask.id === id;
+
+                });
+
+
+            } else {
+
+                return null;
+
+            }
+
+        };
+
+        this.showTLTaskEvents = function (task) {
+
+            var evts = this.getTaskTLEvents(task),
+                e1 = evts[0].event,
+                e2 = evts[evts.length - 1].event;
+
+            // Move time bracket to the first event of the next task, just for design sake
+            if (e2.index + 1 < this.timeLineEvents.length) {
+
+                e2 = this.timeLineEvents[e2.index + 1].event;
+            }
+
+            this.showSpiderGraph(this.activeRecord.id, e1.index, e2.index);
+            this.drawTLBrackets(e1.time, e2.time);
+
+
 
         };
 
@@ -3149,9 +3209,9 @@
                     self.sessionId = r.id;
                     //if (!self.appMode) {
 
-                        self.startEventIndex = 0;
-                        self.endEventIndex = r.events.length - 1;
-                        self.timeBrackets = [0, r.duration];
+                    self.startEventIndex = 0;
+                    self.endEventIndex = r.events.length - 1;
+                    self.timeBrackets = [0, r.duration];
 
                     //}
                     self.drawTimeline(r);
@@ -3699,7 +3759,6 @@
             this.toggleRecMode();
             this.resetApp('test', task.events[0].location);
 
-
         };
 
         this.endOfTest = function () {
@@ -4138,19 +4197,31 @@
 
         });
 
+        // Time line events listeners
         tLine.addEventListener('mousemove', function (e) {
 
             dCipher.showTLTooltip(e);
+            dCipher.moveTimelineBracket(e);
 
         });
 
         tLine.addEventListener('click', function (e) {
 
-            var evt = dCipher.getTimelineEvent(e);
+            var evt = dCipher.getTimelineEvent(e),
+                task = dCipher.getTimelineTask(e);
 
             if (evt) {
 
                 dCipher.showTimelineEvent(evt.event);
+
+            } else if (task) {
+
+                dCipher.showTLTaskEvents(task);
+
+            } else if (dCipher.activeRecord && (e.clientX < dCipher.timeLineOffsetLeft || e.target === dCipher.getDomElement('timelineInfo'))) {
+
+                dCipher.drawSpiderGraph(dCipher.activeRecord.id);
+                dCipher.resetTimeline(dCipher.activeRecord);
 
             }
 
@@ -4173,20 +4244,14 @@
             dCipher.tlMouse.target = '';
             dCipher.drawSpiderGraph(dCipher.activeRecord.id, dCipher.startEventIndex, dCipher.endEventIndex);
 
-/* TODO: if we really need to move to another screen?
-            if (evt.location !== window.location.pathname) {
+            /* TODO: if we really need to move to another screen?
+             if (evt.location !== window.location.pathname) {
 
-                dCipher.appMode = 'timeline';
-                window.location = evt.location;
+             dCipher.appMode = 'timeline';
+             window.location = evt.location;
 
-            }
-*/
-
-        });
-
-        tLine.addEventListener('mousemove', function (e) {
-
-            dCipher.moveTimelineBracket(e);
+             }
+             */
 
         });
 
