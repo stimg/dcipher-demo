@@ -3111,7 +3111,13 @@
 
                     } else {
 
-                        self.unsetActiveRecord($el.attr('data-dcipher-rec-id'));
+                        var id = $el.attr('data-dcipher-rec-id');
+
+                        if (self.activeRecord && self.activeRecord.id === id) {
+
+                            self.unsetActiveRecord();
+
+                        }
 
                     }
 
@@ -3243,15 +3249,11 @@
 
         };
 
-        this.unsetActiveRecord = function unsetActiveRecord(id) {
+        this.unsetActiveRecord = function () {
 
-            if (!id && this.activeRecord) {
+            if (this.activeRecord) {
 
-                id = this.activeRecord.id;
-
-            }
-
-            if (id) {
+                var id = this.activeRecord.id;
 
                 $('#recId-' + id, this.getDomElement('records')).removeClass('active');
                 if (this.db.records.length) {
@@ -3261,10 +3263,11 @@
                 }
                 this.hideSpiderGraph(id);
 
-            }
+                this.activeRecord = null;
+                $(this.getDomElement('timelineInfo')).html('');
+                $(this.getDomElement('timeline')).hide();
 
-            $(this.getDomElement('timelineInfo')).html('');
-            $(this.getDomElement('timeline')).hide();
+            }
 
         };
 
@@ -3274,7 +3277,7 @@
 
             if (id === this.activeRecord.id) {
 
-                this.unsetActiveRecord(id);
+                this.unsetActiveRecord();
 
             }
 
