@@ -2160,7 +2160,6 @@
 
                 });
 
-
             } else {
 
                 return null;
@@ -2172,19 +2171,21 @@
         this.showTLTaskEvents = function (task) {
 
             var evts = this.getTaskTLEvents(task),
-                e1 = evts[0].event,
-                e2 = evts[evts.length - 1].event;
+                tlEvents = this.timeLineEvents,
+                idx1 = tlEvents.indexOf(evts[0]),
+                idx2 = tlEvents.indexOf(evts[evts.length - 1]);
 
             // Move time bracket to the first event of the next task, just for design sake
-            if (e2.index + 1 < this.timeLineEvents.length) {
+            if (idx2 + 1 < this.timeLineEvents.length) {
 
-                e2 = this.timeLineEvents[e2.index + 1].event;
+                idx2 += 1;
             }
 
-            this.showSpiderGraph(this.activeRecord.id, e1.index, e2.index);
-            this.drawTLBrackets(e1.time, e2.time);
+            var evt1 = tlEvents[idx1].event,
+                evt2 = tlEvents[idx2].event;
 
-
+            this.showSpiderGraph(this.activeRecord.id, evt1.index, evt2.index);
+            this.drawTLBrackets(evt1.time, evt2.time);
 
         };
 
@@ -3207,13 +3208,13 @@
                     r.visible = true;
                     self.activeRecord = r;
                     self.sessionId = r.id;
-                    //if (!self.appMode) {
+                    if (self.appMode !== 'timeline') {
 
-                    self.startEventIndex = 0;
-                    self.endEventIndex = r.events.length - 1;
-                    self.timeBrackets = [0, r.duration];
+                        self.startEventIndex = 0;
+                        self.endEventIndex = r.events.length - 1;
+                        self.timeBrackets = [0, r.duration];
 
-                    //}
+                    }
                     self.drawTimeline(r);
 
                 } else {
