@@ -3151,7 +3151,7 @@
                     if ($el.attr('type') === 'text') {
 
                         self.showSpiderGraph(id);
-                        self.setActiveRecord(id);
+                        self.setActiveRecord(id, true);
 
                     }
 
@@ -3190,7 +3190,7 @@
 
         };
 
-        this.setActiveRecord = function setActiveRecord(id) {
+        this.setActiveRecord = function setActiveRecord(id, reset) {
 
             var self = this,
                 recs = this.getDomElement('records'),
@@ -3208,7 +3208,7 @@
                     r.visible = true;
                     self.activeRecord = r;
                     self.sessionId = r.id;
-                    if (self.appMode !== 'timeline') {
+                    if (self.appMode !== 'timeline' || reset) {
 
                         self.startEventIndex = 0;
                         self.endEventIndex = r.events.length - 1;
@@ -4005,30 +4005,37 @@
             return {width: width, left: left};
         };
 
-        this.moveTimelineBracket = function (e) {
+        this.modifyTimelineFrame = function (e) {
 
-            if (this.tlMouse.down) {
+            var $tb = $('#' + this.domId.timelineBrackets),
+                t1 = this.timeBrackets[0],
+                t2 = this.timeBrackets[1],
+                tframe = t2 - t1,
+                tppx = tframe / $tb.width(),
+                dt = (e.clientX - this.tlMouse.x) * tppx;
 
-                var $tb = $('#' + this.domId.timelineBrackets),
-                    t1 = this.timeBrackets[0],
-                    t2 = this.timeBrackets[1],
-                    tframe = t2 - t1,
-                    tppx = tframe / $tb.width(),
-                    dt = (e.clientX - this.tlMouse.x) * tppx;
+            if (this.tlMouse.target === 'left-bracket' && t1 + dt >= 0) {
 
-                if (this.tlMouse.target === 'left-bracket' && t1 + dt >= 0) {
+                t1 += dt;
 
-                    this.drawTLBrackets(t1 + dt, t2)
+            } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeRecord.duration) {
 
-                } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeRecord.duration) {
+                t2 += dt;
 
-                    this.drawTLBrackets(t1, t2 + dt)
-                }
+            } else if (this.tlMouse.target === 'brackets') {
 
-                this.tlMouse.x = e.clientX;
-                this.tlMouse.y = e.clientY;
+                t1 += dt;
+                t2 += dt;
 
             }
+
+            if (t1 >= 0 && t2 <= this.activeRecord.duration) {
+
+                this.drawTLBrackets(t1, t2);
+
+            }
+            this.tlMouse.x = e.clientX;
+            this.tlMouse.y = e.clientY;
 
         };
 
@@ -4201,8 +4208,12 @@
         // Time line events listeners
         tLine.addEventListener('mousemove', function (e) {
 
+            if (dCipher.tlMouse.down) {
+
+                dCipher.modifyTimelineFrame(e);
+
+            }
             dCipher.showTLTooltip(e);
-            dCipher.moveTimelineBracket(e);
 
         });
 
