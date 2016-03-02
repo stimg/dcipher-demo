@@ -46,6 +46,7 @@
             _Start_test: "Start test",
             _Default_record_name: "Test #",
             _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
+            _No_active_record: "No active record",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -699,6 +700,7 @@
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 $('body').on('mousemove', catchEvents);
                 this.hideRecList();
+                this.unsetActiveRecord();
                 this.sessionId = ts.toString();
                 this.activeRecord = {
 
@@ -761,7 +763,6 @@
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId);
                         self.showSpiderGraph(self.sessionId);
-                        self.activeRecord = null;
 
                     });
 
@@ -1729,7 +1730,7 @@
             }
 
             this.getRecordById(sId).visible = false;
-            if (this.activeRecord.id === sId) {
+            if (this.activeRecord && this.activeRecord.id === sId) {
 
                 this.clearTimeline();
 
@@ -1872,12 +1873,13 @@
 
         this.clearTimeline = function clearTimeline() {
 
-            var cnv = $('canvas', this.getDomElement('timeline'))[0],
+            var cw = window.innerWidth,
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
                 ctx = cnv.getContext('2d'),
-                cw = window.innerWidth,
-                ch = $(this.getDomElement('timeline')).height();
+                tlh = $tl.height();
 
-            ctx.clearRect(0, 0, cw, ch);
+            ctx.clearRect(0, 0, cw, tlh);
 
         };
 
@@ -1887,10 +1889,10 @@
 
             var self = this,
                 events = rec.events,
-                cnv = $('canvas', this.getDomElement('timeline'))[0],
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
                 ctx = cnv.getContext('2d'),
                 cw = window.innerWidth,
-                $tl = $(this.getDomElement('timeline')),
                 ch = $tl.height(),
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 offsetLeft = this.timeLineOffsetLeft,
@@ -1955,7 +1957,7 @@
                     });
 
                     // Draw task number
-                    if (showTaskNumber && cTask != e.testTask.step) {
+                    if (showTaskNumber && e.testTask && cTask != e.testTask.step) {
 
                         var tx = e.testTask.step ? posx : posx0;
                         ctx.save();
@@ -2000,9 +2002,23 @@
                 }
             });
 
+            // Draw last task line
+            ctx.save();
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = 'gray';
+            ctx.beginPath();
+            ctx.moveTo(posx, 0);
+            ctx.lineTo(posx, ch);
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw last event pict
+            ctx.beginPath();
             self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
             ctx.stroke();
             ctx.fill();
+
+            $tl.show();
 
         };
 
@@ -3074,13 +3090,13 @@
                     r.visible = true;
                     self.activeRecord = r;
                     self.sessionId = r.id;
-                    if (!self.appMode) {
+                    //if (!self.appMode) {
 
                         self.startEventIndex = 0;
-                        self.endEventIndex = 0;
+                        self.endEventIndex = r.events.length - 1;
                         self.timeBrackets = [0, r.duration];
 
-                    }
+                    //}
                     self.drawTimeline(r);
 
                 } else {
@@ -3101,15 +3117,30 @@
 
         this.unsetActiveRecord = function unsetActiveRecord(id) {
 
-            $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-            this.getRecordById(id).active = false;
-            this.hideSpiderGraph(id);
+            id = id || this.activeRecord.id;
+
+            if (id) {
+
+                $('#recId-' + id, this.getDomElement('records')).removeClass('active');
+                this.getRecordById(id).active = false;
+                this.hideSpiderGraph(id);
+
+            }
+
+            $(this.getDomElement('timelineInfo')).html('');
+            $(this.getDomElement('timeline')).hide();
 
         };
 
         this.deleteRecord = function deleteRecord(id) {
 
             var self = this;
+
+            if (id === this.activeRecord.id) {
+
+                this.unsetActiveRecord(id);
+
+            }
 
             this.db.deleteRecord(id).then(function () {
 
@@ -4076,12 +4107,15 @@
             dCipher.tlMouse.down = false;
             dCipher.tlMouse.target = '';
             dCipher.drawSpiderGraph(dCipher.activeRecord.id, dCipher.startEventIndex, dCipher.endEventIndex);
+
+/* TODO: if we really need to move to another screen?
             if (evt.location !== window.location.pathname) {
 
                 dCipher.appMode = 'timeline';
                 window.location = evt.location;
 
             }
+*/
 
         });
 
