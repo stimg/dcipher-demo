@@ -2193,12 +2193,22 @@
 
             this.sessionId = event.recId;
             this.activeRecord = this.getRecordById(event.recId);
-            this.startEventIndex = 0;
-            this.endEventIndex = event.index;
             this.appMode = 'timeline';
-            this.drawTLBrackets(this.timeBrackets[0], event.time);
+            if (event.time < this.timeBrackets[0]) {
+
+                this.startEventIndex = event.index;
+                this.timeBrackets[0] = event.time;
+
+            } else {
+
+                this.endEventIndex = event.index;
+                this.timeBrackets[1] = event.time;
+
+            }
+            this.drawTLBrackets.apply(this, this.timeBrackets);
             this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
             this.drawTLCursor(event.time, this.activeRecord.duration);
+
             if (window.location.pathname !== event.location) {
 
                 window.location = event.location;
