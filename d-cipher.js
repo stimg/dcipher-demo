@@ -351,6 +351,7 @@
 
             [
                 {
+                    id: 1,
                     step: 0,
                     description: 'Find Cameleon stroller and configure to order',
                     done: false,
@@ -380,6 +381,7 @@
                     ]
                 },
                 {
+                    id: 2,
                     step: 1,
                     description: 'Choose bassinet and select black canopy color',
                     done: false,
@@ -402,6 +404,7 @@
                     ]
                 },
                 {
+                    id: 3,
                     step: 2,
                     description: ' Add running accessory, and a cup holder',
                     done: false,
@@ -424,6 +427,7 @@
                     ]
                 },
                 {
+                    id: 4,
                     step: 3,
                     description: 'Purchase stroller, checking final cost total before completing',
                     done: false,
@@ -482,6 +486,7 @@
             ],
             [
                 {
+                    id: 5,
                     step: 0,
                     description: 'Find Cameleon stroller and configure to order',
                     done: false,
@@ -504,6 +509,7 @@
                     ]
                 },
                 {
+                    id: 6,
                     step: 1,
                     description: 'Choose bassinet and select black canopy color',
                     done: false,
@@ -526,6 +532,7 @@
                     ]
                 },
                 {
+                    id: 7,
                     step: 2,
                     description: ' Add running accessory, and a cup holder',
                     done: false,
@@ -548,6 +555,7 @@
                     ]
                 },
                 {
+                    id: 8,
                     step: 3,
                     description: 'Purchase stroller, checking final cost total before completing',
                     done: false,
@@ -911,8 +919,8 @@
 
                     event = events.pop();
                     event.type = etype = 'click';
+                    lastEvent = events[events.length - 1];
 
-                    lastEvent = events[elen - 1];
                     if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
 
                         events.pop();
@@ -949,6 +957,11 @@
 
                 }
 
+                if (this.currentTask && (!lastEvent || lastEvent.testTask.id !== this.currentTask.id)) {
+
+                    event.firstInTask = true;
+
+                }
                 /*
                  var sd = 0;
                  rec.events.forEach(function (e) {
@@ -1175,6 +1188,7 @@
 
             var self = this,
                 event = this.getTimelineEvent(e),
+                task = this.getTimelineTask(e),
                 $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
                 $tl = $(this.getDomElement('timeline'));
@@ -1288,6 +1302,8 @@
 
                 $tt.css('top', top).css('left', left)
                     .show();
+
+            } else if (task) {
 
             } else {
 
@@ -1902,8 +1918,7 @@
                 pxs = width / rec.duration,
                 posx = offsetLeft,
                 posx0, pe,
-                showTaskNumber = !!rec.testCase,
-                cTask = -1;
+                showTaskNumber = !!rec.testCase;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -1957,9 +1972,9 @@
                     });
 
                     // Draw task number
-                    if (showTaskNumber && e.testTask && cTask != e.testTask.step) {
+                    if (showTaskNumber && e.testTask && e.firstInTask) {
 
-                        var tx = e.testTask.step ? posx : posx0;
+                        var tx = /*e.testTask.step ? posx : */posx0;
                         ctx.save();
                         ctx.fillStyle = 'gray';
                         ctx.strokeStyle = 'gray';
@@ -1970,7 +1985,6 @@
                         ctx.stroke();
                         ctx.fillText(e.testTask.step + 1, tx + 5, ch - 10);
                         ctx.restore();
-                        cTask = e.testTask.step;
 
                     }
 
@@ -2075,6 +2089,45 @@
 
         };
 
+        this.getTimelineTask = function (e) {
+
+            var te = this.timeLineEvents,
+                $tl = $(this.getDomElement('timeline')),
+                y = window.innerHeight - 20,
+                abs = Math.abs,
+                th = 7, evt, task = null,
+                i, il = te.length;
+
+            for (i = 0; i < il; i++) {
+
+                evt = te[i];
+                if (evt.event.testTask && abs(e.clientX - evt.clientX + 10) < th && e.clientY > y) {
+
+                    task = evt.event.testTask;
+                    break;
+
+                }
+
+                //console.log('e.clientX: ', e.clientX, '; evt.clientX + 10: ', (evt.clientX + 10));
+                //console.log('e.clientY: ', e.clientY, '; y: ', y);
+
+            }
+
+
+            if (task) {
+
+                console.log('Task: ', task.description);
+                $tl.css('cursor', 'pointer');
+
+            } else {
+
+                $tl.css('cursor', 'default');
+
+            }
+            return task;
+
+        };
+
         this.showTimelineEvent = function showTimelineEvent(event) {
 
             this.sessionId = event.recId;
@@ -2111,10 +2164,14 @@
 
                 } else if (type === 'dblclick') {
 
-                    ctx.moveTo(x + d, y);
-                    ctx.arc(x, y, d, 0, endAngle, true);
-                    ctx.moveTo(x + 2 * d, y);
-                    ctx.arc(x, y, 2 * d, 0, endAngle, true);
+                    var r = d - 1;
+                    ctx.moveTo(x + 2 * r, y);
+                    ctx.arc(x, y, 2 * r, 0, endAngle, true);
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.arc(x, y, r, 0, endAngle, true);
 
                 } else if (type === 'mousedown') {
 
@@ -3117,12 +3174,20 @@
 
         this.unsetActiveRecord = function unsetActiveRecord(id) {
 
-            id = id || this.activeRecord.id;
+            if (!id && this.activeRecord) {
+
+                id = this.activeRecord.id;
+
+            }
 
             if (id) {
 
                 $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-                this.getRecordById(id).active = false;
+                if (this.db.records.length) {
+
+                    this.getRecordById(id).active = false;
+
+                }
                 this.hideSpiderGraph(id);
 
             }
@@ -3630,8 +3695,8 @@
 
             var task = this.testCase[0];
 
-            this.toggleRecMode();
             this.activateTask(task);
+            this.toggleRecMode();
             this.resetApp('test', task.events[0].location);
 
 
@@ -4102,7 +4167,7 @@
 
         tLine.addEventListener('mouseup', function (e) {
 
-            var evt = dCipher.activeRecord.events[dCipher.endEventIndex];
+            //var evt = dCipher.activeRecord.events[dCipher.endEventIndex];
 
             dCipher.tlMouse.down = false;
             dCipher.tlMouse.target = '';
