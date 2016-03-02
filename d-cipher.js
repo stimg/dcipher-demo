@@ -47,6 +47,8 @@
             _Default_record_name: "Test #",
             _Test_done: "<span>✓</span>Congratulation! You have succesfully complete the test.",
             _No_active_record: "No active record",
+            _Test_name: 'Test',
+            _Task_description: 'Task',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -1191,7 +1193,38 @@
                 task = this.getTimelineTask(e),
                 $tt = $(this.getDomElement('timelineTooltip')),
                 $he = $(this.getDomElement('highlightEvent')),
-                $tl = $(this.getDomElement('timeline'));
+                $tl = $(this.getDomElement('timeline')),
+                loc = this.loc,
+                html = '<table>',
+                x, y, w, h, top, left;
+
+            function calculateTTPosition() {
+
+                if (y + 20 + h < window.innerHeight) {
+
+                    top = y + 20;
+
+                } else {
+
+                    top = y - h - 10;
+
+                }
+
+                if (x - w / 2 - 5 < 0) {
+
+                    left = 5;
+
+                } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                    left = window.innerWidth - w - 5;
+
+                } else {
+
+                    left = x - w / 2;
+
+                }
+
+            }
 
             function getEventInfo(e) {
 
@@ -1242,13 +1275,25 @@
                 return html;
             }
 
+            function getTaskInfo(task) {
+
+                var html = '';
+
+                html += '<tr><td class="tt-name">' + loc._Test_name + ':</td>' +
+                        '<td class="tt-value">' + (self.testCase.name || 'Test #1') + '</td></tr>';
+
+                html += '<tr>' +
+                        '<td colspan = "2" class="tt-value">' + task.description + '</td>' +
+                        '</tr><tr>';
+
+                return html;
+
+            }
+
             if (event) {
 
-                var loc = this.loc,
-                //pos = $tl.offset(),
-                    x = event.clientX/* + pos.left*/,
-                    y = event.clientY/*y + pos.top*/,
-                    html = '<table>', w, h, top, left;
+                x = event.clientX;
+                y = event.clientY;
 
                 if (!$tl.data('eiTID')) {
 
@@ -1275,35 +1320,34 @@
                 $tt.html(html);
                 w = $tt.outerWidth();
                 h = $tt.outerHeight();
-
-                if (y + 20 + h < window.innerHeight) {
-
-                    top = y + 20;
-
-                } else {
-
-                    top = y - h - 10;
-
-                }
-
-                if (x - w / 2 - 5 < 0) {
-
-                    left = 5;
-
-                } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                    left = window.innerWidth - w - 5;
-
-                } else {
-
-                    left = x - w / 2;
-
-                }
-
+                calculateTTPosition();
                 $tt.css('top', top).css('left', left)
                     .show();
 
             } else if (task) {
+
+                x = e.clientX;
+                y = e.clientY - 10;
+
+
+                if (!$tl.data('eiTID')) {
+
+                    $tl.data('eiTID', setTimeout(function () {
+
+                        $tt.hide();
+
+                    }, 5000));
+
+                }
+
+                $tl.css('cursor', 'pointer');
+                html += getTaskInfo(task) + '</table>';
+                $tt.html(html);
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
+                calculateTTPosition();
+                $tt.css('top', top).css('left', left)
+                    .show();
 
             } else {
 
@@ -1833,7 +1877,7 @@
                     ctx.beginPath();
                     ctx.moveTo(ex, ey);
 
-                } else if ((pe && !pe.type.match(/wheel|scroll/i)) || !e.type.match(/wheel|scroll/i)) {
+                } else if ((pe && !pe.type.match(/wheel|scroll/i)) || !e.type.match(/wheel|scroll/i) || e.index) {
 
                     ctx.lineTo(ex, ey);
 
@@ -3116,6 +3160,10 @@
                         if (self.activeRecord && self.activeRecord.id === id) {
 
                             self.unsetActiveRecord();
+
+                        } else {
+
+                            self.hideSpiderGraph(id);
 
                         }
 
