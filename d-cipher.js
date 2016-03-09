@@ -350,237 +350,251 @@
 
         };
 
-        this.testCases = [
+        this.taskEvents = [
+            {
+                id: '0-1-0',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-1-2-1-0-0-0",
+                tagName: "A",
+                location: '/bugaboo/A/index.html',
+                done: false
+            },
+            {
+                id: '0-1-1',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-2-1-0-0-0-1-0-1",
+                tagName: "SPAN",
+                location: '/bugaboo/A/index.html',
+                done: false
+            },
+            {
+                id: '0-1-2',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                tagName: "A",
+                location: '/bugaboo/A/bugaboo-cameleon3.html',
+                done: false
+            },
+            {
+                id: '0-2-0',
+                taskId: '0-2',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                tagName: "SPAN",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-2-1',
+                taskId: '0-2',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                tagName: "path",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-3-0',
+                taskId: '0-3',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                tagName: "A",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-3-1',
+                taskId: '0-3',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                tagName: "A",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-0',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                tagName: "SPAN",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-1',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                alternate: [2],
+                tagName: "A",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-2',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-1-2-0-0-1-2-0-0",
+                alternate: [1],
+                tagName: "A",
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-4',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'click',
+                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                //alternate: [4],
+                tagName: "A",
+                location: '/bugaboo/A/cart.html',
+                done: false
+            },
+            {
+                id: '1-1-0',
+                taskId: '0-1',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-2-0-2-0-0-0-0-0-0",
+                tagName: "A",
+                location: '/bugaboo/B/index.html',
+                done: false
+            },
+            {
+                id: '1-1-1',
+                taskId: '0-1',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/bugaboo-cameleon3.html',
+                done: false
+            },
+            {
+                id: '1-2-0',
+                taskId: '0-2',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-2-1',
+                taskId: '0-2',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                tagName: "path",
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-3-0',
+                taskId: '0-3',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-3-1',
+                taskId: '0-3',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-4-0',
+                taskId: '0-4',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-4-1',
+                taskId: '0-4',
+                sessionId: '0-1-0-1',
+                type: 'click',
+                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                tagName: "SPAN",
+                location: '/bugaboo/B/cart.html',
+                done: false
+            }
 
-            [
-                {
-                    id: 1,
-                    step: 0,
-                    description: 'Find Cameleon stroller and configure to order',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-1-2-1-0-0-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-2-1-0-0-0-1-0-1",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/bugaboo-cameleon3.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 2,
-                    step: 1,
-                    description: 'Choose bassinet and select black canopy color',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                            tagName: "path",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 3,
-                    step: 2,
-                    description: ' Add running accessory, and a cup holder',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 4,
-                    step: 3,
-                    description: 'Purchase stroller, checking final cost total before completing',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
-                            alternate: [2],
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-1-2-0-0-1-2-0-0",
-                            alternate: [1],
-                            tagName: "A",
-                            location: '/bugaboo/A/create.html',
-                            done: false
-                        },
-                        /*
-                         {
-                         type: 'wheel',
-                         treePath: "0-10-0-0-0-0-1-0-1-0-0-0-3",
-                         tagName: "DIV",
-                         location: '/bugaboo/A/cart.html',
-                         done: false
-                         },
-                         */
-                        {
-                            type: 'click',
-                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                            //alternate: [4],
-                            tagName: "A",
-                            location: '/bugaboo/A/cart.html',
-                            done: false
-                        }/*,
-                         {
-                         type: 'click',
-                         treePath: "0-10-0-0-0-0-1-0-0-0-0-0-1-0-0-1",
-                         alternate: [3],
-                         tagName: "A",
-                         location: '/bugaboo/A/cart.html',
-                         done: false
-                         }*/
-                    ]
-                }
-            ],
-            [
-                {
-                    id: 5,
-                    step: 0,
-                    description: 'Find Cameleon stroller and configure to order',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-2-0-2-0-0-0-0-0-0",
-                            tagName: "A",
-                            location: '/bugaboo/B/index.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/bugaboo-cameleon3.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 6,
-                    step: 1,
-                    description: 'Choose bassinet and select black canopy color',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                            tagName: "path",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 7,
-                    step: 2,
-                    description: ' Add running accessory, and a cup holder',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        }
-                    ]
-                },
-                {
-                    id: 8,
-                    step: 3,
-                    description: 'Purchase stroller, checking final cost total before completing',
-                    done: false,
-                    active: false,
-                    events: [
-                        {
-                            type: 'mousedown',
-                            treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/create.html',
-                            done: false
-                        },
-                        {
-                            type: 'click',
-                            treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                            tagName: "SPAN",
-                            location: '/bugaboo/B/cart.html',
-                            done: false
-                        }
-                    ]
-                }
-            ]
+        ];
+
+        this.testTasks = [
+            {
+                id: '0-1',
+                testCaseId: '0',
+                step: 0,
+                description: 'Find Cameleon stroller and configure to order'
+            },
+            {
+                id: '0-2',
+                testCaseId: '0',
+                step: 1,
+                description: 'Choose bassinet and select black canopy color'
+            },
+            {
+                id: '0-3',
+                testCaseId: '0',
+                step: 2,
+                description: ' Add running accessory, and a cup holder'
+            },
+            {
+                id: '0-4',
+                testCaseId: '0',
+                step: 3,
+                description: 'Purchase stroller, checking final cost total before completing'
+            }
+        ];
+
+        this.testCases = [
+            {
+                id: '0',
+                name: 'Bugaboo A',
+                description: 'Test case for Bugaboo A',
+                author: 'Gray Holland',
+                created: '09.09.2015',
+                modified: '',
+                sessions: [
+                    {
+                        sessionId: '0-1-0-0',
+                        tag: 'Bugaboo A',
+                        master: true
+                    },
+                    {
+                        sessionId: '0-2-0-0',
+                        tag: 'Bugaboo B',
+                        master: true
+                    }
+                ]
+            }
         ];
 
         this.currentTask = null;
@@ -1334,7 +1348,6 @@
 
                 x = e.clientX;
                 y = e.clientY - 10;
-
 
                 if (!$tl.data('eiTID')) {
 
@@ -3643,11 +3656,12 @@
 
                         self.startTest();
 
-                    }/* else {
+                    }
+                    /* else {
 
-                        self.activateTask(clickedTask);
+                     self.activateTask(clickedTask);
 
-                    }*/
+                     }*/
 
                 }
 
