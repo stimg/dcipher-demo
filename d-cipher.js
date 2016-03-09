@@ -299,7 +299,8 @@
             eventInfo: 'd-cipher-event-info',
             topMenu: 'd-cipher-topmenu',
             taskBar: 'd-cipher-taskbar',
-            taskProgress: 'd-cipher-task-progress'
+            taskProgress: 'd-cipher-task-progress',
+            butStartTask: 'd-cipher-but-start-task'
 
         };
 
@@ -705,7 +706,7 @@
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(cnvh).hide();
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'none');
+                $(this.getDomElement('butStartTest')).hide();
                 $(this.getDomElement('butList')).hide();
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 $('body').on('mousemove', catchEvents);
@@ -738,8 +739,6 @@
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
                 $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
-                var rec = this.activeRecord;
-
                 $stat.fadeOut();
                 clearInterval($stat.data('tid'));
                 $('body').off('mousemove', catchEvents);
@@ -749,6 +748,8 @@
                     $(this.getDomElement('butList')).show();
 
                 }
+
+                var rec = this.activeRecord;
 
                 if (rec && rec.events && rec.events.length > 1) {
 
@@ -775,6 +776,11 @@
                         self.showSpiderGraph(self.sessionId);
 
                     });
+
+                } else {
+
+                    this.activeRecord = null;
+                    this.sessionId = null;
 
                 }
 
@@ -3633,15 +3639,15 @@
 
                 } else {
 
-                    if (!step && !self.appMode) {
+                    if (/*!step && */!self.appMode) {
 
                         self.startTest();
 
-                    } else {
+                    }/* else {
 
                         self.activateTask(clickedTask);
 
-                    }
+                    }*/
 
                 }
 
@@ -3694,6 +3700,8 @@
                     dw = ($('.step-number', div).outerWidth()),
                     ease = 'left 0.2s ease-out 0.15s',
                     i, t;
+
+                $(this.getDomElement('butStartTask')).hide();
 
                 for (i = 0; i < step; i++) {
 
@@ -4246,6 +4254,7 @@
         taskBar.id = dCipher.domId.taskBar;
         taskProgress.id = dCipher.domId.taskProgress;
         //taskBar.innerHTML = dCipher.loc._Start_task;
+        startTest.id = dCipher.domId.butStartTask;
         startTest.className = 'start-test';
         startTest.innerHTML = dCipher.loc._Start_test;
         taskBar.appendChild(taskProgress);
