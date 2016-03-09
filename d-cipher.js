@@ -1,6 +1,7 @@
 /**
  * Created by zerkalenkov on 05.08.15.
  */
+
 (function (window, document) {
 
     var Strings = {
@@ -49,6 +50,8 @@
             _No_active_record: "No active record",
             _Test_name: 'Test',
             _Task_description: 'Task',
+            _Test_list: 'Test list',
+            _Delete_test: 'Delete test',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -88,6 +91,254 @@
 
         };
         this.records = [];
+        this.taskEvents = [
+            {
+                id: '0-1-0',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-1-2-1-0-0-0",
+                target: {tagName: "A"},
+                location: '/bugaboo/A/index.html',
+                done: false
+            },
+            {
+                id: '0-1-1',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-2-1-0-0-0-1-0-1",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/A/index.html',
+                done: false
+            },
+            {
+                id: '0-1-2',
+                taskId: '0-1',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                target: {tagName: "A"},
+                location: '/bugaboo/A/bugaboo-cameleon3.html',
+                done: false
+            },
+            {
+                id: '0-2-0',
+                taskId: '0-2',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-2-1',
+                taskId: '0-2',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                target: {tagName: "path"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-3-0',
+                taskId: '0-3',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                target: {tagName: "A"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-3-1',
+                taskId: '0-3',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                target: {tagName: "A"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-0',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-1',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                alternate: [2],
+                target: {tagName: "A"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-2',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'mousedown',
+                treePath: "0-2-0-1-2-0-0-1-2-0-0",
+                alternate: [1],
+                target: {tagName: "A"},
+                location: '/bugaboo/A/create.html',
+                done: false
+            },
+            {
+                id: '0-4-4',
+                taskId: '0-4',
+                sessionId: '0-1-0-0',
+                type: 'click',
+                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                //alternate: [4],
+                target: {tagName: "A"},
+                location: '/bugaboo/A/cart.html',
+                done: false
+            },
+            {
+                id: '1-1-0',
+                taskId: '0-1',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-2-0-2-0-0-0-0-0-0",
+                target: {tagName: "A"},
+                location: '/bugaboo/B/index.html',
+                done: false
+            },
+            {
+                id: '1-1-1',
+                taskId: '0-1',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/bugaboo-cameleon3.html',
+                done: false
+            },
+            {
+                id: '1-2-0',
+                taskId: '0-2',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-2-1',
+                taskId: '0-2',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                target: {tagName: "path"},
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-3-0',
+                taskId: '0-3',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-3-1',
+                taskId: '0-3',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-4-0',
+                taskId: '0-4',
+                sessionId: '0-1-0-1',
+                type: 'mousedown',
+                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/create.html',
+                done: false
+            },
+            {
+                id: '1-4-1',
+                taskId: '0-4',
+                sessionId: '0-1-0-1',
+                type: 'click',
+                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                target: {tagName: "SPAN"},
+                location: '/bugaboo/B/cart.html',
+                done: false
+            }
+
+        ];
+
+        this.testTasks = [
+            {
+                id: '0-1',
+                testCaseId: '0',
+                step: 0,
+                description: 'Find Cameleon stroller and configure to order'
+            },
+            {
+                id: '0-2',
+                testCaseId: '0',
+                step: 1,
+                description: 'Choose bassinet and select black canopy color'
+            },
+            {
+                id: '0-3',
+                testCaseId: '0',
+                step: 2,
+                description: ' Add running accessory, and a cup holder'
+            },
+            {
+                id: '0-4',
+                testCaseId: '0',
+                step: 3,
+                description: 'Purchase stroller, checking final cost total before completing'
+            }
+        ];
+
+        this.testCases = [
+            {
+                id: '0',
+                name: 'Bugaboo initial test case',
+                description: 'Test case for Bugaboo web site',
+                author: 'Gray Holland',
+                created: '09.09.2015',
+                modified: '',
+                sessions: [
+                    {
+                        sessionId: '0-1-0-0',
+                        tag: 'Bugaboo A',
+                        location: '/bugaboo/A',
+                        master: true
+                    },
+                    {
+                        sessionId: '0-2-0-0',
+                        tag: 'Bugaboo B',
+                        location: '/bugaboo/B',
+                        master: true
+                    }
+                ]
+            }
+        ];
 
         this.init = function init() {
 
@@ -186,7 +437,45 @@
 
         };
 
-        this.putRecord = function putRecord(id, data) {
+        this.getLocationTestCases = function (location) {
+
+            return this.testCases; /*.filter(function (testCase) {
+
+                return testCase.sessions.map(function (session) {
+
+                    return session.location;
+
+                }).filter(function (loc) {
+
+                    return location === loc || location === loc + 'index.html';
+
+                });
+
+            });*/
+
+        };
+
+        this.getTestCaseTasks = function (testCaseId) {
+
+            return this.testTasks.filter(function (task) {
+
+                return task.testCaseId === testCaseId;
+
+            });
+
+        };
+
+        this.getTaskEvents = function (taskId, sessionId) {
+
+            return this.taskEvents.filter(function (event) {
+
+                return event.taskId === taskId && event.sessionId === sessionId;
+
+            });
+
+        };
+
+         this.putRecord = function putRecord(id, data) {
 
             var self = this;
 
@@ -283,6 +572,7 @@
             menu: 'd-cipher-menu',
             butRecord: 'd-cipher-menu-but-record',
             butPlay: 'd-cipher-menu-but-play',
+            butTest: 'd-cipher-menu-but-test',
             butList: 'd-cipher-menu-but-list',
             stat: 'd-cipher-stat',
             timeline: 'd-cipher-timeline',
@@ -300,7 +590,8 @@
             topMenu: 'd-cipher-topmenu',
             taskBar: 'd-cipher-taskbar',
             taskProgress: 'd-cipher-task-progress',
-            butStartTask: 'd-cipher-but-start-task'
+            butStartTask: 'd-cipher-but-start-task',
+            testList: 'd-cipher-test-list'
 
         };
 
@@ -350,253 +641,8 @@
 
         };
 
-        this.taskEvents = [
-            {
-                id: '0-1-0',
-                taskId: '0-1',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-2-0-1-2-1-0-0-0",
-                tagName: "A",
-                location: '/bugaboo/A/index.html',
-                done: false
-            },
-            {
-                id: '0-1-1',
-                taskId: '0-1',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-2-0-2-1-0-0-0-1-0-1",
-                tagName: "SPAN",
-                location: '/bugaboo/A/index.html',
-                done: false
-            },
-            {
-                id: '0-1-2',
-                taskId: '0-1',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
-                tagName: "A",
-                location: '/bugaboo/A/bugaboo-cameleon3.html',
-                done: false
-            },
-            {
-                id: '0-2-0',
-                taskId: '0-2',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                tagName: "SPAN",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-2-1',
-                taskId: '0-2',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                tagName: "path",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-3-0',
-                taskId: '0-3',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                tagName: "A",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-3-1',
-                taskId: '0-3',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                tagName: "A",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-4-0',
-                taskId: '0-4',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
-                tagName: "SPAN",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-4-1',
-                taskId: '0-4',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
-                alternate: [2],
-                tagName: "A",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-4-2',
-                taskId: '0-4',
-                sessionId: '0-1-0-0',
-                type: 'mousedown',
-                treePath: "0-2-0-1-2-0-0-1-2-0-0",
-                alternate: [1],
-                tagName: "A",
-                location: '/bugaboo/A/create.html',
-                done: false
-            },
-            {
-                id: '0-4-4',
-                taskId: '0-4',
-                sessionId: '0-1-0-0',
-                type: 'click',
-                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                //alternate: [4],
-                tagName: "A",
-                location: '/bugaboo/A/cart.html',
-                done: false
-            },
-            {
-                id: '1-1-0',
-                taskId: '0-1',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-2-0-2-0-0-0-0-0-0",
-                tagName: "A",
-                location: '/bugaboo/B/index.html',
-                done: false
-            },
-            {
-                id: '1-1-1',
-                taskId: '0-1',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/bugaboo-cameleon3.html',
-                done: false
-            },
-            {
-                id: '1-2-0',
-                taskId: '0-2',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/create.html',
-                done: false
-            },
-            {
-                id: '1-2-1',
-                taskId: '0-2',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                tagName: "path",
-                location: '/bugaboo/B/create.html',
-                done: false
-            },
-            {
-                id: '1-3-0',
-                taskId: '0-3',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/create.html',
-                done: false
-            },
-            {
-                id: '1-3-1',
-                taskId: '0-3',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/create.html',
-                done: false
-            },
-            {
-                id: '1-4-0',
-                taskId: '0-4',
-                sessionId: '0-1-0-1',
-                type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/create.html',
-                done: false
-            },
-            {
-                id: '1-4-1',
-                taskId: '0-4',
-                sessionId: '0-1-0-1',
-                type: 'click',
-                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                tagName: "SPAN",
-                location: '/bugaboo/B/cart.html',
-                done: false
-            }
-
-        ];
-
-        this.testTasks = [
-            {
-                id: '0-1',
-                testCaseId: '0',
-                step: 0,
-                description: 'Find Cameleon stroller and configure to order'
-            },
-            {
-                id: '0-2',
-                testCaseId: '0',
-                step: 1,
-                description: 'Choose bassinet and select black canopy color'
-            },
-            {
-                id: '0-3',
-                testCaseId: '0',
-                step: 2,
-                description: ' Add running accessory, and a cup holder'
-            },
-            {
-                id: '0-4',
-                testCaseId: '0',
-                step: 3,
-                description: 'Purchase stroller, checking final cost total before completing'
-            }
-        ];
-
-        this.testCases = [
-            {
-                id: '0',
-                name: 'Bugaboo A',
-                description: 'Test case for Bugaboo A',
-                author: 'Gray Holland',
-                created: '09.09.2015',
-                modified: '',
-                sessions: [
-                    {
-                        sessionId: '0-1-0-0',
-                        tag: 'Bugaboo A',
-                        master: true
-                    },
-                    {
-                        sessionId: '0-2-0-0',
-                        tag: 'Bugaboo B',
-                        master: true
-                    }
-                ]
-            }
-        ];
-
+        this.testCase = null;
+        this.testTasks = [];
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -624,17 +670,9 @@
                 var recList = self.getDomElement('records'),
                     path = window.location.pathname;
 
-                if (path.match('/bugaboo/A/')) {
-
-                    self.testCase = self.testCases[0];
-
-                } else if (path.match('/bugaboo/B/')) {
-
-                    self.testCase = self.testCases[1];
-
-                }
+                self.testCases = self.db.getLocationTestCases(path);
                 self.createRecordList();
-                self.createTaskList();
+                self.createTestList();
                 self.restoreState();
 
                 $(recList).on('mouseout', function () {
@@ -751,7 +789,6 @@
                 // Turn off record mode
                 this.appMode = '';
                 $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
                 $stat.fadeOut();
                 clearInterval($stat.data('tid'));
@@ -853,7 +890,9 @@
                     left = offs.left,
                     top = offs.top,
                     event = {
-                        recId: this.sessionId,
+                        id: new Date(),
+                        taskId: this.currentTask ? this.currentTask.id : '',
+                        sessionId: this.sessionId,
                         timeStamp: e.timeStamp,
                         index: elen,
                         location: location,
@@ -1046,7 +1085,7 @@
             }
 
             setElementListeners($('body').children(":not('#d-cipher-container, script')"));
-            console.log('DOM listeners has been set up...');
+            console.log('DOM listeners have been set up...');
 
         };
 
@@ -1248,7 +1287,7 @@
 
             function getEventInfo(e) {
 
-                var rId = e.recId,
+                var rId = e.sessionId,
                     rec = self.getRecordById(rId),
                     etarget = e.target,
                     html = '';
@@ -1399,7 +1438,7 @@
 
             function getEventInfo(e) {
 
-                var rId = e.recId,
+                var rId = e.sessionId,
                     rec = self.getRecordById(rId),
                     etarget = e.target,
                     html = '';
@@ -1446,16 +1485,16 @@
                 }
 
                 evt = evts[0];
-                rId = evt.recId;
+                rId = evt.sessionId;
                 html += getEventInfo(evt);
 
                 evts.forEach(function (e) {
 
                     rec = self.getRecordById(rId);
 
-                    if (rId !== e.recId) {
+                    if (rId !== e.sessionId) {
 
-                        rId = e.recId;
+                        rId = e.sessionId;
                         html += getEventInfo(e);
 
                     }
@@ -1595,7 +1634,7 @@
                 return html;
             }
 
-            rId = evt.recId;
+            rId = evt.sessionId;
             rec = self.getRecordById(rId);
 
             html += getRecordInfo(rec);
@@ -1605,9 +1644,9 @@
                 dx += e.x;
                 dy += e.y;
 
-                if (rId !== e.recId) {
+                if (rId !== e.sessionId) {
 
-                    rId = e.recId;
+                    rId = e.sessionId;
                     rec = self.getRecordById(rId);
                     html += '<tr><td></td></tr>' + getRecordInfo(rec);
 
@@ -1804,7 +1843,6 @@
             if (!$('canvas.cnv:visible', cnvh).length) {
 
                 $(cnvh).hide();
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
 
             }
 
@@ -2254,8 +2292,8 @@
 
         this.showTimelineEvent = function showTimelineEvent(event) {
 
-            this.sessionId = event.recId;
-            this.activeRecord = this.getRecordById(event.recId);
+            this.sessionId = event.sessionId;
+            this.activeRecord = this.getRecordById(event.sessionId);
             this.appMode = 'timeline';
             if (event.time < this.timeBrackets[0]) {
 
@@ -2269,7 +2307,7 @@
 
             }
             this.drawTLBrackets.apply(this, this.timeBrackets);
-            this.drawSpiderGraph(event.recId, this.startEventIndex, this.endEventIndex + 1);
+            this.drawSpiderGraph(event.sessionId, this.startEventIndex, this.endEventIndex + 1);
             this.drawTLCursor(event.time, this.activeRecord.duration);
 
             if (window.location.pathname !== event.location) {
@@ -3342,12 +3380,7 @@
 
             var self = this;
 
-            if (id === this.activeRecord.id) {
-
-                this.unsetActiveRecord();
-
-            }
-
+            this.unsetActiveRecord();
             this.db.deleteRecord(id).then(function () {
 
                 self.createRecordList();
@@ -3586,11 +3619,9 @@
 
             if (this.appMode !== 'test') {
 
-                $('.start-test', this.getDomElement('topMenu')).css('display', 'inline-block');
+                $(this.getDomElement('butStartTest')).show();
 
-            }
-
-            if (this.appMode === 'test' && this.currentTask) {
+            } else if (this.currentTask) {
 
                 this.activateTask(this.currentTask, true);
 
@@ -3617,10 +3648,8 @@
         this.createTaskList = function () {
 
             var self = this,
-                tc = this.testCase,
                 $tb = $(this.getDomElement('taskBar')),
                 w = $tb.outerHeight(),
-                rp = window.innerWidth - w * (tc.length),
                 d, sn, sd;
 
             function mouseUpHandler(e) {
@@ -3667,7 +3696,11 @@
 
             }
 
-            this.testCase.forEach(function (t, i) {
+            this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
+
+            var rp = window.innerWidth - w * (this.testTasks.length);
+
+                this.testTasks.forEach(function (t, i) {
 
                 t.done = false;
                 d = document.createElement('div');
@@ -3694,10 +3727,7 @@
 
             });
 
-            d = document.createElement('div');
-            d.className = 'd-cipher-task-done';
-            d.innerHTML = this.loc._Test_done;
-            $tb.append(d);
+            $(this.getDomElement('butStartTask')).show();
 
         };
 
@@ -4036,7 +4066,7 @@
 
             var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
                 evt = evts ? evts[0] : null,
-                rec = evt ? this.getRecordById(evt.recId) : null,
+                rec = evt ? this.getRecordById(evt.sessionId) : null,
                 tl = this.getDomElement('timeline'),
                 $tlc = $(this.getDomElement('timelineCircle'));
 
@@ -4122,6 +4152,72 @@
 
         };
 
+        this.toggleTestList = function () {
+
+            $(this.getDomElement('testList')).toggle();
+
+        };
+
+        this.createTestList = function () {
+
+            var self = this,
+                $div = $('.tests', this.getDomElement('testList')),
+                tst, inp, del;
+
+            $div.children().remove();
+            this.testCases.forEach(function (test) {
+
+                tst = document.createElement('div');
+                tst.className = 'test';
+                tst.setAttribute('data-d-cipher-test-id', test.id);
+
+                inp = document.createElement('input');
+                inp.type = 'text';
+                inp.name = 'testName';
+                inp.className = 'test-name';
+                inp.value = test.name;
+                inp.disabled = true;
+                inp.setAttribute('data-d-cipher-test-id', test.id);
+                tst.appendChild(inp);
+
+                del = document.createElement('div');
+                del.id = 'btnDelTest-' + test.id;
+                del.className = 'del';
+                del.innerHTML = '&#10005;';
+                del.title = dCipher.loc._Delete_test;
+                del.setAttribute('data-d-cipher-test-id', test.id);
+                tst.appendChild(del);
+
+                $div.append(tst);
+
+                tst.addEventListener('click', function () {
+
+                    self.testCase = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id'));
+                    self.createTaskList();
+                    self.toggleTestList();
+
+                });
+
+                tst.addEventListener('dblclick', function () {
+
+                    $('input[type="text"]', this).attr('disabled', false).focus();
+
+                });
+
+                del.addEventListener('mouseup', function () {
+
+                    self.deleteTest($(this).attr('data-d-cipher-test-id'));
+
+                });
+
+            });
+
+        };
+
+        this.deleteTest = function () {
+
+        };
+
     }; // End of DCipher class
 
     var dCipher = new DCipher();
@@ -4138,6 +4234,8 @@
             rec = document.createElement('div'),
             butPlay = document.createElement('div'),
             play = document.createElement('div'),
+            butTest = document.createElement('div'),
+            test = document.createElement('div'),
             butList = document.createElement('div'),
             recs = document.createElement('div'),
             recList = document.createElement('div'),
@@ -4159,7 +4257,11 @@
             topMenu = document.createElement('div'),
             taskBar = document.createElement('div'),
             taskProgress = document.createElement('span'),
-            startTest = document.createElement('span');
+            startTest = document.createElement('div'),
+            testList = document.createElement('div'),
+            testsCtrls = document.createElement('div'),
+            tests = document.createElement('div'),
+            testDone = document.createElement('div');;
 
         // D-Cipher container
         dMain.id = dCipher.domId.container;
@@ -4245,6 +4347,14 @@
         butPlay.appendChild(play);
         topMenu.appendChild(butPlay);
 
+        // Test button
+        butTest.id = dCipher.domId.butTest;
+        butTest.className = 'btn test';
+        butTest.title = dCipher.loc._Test_list;
+        test.className = 'test';
+        butTest.appendChild(test);
+        topMenu.appendChild(butTest);
+
         // Record list button
         butList.id = dCipher.domId.butList;
         butList.className = 'btn';
@@ -4253,7 +4363,17 @@
         butList.appendChild(recs);
 
         // Record list
-        recList.id = 'd-cipher-rec-list';
+        recList.id = dCipher.domId['records'];
+
+        // Test list
+        tests.className = 'tests';
+        testsCtrls.className = 'tests-ctrls';
+        testList.id = dCipher.domId['testList'];
+        testList.appendChild(tests);
+        testList.appendChild(testsCtrls);
+        testDone.className = 'd-cipher-task-done';
+        testDone.innerHTML = dCipher.loc._Test_done;
+
 
         // D-Cipher menu
         menu.id = dCipher.domId.menu;
@@ -4262,6 +4382,7 @@
         menu.appendChild(butList);
         dMain.appendChild(menu);
         dMain.appendChild(recList);
+        dMain.appendChild(testList);
 
         // Top menu
         topMenu.id = dCipher.domId.topMenu;
@@ -4273,6 +4394,7 @@
         startTest.innerHTML = dCipher.loc._Start_test;
         taskBar.appendChild(taskProgress);
         taskBar.appendChild(startTest);
+        taskBar.appendChild(testDone);
         topMenu.appendChild(taskBar);
         bdy.insertBefore(topMenu, bdy.firstChild);
 
@@ -4351,7 +4473,7 @@
 
         });
 
-        butRec.addEventListener('click', function (e) {
+        butRec.addEventListener('mouseup', function (e) {
 
             e.stopPropagation();
             if (dCipher.appMode === 'test') {
@@ -4363,7 +4485,13 @@
 
         });
 
-        butPlay.addEventListener('click', function () {
+        butTest.addEventListener('mouseup', function (e) {
+
+            dCipher.toggleTestList();
+
+        });
+
+        butPlay.addEventListener('mouseup', function () {
 
             if (dCipher.appMode !== 'test' && dCipher.appMode !== 'record' && dCipher.activeRecord) {
 
@@ -4679,8 +4807,7 @@ function initJQueryPlugins() {
 
     });
 
-};
-
+}
 // Indexed DB
 function initIndexedDB() {
 
@@ -5201,8 +5328,7 @@ function initIndexedDB() {
     $.indexedDB.IDBCursor = IDBCursor;
     $.indexedDB.IDBTransaction = IDBTransaction;
     $.idb = $.indexedDB;
-};
-
+}
 // Bootstrap color picker
 /*!
  * Bootstrap Colorpicker
@@ -6285,6 +6411,24 @@ function initColorPicker() {
 
     $.fn.colorpicker.constructor = Colorpicker;
 
+}
+
+
+// Functions
+Array.prototype.findBy = function (key, value) {
+
+    return this.filter(function (el) {
+
+        return el[key] === value;
+
+    })[0];
+
 };
 
+Location.prototype.dirname = function () {
+
+    var path = this.pathname;
+    return path.substring(0, path.lastIndexOf('/'));
+
+};
 

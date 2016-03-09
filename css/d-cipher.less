@@ -182,6 +182,20 @@
       border-left-color: white;
       transform: scale(1.5, 1) translate(7px, 0);
     }
+    .test:before{
+      content: 'T';
+      color: gray;
+      position: absolute;
+      padding-left: 5px;
+      display: inline-block;
+      font: bold 19px 'Helvetica Neue';
+    }
+    .test{
+      width: 22px;
+      height: 22px;
+      background-color: white;
+      border-radius: 12px;
+    }
     .rec {
       //width: 1em;
       //height: 1em;
@@ -695,6 +709,58 @@
     border: solid 7px transparent;
     border-right-color: white;
     margin: 0;
+  }
+}
+
+#d-cipher-test-list{
+  .shadow;
+  display: none;
+  position: fixed;
+  z-index: 1000000;
+  top: 52px;
+  left: 1px;
+  //width: 300px;
+  max-width: 450px;
+  max-height: 450px;
+  text-overflow: ellipsis;
+  overflow-x: hidden;
+  overflow-y: auto;
+  background-color: silver;
+  cursor: default;
+  .test:hover, .test.active{
+    background-color: #999999;
+    color: white;
+    input.test-name{
+      color: white;
+    }
+  }
+  .test:hover > .del{
+    color: white;
+  }
+  .test {
+    padding: 2px 20px 2px 10px;
+    .del {
+      display: inline-block;
+      position: absolute;
+      right: 5px;
+      margin: 0.35em;
+      color: transparent;
+      cursor: pointer;
+    }
+    input.test-name{
+      display: inline-block;
+      color: white;
+      background-color: transparent;
+      border: solid 1px transparent;
+      margin: 0 0 0 10px;
+      text-overflow: ellipsis;
+      width: 250px;
+    }
+    input.test-name:focus{
+      background-color: white;
+      color: gray;
+      border: solid 1px gray;
+    }
   }
 }
 
