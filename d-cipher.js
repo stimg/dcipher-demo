@@ -591,6 +591,7 @@
             taskBar: 'd-cipher-taskbar',
             taskProgress: 'd-cipher-task-progress',
             butStartTask: 'd-cipher-but-start-task',
+            testName: 'd-cipher-test-name',
             testList: 'd-cipher-test-list'
 
         };
@@ -643,6 +644,7 @@
 
         this.testCase = null;
         this.testTasks = [];
+        this.taskEvents = [];
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -3745,6 +3747,7 @@
                     ease = 'left 0.2s ease-out 0.15s',
                     i, t;
 
+                this.taskEvents = this.db.getTaskEvents(this.testTask);
                 $(this.getDomElement('butStartTask')).hide();
 
                 for (i = 0; i < step; i++) {
@@ -3867,7 +3870,7 @@
 
         this.startTest = function () {
 
-            var task = this.testCase[0];
+            var task = this.testTasks[0];
 
             this.activateTask(task);
             this.toggleRecMode();
@@ -4195,6 +4198,7 @@
                     self.testCase = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id'));
                     self.createTaskList();
                     self.toggleTestList();
+                    $(self.getDomElement('testName')).html(test.name).show();
 
                 });
 
@@ -4211,6 +4215,12 @@
                 });
 
             });
+
+        };
+
+        this.getTestCaseSessionId = function (testCaseId) {
+
+            return this.testCases.findBy('id', testCaseId).sessions.findBy('location', location.getDirName()).id;
 
         };
 
@@ -4261,7 +4271,8 @@
             testList = document.createElement('div'),
             testsCtrls = document.createElement('div'),
             tests = document.createElement('div'),
-            testDone = document.createElement('div');;
+            testDone = document.createElement('div'),
+            testName = document.createElement('span');
 
         // D-Cipher container
         dMain.id = dCipher.domId.container;
@@ -4371,9 +4382,9 @@
         testList.id = dCipher.domId['testList'];
         testList.appendChild(tests);
         testList.appendChild(testsCtrls);
+        testName.id = dCipher.domId['testName'];
         testDone.className = 'd-cipher-task-done';
         testDone.innerHTML = dCipher.loc._Test_done;
-
 
         // D-Cipher menu
         menu.id = dCipher.domId.menu;
@@ -4395,6 +4406,7 @@
         taskBar.appendChild(taskProgress);
         taskBar.appendChild(startTest);
         taskBar.appendChild(testDone);
+        taskBar.appendChild(testName);
         topMenu.appendChild(taskBar);
         bdy.insertBefore(topMenu, bdy.firstChild);
 
@@ -6425,7 +6437,7 @@ Array.prototype.findBy = function (key, value) {
 
 };
 
-Location.prototype.dirname = function () {
+Location.prototype.getDirName = function () {
 
     var path = this.pathname;
     return path.substring(0, path.lastIndexOf('/'));
