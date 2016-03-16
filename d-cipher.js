@@ -52,6 +52,7 @@
             _Task_description: 'Task',
             _Test_list: 'Test list',
             _Delete_test: 'Delete test',
+            _Select_test: "Select test",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -208,7 +209,7 @@
             {
                 id: '1-1-0',
                 taskId: '0-1',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-2-0-2-0-0-0-0-0-0",
                 target: {tagName: "A"},
@@ -218,7 +219,7 @@
             {
                 id: '1-1-1',
                 taskId: '0-1',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
                 target: {tagName: "SPAN"},
@@ -228,7 +229,7 @@
             {
                 id: '1-2-0',
                 taskId: '0-2',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
                 target: {tagName: "SPAN"},
@@ -238,7 +239,7 @@
             {
                 id: '1-2-1',
                 taskId: '0-2',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
                 target: {tagName: "path"},
@@ -248,7 +249,7 @@
             {
                 id: '1-3-0',
                 taskId: '0-3',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
                 target: {tagName: "SPAN"},
@@ -258,7 +259,7 @@
             {
                 id: '1-3-1',
                 taskId: '0-3',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
                 target: {tagName: "SPAN"},
@@ -268,7 +269,7 @@
             {
                 id: '1-4-0',
                 taskId: '0-4',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
                 target: {tagName: "SPAN"},
@@ -278,7 +279,7 @@
             {
                 id: '1-4-1',
                 taskId: '0-4',
-                sessionId: '0-1-0-1',
+                sessionId: '0-2-0-0',
                 type: 'click',
                 treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
                 target: {tagName: "SPAN"},
@@ -325,13 +326,13 @@
                 modified: '',
                 sessions: [
                     {
-                        sessionId: '0-1-0-0',
+                        id: '0-1-0-0',
                         tag: 'Bugaboo A',
                         location: '/bugaboo/A',
                         master: true
                     },
                     {
-                        sessionId: '0-2-0-0',
+                        id: '0-2-0-0',
                         tag: 'Bugaboo B',
                         location: '/bugaboo/B',
                         master: true
@@ -439,19 +440,20 @@
 
         this.getLocationTestCases = function (location) {
 
-            return this.testCases; /*.filter(function (testCase) {
+            return this.testCases;
+            /*.filter(function (testCase) {
 
-                return testCase.sessions.map(function (session) {
+             return testCase.sessions.map(function (session) {
 
-                    return session.location;
+             return session.location;
 
-                }).filter(function (loc) {
+             }).filter(function (loc) {
 
-                    return location === loc || location === loc + 'index.html';
+             return location === loc || location === loc + 'index.html';
 
-                });
+             });
 
-            });*/
+             });*/
 
         };
 
@@ -475,7 +477,17 @@
 
         };
 
-         this.putRecord = function putRecord(id, data) {
+        this.getSessionEvents = function (sessionId) {
+
+            return this.taskEvents.filter(function (event) {
+
+                return event.sessionId === sessionId;
+
+            });
+
+        };
+
+        this.putRecord = function putRecord(id, data) {
 
             var self = this;
 
@@ -590,7 +602,7 @@
             topMenu: 'd-cipher-topmenu',
             taskBar: 'd-cipher-taskbar',
             taskProgress: 'd-cipher-task-progress',
-            butStartTask: 'd-cipher-but-start-task',
+            butStartTest: 'd-cipher-but-start-task',
             testName: 'd-cipher-test-name',
             testList: 'd-cipher-test-list'
 
@@ -760,7 +772,7 @@
                 var ts = 1 * new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(cnvh).hide();
-                $(this.getDomElement('butStartTest')).hide();
+                $(this.getDomElement('0-2-0-0')).hide();
                 $(this.getDomElement('butList')).hide();
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 $('body').on('mousemove', catchEvents);
@@ -3540,6 +3552,9 @@
                     startEventIndex: this.startEventIndex,
                     endEventIndex: this.endEventIndex,
                     testCase: this.testCase,
+                    testTasks: this.testTasks,
+                    testEvents: this.testEvents,
+                    taskEvents: this.taskEvents,
                     currentTask: this.currentTask,
                     currentEvent: this.currentEvent,
                     timeBrackets: this.timeBrackets
@@ -3621,11 +3636,15 @@
 
             if (this.appMode !== 'test') {
 
-                $(this.getDomElement('butStartTest')).show();
+                $(this.getDomElement('0-2-0-0')).show();
 
             } else if (this.currentTask) {
 
+                this.createTaskList();
                 this.activateTask(this.currentTask, true);
+                $(this.getDomElement('testName')).hide();
+                $(this.getDomElement('butStartTest')).hide();
+                $(this.getDomElement('butTest')).hide();
 
             }
 
@@ -3656,9 +3675,9 @@
 
             function mouseUpHandler(e) {
 
-                var tc = self.testCase,
+                var testTasks = self.testTasks,
                     step = 1 * $(e.target).attr('step'),
-                    clickedTask = tc[step],
+                    clickedTask = testTasks[step],
                     nextStep = step + 1;
 
                 e.stopPropagation();
@@ -3671,9 +3690,9 @@
                 } else if (clickedTask.active) {
 
                     self.setTaskDone(clickedTask);
-                    if (nextStep < tc.length) {
+                    if (nextStep < testTasks.length) {
 
-                        self.activateTask(tc[nextStep]);
+                        self.activateTask(testTasks[nextStep]);
 
                     } else {
 
@@ -3698,11 +3717,29 @@
 
             }
 
-            this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
+            if (this.testCase && this.testCase.id) {
+
+                if (!this.testTasks.length) {
+
+                    this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
+
+                }
+
+                if (!this.currentTask) {
+
+                    $(this.getDomElement('butStartTest')).show();
+
+                }
+
+            } else {
+
+                this.testTasks = [];
+
+            }
 
             var rp = window.innerWidth - w * (this.testTasks.length);
 
-                this.testTasks.forEach(function (t, i) {
+            this.testTasks.forEach(function (t, i) {
 
                 t.done = false;
                 d = document.createElement('div');
@@ -3729,8 +3766,6 @@
 
             });
 
-            $(this.getDomElement('butStartTask')).show();
-
         };
 
         this.activateTask = function (task, force) {
@@ -3738,21 +3773,24 @@
             if (task && (!task.active) || force) {
 
                 var self = this,
-                    tc = this.testCase,
+                    testTasks = this.testTasks,
                     step = task.step,
                     tb = this.getDomElement('taskBar'),
                     div = $('div.d-cipher-task', tb)[step],
                     $div = $(div),
                     dw = ($('.step-number', div).outerWidth()),
                     ease = 'left 0.2s ease-out 0.15s',
-                    i, t;
+                    i, il, t;
 
-                this.taskEvents = this.db.getTaskEvents(this.testTask);
-                $(this.getDomElement('butStartTask')).hide();
+                this.taskEvents = this.testEvents.filter(function (event) {
+
+                    return event.taskId === task.id;
+
+                });
 
                 for (i = 0; i < step; i++) {
 
-                    t = tc[i];
+                    t = testTasks[i];
 
                     this.setTaskDone(t, force);
                     t.active = false;
@@ -3768,9 +3806,9 @@
                 }
 
                 i++;
-                for (il = tc.length; i < il; i++) {
+                for (il = testTasks.length; i < il; i++) {
 
-                    this.deactivateTask(tc[i]);
+                    this.deactivateTask(testTasks[i]);
 
                 }
 
@@ -3799,10 +3837,10 @@
 
             var tb = this.getDomElement('taskBar'),
                 step = task.step,
-                div = $('div', tb)[step],
+                div = $('div.d-cipher-task', tb)[step],
                 $div = $(div),
                 $spn = $('span.step-number', div),
-                left = window.innerWidth - $spn.outerWidth() * (this.testCase.length - step);
+                left = window.innerWidth - $spn.outerWidth() * (this.testTasks.length - step);
 
             task.active = false;
             this.setTaskUndone(task);
@@ -3820,9 +3858,13 @@
 
             var done = task.done;
 
-            task.events.forEach(function (e) {
+            this.testEvents.forEach(function (e) {
 
-                e.done = done;
+                if (e.taskId === task.id) {
+
+                    e.done = done;
+
+                }
 
             });
 
@@ -3872,9 +3914,12 @@
 
             var task = this.testTasks[0];
 
+            $(this.getDomElement('testName')).hide();
+            $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butTest')).hide();
             this.activateTask(task);
             this.toggleRecMode();
-            this.resetApp('test', task.events[0].location);
+            this.resetApp('test', this.taskEvents[0].location);
 
         };
 
@@ -3887,26 +3932,28 @@
 
                 $('.d-cipher-task-done', tb).fadeOut();
                 $(self.getDomElement('taskProgress')).hide();
-                //window.location = self.testCase[0].events[0].location;
+                $(self.getDomElement('testName')).show();
+                $(self.getDomElement('butStartTest')).show();
+                $(self.getDomElement('butTest')).show();
 
             }
 
-            this.resetTasklist();
             this.appMode = 'record';
             this.toggleRecMode();
             $('.d-cipher-task-done', tb).fadeIn();
             setTimeout(endOfTest, 2000);
+            self.resetTasklist();
 
         };
 
         this.checkTaskCompletion = function () {
 
             var e = this.currentEvent,
-                testCase = this.testCase,
+                testTasks = this.testTasks,
                 currentTask = this.currentTask,
                 cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = currentTask ? currentTask.events : null;
+                evts = this.taskEvents;
 
             if (e && evts && evts.length) {
 
@@ -3955,9 +4002,9 @@
 
                     }).length) {
 
-                    if (cStep < testCase.length) {
+                    if (cStep < testTasks.length) {
 
-                        this.activateTask(testCase[cStep]);
+                        this.activateTask(testTasks[cStep]);
 
                     } else {
 
@@ -3977,36 +4024,28 @@
 
         this.setTestProgressBar = function () {
 
-            var tc = this.testCase,
+            var testEvents = this.testEvents,
                 winW = window.innerWidth,
-                butW = $('.step-number', this.getDomElement('taskBar')).width(),
-                len = tc.length,
-                finW = winW - butW * (len + 2);
+                butW = $('.step-number', this.getDomElement('taskBar')).outerWidth(),
+                finW = winW - butW * (2 + this.testTasks.length);
 
             function getEventsInfo() {
 
-                var done = 0,
-                    total = 0;
-
-                tc.forEach(function (t) {
-
-                    total += t.events.length;
-                    done += t.events.filter(function (e) {
+                var total = testEvents.length,
+                    dl = testEvents.filter(function (e) {
                         return e.done
-                    }).length;
+                    });
 
-                });
-
-                return {total: total, done: done};
+                return {total: total, done: dl ? dl.length : 0};
 
             }
 
             var ev = getEventsInfo(),
-                ct = this.currentTask ? (3 + this.currentTask.step) : 0;
+                ct = this.currentTask ? (2 + this.currentTask.step) : 0;
 
             $(this.getDomElement('taskProgress')).css({
 
-                width: finW * ev.done / ev.total,
+                width: finW * ev.done / ev.total + 2,
                 left: butW * (ct),
                 transition: 'width 0.2s ease-out 0.1s',
                 display: 'block'
@@ -4036,28 +4075,9 @@
 
         this.resetTasklist = function () {
 
-            var $tb = $(this.getDomElement('taskBar')),
-                tl = this.testCase,
-                $tasks = $('div', $tb),
-                w = $tb.outerHeight(),
-                rp = window.innerWidth - w * (tl.length),
-                d;
+            var self = this;
 
-            tl.forEach(function (t, i) {
-
-                t.done = false;
-                t.active = false;
-                t.events.forEach(function (e) {
-
-                    e.done = false;
-
-                });
-                d = $tasks[i];
-                $(d).css('left', rp + w * i);
-                $('.step-number', d).html(i + 1).removeClass('active');
-
-            });
-
+            this.testTasks.forEach(function (task) { self.deactivateTask(task) });
             this.currentTask = null;
             this.currentEvent = null;
             this.setTestProgressBar();
@@ -4165,6 +4185,7 @@
 
             var self = this,
                 $div = $('.tests', this.getDomElement('testList')),
+                path = window.location.pathname,
                 tst, inp, del;
 
             $div.children().remove();
@@ -4199,6 +4220,18 @@
                     self.createTaskList();
                     self.toggleTestList();
                     $(self.getDomElement('testName')).html(test.name).show();
+
+                    if (self.testCase.sessions && self.testCase.sessions.length) {
+
+                        self.testCase.session = self.testCase.sessions.filter(function (s) {
+
+                            return path.match(s.location) && s.master === true;
+
+                        })[0];
+
+                    }
+
+                    self.testEvents = self.db.getSessionEvents(self.testCase.session.id);
 
                 });
 
@@ -4383,6 +4416,7 @@
         testList.appendChild(tests);
         testList.appendChild(testsCtrls);
         testName.id = dCipher.domId['testName'];
+        testName.innerHTML = dCipher.loc._Select_test;
         testDone.className = 'd-cipher-task-done';
         testDone.innerHTML = dCipher.loc._Test_done;
 
@@ -4400,14 +4434,14 @@
         taskBar.id = dCipher.domId.taskBar;
         taskProgress.id = dCipher.domId.taskProgress;
         //taskBar.innerHTML = dCipher.loc._Start_task;
-        startTest.id = dCipher.domId.butStartTask;
+        startTest.id = dCipher.domId.butStartTest;
         startTest.className = 'start-test';
         startTest.innerHTML = dCipher.loc._Start_test;
         taskBar.appendChild(taskProgress);
         taskBar.appendChild(startTest);
-        taskBar.appendChild(testDone);
         taskBar.appendChild(testName);
         topMenu.appendChild(taskBar);
+        taskBar.appendChild(testDone);
         bdy.insertBefore(topMenu, bdy.firstChild);
 
         cnvDiv.addEventListener('click', function (e) {
@@ -6424,7 +6458,6 @@ function initColorPicker() {
     $.fn.colorpicker.constructor = Colorpicker;
 
 }
-
 
 // Functions
 Array.prototype.findBy = function (key, value) {
