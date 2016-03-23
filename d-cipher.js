@@ -89,7 +89,9 @@
         this.dbName = 'dCipherDB';
         this.tables = {
 
-            'sessions': 'sessions'
+            'sessions': 'sessions',
+            'tests': 'tests',
+            'tasks': 'tasks'
 
         };
         this.records = [];
@@ -346,7 +348,7 @@
             var self = this,
                 tables = self.tables;
 
-            $.indexedDB(self.dbName).done(function (db) {
+            return $.indexedDB(self.dbName).done(function (db) {
 
                 var ok = true,
                     database = db;
@@ -440,7 +442,8 @@
 
         this.getLocationTestCases = function (location) {
 
-            return this.testCases;
+            return this.getTests();
+
             /*.filter(function (testCase) {
 
              return testCase.sessions.map(function (session) {
@@ -564,6 +567,148 @@
 
         };
 
+        this.getTests = function () {
+
+            var self = this,
+                tests = this.testCases;
+
+            return $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
+
+                console.log(test.value);
+                tests.push(test.value);
+
+            }).done(function (r, e) {
+
+                //console.log('--> result: %s, event: %s', r, e);
+                //console.debug('Records: ', self.records);
+
+            }).fail(function (e, msg) {
+
+                console.warn('[WARNING] dbAdapter: Failed to get test. Error: ', msg);
+
+            });
+
+        };
+
+        this.putTest = function (test) {
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.tests).put(test, test.id).done(function () {
+
+                    console.log('[INFO] dbAdapter: test data saved.');
+                    self.getTests().done(resolve);
+
+                }).fail(function (e, msg) {
+
+                    console.warn('[INFO] dbAdapter: Failed to save test data. Error: ', msg);
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.deleteTest = function (id) {
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(function () {
+
+                    self.getTests().done(function () {
+
+                        console.log('[INFO] dbAdapter: Test data deleted.');
+                        resolve(self.testCases);
+
+                    });
+
+                }).fail(function () {
+
+                    console.warn('[INFO] dbAdapter: Failed to delete test data.');
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.getTasks = function () {
+
+            var self = this,
+                tasks = this.taskList = [];
+
+            return $.indexedDB(self.dbName).objectStore(self.tables.tasks).each(function (task) {
+
+                console.log(task.value);
+                tasks.push(task.value);
+
+            }).done(function (r, e) {
+
+                //console.log('--> result: %s, event: %s', r, e);
+                //console.debug('Records: ', self.records);
+
+            }).fail(function (e, msg) {
+
+                console.warn('[WARNING] dbAdapter: Failed to get task. Error: ', msg);
+
+            });
+
+        };
+
+        this.putTask = function (id, data) {
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.task).put(data, id.toString()).done(function () {
+
+                    console.log('[INFO] dbAdapter: task data saved.');
+                    self.getTests().done(resolve);
+
+                }).fail(function (e, msg) {
+
+                    console.warn('[INFO] dbAdapter: Failed to save task data. Error: ', msg);
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.deleteTask = function (id) {
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).delete(id.toString()).done(function () {
+
+                    self.getTasks().done(function () {
+
+                        console.log('[INFO] dbAdapter: Test data deleted.');
+                        resolve(self.taskList);
+
+                    });
+
+                }).fail(function () {
+
+                    console.warn('[INFO] dbAdapter: Failed to delete task data.');
+                    reject();
+
+                });
+
+            });
+
+        };
+
     }; // end of IDB class
 
     // DCipher class
@@ -676,40 +821,48 @@
 
         this.init = function init() {
 
-            var self = this;
+            var self = this,
+                path = window.location.pathname;
 
-            self.db.init();
-            self.db.getAllRecords().done(function () {
+            self.db.init().done(function () {
 
-                var recList = self.getDomElement('records'),
-                    path = window.location.pathname;
+                self.db.getLocationTestCases(path).done(function () {
 
-                self.testCases = self.db.getLocationTestCases(path);
-                self.createRecordList();
-                self.createTestList();
-                self.restoreState();
-
-                $(recList).on('mouseout', function () {
-
-                    $(recList).data('tid', setTimeout(function () {
-
-                        $(recList).hide();
-
-                    }, 1000));
+                    self.testCases = self.db.testCases;
+                    self.createTestList();
 
                 });
 
-                $(recList).on('mouseover', function () {
+                self.db.getAllRecords().done(function () {
 
-                    clearTimeout($(recList).data('tid'));
+                    var recList = self.getDomElement('records');
 
-                });
+                    self.createRecordList();
+                    self.restoreState();
 
-                $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
+                    $(recList).on('mouseout', function () {
 
-                $('document').ready(function () {
+                        $(recList).data('tid', setTimeout(function () {
 
-                    self.setupDOMListeners();
+                            $(recList).hide();
+
+                        }, 1000));
+
+                    });
+
+                    $(recList).on('mouseover', function () {
+
+                        clearTimeout($(recList).data('tid'));
+
+                    });
+
+                    $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
+
+                    $('document').ready(function () {
+
+                        self.setupDOMListeners();
+
+                    });
 
                 });
 
@@ -4241,6 +4394,7 @@
                 tst.setAttribute('data-d-cipher-test-id', test.id);
 
                 inp = document.createElement('input');
+                inp.id = 'inpTestId-' + test.id;
                 inp.type = 'text';
                 inp.name = 'testName';
                 inp.className = 'test-name';
@@ -4274,9 +4428,9 @@
 
                         })[0];
 
-                    }
+                        self.testEvents = self.db.getSessionEvents(self.testCase.session.id);
 
-                    self.testEvents = self.db.getSessionEvents(self.testCase.session.id);
+                    }
 
                 });
 
@@ -4289,7 +4443,16 @@
 
                 inp.addEventListener('change', function (e) {
 
-                    self.updateTestName();
+                    var test = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id')),
+                        name = $(this).val();
+
+                    if (test && name) {
+
+                        test.name = name;
+                        test.description = name;
+                        self.saveTestCase(test);
+
+                    }
 
                 });
 
@@ -4313,11 +4476,13 @@
 
         };
 
-        this.createTest = function () {
+        this.createTestCase = function () {
+
+            var id = $.newGuid();
 
             this.testCases.push({
 
-                id: $.newGuid(),
+                id: id,
                 name: '',
                 description: '',
                 author: 'Gray Holland',
@@ -4327,9 +4492,27 @@
 
             });
 
+            this.createTestList();
+            $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
+
         };
 
-        this.deleteTest = function () {
+        this.saveTestCase = function (test) {
+
+            this.db.putTest(test);
+            this.createTestList();
+
+        };
+
+        this.deleteTest = function (id) {
+
+            var self = this;
+
+            this.db.deleteTest(id).then(function () {
+
+                self.createTaskList();
+
+            });
 
         };
 
@@ -4619,7 +4802,7 @@
 
         butCreateTest.addEventListener('mouseup', function (e) {
 
-            dCipher.createTest();
+            dCipher.createTestCase();
 
         });
 
