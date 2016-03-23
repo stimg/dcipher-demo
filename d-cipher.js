@@ -52,7 +52,8 @@
             _Task_description: 'Task',
             _Test_list: 'Test list',
             _Delete_test: 'Delete test',
-            _Select_test: "No test selected",
+            _Select_test: 'No test selected',
+            _Create_test: 'Create test',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -4095,7 +4096,9 @@
 
             var self = this;
 
-            this.testTasks.forEach(function (task) { self.deactivateTask(task) });
+            this.testTasks.forEach(function (task) {
+                self.deactivateTask(task)
+            });
             this.currentTask = null;
             this.currentEvent = null;
             this.setTestProgressBar();
@@ -4195,7 +4198,31 @@
 
         this.toggleTestList = function () {
 
-            $(this.getDomElement('testList')).toggle();
+            var tlId = this.domId['testList'],
+                tlbId = this.domId['butTest'],
+                $tl = $('#' + tlId);
+
+            function hideTestList(e) {
+
+                if ($tl.is(':visible') && !$tl.find(e.target).length && e.target.id !== tlbId && !$('#' + tlbId).find(e.target).length) {
+
+                    $tl.hide();
+
+                }
+
+            }
+
+            if (!$tl.is(':visible') && this.testCases) {
+
+                $tl.show();
+                $('body').on('click', hideTestList);
+
+            } else {
+
+                $tl.hide();
+                $('body').off('click', hideTestList);
+
+            }
 
         };
 
@@ -4236,7 +4263,7 @@
 
                     self.testCase = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id'));
                     self.createTaskList();
-                    self.toggleTestList();
+                    // self.toggleTestList();
                     $(self.getDomElement('testName')).html(test.name).show();
 
                     if (self.testCase.sessions && self.testCase.sessions.length) {
@@ -4253,9 +4280,16 @@
 
                 });
 
-                tst.addEventListener('dblclick', function () {
+                tst.addEventListener('dblclick', function (e) {
 
+                    e.stopPropagation();
                     $('input[type="text"]', this).attr('disabled', false).focus();
+
+                });
+
+                inp.addEventListener('change', function (e) {
+
+                    self.updateTestName();
 
                 });
 
@@ -4272,6 +4306,26 @@
         this.getTestCaseSessionId = function (testCaseId) {
 
             return this.testCases.findBy('id', testCaseId).sessions.findBy('location', location.getDirName()).id;
+
+        };
+
+        this.updateTestName = function (id) {
+
+        };
+
+        this.createTest = function () {
+
+            this.testCases.push({
+
+                id: $.newGuid(),
+                name: '',
+                description: '',
+                author: 'Gray Holland',
+                created: new Date().getTime(),
+                modified: '',
+                sessions: []
+
+            });
 
         };
 
@@ -4320,6 +4374,7 @@
             taskProgress = document.createElement('span'),
             startTest = document.createElement('div'),
             testList = document.createElement('div'),
+            butCreateTest = document.createElement('div'),
             testsCtrls = document.createElement('div'),
             tests = document.createElement('div'),
             testDone = document.createElement('div'),
@@ -4429,7 +4484,10 @@
 
         // Test list
         tests.className = 'tests';
+        butCreateTest.className = 'but-create-test';
+        butCreateTest.innerHTML = '+';
         testsCtrls.className = 'tests-ctrls';
+        testsCtrls.appendChild(butCreateTest);
         testList.id = dCipher.domId['testList'];
         testList.appendChild(tests);
         testList.appendChild(testsCtrls);
@@ -4556,6 +4614,12 @@
         butTest.addEventListener('mouseup', function (e) {
 
             dCipher.toggleTestList();
+
+        });
+
+        butCreateTest.addEventListener('mouseup', function (e) {
+
+            dCipher.createTest();
 
         });
 
