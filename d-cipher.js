@@ -95,6 +95,8 @@
 
         };
         this.records = [];
+        this.testCases = [];
+
         this.taskEvents = [
             {
                 id: '0-1-0',
@@ -318,30 +320,28 @@
             }
         ];
 
-        this.testCases = [
-            {
-                id: '0',
-                name: 'Bugaboo initial test case',
-                description: 'Test case for Bugaboo web site',
-                author: 'Gray Holland',
-                created: '09.09.2015',
-                modified: '',
-                sessions: [
-                    {
-                        id: '0-1-0-0',
-                        tag: 'Bugaboo A',
-                        location: '/bugaboo/A',
-                        master: true
-                    },
-                    {
-                        id: '0-2-0-0',
-                        tag: 'Bugaboo B',
-                        location: '/bugaboo/B',
-                        master: true
-                    }
-                ]
-            }
-        ];
+        this.masterTest = {
+            id: '0',
+            name: 'Bugaboo initial test case',
+            description: 'Test case for Bugaboo web site',
+            author: 'Gray Holland',
+            created: '09.09.2015',
+            modified: '',
+            sessions: [
+                {
+                    id: '0-1-0-0',
+                    tag: 'Bugaboo A',
+                    location: '/bugaboo/A',
+                    master: true
+                },
+                {
+                    id: '0-2-0-0',
+                    tag: 'Bugaboo B',
+                    location: '/bugaboo/B',
+                    master: true
+                }
+            ]
+        };
 
         this.init = function init() {
 
@@ -570,7 +570,7 @@
         this.getTests = function () {
 
             var self = this,
-                tests = this.testCases;
+                tests = this.testCases = [this.masterTest];
 
             return $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
 
@@ -4413,7 +4413,7 @@
 
                 $div.append(tst);
 
-                tst.addEventListener('click', function () {
+                tst.addEventListener('click', function (e) {
 
                     self.testCase = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id'));
                     self.createTaskList();
@@ -4456,8 +4456,9 @@
 
                 });
 
-                del.addEventListener('mouseup', function () {
+                del.addEventListener('click', function (e) {
 
+                    e.stopImmediatePropagation();
                     self.deleteTest($(this).attr('data-d-cipher-test-id'));
 
                 });
@@ -4510,7 +4511,8 @@
 
             this.db.deleteTest(id).then(function () {
 
-                self.createTaskList();
+                self.testCases = self.db.testCases;
+                self.createTestList();
 
             });
 
