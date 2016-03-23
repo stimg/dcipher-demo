@@ -52,7 +52,7 @@
             _Task_description: 'Task',
             _Test_list: 'Test list',
             _Delete_test: 'Delete test',
-            _Select_test: "Select test",
+            _Select_test: "No test selected",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -179,7 +179,7 @@
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
                 treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
-                alternate: [2],
+                alternate: ['0-4-2'],
                 target: {tagName: "A"},
                 location: '/bugaboo/A/create.html',
                 done: false
@@ -189,8 +189,8 @@
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-2-0-1-2-0-0-1-2-0-0",
-                alternate: [1],
+                treePath: "0-2-0-1-2-0-0-1-2-0",
+                alternate: ['0-4-1'],
                 target: {tagName: "A"},
                 location: '/bugaboo/A/create.html',
                 done: false
@@ -201,7 +201,6 @@
                 sessionId: '0-1-0-0',
                 type: 'click',
                 treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                //alternate: [4],
                 target: {tagName: "A"},
                 location: '/bugaboo/A/cart.html',
                 done: false
@@ -837,7 +836,7 @@
                         self.createRecordList();
                         self.toggleRecList();
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
-                        self.setActiveRecord(self.sessionId);
+                        self.setActiveRecord(self.sessionId, true);
                         self.showSpiderGraph(self.sessionId);
 
                     });
@@ -903,11 +902,12 @@
                     offs = $el.offset(),
                     left = offs.left,
                     top = offs.top,
+                    timeStamp = new Date().getTime(),
                     event = {
                         id: new Date(),
                         taskId: this.currentTask ? this.currentTask.id : '',
                         sessionId: this.sessionId,
-                        timeStamp: e.timeStamp,
+                        timeStamp: timeStamp,
                         index: elen,
                         location: location,
                         testTask: this.currentTask,
@@ -967,8 +967,8 @@
                             relX: (e.pageX - left) / $el.outerWidth(),
                             relY: (e.pageY - top) / $el.outerHeight()
                         },
-                        duration: lastEvent ? e.timeStamp - lastEvent.timeStamp : 0,
-                        time: e.timeStamp - rec.modified
+                        duration: lastEvent ? timeStamp - lastEvent.timeStamp : 0,
+                        time: timeStamp - rec.modified
 
                     };
 
@@ -3585,7 +3585,7 @@
 
             if (this.currentTask) {
 
-                this.testCase[this.currentTask.step] = this.currentTask;
+                this.testTasks[this.currentTask.step] = this.currentTask;
 
             }
 
@@ -3917,13 +3917,14 @@
             $(this.getDomElement('testName')).hide();
             $(this.getDomElement('butStartTest')).hide();
             $(this.getDomElement('butTest')).hide();
+            $(this.getDomElement('taskProgress')).width(0);
             this.activateTask(task);
             this.toggleRecMode();
             this.resetApp('test', this.taskEvents[0].location);
 
         };
 
-        this.endOfTest = function () {
+        this.endOfTest = function (stop) {
 
             var self = this,
                 tb = this.getDomElement('taskBar');
@@ -3940,9 +3941,17 @@
 
             this.appMode = 'record';
             this.toggleRecMode();
-            $('.d-cipher-task-done', tb).fadeIn();
-            setTimeout(endOfTest, 2000);
-            self.resetTasklist();
+            this.resetTasklist();
+            if (stop) {
+
+                endOfTest();
+
+            } else {
+
+                $('.d-cipher-task-done', tb).fadeIn();
+                setTimeout(endOfTest, 2000);
+
+            }
 
         };
 
@@ -3977,19 +3986,9 @@
                         && evt.location === e.location) {
 
                         evt.done = true;
-                        evt.testEvent = e;
-                        evt.testEventIndex = i;
-                        if (evt.alternate && evt.alternate.length) {
 
-                            evt.alternate.forEach(function (ae) {
-
-                                ae.done = true;
-                                ae.testEvent = e;
-                                ae.testEventIndex = i;
-
-                            });
-
-                        }
+                        // Set alternative scenario events to done
+                        this.checkAlternativeEvents(evt);
                         break;
 
                     }
@@ -4008,6 +4007,7 @@
 
                     } else {
 
+                        this.setTaskDone(currentTask);
                         this.endOfTest();
 
                     }
@@ -4017,6 +4017,24 @@
                     this.setTestProgressBar();
 
                 }
+
+            }
+
+        };
+
+        this.checkAlternativeEvents = function (event) {
+
+            var evts = this.taskEvents,
+                id = event.id;
+
+            // Check events in the reference list of the given event
+            if (event.alternate && event.alternate.length) {
+
+                event.alternate.forEach(function (id) {
+
+                    evts.findBy('id', id).done = true;
+
+                });
 
             }
 
@@ -4041,7 +4059,7 @@
             }
 
             var ev = getEventsInfo(),
-                ct = this.currentTask ? (2 + this.currentTask.step) : 0;
+                ct = this.currentTask ? (3 + this.currentTask.step) : 0;
 
             $(this.getDomElement('taskProgress')).css({
 
@@ -4524,10 +4542,14 @@
             e.stopPropagation();
             if (dCipher.appMode === 'test') {
 
-                dCipher.resetTasklist();
+                dCipher.setTaskDone(dCipher.currentTask);
+                dCipher.endOfTest(true);
+
+            } else {
+
+                dCipher.toggleRecMode(e);
 
             }
-            dCipher.toggleRecMode(e);
 
         });
 
