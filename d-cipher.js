@@ -665,14 +665,14 @@
 
             var self = this;
 
-            return new Promise(function (resolve, reject) {
+            return new Promise((resolve, reject) => {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.task).put(data, id.toString()).done(function () {
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(data, id).done(() => {
 
                     console.log('[INFO] dbAdapter: task data saved.');
-                    self.getTests().done(resolve);
+                    resolve();
 
-                }).fail(function (e, msg) {
+                }).fail((e, msg) => {
 
                     console.warn('[INFO] dbAdapter: Failed to save task data. Error: ', msg);
                     reject();
@@ -3836,36 +3836,54 @@
 
                 e.stopPropagation();
 
-                if (clickedTask.done) {
+                if (self.appMode === 'test') {
 
-                    //self.setTaskUndone(clickedTask);
-                    self.activateTask(clickedTask);
+                    if (clickedTask.done) {
 
-                } else if (clickedTask.active) {
+                        //self.setTaskUndone(clickedTask);
+                        self.activateTask(clickedTask);
 
-                    self.setTaskDone(clickedTask);
-                    if (nextStep < testTasks.length) {
+                    } else if (clickedTask.active) {
 
-                        self.activateTask(testTasks[nextStep]);
+                        self.setTaskDone(clickedTask);
+                        if (nextStep < testTasks.length) {
+
+                            self.activateTask(testTasks[nextStep]);
+
+                        } else {
+
+                            self.endOfTest();
+
+                        }
 
                     } else {
 
-                        self.endOfTest();
+                        if (/*!step && */!self.appMode) {
+
+                            self.startTest();
+
+                        }
+                        /* else {
+
+                         self.activateTask(clickedTask);
+
+                         }*/
 
                     }
 
                 } else {
 
-                    if (/*!step && */!self.appMode) {
+                    var task = testTasks.findBy('id', e.target.dataset.dcipherTaskId);
 
-                        self.startTest();
+                    if (task.left) {
+
+                        self.moveTaskRight(task);
+
+                    } else {
+
+                        self.moveTaskLeft(task);
 
                     }
-                    /* else {
-
-                     self.activateTask(clickedTask);
-
-                     }*/
 
                 }
 
@@ -3891,34 +3909,191 @@
 
             }
 
-            var rp = window.innerWidth - w * (this.testTasks.length);
+            var rp = window.innerWidth - w * (this.testTasks.length),
+                tqty = this.testTasks.length;
 
             this.testTasks.forEach(function (t, i) {
 
+                // Task container
                 t.done = false;
                 d = document.createElement('div');
                 d.className = 'd-cipher-task';
                 d.style.left = rp + w * i + 'px';
 
+                // Task step number span
                 sn = document.createElement('span');
                 sn.className = 'step-number';
                 sn.innerHTML = i + 1;
                 sn.setAttribute('step', i);
+                sn.setAttribute('data-dcipher-task-id', t.id);
                 d.appendChild(sn);
 
+                // Tsk description input container
                 sd = document.createElement('span');
                 sd.className = 'task-description';
-                sd.innerText = t.description;
+                sd.style.width = rp - tqty * w + 'px';
+
+                // Task description input
+                inp = document.createElement('input');
+                inp.type = 'text';
+                inp.id = 'taskId-' + t.id;
+                inp.className = 'task-description-input';
+                inp.disabled = true;
+                inp.style.width = rp - tqty * w + 'px';
+                inp.setAttribute('data-dcipher-task-id', t.id);
+                inp.value = t.description;
+
+                sd.appendChild(inp);
                 d.appendChild(sd);
                 $tb.append(d);
 
-                sn.addEventListener('mousedown', function (e) {
+                // Tsk step button listener
+                sn.addEventListener('mouseup', (e) => {
 
                     mouseUpHandler(e);
 
                 });
 
+                // Task description inout listener
+                sd.addEventListener('dblclick', (e) => {
+                    "use strict";
+
+                    var target = e.target,
+                        ds = target.dataset;
+
+                    if (self.appMode !== 'test' && ds && ds.dcipherTaskId) {
+
+                        e.stopPropagation();
+                        target.disabled = false;
+
+                    }
+
+                });
+
+                inp.addEventListener('blur', (e) => {
+                    "use strict";
+
+                    e.target.disabled = true;
+
+                });
+
+                inp.addEventListener('change', (e) => {
+                    "use strict";
+
+                    var target = e.target,
+                        ds = target.dataset,
+                        tid;
+
+                    if (ds && (tid = ds.dcipherTaskId)) {
+
+                        var task = self.testTasks.findBy('id', tid);
+
+                        e.target.disabled = true;
+                        self.db.putTask(tid, {
+
+                            id: task.id,
+                            testCaseId: task.testCaseId,
+                            description: target.value,
+                            step: task.step
+
+                        });
+
+                    }
+                });
+
             });
+
+        };
+
+        this.moveTaskLeft = function (task) {
+
+            var testTasks = this.testTasks,
+                step = task.step,
+                tb = this.getDomElement('taskBar'),
+                div = $('div.d-cipher-task', tb)[step],
+                $div = $(div),
+                dw = ($('.step-number', div).outerWidth()),
+                ease = 'left 0.2s ease-out 0.15s',
+                i, il, t;
+
+            for (i = 0; i < step; i++) {
+
+                t = testTasks[i];
+                t.left = true;
+
+                // Move previous tasks to the left
+                $($('div.d-cipher-task', tb)[i]).css({
+
+                    left: dw * (i + 2) + 4,
+                    transition: ease
+
+                }).children('.task-description').fadeOut('fast');
+
+            }
+
+            $($('div.d-cipher-task', tb)[i]).css({
+
+                left: dw * (i + 2) + 4,
+                transition: ease
+
+            }).children('.task-description').fadeIn('fast');
+
+            task.left = true;
+
+            $(this.getDomElement('testName')).hide();
+            $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butTest')).hide();
+
+        };
+
+        this.moveTaskRight = function (task) {
+
+            var tb = this.getDomElement('taskBar'),
+                testTasks = this.testTasks,
+                step = task.step,
+                div = $('div.d-cipher-task', tb)[step],
+                $div = $(div),
+                $spn = $('span.step-number', div),
+                w = $spn.outerWidth(),
+                tLen = this.testTasks.length,
+                winWidth = window.innerWidth,
+                left = winWidth - w * (tLen - step),
+                ease = 'left 0.2s ease-out 0.15s',
+                i = tLen;
+
+            while (i-- > step) {
+
+                $($('div.d-cipher-task', tb)[i]).css({
+
+                    left: winWidth - w * (tLen - i),
+                    transition: ease
+
+                }).children('.task-description').fadeIn('slow');
+
+                delete testTasks[i].left;
+
+            }
+
+            $($('div.d-cipher-task', tb)[i]).children('.task-description').fadeIn('slow');
+
+            /*
+                        $div.css({
+
+                            left: winWidth - w * (tLen - step),
+                            transition: ease
+
+                        }).children('.task-description').fadeIn('slow');
+            */
+
+            delete task.left;
+
+            if (!task.step) {
+
+                $(this.getDomElement('testName')).show();
+                $(this.getDomElement('butStartTest')).show();
+                $(this.getDomElement('butTest')).show();
+
+            }
 
         };
 
