@@ -109,7 +109,6 @@
     position: absolute;
     top: 0;
     height: 42px;
-    width: 100%;
     //background: linear-gradient(#C0C0C0, #808080);
     .step-number{
       display: inline-block;
@@ -199,6 +198,11 @@
       border-left-color: white;
       transform: scale(1.5, 1) translate(7px, 0);
     }
+    .add-task{
+      font-size: 30px;
+      font-weight: bold;
+      color: white;
+    }
     .test:before{
       content: 'T';
       color: gray;
@@ -238,6 +242,11 @@
     .play{
       border-left-color: black;
     }
+  }
+  .btn.add-task{
+    display: none;
+    float: right;
+    padding: 0 13px;
   }
 
 }

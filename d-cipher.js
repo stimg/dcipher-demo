@@ -54,6 +54,8 @@
             _Delete_test: 'Delete test',
             _Select_test: 'No test selected',
             _Create_test: 'Create test',
+            _Add_test_task: 'Create test task',
+            _Task_description_placeholder: 'Enter task name',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -96,6 +98,7 @@
         };
         this.records = [];
         this.testCases = [];
+        this.taskLIst = [];
 
         this.taskEvents = [
             {
@@ -462,9 +465,14 @@
 
         this.getTestCaseTasks = function (testCaseId) {
 
-            return this.testTasks.filter(function (task) {
+            return this.taskList.filter(function (task) {
 
                 return task.testCaseId === testCaseId;
+
+            }).sort( (task1, task2) => {
+                "use strict";
+
+                return task1.step > task2.step;
 
             });
 
@@ -618,7 +626,23 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(function () {
+                // $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(function () {
+                $.indexedDB(self.dbName).transaction([self.tables.tests, self.tables.tasks], 'rw').progress( (t) => {
+
+                    t.objectStore(self.tables.tests).delete(id);
+                    self.taskList.forEach( (task) => {
+                        "use strict";
+
+                        if (task.testCaseId === id) {
+
+                            t.objectStore(self.tables.tasks).delete(task.id);
+
+                        }
+
+                    });
+
+                }).done( () => {
+                    "use strict";
 
                     self.getTests().done(function () {
 
@@ -641,7 +665,7 @@
         this.getTasks = function () {
 
             var self = this,
-                tasks = this.taskList = [];
+                tasks = this.taskList = this.testTasks.slice(); // TEST
 
             return $.indexedDB(self.dbName).objectStore(self.tables.tasks).each(function (task) {
 
@@ -670,7 +694,12 @@
                 $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(data, id).done(() => {
 
                     console.log('[INFO] dbAdapter: task data saved.');
-                    resolve();
+                    self.getTasks().then( () => {
+                        "use strict";
+
+                        resolve();
+
+                    });
 
                 }).fail((e, msg) => {
 
@@ -749,7 +778,8 @@
             taskProgress: 'd-cipher-task-progress',
             butStartTest: 'd-cipher-but-start-task',
             testName: 'd-cipher-test-name',
-            testList: 'd-cipher-test-list'
+            testList: 'd-cipher-test-list',
+            butAddTask: 'd-cipher-add-task'
 
         };
 
@@ -824,25 +854,30 @@
             var self = this,
                 path = window.location.pathname;
 
-            self.db.init().done(function () {
+            self.db.init().done( () => {
 
-                self.db.getLocationTestCases(path).done(function () {
+                self.db.getLocationTestCases(path).done( () => {
 
-                    self.testCases = self.db.testCases;
-                    self.createTestList();
+                    self.db.getTasks().then( () => {
+                        "use strict";
+
+                        self.testCases = self.db.testCases;
+                        self.createTestList();
+
+                    });
 
                 });
 
-                self.db.getAllRecords().done(function () {
+                self.db.getAllRecords().done( () => {
 
                     var recList = self.getDomElement('records');
 
                     self.createRecordList();
                     self.restoreState();
 
-                    $(recList).on('mouseout', function () {
+                    $(recList).on('mouseout', () => {
 
-                        $(recList).data('tid', setTimeout(function () {
+                        $(recList).data('tid', setTimeout( () => {
 
                             $(recList).hide();
 
@@ -850,7 +885,7 @@
 
                     });
 
-                    $(recList).on('mouseover', function () {
+                    $(recList).on('mouseover', () => {
 
                         clearTimeout($(recList).data('tid'));
 
@@ -858,7 +893,7 @@
 
                     $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
 
-                    $('document').ready(function () {
+                    $('document').ready( () => {
 
                         self.setupDOMListeners();
 
@@ -3824,7 +3859,7 @@
 
             var self = this,
                 $tb = $(this.getDomElement('taskBar')),
-                w = $tb.outerHeight(),
+                w = 42,
                 d, sn, sd;
 
             function mouseUpHandler(e) {
@@ -3891,11 +3926,7 @@
 
             if (this.testCase && this.testCase.id) {
 
-                if (!this.testTasks.length) {
-
-                    this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
-
-                }
+                this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
 
                 if (!this.currentTask) {
 
@@ -3909,8 +3940,12 @@
 
             }
 
-            var rp = window.innerWidth - w * (this.testTasks.length),
-                tqty = this.testTasks.length;
+            var winWidth = window.innerWidth,
+                rp = winWidth - w * (this.testTasks.length),
+                tqty = this.testTasks.length,
+                inpWidth = winWidth - (tqty + 3) * w;
+
+            $('.d-cipher-task', $tb).remove();
 
             this.testTasks.forEach(function (t, i) {
 
@@ -3931,7 +3966,7 @@
                 // Tsk description input container
                 sd = document.createElement('span');
                 sd.className = 'task-description';
-                sd.style.width = rp - tqty * w + 'px';
+                sd.style.width = inpWidth + 'px';
 
                 // Task description input
                 inp = document.createElement('input');
@@ -3939,7 +3974,6 @@
                 inp.id = 'taskId-' + t.id;
                 inp.className = 'task-description-input';
                 inp.disabled = true;
-                inp.style.width = rp - tqty * w + 'px';
                 inp.setAttribute('data-dcipher-task-id', t.id);
                 inp.value = t.description;
 
@@ -3965,6 +3999,7 @@
 
                         e.stopPropagation();
                         target.disabled = false;
+                        target.focus();
 
                     }
 
@@ -4003,6 +4038,7 @@
 
             });
 
+            $(this.getDomElement('butAddTask')).show();
         };
 
         this.moveTaskLeft = function (task) {
@@ -4076,22 +4112,13 @@
 
             $($('div.d-cipher-task', tb)[i]).children('.task-description').fadeIn('slow');
 
-            /*
-                        $div.css({
-
-                            left: winWidth - w * (tLen - step),
-                            transition: ease
-
-                        }).children('.task-description').fadeIn('slow');
-            */
-
             delete task.left;
 
             if (!task.step) {
 
-                $(this.getDomElement('testName')).show();
-                $(this.getDomElement('butStartTest')).show();
-                $(this.getDomElement('butTest')).show();
+                $(this.getDomElement('testName')).fadeIn();
+                $(this.getDomElement('butStartTest')).fadeIn();
+                $(this.getDomElement('butTest')).fadeIn();
 
             }
 
@@ -4625,7 +4652,9 @@
 
                         test.name = name;
                         test.description = name;
+                        self.getDomElement('testName').innerText = name;
                         self.saveTestCase(test);
+                        self.createTaskList();
 
                     }
 
@@ -4642,32 +4671,23 @@
 
         };
 
-        this.getTestCaseSessionId = function (testCaseId) {
-
-            return this.testCases.findBy('id', testCaseId).sessions.findBy('location', location.getDirName()).id;
-
-        };
-
-        this.updateTestName = function (id) {
-
-        };
-
         this.createTestCase = function () {
 
-            var id = $.newGuid();
+            var id = $.newGuid(),
+                test = {
 
-            this.testCases.push({
+                    id: id,
+                    name: '',
+                    description: '',
+                    author: 'Gray Holland',
+                    created: new Date().getTime(),
+                    modified: '',
+                    sessions: []
 
-                id: id,
-                name: '',
-                description: '',
-                author: 'Gray Holland',
-                created: new Date().getTime(),
-                modified: '',
-                sessions: []
+                };
 
-            });
-
+            this.testCases.push(test);
+            this.testCase = test;
             this.createTestList();
             $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
 
@@ -4688,10 +4708,34 @@
 
                 self.testCases = self.db.testCases;
                 self.createTestList();
+                self.createTaskList();
 
             });
 
         };
+
+        this.createTestTask = () => {
+            "use strict";
+
+            var id = $.newGuid(),
+                task = {
+
+                    id: id,
+                    testCaseId: this.testCase.id,
+                    description: '',
+                    step: this.testTasks.length
+
+                };
+
+            this.db.putTask(id, task).then( () => {
+
+                this.createTaskList();
+                this.moveTaskLeft(task);
+                $('input#taskId-' + task.id).attr('disabled', false).focus();
+
+            });
+
+        }
 
     }; // End of DCipher class
 
@@ -4711,6 +4755,8 @@
             play = document.createElement('div'),
             butTest = document.createElement('div'),
             test = document.createElement('div'),
+            butAddTask = document.createElement('div'),
+            addTask = document.createElement('div'),
             butList = document.createElement('div'),
             recs = document.createElement('div'),
             recList = document.createElement('div'),
@@ -4832,6 +4878,15 @@
         butTest.appendChild(test);
         topMenu.appendChild(butTest);
 
+        // Add task button
+        butAddTask.id = dCipher.domId.butAddTask;
+        butAddTask.className = 'btn add-task';
+        butAddTask.title = dCipher.loc._Add_test_task;
+        addTask.innerText = '+';
+        addTask.className = 'add-task';
+        butAddTask.appendChild(addTask);
+        topMenu.appendChild(butAddTask);
+
         // Record list button
         butList.id = dCipher.domId.butList;
         butList.className = 'btn';
@@ -4858,8 +4913,6 @@
 
         // D-Cipher menu
         menu.id = dCipher.domId.menu;
-        //menu.appendChild(butRec);
-        //menu.appendChild(butPlay);
         menu.appendChild(butList);
         dMain.appendChild(menu);
         dMain.appendChild(recList);
@@ -4980,6 +5033,12 @@
         butCreateTest.addEventListener('mouseup', function (e) {
 
             dCipher.createTestCase();
+
+        });
+
+        butAddTask.addEventListener('mouseup', function (e) {
+
+            dCipher.createTestTask();
 
         });
 
