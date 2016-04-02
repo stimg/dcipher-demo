@@ -56,6 +56,7 @@
             _Create_test: 'Create test',
             _Add_test_task: 'Create test task',
             _Task_description_placeholder: 'Enter task name',
+            _Delete_task: 'Delete task',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -93,7 +94,8 @@
 
             'sessions': 'sessions',
             'tests': 'tests',
-            'tasks': 'tasks'
+            'tasks': 'tasks',
+            'events': 'events'
 
         };
         this.records = [];
@@ -626,7 +628,6 @@
 
             return new Promise(function (resolve, reject) {
 
-                // $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(function () {
                 $.indexedDB(self.dbName).transaction([self.tables.tests, self.tables.tasks], 'rw').progress( (t) => {
 
                     t.objectStore(self.tables.tests).delete(id);
@@ -714,13 +715,38 @@
 
         this.deleteTask = function (id) {
 
-            var self = this;
+            var self = this,
+                testCaseId = this.taskList.findBy('id', id).testCaseId;
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tasks).delete(id.toString()).done(function () {
+                $.indexedDB(self.dbName).transaction([self.tables.tasks, self.tables.events], 'rw').progress( (t) => {
+
+                    t.objectStore(self.tables.tasks).delete(id);
+                    self.taskEvents.forEach( (event) => {
+                        "use strict";
+
+                        if (event.taskId === id) {
+
+                            t.objectStore(self.tables.events).delete(event.id);
+
+                        }
+
+                    });
+
+                }).done( () => {
+                    "use strict";
 
                     self.getTasks().done(function () {
+
+                        self.taskLIst
+                            .filter( (task) => { return task.testCaseId === testCaseId; })
+                            .forEach((task, idx) => {
+
+                                task.step = idx;
+                                self.putTask(task);
+
+                            });
 
                         console.log('[INFO] dbAdapter: Test data deleted.');
                         resolve(self.taskList);
@@ -3928,9 +3954,17 @@
 
                 this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
 
-                if (!this.currentTask) {
+                if (this.testTasks.length) {
 
-                    $(this.getDomElement('butStartTest')).show();
+                    if (!this.currentTask) {
+
+                        $(this.getDomElement('butStartTest')).show();
+
+                    }
+
+                } else {
+
+                    $(this.getDomElement('butStartTest')).hide();
 
                 }
 
@@ -3977,7 +4011,16 @@
                 inp.setAttribute('data-dcipher-task-id', t.id);
                 inp.value = t.description;
 
+                // Delete task button
+                del = document.createElement('div');
+                del.id = 'btnDelTask-' + t.id;
+                del.className = 'del';
+                del.innerHTML = '&#10005;';
+                del.title = dCipher.loc._Delete_task;
+                del.setAttribute('data-dcipher-task-id', t.id);
+
                 sd.appendChild(inp);
+                sd.appendChild(del);
                 d.appendChild(sd);
                 $tb.append(d);
 
@@ -4036,23 +4079,41 @@
                     }
                 });
 
+                del.addEventListener('mouseup', (e) => {
+                    "use strict";
+
+                    self.db.deleteTask(e.target.dataset.dcipherTaskId).then( (taskList) => {
+
+                        self.testTasks = taskList;
+                        self.createTaskList();
+
+                    } );
+
+                })
+
             });
 
             $(this.getDomElement('butAddTask')).show();
+            if (!this.testTasks.length) {
+
+                $(this.getDomElement('testName')).show();
+                $(this.getDomElement('butTest')).show();
+
+            }
         };
 
         this.moveTaskLeft = function (task) {
 
             var testTasks = this.testTasks,
-                step = task.step,
+                idx = testTasks.indexOf(task),
                 tb = this.getDomElement('taskBar'),
-                div = $('div.d-cipher-task', tb)[step],
+                div = $('div.d-cipher-task', tb)[idx],
                 $div = $(div),
                 dw = ($('.step-number', div).outerWidth()),
                 ease = 'left 0.2s ease-out 0.15s',
                 i, il, t;
 
-            for (i = 0; i < step; i++) {
+            for (i = 0; i < idx; i++) {
 
                 t = testTasks[i];
                 t.left = true;
