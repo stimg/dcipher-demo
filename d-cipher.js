@@ -98,11 +98,12 @@
             'events': 'events'
 
         };
-        this.records = [];
-        this.testCases = [];
-        this.taskLIst = [];
-
-        this.taskEvents = [
+        this.sessions = [];
+        this.sessionEvents = [];
+        this.tests = [];
+        this.tasks = [];
+        this.events = [];
+        this.masterTestEvents = [
             {
                 id: '0-1-0',
                 taskId: '0-1',
@@ -297,8 +298,7 @@
             }
 
         ];
-
-        this.testTasks = [
+        this.masterTestTasks = [
             {
                 id: '0-1',
                 testCaseId: '0',
@@ -324,7 +324,6 @@
                 description: 'Purchase stroller, checking final cost total before completing'
             }
         ];
-
         this.masterTest = {
             id: '0',
             name: 'Bugaboo initial test case',
@@ -439,12 +438,14 @@
 
         };
 
-        this.getRecord = function getRecord(id) {
+        /*
+         this.getSession = function getRecord(id) {
 
-            return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
+         return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
 
-        };
+         };
 
+         */
         this.getLocationTestCases = function (location) {
 
             return this.getTests();
@@ -465,42 +466,7 @@
 
         };
 
-        this.getTestCaseTasks = function (testCaseId) {
-
-            return this.taskList.filter(function (task) {
-
-                return task.testCaseId === testCaseId;
-
-            }).sort( (task1, task2) => {
-                "use strict";
-
-                return task1.step > task2.step;
-
-            });
-
-        };
-
-        this.getTaskEvents = function (taskId, sessionId) {
-
-            return this.taskEvents.filter(function (event) {
-
-                return event.taskId === taskId && event.sessionId === sessionId;
-
-            });
-
-        };
-
-        this.getSessionEvents = function (sessionId) {
-
-            return this.taskEvents.filter(function (event) {
-
-                return event.sessionId === sessionId;
-
-            });
-
-        };
-
-        this.putRecord = function putRecord(id, data) {
+        this.putSession = function putRecord(id, data) {
 
             var self = this;
 
@@ -515,7 +481,7 @@
                 $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
 
                     console.log('[INFO] dbAdapter: session data saved.');
-                    self.getAllRecords().done(resolve);
+                    self.getTestSessions().done(resolve);
 
                 }).fail(function (e, msg) {
 
@@ -528,7 +494,7 @@
 
         };
 
-        this.deleteRecord = function deleteRecord(id) {
+        this.deleteSession = function (id) {
 
             var self = this;
 
@@ -536,16 +502,11 @@
 
                 $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
 
-                    self.getAllRecords().done(function () {
-
-                        console.log('[INFO] dbAdapter: session data deleted.');
-                        resolve(self.records);
-
-                    });
+                    resolve();
 
                 }).fail(function () {
 
-                    console.warn('[INFO] dbAdapter: Failed to delete session data.');
+                    console.error('[ERROR] dbAdapter: Failed to delete session data.');
                     reject();
 
                 });
@@ -554,47 +515,130 @@
 
         };
 
-        this.getAllRecords = function getAllRecords() {
+        this.getTestSessions = function (testCaseId) {
 
             var self = this,
-                records = this.records = [];
+                sessions = [];
 
-            return $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
+            return new Promise((resolve, reject) => {
 
-                //console.log(r.value);
-                records.push(r.value);
+                $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
 
-            }).done(function (r, e) {
+                    if (testCaseId === r.value.testCaseId) {
 
-                //console.log('--> result: %s, event: %s', r, e);
-                //console.debug('Records: ', self.records);
+                        //console.log(r.value);
+                        sessions.push(r.value);
 
-            }).fail(function (e, msg) {
+                    }
 
-                console.warn('[WARNING] dbAdapter: Failed to get all records. Error: ', msg);
+                }).done(function () {
+
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.sessions);
+                    resolve(sessions)
+
+                }).fail(function (error, msg) {
+
+                    console.warn('[WARNING] dbAdapter: Failed to get all sessions. Error: ', msg)
+                    reject(error);
+
+                });
 
             });
 
         };
 
+        this.getTestEvents = (testCaseId) => {
+            "use strict";
+
+            var self = this,
+                events = [];
+
+            return new Promise((resolve, reject) => {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+
+                    if (rec.value.testCaseId === testCaseId && rec.appMode === 'taskRecord') {
+
+                        //console.log(r.value);
+                        events.push(rec.value);
+
+                    }
+
+                }).done(function () {
+
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.records);
+                    resolve(events);
+
+                }).fail(function (error, msg) {
+
+                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+                    reject(error);
+
+                });
+
+            });
+        };
+
+        this.getSessionEvents = (sessionId) => {
+            "use strict";
+
+            var self = this,
+                events = [];
+
+            return new Promise((resolve, reject) => {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+
+                    if (rec.value.sessionId === sessionId && rec.appMode === 'taskRecord') {
+
+                        //console.log(r.value);
+                        events.push(rec.value);
+
+                    }
+
+                }).done(function () {
+
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.records);
+                    resolve(events);
+
+                }).fail(function (error, msg) {
+
+                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+                    reject(error);
+
+                });
+
+            });
+        };
+
         this.getTests = function () {
 
             var self = this,
-                tests = this.testCases = [this.masterTest];
+                tests = [this.masterTest];
 
-            return $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
+            return new Promise((resolve, reject) => {
+                "use strict";
 
-                console.log(test.value);
-                tests.push(test.value);
+                $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
 
-            }).done(function (r, e) {
+                    console.log(test.value);
+                    tests.push(test.value);
 
-                //console.log('--> result: %s, event: %s', r, e);
-                //console.debug('Records: ', self.records);
+                }).done(function () {
 
-            }).fail(function (e, msg) {
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.records);
+                    resolve(tests);
 
-                console.warn('[WARNING] dbAdapter: Failed to get test. Error: ', msg);
+                }).fail(function (error, msg) {
+
+                    console.error('[ERROR] dbAdapter: Failed to get test list. Error: ', msg);
+                    reject(error);
+
+                });
 
             });
 
@@ -609,7 +653,7 @@
                 $.indexedDB(self.dbName).objectStore(self.tables.tests).put(test, test.id).done(function () {
 
                     console.log('[INFO] dbAdapter: test data saved.');
-                    self.getTests().done(resolve);
+                    resolve();
 
                 }).fail(function (e, msg) {
 
@@ -628,29 +672,38 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.tests, self.tables.tasks], 'rw').progress( (t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.tests, self.tables.tasks], 'rw').progress((t) => {
 
                     t.objectStore(self.tables.tests).delete(id);
-                    self.taskList.forEach( (task) => {
+                    self.tasks.forEach((task) => {
                         "use strict";
 
                         if (task.testCaseId === id) {
 
                             t.objectStore(self.tables.tasks).delete(task.id);
 
+                            self.events.forEach((event) => {
+                                "use strict";
+
+                                if (event.taskId === id) {
+
+                                    t.objectStore(self.tables.events).delete(event.id);
+
+                                }
+
+                            });
+
                         }
 
                     });
 
-                }).done( () => {
+                    // TODO: delete test record as well?
+
+                }).done(() => {
                     "use strict";
 
-                    self.getTests().done(function () {
-
-                        console.log('[INFO] dbAdapter: Test data deleted.');
-                        resolve(self.testCases);
-
-                    });
+                    console.log('[INFO] dbAdapter: Test data deleted.');
+                    resolve();
 
                 }).fail(function () {
 
@@ -663,39 +716,58 @@
 
         };
 
-        this.getTasks = function () {
+        this.getTestTasks = function (testCaseId) {
 
             var self = this,
-                tasks = this.taskList = this.testTasks.slice(); // TEST
+                tasks = []; // TEST
 
-            return $.indexedDB(self.dbName).objectStore(self.tables.tasks).each(function (task) {
+            return new Promise((resolve, reject) => {
+                "use strict";
 
-                console.log(task.value);
-                tasks.push(task.value);
+                if (testCaseId == '0') {
 
-            }).done(function (r, e) {
+                    tasks = this.masterTestTasks.slice();
+                    resolve(tasks)
 
-                //console.log('--> result: %s, event: %s', r, e);
-                //console.debug('Records: ', self.records);
+                } else {
 
-            }).fail(function (e, msg) {
+                    $.indexedDB(self.dbName).objectStore(self.tables.tasks).each(function (rec) {
 
-                console.warn('[WARNING] dbAdapter: Failed to get task. Error: ', msg);
+                        // console.log(rec.value);
+                        if (rec.value.testCaseId === testCaseId) {
+
+                            tasks.push(rec.value);
+
+                        }
+
+                    }).done(function () {
+
+                        //console.log('--> result: %s, event: %s', r, e);
+                        resolve(tasks);
+
+                    }).fail(function (error, msg) {
+
+                        console.error('[ERROR] dbAdapter: Failed to get test task. Error: ', msg);
+                        reject(error);
+
+                    });
+
+                }
 
             });
 
         };
 
-        this.putTask = function (id, data) {
+        this.putTask = function (task) {
 
             var self = this;
 
             return new Promise((resolve, reject) => {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(data, id).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(task, task.id).done(() => {
 
                     console.log('[INFO] dbAdapter: task data saved.');
-                    self.getTasks().then( () => {
+                    self.getTestTasks(task.testCaseId).then(() => {
                         "use strict";
 
                         resolve();
@@ -716,14 +788,31 @@
         this.deleteTask = function (id) {
 
             var self = this,
-                testCaseId = this.taskList.findBy('id', id).testCaseId;
+                dTask = this.tasks.findBy('id', id),
+                tIndex = dTask.step,
+                testCaseId = dTask.testCaseId,
+                tTasks = this.tasks.filter((task) => {
+                    return task.testCaseId === testCaseId;
+                });
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.tasks, self.tables.events], 'rw').progress( (t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.tasks, self.tables.events], 'rw').progress((t) => {
 
                     t.objectStore(self.tables.tasks).delete(id);
-                    self.taskEvents.forEach( (event) => {
+                    tTasks.splice(tIndex, 1);
+                    tTasks.forEach((task, idx) => {
+
+                        task.step = idx;
+                        if (idx >= tIndex) {
+
+                            t.objectStore(self.tables.tasks).put(task, task.id);
+
+                        }
+
+                    });
+
+                    self.events.forEach((event) => {
                         "use strict";
 
                         if (event.taskId === id) {
@@ -734,28 +823,98 @@
 
                     });
 
-                }).done( () => {
+                }).done(() => {
                     "use strict";
 
-                    self.getTasks().done(function () {
-
-                        self.taskLIst
-                            .filter( (task) => { return task.testCaseId === testCaseId; })
-                            .forEach((task, idx) => {
-
-                                task.step = idx;
-                                self.putTask(task);
-
-                            });
-
-                        console.log('[INFO] dbAdapter: Test data deleted.');
-                        resolve(self.taskList);
-
-                    });
+                    console.log('[INFO] dbAdapter: Test data deleted.');
+                    resolve();
 
                 }).fail(function () {
 
                     console.warn('[INFO] dbAdapter: Failed to delete task data.');
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        /*
+         this.getEvents = () => {
+         "use strict";
+
+         var self = this,
+         events = this.events = self.masterTestEvents.slice();
+
+         return new Promise((resolve, reject) => {
+
+         $.indexedDB(self.dbName).objectStore(self.tables.tasks).each((rec) => {
+         "use strict";
+
+         events.push(rec.value);
+
+         }
+         ).done(() => {
+
+         resolve(events);
+
+         }).fail(() => {
+
+         console.warn('[INFO] dbAdapter: Failed to get events data. Error: ', msg);
+         reject();
+
+         });
+
+         });
+
+         };
+
+         this.getTaskEvents = function (taskId, sessionId) {
+
+         return this.events.filter(function (event) {
+
+         return event.taskId === taskId && event.sessionId === sessionId;
+
+         });
+
+         };
+
+         */
+        this.putEvent = function (event) {
+
+            var self = this;
+
+            return new Promise((resolve, reject) => {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.events).put(event, event.id).done(() => {
+
+                    console.log('[INFO] dbAdapter: event saved.');
+                    resolve();
+
+                }).fail((e, msg) => {
+
+                    console.warn('[INFO] dbAdapter: Failed to save event. Error: ', msg);
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.deleteEvent = (id) => {
+            "use strict";
+
+            return new Promise((resolve, reject) => {
+
+                $.indexedDB(self.dbName).objectStore(self.tables.events).delete(id).done(() => {
+
+                    resolve();
+
+                }).fail((error, message) => {
+
+                    console.log('[ERROR] IDB: fail to delete event. Error: ', message, error.stack);
                     reject();
 
                 });
@@ -857,7 +1016,8 @@
 
         this.testCase = null;
         this.testTasks = [];
-        this.taskEvents = [];
+        this.events = [];
+        this.sessions = [];
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -880,52 +1040,21 @@
             var self = this,
                 path = window.location.pathname;
 
-            self.db.init().done( () => {
+            self.db.init().done(() => {
 
-                self.db.getLocationTestCases(path).done( () => {
+                self.db.getLocationTestCases(path).done((tests) => {
 
-                    self.db.getTasks().then( () => {
-                        "use strict";
-
-                        self.testCases = self.db.testCases;
-                        self.createTestList();
-
-                    });
+                    self.tests = tests;
+                    self.createTestList();
 
                 });
 
-                self.db.getAllRecords().done( () => {
+                $('document').ready(() => {
 
-                    var recList = self.getDomElement('records');
-
-                    self.createRecordList();
-                    self.restoreState();
-
-                    $(recList).on('mouseout', () => {
-
-                        $(recList).data('tid', setTimeout( () => {
-
-                            $(recList).hide();
-
-                        }, 1000));
-
-                    });
-
-                    $(recList).on('mouseover', () => {
-
-                        clearTimeout($(recList).data('tid'));
-
-                    });
-
-                    $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
-
-                    $('document').ready( () => {
-
-                        self.setupDOMListeners();
-
-                    });
+                    self.setupDOMListeners();
 
                 });
+                $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
 
             });
 
@@ -983,7 +1112,7 @@
                 //this.resetApp(this.appMode || 'record', window.location.pathname);
                 this.resetApp(this.appMode || 'record');
 
-                var ts = 1 * new Date();
+                var ts = +new Date();
                 $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                 $(cnvh).hide();
                 $(this.getDomElement('0-2-0-0')).hide();
@@ -996,8 +1125,8 @@
                 this.activeRecord = {
 
                     id: this.sessionId,
-                    testCase: this.testCase,
-                    name: this.loc._Default_record_name + this.db.records.length,
+                    testCaseId: this.testCase.id,
+                    name: this.loc._Default_record_name + this.sessions.length,
                     description: '',
                     created: ts,
                     modified: ts,
@@ -1022,7 +1151,7 @@
                 clearInterval($stat.data('tid'));
                 $('body').off('mousemove', catchEvents);
 
-                if (this.db.records.length) {
+                if (this.sessions.length) {
 
                     $(this.getDomElement('butList')).show();
 
@@ -1041,14 +1170,18 @@
 
                     for (var et in rec.eventsStat) {
 
-                        rec.eventsQty += rec.eventsStat[et];
+                        if (rec.eventsStat.hasOwnProperty(et)) {
+
+                            rec.eventsQty += rec.eventsStat[et];
+
+                        }
 
                     }
 
-                    this.db.putRecord(this.sessionId, rec).then(function () {
+                    this.db.putSession(this.sessionId, rec).then(function () {
 
                         $(self.getDomElement('butList')).show();
-                        self.createRecordList();
+                        self.createSessionList();
                         self.toggleRecList();
                         $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId, true);
@@ -1117,15 +1250,16 @@
                     offs = $el.offset(),
                     left = offs.left,
                     top = offs.top,
-                    timeStamp = new Date().getTime(),
+                    timeStamp = +new Date(),
                     event = {
-                        id: new Date(),
+                        id: $.newGuid(),
                         taskId: this.currentTask ? this.currentTask.id : '',
                         sessionId: this.sessionId,
                         timeStamp: timeStamp,
+                        appMode: this.appMode,
                         index: elen,
                         location: location,
-                        testTask: this.currentTask,
+                        testTaskId: this.currentTask - id,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -1273,7 +1407,8 @@
                  console.debug('-------> event.kpiLast', event.kpiLast);
                  */
 
-                events.push(event);
+                // events.push(event);
+                this.db.putEvent(event);
                 rec.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
 
@@ -1517,7 +1652,7 @@
             function getEventInfo(e) {
 
                 var rId = e.sessionId,
-                    rec = self.getRecordById(rId),
+                    rec = self.getSessionById(rId),
                     etarget = e.target,
                     html = '';
 
@@ -1668,7 +1803,7 @@
             function getEventInfo(e) {
 
                 var rId = e.sessionId,
-                    rec = self.getRecordById(rId),
+                    rec = self.getSessionById(rId),
                     etarget = e.target,
                     html = '';
 
@@ -1719,7 +1854,7 @@
 
                 evts.forEach(function (e) {
 
-                    rec = self.getRecordById(rId);
+                    rec = self.getSessionById(rId);
 
                     if (rId !== e.sessionId) {
 
@@ -1864,7 +1999,7 @@
             }
 
             rId = evt.sessionId;
-            rec = self.getRecordById(rId);
+            rec = self.getSessionById(rId);
 
             html += getRecordInfo(rec);
 
@@ -1876,7 +2011,7 @@
                 if (rId !== e.sessionId) {
 
                     rId = e.sessionId;
-                    rec = self.getRecordById(rId);
+                    rec = self.getSessionById(rId);
                     html += '<tr><td></td></tr>' + getRecordInfo(rec);
 
                 }
@@ -1937,7 +2072,7 @@
         this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
 
             var self = this,
-                recs = this.db.records,
+                recs = this.sessions,
                 abs = Math.abs,
                 th = 5,
                 evts = [];
@@ -1987,7 +2122,7 @@
                 evt = rec.events[rec.events.length - 1],
                 ms = rec.modified,
                 miles = evt ? evt.miles : 0,
-                timeString = this.getTimeString(1 * new Date() - ms),
+                timeString = this.getTimeString(+new Date() - ms),
                 clicks = rec.eventsStat.click || 0,
                 drags = rec.eventsStat.drag || 0,
                 wheels = rec.eventsStat.wheel || 0,
@@ -2036,9 +2171,9 @@
 
         };
 
-        this.getRecordById = function getRecordById(id) {
+        this.getSessionById = function getRecordById(id) {
 
-            var records = this.db.records,
+            var records = this.sessions,
                 r = null;
 
             for (var i = 0, rl = records.length; i < rl; i++) {
@@ -2075,7 +2210,7 @@
 
             }
 
-            this.getRecordById(sId).visible = false;
+            this.getSessionById(sId).visible = false;
             if (this.activeRecord && this.activeRecord.id === sId) {
 
                 this.clearTimeline();
@@ -2086,7 +2221,7 @@
 
         this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
 
-            var rec = this.getRecordById(sId);
+            var rec = this.getSessionById(sId);
 
             if (!rec) {
 
@@ -2117,7 +2252,7 @@
         this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
 
             var self = this,
-                rec = this.getRecordById(sId);
+                rec = this.getSessionById(sId);
 
             if (!rec) {
 
@@ -2522,7 +2657,7 @@
         this.showTimelineEvent = function showTimelineEvent(event) {
 
             this.sessionId = event.sessionId;
-            this.activeRecord = this.getRecordById(event.sessionId);
+            this.activeRecord = this.getSessionById(event.sessionId);
             this.appMode = 'timeline';
             if (event.time < this.timeBrackets[0]) {
 
@@ -2628,7 +2763,7 @@
         this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
-                rec = this.getRecordById(sId),
+                rec = this.getSessionById(sId),
                 btn = this.getDomElement('butPlay');
 
             if (btn.className.match(/play/i)) {
@@ -3228,7 +3363,7 @@
 
         this.toggleRecList = function toggleRecList() {
 
-            var rlId = this.domId['records'],
+            var rlId = this.domId['sessions'],
                 rbId = this.domId['butList'],
                 $rl = $('#' + rlId);
 
@@ -3242,7 +3377,7 @@
 
             }
 
-            if (!$rl.is(':visible') && this.db.records.length) {
+            if (!$rl.is(':visible') && this.sessions.length) {
 
                 this.setRecListPosition();
                 $rl.show();
@@ -3284,7 +3419,7 @@
 
         };
 
-        this.createRecordList = function createRecordList() {
+        this.createSessionList = function createRecordList() {
 
             var self = this,
                 recListDiv = this.getDomElement('records'),
@@ -3293,7 +3428,7 @@
                 rec, butShow, butDel, butPlay, inpName, nChckb,
                 cnv, ctx, butCp, cpInp, cpSp;
 
-            if (!this.db.records.length) {
+            if (!this.sessions.length) {
 
                 $(recListDiv).hide();
                 $(cnvHolder).hide();
@@ -3323,7 +3458,7 @@
             }
             $(recListDiv).children().remove();
             $(cnvHolder).children('.cnv').remove();
-            this.db.records.forEach(function (r, idx) {
+            this.sessions.forEach(function (r, idx) {
 
                 // Restore visibility and active flags
                 r.visible = visRecs[r.id];
@@ -3459,7 +3594,7 @@
 
                 butDel.addEventListener('click', function () {
 
-                    self.deleteRecord($(this).attr('data-dcipher-rec-id'));
+                    self.deleteSession($(this).attr('data-dcipher-rec-id'));
 
                 });
 
@@ -3500,8 +3635,22 @@
 
                     if ($el.attr('type') === 'text') {
 
-                        self.showSpiderGraph(id);
-                        self.setActiveRecord(id, true);
+                        if (!rec.events) {
+
+                            self.db.getSessionEvents(id).then((events) => {
+                                "use strict";
+
+                                rec.events = events;
+                                self.showSpiderGraph(id);
+                                self.setActiveRecord(id, true);
+
+                            });
+
+                        } else {
+
+                            self.showSpiderGraph(id);
+                            self.setActiveRecord(id, true);
+                        }
 
                     }
 
@@ -3550,7 +3699,7 @@
             $('.rec', recs).removeClass('active');
             $rec.addClass('active');
 
-            this.db.records.forEach(function (r) {
+            this.sessions.forEach(function (r) {
 
                 if (r.id == id) {
 
@@ -3590,9 +3739,9 @@
                 var id = this.activeRecord.id;
 
                 $('#recId-' + id, this.getDomElement('records')).removeClass('active');
-                if (this.db.records.length) {
+                if (this.sessions.length) {
 
-                    this.getRecordById(id).active = false;
+                    this.getSessionById(id).active = false;
 
                 }
                 this.hideSpiderGraph(id);
@@ -3605,14 +3754,20 @@
 
         };
 
-        this.deleteRecord = function deleteRecord(id) {
+        this.deleteSession = function (id) {
 
             var self = this;
 
             this.unsetActiveRecord();
-            this.db.deleteRecord(id).then(function () {
+            this.db.deleteSession(id).then(function () {
 
-                self.createRecordList();
+                self.db.getTestSession(self.testCase.id).then((sessions) => {
+                    "use strict";
+
+                    self.sessions = sessions;
+                    self.createSessionList();
+
+                });
 
             }, function (e, msg) {
 
@@ -3625,13 +3780,13 @@
         this.updateRecordName = function updateRecordName(id, name) {
 
             var self = this,
-                rec = this.getRecordById(id);
+                rec = this.getSessionById(id);
 
             rec.name = name;
             delete rec.drawn;
-            this.db.putRecord(id, rec).then(function () {
+            this.db.putSession(id, rec).then(function () {
 
-                self.createRecordList();
+                self.createSessionList();
                 self.setActiveRecord(id);
                 self.showSpiderGraph(id);
 
@@ -3646,15 +3801,15 @@
         this.updateRecordColor = function updateRecordColor(id, color) {
 
             var self = this,
-                rec = this.getRecordById(id);
+                rec = this.getSessionById(id);
 
             if (rec.color !== color) {
 
                 rec.color = color;
                 delete rec.drawn;
-                this.db.putRecord(id, rec).then(function () {
+                this.db.putSession(id, rec).then(function () {
 
-                    self.createRecordList();
+                    self.createSessionList();
 
                 }, function (e, msg) {
 
@@ -3669,7 +3824,7 @@
         this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
 
             $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
-            this.getRecordById(sId).visible = true;
+            this.getSessionById(sId).visible = true;
 
         };
 
@@ -3768,8 +3923,8 @@
                     endEventIndex: this.endEventIndex,
                     testCase: this.testCase,
                     testTasks: this.testTasks,
-                    testEvents: this.testEvents,
-                    taskEvents: this.taskEvents,
+                    sessionEvents: this.sessionEvents,
+                    events: this.events,
                     currentTask: this.currentTask,
                     currentEvent: this.currentEvent,
                     timeBrackets: this.timeBrackets
@@ -3952,7 +4107,7 @@
 
             if (this.testCase && this.testCase.id) {
 
-                this.testTasks = this.db.getTestCaseTasks(this.testCase.id);
+                this.testTasks = this.db.getTestTasks(this.testCase.id);
 
                 if (this.testTasks.length) {
 
@@ -4082,12 +4237,15 @@
                 del.addEventListener('mouseup', (e) => {
                     "use strict";
 
-                    self.db.deleteTask(e.target.dataset.dcipherTaskId).then( (taskList) => {
+                    self.deleteTask(e.target.dataset.dcipherTaskId).then( () => {
 
-                        self.testTasks = taskList;
-                        self.createTaskList();
+                        self.getTestTaskList(self.testCase.id).then( (taskList) => {
 
-                    } );
+                            self.testTasks = taskList;
+                            self.createTaskList();
+
+                        });
+                    });
 
                 })
 
@@ -4100,6 +4258,56 @@
                 $(this.getDomElement('butTest')).show();
 
             }
+        };
+
+        this.deleteTask = function (id) {
+
+            var self = this,
+                task = this.testTasks.findBy('id', id),
+                tIndex = task.step,
+                testTasks = this.testTasks;
+
+            return new Promise( (resolve, reject) => {
+                "use strict";
+
+                var promises = [];
+
+                promises.push(self.db.deleteTask(task.id));
+                testTasks.splice(tIndex, 1);
+                testTasks.forEach((task, idx) => {
+
+                    task.step = idx;
+                    if (idx >= tIndex) {
+
+                        promises.push(self.putTask(task));
+
+                    }
+
+                });
+
+                task.events.forEach((event) => {
+                    "use strict";
+
+                    if (event.taskId === id) {
+
+                        promises.push(self.db.deleteEvent(event.id));
+
+                    }
+
+                });
+
+                Promise.all(promises).then( () => {
+
+                    resolve();
+
+                }, (error) => {
+
+                    reject(error);
+
+                });
+
+            });
+
         };
 
         this.moveTaskLeft = function (task) {
@@ -4199,7 +4407,7 @@
                     ease = 'left 0.2s ease-out 0.15s',
                     i, il, t;
 
-                this.taskEvents = this.testEvents.filter(function (event) {
+                this.events = this.sessionEvents.filter(function (event) {
 
                     return event.taskId === task.id;
 
@@ -4275,7 +4483,7 @@
 
             var done = task.done;
 
-            this.testEvents.forEach(function (e) {
+            this.sessionEvents.forEach(function (e) {
 
                 if (e.taskId === task.id) {
 
@@ -4337,7 +4545,7 @@
             $(this.getDomElement('taskProgress')).width(0);
             this.activateTask(task);
             this.toggleRecMode();
-            this.resetApp('test', this.taskEvents[0].location);
+            this.resetApp('test', this.events[0].location);
 
         };
 
@@ -4379,7 +4587,7 @@
                 currentTask = this.currentTask,
                 cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = this.taskEvents;
+                evts = this.events;
 
             if (e && evts && evts.length) {
 
@@ -4441,7 +4649,7 @@
 
         this.checkAlternativeEvents = function (event) {
 
-            var evts = this.taskEvents,
+            var evts = this.events,
                 id = event.id;
 
             // Check events in the reference list of the given event
@@ -4459,15 +4667,15 @@
 
         this.setTestProgressBar = function () {
 
-            var testEvents = this.testEvents,
+            var testEvents = this.sessionEvents,
                 winW = window.innerWidth,
                 butW = $('.step-number', this.getDomElement('taskBar')).outerWidth(),
                 finW = winW - butW * (2 + this.testTasks.length);
 
             function getEventsInfo() {
 
-                var total = testEvents.length,
-                    dl = testEvents.filter(function (e) {
+                var total = sessionEvents.length,
+                    dl = sessionEvents.filter(function (e) {
                         return e.done
                     });
 
@@ -4526,7 +4734,7 @@
 
             var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
                 evt = evts ? evts[0] : null,
-                rec = evt ? this.getRecordById(evt.sessionId) : null,
+                rec = evt ? this.getSessionById(evt.sessionId) : null,
                 tl = this.getDomElement('timeline'),
                 $tlc = $(this.getDomElement('timelineCircle'));
 
@@ -4628,7 +4836,7 @@
 
             }
 
-            if (!$tl.is(':visible') && this.testCases) {
+            if (!$tl.is(':visible') && this.tests) {
 
                 $tl.show();
                 $('body').on('click', hideTestList);
@@ -4650,7 +4858,7 @@
                 tst, inp, del;
 
             $div.children().remove();
-            this.testCases.forEach(function (test) {
+            this.tests.forEach(function (test) {
 
                 tst = document.createElement('div');
                 tst.className = 'test';
@@ -4678,7 +4886,7 @@
 
                 tst.addEventListener('click', function (e) {
 
-                    self.testCase = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id'));
+                    self.testCase = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id'));
                     self.createTaskList();
                     // self.toggleTestList();
                     $(self.getDomElement('testName')).html(test.name).show();
@@ -4691,7 +4899,32 @@
 
                         })[0];
 
-                        self.testEvents = self.db.getSessionEvents(self.testCase.session.id);
+                        self.sessionEvents = self.db.getTestEvents(self.testCase.id);
+                        self.db.getTestSessions(test.id).then((sessions) => {
+
+                            var recList = self.getDomElement('records');
+
+                            self.sessions = sessions;
+                            self.createSessionList();
+                            self.restoreState();
+
+                            $(recList).on('mouseout', () => {
+
+                                $(recList).data('tid', setTimeout(() => {
+
+                                    $(recList).hide();
+
+                                }, 1000));
+
+                            });
+
+                            $(recList).on('mouseover', () => {
+
+                                clearTimeout($(recList).data('tid'));
+
+                            });
+
+                        });
 
                     }
 
@@ -4706,7 +4939,7 @@
 
                 inp.addEventListener('change', function (e) {
 
-                    var test = self.testCases.findBy('id', $(this).attr('data-d-cipher-test-id')),
+                    var test = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id')),
                         name = $(this).val();
 
                     if (test && name) {
@@ -4741,13 +4974,13 @@
                     name: '',
                     description: '',
                     author: 'Gray Holland',
-                    created: new Date().getTime(),
+                    created: +new Date(),
                     modified: '',
                     sessions: []
 
                 };
 
-            this.testCases.push(test);
+            this.tests.push(test);
             this.testCase = test;
             this.createTestList();
             $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
@@ -4756,8 +4989,16 @@
 
         this.saveTestCase = function (test) {
 
+            var self = this;
+
             this.db.putTest(test);
-            this.createTestList();
+            this.db.getTests().then((tests) => {
+                "use strict";
+
+                self.testCases = tests;
+                self.createTestList();
+
+            });
 
         };
 
@@ -4765,11 +5006,16 @@
 
             var self = this;
 
-            this.db.deleteTest(id).then(function () {
+            this.db.deleteTest(id).then(function (tests) {
 
-                self.testCases = self.db.testCases;
-                self.createTestList();
-                self.createTaskList();
+                self.db.getTests().then((tests) => {
+                    "use strict";
+
+                    self.testCases = tests;
+                    self.createTestList();
+                    self.createTaskList();
+
+                });
 
             });
 
@@ -4788,7 +5034,7 @@
 
                 };
 
-            this.db.putTask(id, task).then( () => {
+            this.db.putTask(id, task).then(() => {
 
                 this.createTaskList();
                 this.moveTaskLeft(task);
@@ -4796,7 +5042,13 @@
 
             });
 
-        }
+        };
+
+        this.getTestTaskList = (testCaseId) => {
+            "use strict";
+
+
+        };
 
     }; // End of DCipher class
 
@@ -4956,7 +5208,7 @@
         butList.appendChild(recs);
 
         // Record list
-        recList.id = dCipher.domId['records'];
+        recList.id = dCipher.domId['sessions'];
 
         // Test list
         tests.className = 'tests';
@@ -5202,7 +5454,7 @@
 
             $recs.data('tid', setTimeout(function () {
 
-                dCipher.createRecordList(e);
+                dCipher.createSessionList(e);
 
             }, 500));
 
