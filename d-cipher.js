@@ -331,6 +331,7 @@
             author: 'Gray Holland',
             created: '09.09.2015',
             modified: '',
+            eventSession: '',
             sessions: [
                 {
                     id: '0-1-0-0',
@@ -776,7 +777,39 @@
 
                 }).fail((e, msg) => {
 
-                    console.warn('[INFO] dbAdapter: Failed to save task data. Error: ', msg);
+                    console.error('[ERROR] dbAdapter: Failed to save task data. Error: ', msg);
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.deleteTaskSet = (tasks) => {
+            "use strict";
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).transaction([self.tables.tasks], 'rw').progress((t) => {
+
+                    tasks.forEach((task) => {
+
+                        t.objectStore(self.tables.tasks).delete(task.id);
+
+                    });
+
+                }).done(() => {
+                    "use strict";
+
+                    console.log('[INFO] dbAdapter: Task set deleted.');
+                    resolve();
+
+                }).fail(function () {
+
+                    console.error('[ERROR] dbAdapter: Failed to delete task set.');
                     reject();
 
                 });
@@ -840,47 +873,6 @@
 
         };
 
-        /*
-         this.getEvents = () => {
-         "use strict";
-
-         var self = this,
-         events = this.events = self.masterTestEvents.slice();
-
-         return new Promise((resolve, reject) => {
-
-         $.indexedDB(self.dbName).objectStore(self.tables.tasks).each((rec) => {
-         "use strict";
-
-         events.push(rec.value);
-
-         }
-         ).done(() => {
-
-         resolve(events);
-
-         }).fail(() => {
-
-         console.warn('[INFO] dbAdapter: Failed to get events data. Error: ', msg);
-         reject();
-
-         });
-
-         });
-
-         };
-
-         this.getTaskEvents = function (taskId, sessionId) {
-
-         return this.events.filter(function (event) {
-
-         return event.taskId === taskId && event.sessionId === sessionId;
-
-         });
-
-         };
-
-         */
         this.putEvent = function (event) {
 
             var self = this;
@@ -915,6 +907,38 @@
                 }).fail((error, message) => {
 
                     console.log('[ERROR] IDB: fail to delete event. Error: ', message, error.stack);
+                    reject();
+
+                });
+
+            });
+
+        };
+
+        this.deleteEventSet = (events) => {
+            "use strict";
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+
+                $.indexedDB(self.dbName).transaction([self.tables.events], 'rw').progress((t) => {
+
+                    events.forEach((event) => {
+
+                        t.objectStore(self.tables.events).delete(event.id);
+
+                    });
+
+                }).done(() => {
+                    "use strict";
+
+                    console.log('[INFO] dbAdapter: Event set deleted.');
+                    resolve();
+
+                }).error(function () {
+
+                    console.error('[ERROR] dbAdapter: Failed to delete event set.');
                     reject();
 
                 });
@@ -4107,8 +4131,6 @@
 
             if (this.testCase && this.testCase.id) {
 
-                this.testTasks = this.db.getTestTasks(this.testCase.id);
-
                 if (this.testTasks.length) {
 
                     if (!this.currentTask) {
@@ -4237,9 +4259,9 @@
                 del.addEventListener('mouseup', (e) => {
                     "use strict";
 
-                    self.deleteTask(e.target.dataset.dcipherTaskId).then( () => {
+                    self.deleteTask(e.target.dataset.dcipherTaskId).then(() => {
 
-                        self.getTestTaskList(self.testCase.id).then( (taskList) => {
+                        self.getTestTaskList(self.testCase.id).then((taskList) => {
 
                             self.testTasks = taskList;
                             self.createTaskList();
@@ -4267,7 +4289,7 @@
                 tIndex = task.step,
                 testTasks = this.testTasks;
 
-            return new Promise( (resolve, reject) => {
+            return new Promise((resolve, reject) => {
                 "use strict";
 
                 var promises = [];
@@ -4296,7 +4318,7 @@
 
                 });
 
-                Promise.all(promises).then( () => {
+                Promise.all(promises).then(() => {
 
                     resolve();
 
@@ -4886,27 +4908,56 @@
 
                 tst.addEventListener('click', function (e) {
 
-                    self.testCase = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id'));
-                    self.createTaskList();
+                    var testCaseId = $(this).attr('data-d-cipher-test-id');
+
+                    test = self.testCase = self.tests.findBy('id', testCaseId);
                     // self.toggleTestList();
                     $(self.getDomElement('testName')).html(test.name).show();
 
-                    if (self.testCase.sessions && self.testCase.sessions.length) {
+                    if (test.sessions && test.sessions.length) {
 
-                        self.testCase.session = self.testCase.sessions.filter(function (s) {
+                        test.session = test.sessions.filter(function (s) {
 
                             return path.match(s.location) && s.master === true;
 
                         })[0];
 
-                        self.sessionEvents = self.db.getTestEvents(self.testCase.id);
-                        self.db.getTestSessions(test.id).then((sessions) => {
+                        self.db.getTestEvents(testCaseid).then((events) => {
+                            "use strict";
+
+                            self.db.getTestTasks(testCaseId).then((tasks) => {
+
+                                tasks.forEach((task) => {
+
+                                    task.events = events.filter((event) => {
+
+                                        return event.sessionId === test.eventSession;
+
+                                    });
+
+                                });
+
+                                self.createTaskList();
+
+                            });
+                            self.db.getTestSessions(testCaseid).then((sessions) => {
+
+                                sessions.forEach((session) => {
+
+                                    session.events = events.filter((event) => {
+
+                                        return event.sessionId === session.id;
+
+                                    });
+
+                                });
+                                self.sessions = sessions;
+                                self.createSessionList();
+                                self.restoreState();
+
+                            });
 
                             var recList = self.getDomElement('records');
-
-                            self.sessions = sessions;
-                            self.createSessionList();
-                            self.restoreState();
 
                             $(recList).on('mouseout', () => {
 
@@ -5002,18 +5053,48 @@
 
         };
 
-        this.deleteTest = function (id) {
+        this.deleteTest = function (testCaseId) {
 
             var self = this;
 
-            this.db.deleteTest(id).then(function (tests) {
+            return new Promise((resolve, reject) => {
+                "use strict";
 
-                self.db.getTests().then((tests) => {
-                    "use strict";
+                var promises = [];
 
-                    self.testCases = tests;
-                    self.createTestList();
-                    self.createTaskList();
+                promises.push(self.db.deleteTest(testCaseId));
+                promises.push(self.db.getTestTasks(testCaseId).then((tasks) => {
+
+                    promises.push(self.db.deleteTaskSet(tasks));
+
+                }));
+                promises.push(self.db.getTestEvents(testCaseId).then((events) => {
+
+                    promises.push(self.db.deleteEventSet(events));
+
+                }));
+
+                Promises.all(promises).then(() => {
+
+                    self.db.getTests().then((tests) => {
+                        "use strict";
+
+                        self.testCases = tests;
+                        self.getTestTasks().then((tasks) => {
+
+                            self.testTasks = tasks;
+                            self.createTestList();
+                            self.createTaskList();
+                            resolve();
+
+                        });
+
+                    });
+
+                }, (error, message) => {
+
+                    console.error('[ERROR] dCipher: Failed to delete test. Error: ', message);
+                    reject(error);
 
                 });
 
@@ -5044,9 +5125,44 @@
 
         };
 
-        this.getTestTaskList = (testCaseId) => {
+        this.getTestTasks = (testCaseId) => {
             "use strict";
 
+            var self = this;
+
+            return new Promise((resolve, reject) => {
+
+                self.db.getTestTasks(testCaseId).then((tasks) => {
+
+                    self.db.getTestEvents(testCaseId).then((events) => {
+
+                        tasks.forEach((task) => {
+
+                            task.events = events.filter((event) => {
+
+                                return event.taskId === task.id;
+
+                            });
+
+                        });
+                        self.testTasks = tasks;
+                        resolve(tasks);
+
+                    }, (error, message) => {
+
+                        console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
+                        reject(error);
+
+                    });
+
+                }, (error, message) => {
+
+                    console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
+                    reject(error);
+
+                });
+
+            });
 
         };
 
