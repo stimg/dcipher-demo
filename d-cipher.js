@@ -1051,9 +1051,9 @@
                 self.db.getLocationTestCases(path).then((tests) => {
 
                     self.tests = tests;
+                    self.restoreState();
                     self.createTestList();
                     self.createSessionList();
-                    self.restoreState();
 
                 });
 
@@ -1195,7 +1195,7 @@
                         self.createSessionList();
                         self.toggleRecList();
                         $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
-                        self.setActiveRecord(self.sessionId, true);
+                        self.setActiveSession(self.sessionId, true);
                         self.showSpiderGraph(self.sessionId);
 
                     });
@@ -3179,7 +3179,7 @@
             $cur.show();
             $tlCursor.show();
             this.hideRecList();
-            this.setActiveRecord(sId);
+            this.setActiveSession(sId);
             this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
             ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
             ctx.strokeStyle = session.color;
@@ -3390,7 +3390,6 @@
 
             if (!$rl.is(':visible') && this.sessions.length) {
 
-                this.setRecListPosition();
                 $rl.show();
                 $('body').on('click', hideReclist);
 
@@ -3403,60 +3402,37 @@
 
         };
 
-        this.setRecListPosition = function setRecListPosition() {
-
-            var $butList = $(this.getDomElement('butList')),
-                p = $butList.offset(),
-                $rl = $(this.getDomElement('sessions')),
-                hidden = $rl.css('display') === 'none';
-
-            if (hidden) {
-
-                $rl.css('display', 'block')
-                    .css('visibility', 'hidden');
-
-            }
-
-            /*
-             $rl.css('top', p.top - window.pageYOffset + ($butList.outerHeight() - $rl.outerHeight()) / 2)
-             .css('left', p.left - window.pageXOffset + 1.5 * $butList.outerWidth());
-             */
-            if (hidden) {
-
-                $rl.css('visibility', 'visible')
-                    .css('display', 'none');
-
-            }
-
-        };
-
-        this.createSessionList = function createRecordList() {
+        this.createSessionList = function () {
 
             var self = this,
-                recListDiv = this.getDomElement('sessions'),
+                sessionsDiv = this.getDomElement('sessions'),
                 cnvHolder = this.getDomElement('canvasHolder'),
                 visRecs = {}, actRecs = {},
-                recDiv, butShow, butDel, inpName, nChckb,
+                sessionDiv, butShow, butDel, inpName, nChckb,
                 cnv, ctx, butCp, cpInp, cpSp;
 
             if (!this.sessions.length) {
 
-                $(recListDiv).hide();
+                $(sessionsDiv).hide();
                 $(cnvHolder).hide();
                 $(this.getDomElement('butList')).hide();
                 return;
 
+            } else {
+
+                $(this.getDomElement('butList')).show();
+
             }
 
             // Get all visible records
-            $('input:checkbox', recListDiv).each(function () {
+            $('input:checkbox', sessionsDiv).each(function () {
 
                 visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
 
             });
 
             // Get all active records
-            $('.rec', recListDiv).each(function () {
+            $('.rec', sessionsDiv).each(function () {
 
                 actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
 
@@ -3467,7 +3443,7 @@
                 $(cnvHolder).hide();
 
             }
-            $(recListDiv).children().remove();
+            $(sessionsDiv).children().remove();
             $(cnvHolder).children('.cnv').remove();
             this.sessions.forEach(function (r, idx) {
 
@@ -3498,10 +3474,10 @@
                 cnvHolder.appendChild(cnv);
 
                 // Record div
-                recDiv = document.createElement('div');
-                recDiv.id = 'recId-' + r.id;
-                recDiv.className = 'rec' + (actRecs[r.id] ? ' active' : '');
-                recDiv.setAttribute('data-dcipher-rec-id', r.id);
+                sessionDiv = document.createElement('div');
+                sessionDiv.id = 'recId-' + r.id;
+                sessionDiv.className = 'rec' + (actRecs[r.id] ? ' active' : '');
+                sessionDiv.setAttribute('data-dcipher-rec-id', r.id);
 
                 // Show record button
                 nChckb = document.createElement('input');
@@ -3512,7 +3488,7 @@
                 nChckb.value = r.id;
                 nChckb.className = "chckb-show";
                 nChckb.checked = visRecs[r.id];
-                recDiv.appendChild(nChckb);
+                sessionDiv.appendChild(nChckb);
 
                 butShow = document.createElement('label');
                 butShow.setAttribute('data-dcipher-rec-id', r.id);
@@ -3520,7 +3496,7 @@
                 butShow.htmlFor = 'showRecId-' + r.id;
                 butShow.className = 'show';
                 butShow.title = dCipher.loc._Toggle_record;
-                recDiv.appendChild(butShow);
+                sessionDiv.appendChild(butShow);
 
                 // Delete Record button
                 butDel = document.createElement('div');
@@ -3529,7 +3505,7 @@
                 butDel.className = 'del';
                 butDel.innerHTML = '&#10005;';
                 butDel.title = dCipher.loc._Delete_record;
-                recDiv.appendChild(butDel);
+                sessionDiv.appendChild(butDel);
 
                 // Color picker
                 cpInp = document.createElement('input');
@@ -3550,7 +3526,7 @@
                 butCp.className = 'cp-container input-group';
                 butCp.appendChild(cpInp);
                 butCp.appendChild(cpSp);
-                recDiv.appendChild(butCp);
+                sessionDiv.appendChild(butCp);
 
                 // Play record button
                 /*
@@ -3571,10 +3547,9 @@
                 inpName.disabled = true;
                 inpName.id = 'recNameId-' + r.id;
                 inpName.className = 'rec-name';
-                recDiv.appendChild(inpName);
+                sessionDiv.appendChild(inpName);
 
-                recListDiv.appendChild(recDiv);
-                self.setRecListPosition();
+                sessionsDiv.appendChild(sessionDiv);
 
                 // Define listeners
                 nChckb.addEventListener('change', function () {
@@ -3632,35 +3607,35 @@
 
                 });
 
-                recDiv.addEventListener('dblclick', function () {
+                sessionDiv.addEventListener('dblclick', function () {
 
                     var $el = $('input[type="text"]', this);
                     $el.attr('disabled', false).focus();
 
                 });
 
-                recDiv.addEventListener('click', function (e) {
+                sessionDiv.addEventListener('click', function (e) {
 
                     var $el = $(e.target),
                         id = $el.attr('data-dcipher-rec-id');
 
                     if ($el.attr('type') === 'text') {
 
-                        if (!recDiv.events) {
+                        if (!sessionDiv.events) {
 
                             self.db.getSessionEvents(id).then((events) => {
                                 "use strict";
 
-                                recDiv.events = events;
+                                sessionDiv.events = events;
                                 self.showSpiderGraph(id);
-                                self.setActiveRecord(id, true);
+                                self.setActiveSession(id, true);
 
                             });
 
                         } else {
 
                             self.showSpiderGraph(id);
-                            self.setActiveRecord(id, true);
+                            self.setActiveSession(id, true);
                         }
 
                     }
@@ -3700,7 +3675,7 @@
 
         };
 
-        this.setActiveRecord = function setActiveRecord(id, reset) {
+        this.setActiveSession = function setActiveRecord(id, reset) {
 
             var self = this,
                 recs = this.getDomElement('sessions'),
@@ -3798,7 +3773,7 @@
             this.db.putSession(session).then(function () {
 
                 self.createSessionList();
-                self.setActiveRecord(id);
+                self.setActiveSession(id);
                 self.showSpiderGraph(id);
 
             }, function (e, msg) {
@@ -3934,6 +3909,7 @@
                     endEventIndex: this.endEventIndex,
                     testCase: this.testCase,
                     testTasks: this.testTasks,
+                    sessions: this.sessions,
                     testEvents: this.testEvents,
                     currentTask: this.currentTask,
                     currentEvent: this.currentEvent,
@@ -4003,7 +3979,7 @@
                     var event = self.activeSession.events[self.endEventIndex],
                         tEvt;
 
-                    self.setActiveRecord(self.activeSession.id);
+                    self.setActiveSession(self.activeSession.id);
                     self.showSpiderGraph(self.activeSession.id, self.startEventIndex, self.endEventIndex + 1);
 
                     tEvt = self.timeLineEvents.find(function (e) {
