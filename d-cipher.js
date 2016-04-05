@@ -98,11 +98,70 @@
             'events': 'events'
 
         };
-        this.sessions = [];
-        this.sessionEvents = [];
-        this.tests = [];
-        this.tasks = [];
-        this.events = [];
+        this.masterTest = {
+            id: '0',
+            name: 'Bugaboo initial test case',
+            description: 'Test case for Bugaboo web site',
+            author: 'Gray Holland',
+            created: '09.09.2015',
+            modified: ''
+        };
+        this.masterTestTasks = [
+            {
+                id: '0-1',
+                testCaseId: '0',
+                step: 0,
+                description: 'Find Cameleon stroller and configure to order'
+            },
+            {
+                id: '0-2',
+                testCaseId: '0',
+                step: 1,
+                description: 'Choose bassinet and select black canopy color'
+            },
+            {
+                id: '0-3',
+                testCaseId: '0',
+                step: 2,
+                description: ' Add running accessory, and a cup holder'
+            },
+            {
+                id: '0-4',
+                testCaseId: '0',
+                step: 3,
+                description: 'Purchase stroller, checking final cost total before completing'
+            }
+        ];
+        this.masterTestSessions = [
+            {
+                id: '0-1-0-0',
+                type: 'testEvents',
+                testCaseId: '0',
+                name: 'Master Test Events',
+                location: '/bugaboo/A',
+                description: 'Master test events records',
+                created: '',
+                modified: '',
+                author: '',
+                color: 'rgba(255, 0, 255, 1)',
+                duration: 0,
+                mouseMilesTotal: 0
+            },
+            {
+                id: '0-2-0-0',
+                type: 'testEvents',
+                testCaseId: '0',
+                name: 'Master Test Events',
+                location: '/bugaboo/B',
+                description: 'Master test events records',
+                created: '',
+                modified: '',
+                author: '',
+                color: 'rgba(255, 0, 255, 1)',
+                duration: 0,
+                mouseMilesTotal: 0
+            }
+        ];
         this.masterTestEvents = [
             {
                 id: '0-1-0',
@@ -298,55 +357,6 @@
             }
 
         ];
-        this.masterTestTasks = [
-            {
-                id: '0-1',
-                testCaseId: '0',
-                step: 0,
-                description: 'Find Cameleon stroller and configure to order'
-            },
-            {
-                id: '0-2',
-                testCaseId: '0',
-                step: 1,
-                description: 'Choose bassinet and select black canopy color'
-            },
-            {
-                id: '0-3',
-                testCaseId: '0',
-                step: 2,
-                description: ' Add running accessory, and a cup holder'
-            },
-            {
-                id: '0-4',
-                testCaseId: '0',
-                step: 3,
-                description: 'Purchase stroller, checking final cost total before completing'
-            }
-        ];
-        this.masterTest = {
-            id: '0',
-            name: 'Bugaboo initial test case',
-            description: 'Test case for Bugaboo web site',
-            author: 'Gray Holland',
-            created: '09.09.2015',
-            modified: '',
-            eventSession: '',
-            sessions: [
-                {
-                    id: '0-1-0-0',
-                    tag: 'Bugaboo A',
-                    location: '/bugaboo/A',
-                    master: true
-                },
-                {
-                    id: '0-2-0-0',
-                    tag: 'Bugaboo B',
-                    location: '/bugaboo/B',
-                    master: true
-                }
-            ]
-        };
 
         this.init = function init() {
 
@@ -467,22 +477,18 @@
 
         };
 
-        this.putSession = function putRecord(id, data) {
+        this.putSession = function (session) {
 
-            var self = this;
+            var self = this,
+                data = $.extend({}, session);
 
-            data.events.forEach(function (e) {
-
-                delete e.target.element;
-
-            });
-
+            delete data.events;
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, id.toString()).done(function () {
+                $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, session.id.toString()).done(function () {
 
                     console.log('[INFO] dbAdapter: session data saved.');
-                    self.getTestSessions().done(resolve);
+                    resolve();
 
                 }).fail(function (e, msg) {
 
@@ -523,6 +529,11 @@
 
             return new Promise((resolve, reject) => {
 
+                if (testCaseId == '0') {
+
+                    sessions = this.masterTestSessions;
+
+                }
                 $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
 
                     if (testCaseId === r.value.testCaseId) {
@@ -540,7 +551,7 @@
 
                 }).fail(function (error, msg) {
 
-                    console.warn('[WARNING] dbAdapter: Failed to get all sessions. Error: ', msg)
+                    console.warn('[WARNING] dbAdapter: Failed to get all sessions. Error: ', msg);
                     reject(error);
 
                 });
@@ -557,29 +568,37 @@
 
             return new Promise((resolve, reject) => {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+                if (testCaseId == '0') {
 
-                    if (rec.value.testCaseId === testCaseId && rec.appMode === 'taskRecord') {
+                    resolve(this.masterTestEvents);
 
-                        //console.log(r.value);
-                        events.push(rec.value);
+                } else {
 
-                    }
+                    $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
 
-                }).done(function () {
+                        if (rec.value.testCaseId === testCaseId) {
 
-                    //console.log('--> result: %s, event: %s', r, e);
-                    //console.debug('Records: ', self.records);
-                    resolve(events);
+                            //console.log(r.value);
+                            events.push(rec.value);
 
-                }).fail(function (error, msg) {
+                        }
 
-                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
-                    reject(error);
+                    }).done(function () {
 
-                });
+                        //console.log('--> result: %s, event: %s', r, e);
+                        //console.debug('Records: ', self.records);
+                        resolve(events);
 
+                    }).fail(function (error, msg) {
+
+                        console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+                        reject(error);
+
+                    });
+
+                }
             });
+
         };
 
         this.getSessionEvents = (sessionId) => {
@@ -683,7 +702,7 @@
 
                             t.objectStore(self.tables.tasks).delete(task.id);
 
-                            self.events.forEach((event) => {
+                            self.testEvents.forEach((event) => {
                                 "use strict";
 
                                 if (event.taskId === id) {
@@ -768,12 +787,7 @@
                 $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(task, task.id).done(() => {
 
                     console.log('[INFO] dbAdapter: task data saved.');
-                    self.getTestTasks(task.testCaseId).then(() => {
-                        "use strict";
-
-                        resolve();
-
-                    });
+                    resolve();
 
                 }).fail((e, msg) => {
 
@@ -820,43 +834,11 @@
 
         this.deleteTask = function (id) {
 
-            var self = this,
-                dTask = this.tasks.findBy('id', id),
-                tIndex = dTask.step,
-                testCaseId = dTask.testCaseId,
-                tTasks = this.tasks.filter((task) => {
-                    return task.testCaseId === testCaseId;
-                });
+            var self = this;
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.tasks, self.tables.events], 'rw').progress((t) => {
-
-                    t.objectStore(self.tables.tasks).delete(id);
-                    tTasks.splice(tIndex, 1);
-                    tTasks.forEach((task, idx) => {
-
-                        task.step = idx;
-                        if (idx >= tIndex) {
-
-                            t.objectStore(self.tables.tasks).put(task, task.id);
-
-                        }
-
-                    });
-
-                    self.events.forEach((event) => {
-                        "use strict";
-
-                        if (event.taskId === id) {
-
-                            t.objectStore(self.tables.events).delete(event.id);
-
-                        }
-
-                    });
-
-                }).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).delete(id).done(() => {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Test data deleted.');
@@ -979,7 +961,7 @@
             click: 'd-cipher-click',
             dblClick: 'd-cipher-dblclick',
             highlightEvent: 'd-cipher-highlight-event',
-            records: 'd-cipher-rec-list',
+            sessions: 'd-cipher-session-list',
             mTooltip: 'd-cipher-m-tooltip',
             eventInfo: 'd-cipher-event-info',
             topMenu: 'd-cipher-topmenu',
@@ -1040,7 +1022,7 @@
 
         this.testCase = null;
         this.testTasks = [];
-        this.events = [];
+        this.testEvents = [];
         this.sessions = [];
         this.currentTask = null;
         this.currentEvent = null;
@@ -1048,7 +1030,7 @@
         this.db = new IDB();
         this.user = {};
         this.sessionId = '';
-        this.activeRecord = null;
+        this.activeSession = null;
         this.startEventIndex = 0;
         this.endEventIndex = 0;
         this.timeBrackets = [0, 0];
@@ -1066,10 +1048,12 @@
 
             self.db.init().done(() => {
 
-                self.db.getLocationTestCases(path).done((tests) => {
+                self.db.getLocationTestCases(path).then((tests) => {
 
                     self.tests = tests;
                     self.createTestList();
+                    self.createSessionList();
+                    self.restoreState();
 
                 });
 
@@ -1146,11 +1130,13 @@
                 this.hideRecList();
                 this.unsetActiveRecord();
                 this.sessionId = ts.toString();
-                this.activeRecord = {
+                this.activeSession = {
 
                     id: this.sessionId,
+                    type: this.appMode,
                     testCaseId: this.testCase.id,
                     name: this.loc._Default_record_name + this.sessions.length,
+                    location: location.pathname,
                     description: '',
                     created: ts,
                     modified: ts,
@@ -1164,6 +1150,7 @@
                 };
 
                 this.saveEvent(new MouseEvent('start', e));
+                this.db.putSession(this.activeSession);
 
             } else {
 
@@ -1181,33 +1168,33 @@
 
                 }
 
-                var rec = this.activeRecord;
+                var activeSession = this.activeSession;
 
-                if (rec && rec.events && rec.events.length > 1) {
+                if (activeSession && activeSession.events && activeSession.events.length > 1) {
 
-                    var evt = rec.events[rec.events.length - 1];
+                    var evt = activeSession.events[activeSession.events.length - 1];
 
-                    rec.duration = evt.time;
-                    rec.kpi = evt.kpi;
-                    rec.mouseMilesTotal = evt.miles;
-                    rec.eventsQty = 0;
+                    activeSession.duration = evt.time;
+                    activeSession.kpi = evt.kpi;
+                    activeSession.mouseMilesTotal = evt.miles;
+                    activeSession.eventsQty = 0;
 
-                    for (var et in rec.eventsStat) {
+                    for (var et in activeSession.eventsStat) {
 
-                        if (rec.eventsStat.hasOwnProperty(et)) {
+                        if (activeSession.eventsStat.hasOwnProperty(et)) {
 
-                            rec.eventsQty += rec.eventsStat[et];
+                            activeSession.eventsQty += activeSession.eventsStat[et];
 
                         }
 
                     }
 
-                    this.db.putSession(this.sessionId, rec).then(function () {
+                    this.db.putSession(activeSession).then(function () {
 
                         $(self.getDomElement('butList')).show();
                         self.createSessionList();
                         self.toggleRecList();
-                        $(':last-child > input', self.getDomElement('records')).attr('disabled', false).focus();
+                        $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
                         self.setActiveRecord(self.sessionId, true);
                         self.showSpiderGraph(self.sessionId);
 
@@ -1215,7 +1202,7 @@
 
                 } else {
 
-                    this.activeRecord = null;
+                    this.activeSession = null;
                     this.sessionId = null;
 
                 }
@@ -1262,11 +1249,11 @@
 
                 //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
 
-                var rec = this.activeRecord,
-                    events = rec.events,
+                var activeSession = this.activeSession,
+                    events = activeSession.events,
                     elen = events.length,
                     lastEvent = events[elen - 1] || null,
-                    milesTotal = this.getNDCMousePath(rec),
+                    milesTotal = this.getNDCMousePath(activeSession),
                     clientNDC = this.getNDC(e.clientX, e.clientY),
                     pageNDC = this.getNDC(e.pageX, e.pageY),
                     pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
@@ -1283,7 +1270,7 @@
                         appMode: this.appMode,
                         index: elen,
                         location: location,
-                        testTaskId: this.currentTask - id,
+                        testTaskId: this.currentTask.id,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -1341,7 +1328,7 @@
                             relY: (e.pageY - top) / $el.outerHeight()
                         },
                         duration: lastEvent ? timeStamp - lastEvent.timeStamp : 0,
-                        time: timeStamp - rec.modified
+                        time: timeStamp - activeSession.modified
 
                     };
 
@@ -1387,25 +1374,25 @@
 
                 if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
 
-                    rec.eventsStat[etype] = rec.eventsStat[etype] ? rec.eventsStat[etype] + 1 : 1;
-                    event.eventNo = rec.eventsStat[etype];
+                    activeSession.eventsStat[etype] = activeSession.eventsStat[etype] ? activeSession.eventsStat[etype] + 1 : 1;
+                    event.eventNo = activeSession.eventsStat[etype];
 
                 }
 
                 if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
 
-                    lastEvent.eventNo = rec.eventsStat['wheel'];
+                    lastEvent.eventNo = activeSession.eventsStat['wheel'];
 
                 }
 
                 if (event.drag) {
 
-                    rec.eventsStat['drag'] = rec.eventsStat['drag'] ? rec.eventsStat['drag'] + 1 : 1;
-                    event.eventNo = rec.eventsStat['drag'];
+                    activeSession.eventsStat['drag'] = activeSession.eventsStat['drag'] ? activeSession.eventsStat['drag'] + 1 : 1;
+                    event.eventNo = activeSession.eventsStat['drag'];
 
                 }
 
-                if (this.currentTask && (!lastEvent || lastEvent.testTask.id !== this.currentTask.id)) {
+                if (this.currentTask && (!lastEvent || lastEvent.taskId !== this.currentTask.id)) {
 
                     event.firstInTask = true;
 
@@ -1422,7 +1409,7 @@
 
                  });
                  */
-                event.kpi = (event.time / 1000) * (((rec.eventsStat['click'] || 0) + (rec.eventsStat['drag'] || 0) + (rec.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                event.kpi = (event.time / 1000) * (((activeSession.eventsStat['click'] || 0) + (activeSession.eventsStat['drag'] || 0) + (activeSession.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
                 //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
                 event.kpiLast = event.kpi;
                 /*
@@ -1431,9 +1418,9 @@
                  console.debug('-------> event.kpiLast', event.kpiLast);
                  */
 
-                // events.push(event);
+                events.push(event);
                 this.db.putEvent(event);
-                rec.mouseMilesTotal = milesTotal;
+                activeSession.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
 
             }
@@ -1546,12 +1533,12 @@
 
         };
 
-        this.getNDCMousePath = function getNDCMousePath(rec) {
+        this.getNDCMousePath = function getNDCMousePath(session) {
 
             var self = this,
                 path = 0;
 
-            rec.events.forEach(function (e, idx, arr) {
+            session.events.forEach(function (e, idx, arr) {
 
                 if (idx > 0) {
 
@@ -1621,11 +1608,11 @@
 
         };
 
-        this.calcSC = function calcSC(rec) {
+        this.calcSC = function calcSC(session) {
 
             var self = this;
 
-            rec.events.forEach(function (e) {
+            session.events.forEach(function (e) {
 
                 self.getTargetScreenPars(e);
 
@@ -2096,16 +2083,16 @@
         this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
 
             var self = this,
-                recs = this.sessions,
+                sessions = this.sessions,
                 abs = Math.abs,
                 th = 5,
                 evts = [];
 
-            recs.forEach(function (r) {
+            sessions.forEach(function (session) {
 
-                if (r.active && r.visible) {
+                if (session.active && session.visible) {
 
-                    var ea = r.events.filter(function (e, i, arr) {
+                    var ea = session.events.filter(function (e, i, arr) {
 
                         return abs(x - e.x) < th && abs(y - e.y) < th
                                && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
@@ -2142,14 +2129,14 @@
         this.updateStatString = function updateStatString(e) {
 
             var loc = this.loc,
-                rec = this.activeRecord,
-                evt = rec.events[rec.events.length - 1],
-                ms = rec.modified,
+                activeSession = this.activeSession,
+                evt = activeSession.events[activeSession.events.length - 1],
+                ms = activeSession.modified,
                 miles = evt ? evt.miles : 0,
                 timeString = this.getTimeString(+new Date() - ms),
-                clicks = rec.eventsStat.click || 0,
-                drags = rec.eventsStat.drag || 0,
-                wheels = rec.eventsStat.wheel || 0,
+                clicks = activeSession.eventsStat.click || 0,
+                drags = activeSession.eventsStat.drag || 0,
+                wheels = activeSession.eventsStat.wheel || 0,
                 el = document.elementFromPoint(this.mouse.x, this.mouse.y),
                 trg = el.name || el.id || el.className,
             //type = e ? loc[e.type] : '',
@@ -2197,14 +2184,14 @@
 
         this.getSessionById = function getRecordById(id) {
 
-            var records = this.sessions,
+            var session = this.sessions,
                 r = null;
 
-            for (var i = 0, rl = records.length; i < rl; i++) {
+            for (var i = 0, rl = session.length; i < rl; i++) {
 
-                if (records[i].id == id) {
+                if (session[i].id == id) {
 
-                    r = records[i];
+                    r = session[i];
                     break;
 
                 }
@@ -2235,7 +2222,7 @@
             }
 
             this.getSessionById(sId).visible = false;
-            if (this.activeRecord && this.activeRecord.id === sId) {
+            if (this.activeSession && this.activeSession.id === sId) {
 
                 this.clearTimeline();
 
@@ -2276,16 +2263,16 @@
         this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
 
             var self = this,
-                rec = this.getSessionById(sId);
+                session = this.getSessionById(sId);
 
-            if (!rec) {
+            if (!session) {
 
                 return;
 
             }
 
             var cnvh = this.getDomElement('canvasHolder'),
-                data = rec.events.slice(start || 0, end || rec.events.length),
+                data = session.events.slice(start || 0, end || session.events.length),
                 cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
                 ctx = cnv.getContext('2d');
 
@@ -2367,7 +2354,7 @@
                  });
                  */
                 $(cnv).show();
-                rec.drawn = true;
+                session.drawn = true;
                 this.checkRecordCheckbox(sId);
 
             }
@@ -2393,20 +2380,20 @@
             this.timeBrackets = [];
             this.startEventIndex = 0;
             this.endEventIndex = this.timeLineEvents.length - 1;
-            if (this.activeRecord) {
+            if (this.activeSession) {
 
-                this.drawTimeline(this.activeRecord);
+                this.drawTimeline(this.activeSession);
 
             }
 
         };
 
-        this.drawTimeline = function drawTimeline(rec) {
+        this.drawTimeline = function drawTimeline(session) {
 
-            this.showTimelineStat(rec);
+            this.showTimelineStat(session);
 
             var self = this,
-                events = rec.events,
+                events = session.events,
                 $tl = $(this.getDomElement('timeline')),
                 cnv = $('canvas', $tl)[0],
                 ctx = cnv.getContext('2d'),
@@ -2417,10 +2404,10 @@
                 offsetTop = ch / 2,
                 cy = window.innerHeight - ch + offsetTop,
                 width = cw - offsetLeft - offsetRight,
-                pxs = width / rec.duration,
+                pxs = width / session.duration,
                 posx = offsetLeft,
                 posx0, pe,
-                showTaskNumber = !!rec.testCase;
+                showTaskNumber = !!session.testCase;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -2430,7 +2417,7 @@
 
             if (this.endEventIndex) {
 
-                this.drawTLCursor(events[this.endEventIndex].time, rec.duration);
+                this.drawTLCursor(events[this.endEventIndex].time, session.duration);
 
             }
             /*else {
@@ -2443,7 +2430,7 @@
 
             ctx.lineWidth = 2.0;
             ctx.fillStyle = 'white';
-            ctx.strokeStyle = rec.color;
+            ctx.strokeStyle = session.color;
             ctx.font = "bold 14px 'Helvetica Neue'";
             ctx.clearRect(0, 0, cw, ch);
             ctx.moveTo(offsetLeft, offsetTop);
@@ -2550,20 +2537,20 @@
         this.drawTLBrackets = function (time1, time2) {
 
             var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
-                t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeRecord.duration,
+                t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeSession.duration,
                 pars = this.getTimeLineBracketsPars(t1, t2);
 
             $(this.getDomElement('timelineBrackets')).css(pars).show();
 
         };
 
-        this.showTimelineStat = function (rec) {
+        this.showTimelineStat = function (session) {
 
             var loc = this.loc,
-                html = Math.round(rec.duration / 1000) + '<span>' + loc.sec + '</span> '
-                       + ((rec.eventsStat.click || 0) + (rec.eventsStat.drag || 0) + (rec.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
-                       + rec.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
-                       + rec.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
+                html = Math.round(session.duration / 1000) + '<span>' + loc.sec + '</span> '
+                       + ((session.eventsStat.click || 0) + (session.eventsStat.drag || 0) + (session.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
+                       + session.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
+                       + session.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
 
             $(this.getDomElement('timelineInfo')).html(html);
 
@@ -2645,7 +2632,7 @@
 
                 return this.timeLineEvents.filter(function (e) {
 
-                    return e.event.testTask.id === id;
+                    return e.event.taskId === id;
 
                 });
 
@@ -2673,7 +2660,7 @@
             var evt1 = tlEvents[idx1].event,
                 evt2 = tlEvents[idx2].event;
 
-            this.showSpiderGraph(this.activeRecord.id, evt1.index, evt2.index);
+            this.showSpiderGraph(this.activeSession.id, evt1.index, evt2.index);
             this.drawTLBrackets(evt1.time, evt2.time);
 
         };
@@ -2681,7 +2668,7 @@
         this.showTimelineEvent = function showTimelineEvent(event) {
 
             this.sessionId = event.sessionId;
-            this.activeRecord = this.getSessionById(event.sessionId);
+            this.activeSession = this.getSessionById(event.sessionId);
             this.appMode = 'timeline';
             if (event.time < this.timeBrackets[0]) {
 
@@ -2696,7 +2683,7 @@
             }
             this.drawTLBrackets.apply(this, this.timeBrackets);
             this.drawSpiderGraph(event.sessionId, this.startEventIndex, this.endEventIndex + 1);
-            this.drawTLCursor(event.time, this.activeRecord.duration);
+            this.drawTLCursor(event.time, this.activeSession.duration);
 
             if (window.location.pathname !== event.location) {
 
@@ -2787,7 +2774,7 @@
         this.playSession = function playSession(sId, eventIndex) {
 
             var self = this,
-                rec = this.getSessionById(sId),
+                session = this.getSessionById(sId),
                 btn = this.getDomElement('butPlay');
 
             if (btn.className.match(/play/i)) {
@@ -2800,7 +2787,7 @@
 
             }
 
-            if (!rec) {
+            if (!session) {
 
                 this.resetApp('');
                 return;
@@ -2809,11 +2796,11 @@
 
             var cnt = eventIndex || this.endEventIndex || 0,
                 delay = 20, speed = 2,
-                sData = rec.events,
+                sData = session.events,
                 pars = this.getTargetScreenPars(sData[cnt]),
                 el = pars.element,
                 cnvh = this.getDomElement('canvasHolder'),
-                cnv = $('#cnvId-' + rec.id, cnvh)[0],
+                cnv = $('#cnvId-' + session.id, cnvh)[0],
                 ctx = cnv.getContext('2d'),
                 $cur = $(self.getDomElement('cursor')),
                 $tlCursor = $(self.getDomElement('timelineCursor')),
@@ -2918,7 +2905,7 @@
 
                 if (e1 && e2) {
 
-                    var recDuration = rec.duration,
+                    var recDuration = session.duration,
                         etime = e1.time,
                         dur = e2.timeStamp - e1.timeStamp,
                         pars1 = pars || self.getTargetScreenPars(e1),
@@ -3142,11 +3129,11 @@
 
                     if (cnt === sData.length) {
 
-                        self.drawSpiderGraph(rec.id, self.startEventIndex);
+                        self.drawSpiderGraph(session.id, self.startEventIndex);
 
                     } else {
 
-                        self.drawSpiderGraph(rec.id, 0, cnt);
+                        self.drawSpiderGraph(session.id, 0, cnt);
 
                     }
                     self.appMode = '';
@@ -3158,7 +3145,7 @@
 
             //this.appMode = 'play';
             this.sessionId = sId;
-            this.activeRecord = rec;
+            this.activeSession = session;
 
             // Reload initial session location on replay start
             if (!cnt || cnt === sData.length - 1) {
@@ -3195,7 +3182,7 @@
             this.setActiveRecord(sId);
             this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
             ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
-            ctx.strokeStyle = rec.color;
+            ctx.strokeStyle = session.color;
             //if (eventIndex !== undefined) {
 
             this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
@@ -3420,7 +3407,7 @@
 
             var $butList = $(this.getDomElement('butList')),
                 p = $butList.offset(),
-                $rl = $(this.getDomElement('records')),
+                $rl = $(this.getDomElement('sessions')),
                 hidden = $rl.css('display') === 'none';
 
             if (hidden) {
@@ -3446,10 +3433,10 @@
         this.createSessionList = function createRecordList() {
 
             var self = this,
-                recListDiv = this.getDomElement('records'),
+                recListDiv = this.getDomElement('sessions'),
                 cnvHolder = this.getDomElement('canvasHolder'),
                 visRecs = {}, actRecs = {},
-                rec, butShow, butDel, butPlay, inpName, nChckb,
+                recDiv, butShow, butDel, inpName, nChckb,
                 cnv, ctx, butCp, cpInp, cpSp;
 
             if (!this.sessions.length) {
@@ -3511,10 +3498,10 @@
                 cnvHolder.appendChild(cnv);
 
                 // Record div
-                rec = document.createElement('div');
-                rec.id = 'recId-' + r.id;
-                rec.className = 'rec' + (actRecs[r.id] ? ' active' : '');
-                rec.setAttribute('data-dcipher-rec-id', r.id);
+                recDiv = document.createElement('div');
+                recDiv.id = 'recId-' + r.id;
+                recDiv.className = 'rec' + (actRecs[r.id] ? ' active' : '');
+                recDiv.setAttribute('data-dcipher-rec-id', r.id);
 
                 // Show record button
                 nChckb = document.createElement('input');
@@ -3525,7 +3512,7 @@
                 nChckb.value = r.id;
                 nChckb.className = "chckb-show";
                 nChckb.checked = visRecs[r.id];
-                rec.appendChild(nChckb);
+                recDiv.appendChild(nChckb);
 
                 butShow = document.createElement('label');
                 butShow.setAttribute('data-dcipher-rec-id', r.id);
@@ -3533,7 +3520,7 @@
                 butShow.htmlFor = 'showRecId-' + r.id;
                 butShow.className = 'show';
                 butShow.title = dCipher.loc._Toggle_record;
-                rec.appendChild(butShow);
+                recDiv.appendChild(butShow);
 
                 // Delete Record button
                 butDel = document.createElement('div');
@@ -3542,7 +3529,7 @@
                 butDel.className = 'del';
                 butDel.innerHTML = '&#10005;';
                 butDel.title = dCipher.loc._Delete_record;
-                rec.appendChild(butDel);
+                recDiv.appendChild(butDel);
 
                 // Color picker
                 cpInp = document.createElement('input');
@@ -3563,7 +3550,7 @@
                 butCp.className = 'cp-container input-group';
                 butCp.appendChild(cpInp);
                 butCp.appendChild(cpSp);
-                rec.appendChild(butCp);
+                recDiv.appendChild(butCp);
 
                 // Play record button
                 /*
@@ -3584,9 +3571,9 @@
                 inpName.disabled = true;
                 inpName.id = 'recNameId-' + r.id;
                 inpName.className = 'rec-name';
-                rec.appendChild(inpName);
+                recDiv.appendChild(inpName);
 
-                recListDiv.appendChild(rec);
+                recListDiv.appendChild(recDiv);
                 self.setRecListPosition();
 
                 // Define listeners
@@ -3602,7 +3589,7 @@
 
                         var id = $el.attr('data-dcipher-rec-id');
 
-                        if (self.activeRecord && self.activeRecord.id === id) {
+                        if (self.activeSession && self.activeSession.id === id) {
 
                             self.unsetActiveRecord();
 
@@ -3645,26 +3632,26 @@
 
                 });
 
-                rec.addEventListener('dblclick', function () {
+                recDiv.addEventListener('dblclick', function () {
 
                     var $el = $('input[type="text"]', this);
                     $el.attr('disabled', false).focus();
 
                 });
 
-                rec.addEventListener('click', function (e) {
+                recDiv.addEventListener('click', function (e) {
 
                     var $el = $(e.target),
                         id = $el.attr('data-dcipher-rec-id');
 
                     if ($el.attr('type') === 'text') {
 
-                        if (!rec.events) {
+                        if (!recDiv.events) {
 
                             self.db.getSessionEvents(id).then((events) => {
                                 "use strict";
 
-                                rec.events = events;
+                                recDiv.events = events;
                                 self.showSpiderGraph(id);
                                 self.setActiveRecord(id, true);
 
@@ -3716,33 +3703,33 @@
         this.setActiveRecord = function setActiveRecord(id, reset) {
 
             var self = this,
-                recs = this.getDomElement('records'),
+                recs = this.getDomElement('sessions'),
                 $rec = $('#recId-' + id, recs),
                 $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
 
             $('.rec', recs).removeClass('active');
             $rec.addClass('active');
 
-            this.sessions.forEach(function (r) {
+            this.sessions.forEach(function (session) {
 
-                if (r.id == id) {
+                if (session.id == id) {
 
-                    r.active = true;
-                    r.visible = true;
-                    self.activeRecord = r;
-                    self.sessionId = r.id;
+                    session.active = true;
+                    session.visible = true;
+                    self.activeSession = session;
+                    self.sessionId = session.id;
                     if (self.appMode !== 'timeline' || reset) {
 
                         self.startEventIndex = 0;
-                        self.endEventIndex = r.events.length - 1;
-                        self.timeBrackets = [0, r.duration];
+                        self.endEventIndex = session.events.length - 1;
+                        self.timeBrackets = [0, session.duration];
 
                     }
-                    self.drawTimeline(r);
+                    self.drawTimeline(session);
 
                 } else {
 
-                    r.active = false;
+                    session.active = false;
 
                 }
 
@@ -3758,11 +3745,11 @@
 
         this.unsetActiveRecord = function () {
 
-            if (this.activeRecord) {
+            if (this.activeSession) {
 
-                var id = this.activeRecord.id;
+                var id = this.activeSession.id;
 
-                $('#recId-' + id, this.getDomElement('records')).removeClass('active');
+                $('#recId-' + id, this.getDomElement('sessions')).removeClass('active');
                 if (this.sessions.length) {
 
                     this.getSessionById(id).active = false;
@@ -3770,7 +3757,7 @@
                 }
                 this.hideSpiderGraph(id);
 
-                this.activeRecord = null;
+                this.activeSession = null;
                 $(this.getDomElement('timelineInfo')).html('');
                 $(this.getDomElement('timeline')).hide();
 
@@ -3804,11 +3791,11 @@
         this.updateRecordName = function updateRecordName(id, name) {
 
             var self = this,
-                rec = this.getSessionById(id);
+                session = this.getSessionById(id);
 
-            rec.name = name;
-            delete rec.drawn;
-            this.db.putSession(id, rec).then(function () {
+            session.name = name;
+            delete session.drawn;
+            this.db.putSession(session).then(function () {
 
                 self.createSessionList();
                 self.setActiveRecord(id);
@@ -3825,13 +3812,13 @@
         this.updateRecordColor = function updateRecordColor(id, color) {
 
             var self = this,
-                rec = this.getSessionById(id);
+                session = this.getSessionById(id);
 
-            if (rec.color !== color) {
+            if (session.color !== color) {
 
-                rec.color = color;
-                delete rec.drawn;
-                this.db.putSession(id, rec).then(function () {
+                session.color = color;
+                delete session.drawn;
+                this.db.putSession(session).then(function () {
 
                     self.createSessionList();
 
@@ -3847,14 +3834,14 @@
 
         this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
 
-            $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('records')).prop('checked', true);
+            $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('sessions')).prop('checked', true);
             this.getSessionById(sId).visible = true;
 
         };
 
         this.hideRecList = function hideRecList() {
 
-            $(this.getDomElement('records')).hide();
+            $(this.getDomElement('sessions')).hide();
 
         };
 
@@ -3931,7 +3918,7 @@
 
                 }
 
-                this.activeRecord.events.forEach(function (e) {
+                this.activeSession.events.forEach(function (e) {
 
                     delete e.target.element;
 
@@ -3941,14 +3928,13 @@
 
                     user: this.user,
                     appMode: this.appMode,
-                    activeRecord: this.activeRecord,
+                    activeSession: this.activeSession,
                     sessionId: this.sessionId,
                     startEventIndex: this.startEventIndex,
                     endEventIndex: this.endEventIndex,
                     testCase: this.testCase,
                     testTasks: this.testTasks,
-                    sessionEvents: this.sessionEvents,
-                    events: this.events,
+                    testEvents: this.testEvents,
                     currentTask: this.currentTask,
                     currentEvent: this.currentEvent,
                     timeBrackets: this.timeBrackets
@@ -3962,83 +3948,100 @@
             }
         };
 
-        this.restoreState = function restoreState() {
+        this.restoreState = function () {
 
             var self = this,
                 state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+            
+            function initState() {
+                "use strict";
 
-            for (var k in state) {
+                for (var k in state) {
 
-                if (state[k]) {
+                    if (state.hasOwnProperty(k) && state[k]) {
 
-                    this[k] = state[k];
+                        self[k] = state[k];
+
+                    }
 
                 }
 
+                if (self.currentTask) {
+
+                    self.createTaskList();
+                    self.testTasks[self.currentTask.step] = self.currentTask;
+
+                }
+
+                if (self.appMode === 'record' || self.appMode === 'test') {
+
+                    $('div', self.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                    $(self.getDomElement('butList')).hide();
+                    $('body').on('mousemove', function (e) {
+
+                        self.catchEvents(e);
+
+                    });
+                    $(self.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+
+                        self.updateStatString();
+
+                    }, 100)).fadeIn();
+
+                } else if (self.appMode === 'play') {
+
+                    $('div', self.getDomElement('butPlay')).removeClass('play').addClass('stop');
+                    self.showSpiderGraph(self.activeSession.id, 0, self.endEventIndex + 1);
+                    setTimeout(function () {
+
+                        self.playSession(self.activeSession.id, self.endEventIndex);
+
+                    }, 1000);
+
+                } else if (self.appMode === 'timeline') {
+
+                    var event = self.activeSession.events[self.endEventIndex],
+                        tEvt;
+
+                    self.setActiveRecord(self.activeSession.id);
+                    self.showSpiderGraph(self.activeSession.id, self.startEventIndex, self.endEventIndex + 1);
+
+                    tEvt = self.timeLineEvents.find(function (e) {
+
+                        return e.event.index === event.index;
+
+                    });
+                    self.showTLTooltip(tEvt);
+                    self.drawTLBrackets();
+                    sessionStorage.removeItem('dcipherState');
+                    self.appMode = '';
+
+                }
+
+                if (self.appMode !== 'test') {
+
+                    $(self.getDomElement('0-2-0-0')).show();
+
+                } else if (self.currentTask) {
+
+                    self.createTaskList();
+                    self.activateTask(self.currentTask, true);
+                    $(self.getDomElement('testName')).hide();
+                    $(self.getDomElement('butStartTest')).hide();
+                    $(self.getDomElement('butTest')).hide();
+
+                }
+
+
             }
 
-            if (this.currentTask) {
+            if (state.testCase && !state.currentTask) {
 
-                this.testTasks[this.currentTask.step] = this.currentTask;
+                this.initTestCase(state.testCase.id).then(initState);
 
-            }
+            } else {
 
-            if (this.appMode === 'record' || this.appMode === 'test') {
-
-                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                $(this.getDomElement('butList')).hide();
-                $('body').on('mousemove', function (e) {
-
-                    self.catchEvents(e);
-
-                });
-                $(this.getDomElement('stat')).data('tid', setInterval(function updateStats() {
-
-                    self.updateStatString();
-
-                }, 100)).fadeIn();
-
-            } else if (this.appMode === 'play') {
-
-                $('div', this.getDomElement('butPlay')).removeClass('play').addClass('stop');
-                this.showSpiderGraph(this.activeRecord.id, 0, this.endEventIndex + 1);
-                setTimeout(function () {
-
-                    self.playSession(self.activeRecord.id, self.endEventIndex);
-
-                }, 1000);
-
-            } else if (this.appMode === 'timeline') {
-
-                var event = this.activeRecord.events[this.endEventIndex],
-                    tEvt;
-
-                this.setActiveRecord(this.activeRecord.id);
-                this.showSpiderGraph(this.activeRecord.id, this.startEventIndex, this.endEventIndex + 1);
-
-                tEvt = this.timeLineEvents.find(function (e) {
-
-                    return e.event.index === event.index;
-
-                });
-                this.showTLTooltip(tEvt);
-                this.drawTLBrackets();
-                sessionStorage.removeItem('dcipherState');
-                this.appMode = '';
-
-            }
-
-            if (this.appMode !== 'test') {
-
-                $(this.getDomElement('0-2-0-0')).show();
-
-            } else if (this.currentTask) {
-
-                this.createTaskList();
-                this.activateTask(this.currentTask, true);
-                $(this.getDomElement('testName')).hide();
-                $(this.getDomElement('butStartTest')).hide();
-                $(this.getDomElement('butTest')).hide();
+                initState();
 
             }
 
@@ -4047,11 +4050,11 @@
         this.resetState = function resetState() {
 
             sessionStorage.removeItem('dcipherState');
-            if (this.activeRecord) {
+            if (this.activeSession) {
 
-                var loc = this.activeRecord.events[0].location;
+                var loc = this.activeSession.events[0].location;
 
-                this.activeRecord = null;
+                this.activeSession = null;
                 this.appMode = '';
                 this.endEventIndex = 0;
                 window.location = loc;
@@ -4429,12 +4432,6 @@
                     ease = 'left 0.2s ease-out 0.15s',
                     i, il, t;
 
-                this.events = this.sessionEvents.filter(function (event) {
-
-                    return event.taskId === task.id;
-
-                });
-
                 for (i = 0; i < step; i++) {
 
                     t = testTasks[i];
@@ -4455,7 +4452,11 @@
                 i++;
                 for (il = testTasks.length; i < il; i++) {
 
-                    this.deactivateTask(testTasks[i]);
+                    if (testTasks[i].active) {
+
+                        this.deactivateTask(testTasks[i]);
+
+                    }
 
                 }
 
@@ -4505,7 +4506,7 @@
 
             var done = task.done;
 
-            this.sessionEvents.forEach(function (e) {
+            this.testEvents.forEach(function (e) {
 
                 if (e.taskId === task.id) {
 
@@ -4567,7 +4568,7 @@
             $(this.getDomElement('taskProgress')).width(0);
             this.activateTask(task);
             this.toggleRecMode();
-            this.resetApp('test', this.events[0].location);
+            this.resetApp('test', this.testEvents[0].location);
 
         };
 
@@ -4609,7 +4610,8 @@
                 currentTask = this.currentTask,
                 cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                evts = this.events;
+                // evts = this.testEvents;
+                evts = this.currentTask.events;
 
             if (e && evts && evts.length) {
 
@@ -4671,7 +4673,7 @@
 
         this.checkAlternativeEvents = function (event) {
 
-            var evts = this.events,
+            var evts = this.testEvents,
                 id = event.id;
 
             // Check events in the reference list of the given event
@@ -4689,15 +4691,15 @@
 
         this.setTestProgressBar = function () {
 
-            var testEvents = this.sessionEvents,
+            var testEvents = this.testEvents,
                 winW = window.innerWidth,
                 butW = $('.step-number', this.getDomElement('taskBar')).outerWidth(),
                 finW = winW - butW * (2 + this.testTasks.length);
 
             function getEventsInfo() {
 
-                var total = sessionEvents.length,
-                    dl = sessionEvents.filter(function (e) {
+                var total = testEvents.length,
+                    dl = testEvents.filter(function (e) {
                         return e.done
                     });
 
@@ -4791,18 +4793,18 @@
 
         this.getTimeLineBracketsPars = function (time1, time2) {
 
-            var rec = this.activeRecord,
-                duration = rec ? rec.duration : 0,
+            var activeSession = this.activeSession,
+                duration = activeSession ? activeSession.duration : 0,
                 offsetRight = $(this.getDomElement('timelineInfo')).width(),
                 pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
                 left = this.timeLineOffsetLeft + pxs * time1,
                 width = this.timeLineOffsetLeft + pxs * time2 - left;
 
             this.timeBrackets = [time1, time2];
-            this.startEventIndex = rec.events.find(function (e) {
+            this.startEventIndex = activeSession.events.find(function (e) {
                 return e.time >= time1;
             }).index;
-            this.endEventIndex = rec.events.find(function (e) {
+            this.endEventIndex = activeSession.events.find(function (e) {
                 return e.time >= time2;
             }).index;
             return {width: width, left: left};
@@ -4821,7 +4823,7 @@
 
                 t1 += dt;
 
-            } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeRecord.duration) {
+            } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeSession.duration) {
 
                 t2 += dt;
 
@@ -4832,7 +4834,7 @@
 
             }
 
-            if (t1 >= 0 && t2 <= this.activeRecord.duration) {
+            if (t1 >= 0 && t2 <= this.activeSession.duration) {
 
                 this.drawTLBrackets(t1, t2);
 
@@ -4876,7 +4878,6 @@
 
             var self = this,
                 $div = $('.tests', this.getDomElement('testList')),
-                path = window.location.pathname,
                 tst, inp, del;
 
             $div.children().remove();
@@ -4906,78 +4907,9 @@
 
                 $div.append(tst);
 
-                tst.addEventListener('click', function (e) {
+                tst.addEventListener('click', function () {
 
-                    var testCaseId = $(this).attr('data-d-cipher-test-id');
-
-                    test = self.testCase = self.tests.findBy('id', testCaseId);
-                    // self.toggleTestList();
-                    $(self.getDomElement('testName')).html(test.name).show();
-
-                    if (test.sessions && test.sessions.length) {
-
-                        test.session = test.sessions.filter(function (s) {
-
-                            return path.match(s.location) && s.master === true;
-
-                        })[0];
-
-                        self.db.getTestEvents(testCaseid).then((events) => {
-                            "use strict";
-
-                            self.db.getTestTasks(testCaseId).then((tasks) => {
-
-                                tasks.forEach((task) => {
-
-                                    task.events = events.filter((event) => {
-
-                                        return event.sessionId === test.eventSession;
-
-                                    });
-
-                                });
-
-                                self.createTaskList();
-
-                            });
-                            self.db.getTestSessions(testCaseid).then((sessions) => {
-
-                                sessions.forEach((session) => {
-
-                                    session.events = events.filter((event) => {
-
-                                        return event.sessionId === session.id;
-
-                                    });
-
-                                });
-                                self.sessions = sessions;
-                                self.createSessionList();
-                                self.restoreState();
-
-                            });
-
-                            var recList = self.getDomElement('records');
-
-                            $(recList).on('mouseout', () => {
-
-                                $(recList).data('tid', setTimeout(() => {
-
-                                    $(recList).hide();
-
-                                }, 1000));
-
-                            });
-
-                            $(recList).on('mouseover', () => {
-
-                                clearTimeout($(recList).data('tid'));
-
-                            });
-
-                        });
-
-                    }
+                    self.initTestCase(this.dataset.dCipherTestId);
 
                 });
 
@@ -5016,6 +4948,102 @@
 
         };
 
+        this.initTestCase = (testCaseId) => {
+            "use strict";
+
+            var self = this,
+                test = self.testCase = self.tests.findBy('id', testCaseId),
+                path = window.location.pathname;
+
+            return new Promise((resolve, reject) => {
+
+                // self.toggleTestList();
+                $(self.getDomElement('testName')).html(test.name).show();
+
+                self.db.getTestEvents(testCaseId).then((events) => {
+                    "use strict";
+
+                    var testEventSession;
+                    self.sessions = [];
+                    self.testEvents = [];
+
+                    // TODO: sort by location?
+                    self.db.getTestSessions(testCaseId).then((sessions) => {
+
+                        sessions.forEach((session) => {
+
+                            session.events = events.filter((event) => {
+
+                                return event.sessionId === session.id;
+
+                            });
+
+                            if (session.type !== 'testEvents') {
+
+                                self.sessions.push(session);
+
+                            } else if (path.match(session.location)) {
+
+                                testEventSession = session;
+
+                            }
+
+                        });
+                        self.db.getTestTasks(testCaseId).then((tasks) => {
+
+                            tasks.forEach((task) => {
+
+                                task.events = events.filter((event) => {
+
+                                    return event.sessionId === testEventSession.id && event.taskId === task.id;
+
+                                });
+
+                                Array.prototype.push.apply(self.testEvents, task.events);
+
+                            });
+
+                            self.testTasks = tasks;
+                            self.createTaskList();
+                            self.createSessionList();
+                            resolve();
+
+                        }, (error, message) => {
+
+                            reject(error);
+
+                        });
+
+                    });
+
+                    var recList = self.getDomElement('sessions');
+
+                    $(recList).on('mouseout', () => {
+
+                        $(recList).data('tid', setTimeout(() => {
+
+                            $(recList).hide();
+
+                        }, 1000));
+
+                    });
+
+                    $(recList).on('mouseover', () => {
+
+                        clearTimeout($(recList).data('tid'));
+
+                    });
+
+                }, (error, message) => {
+
+                    reject(error);
+
+                });
+
+            });
+
+        };
+
         this.createTestCase = function () {
 
             var id = $.newGuid(),
@@ -5046,7 +5074,7 @@
             this.db.getTests().then((tests) => {
                 "use strict";
 
-                self.testCases = tests;
+                self.tests = tests;
                 self.createTestList();
 
             });
@@ -5079,15 +5107,11 @@
                     self.db.getTests().then((tests) => {
                         "use strict";
 
-                        self.testCases = tests;
-                        self.getTestTasks().then((tasks) => {
-
-                            self.testTasks = tasks;
-                            self.createTestList();
-                            self.createTaskList();
-                            resolve();
-
-                        });
+                        self.tests = tests;
+                        self.createTestList();
+                        self.testTasks = [];
+                        self.testEvents = [];
+                        resolve();
 
                     });
 
@@ -5125,46 +5149,49 @@
 
         };
 
-        this.getTestTasks = (testCaseId) => {
-            "use strict";
+        /*
+         this.getTestTasks = (testCaseId) => {
+         "use strict";
 
-            var self = this;
+         var self = this,
+         eventSessionId = this.tests.findBy('id', testCaseId)[0].eventSessionId;
 
-            return new Promise((resolve, reject) => {
+         return new Promise((resolve, reject) => {
 
-                self.db.getTestTasks(testCaseId).then((tasks) => {
+         self.db.getTestTasks(testCaseId).then((tasks) => {
 
-                    self.db.getTestEvents(testCaseId).then((events) => {
+         self.db.getTestEvents(testCaseId).then((events) => {
 
-                        tasks.forEach((task) => {
+         tasks.forEach((task) => {
 
-                            task.events = events.filter((event) => {
+         task.events = events.filter((event) => {
 
-                                return event.taskId === task.id;
+         return event.taskId === task.id && event.sessionId === eventSessionId;
 
-                            });
+         });
 
-                        });
-                        self.testTasks = tasks;
-                        resolve(tasks);
+         });
+         self.testTasks = tasks;
+         resolve(tasks);
 
-                    }, (error, message) => {
+         }, (error, message) => {
 
-                        console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
-                        reject(error);
+         console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
+         reject(error);
 
-                    });
+         });
 
-                }, (error, message) => {
+         }, (error, message) => {
 
-                    console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
-                    reject(error);
+         console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
+         reject(error);
 
-                });
+         });
 
-            });
+         });
 
-        };
+         };
+         */
 
     }; // End of DCipher class
 
@@ -5400,10 +5427,10 @@
 
                 dCipher.showTLTaskEvents(task);
 
-            } else if (dCipher.activeRecord && (e.clientX < dCipher.timeLineOffsetLeft || e.target === dCipher.getDomElement('timelineInfo'))) {
+            } else if (dCipher.activeSession && (e.clientX < dCipher.timeLineOffsetLeft || e.target === dCipher.getDomElement('timelineInfo'))) {
 
-                dCipher.drawSpiderGraph(dCipher.activeRecord.id);
-                dCipher.resetTimeline(dCipher.activeRecord);
+                dCipher.drawSpiderGraph(dCipher.activeSession.id);
+                dCipher.resetTimeline(dCipher.activeSession);
 
             }
 
@@ -5424,7 +5451,7 @@
 
             dCipher.tlMouse.down = false;
             dCipher.tlMouse.target = '';
-            dCipher.drawSpiderGraph(dCipher.activeRecord.id, dCipher.startEventIndex, dCipher.endEventIndex);
+            dCipher.drawSpiderGraph(dCipher.activeSession.id, dCipher.startEventIndex, dCipher.endEventIndex);
 
             /* TODO: if we really need to move to another screen?
              if (evt.location !== window.location.pathname) {
@@ -5473,7 +5500,7 @@
 
         butPlay.addEventListener('mouseup', function () {
 
-            if (dCipher.appMode !== 'test' && dCipher.appMode !== 'record' && dCipher.activeRecord) {
+            if (dCipher.appMode !== 'test' && dCipher.appMode !== 'record' && dCipher.activeSession) {
 
                 var sId = dCipher.sessionId,
                     $div = $('div', this);
@@ -5564,7 +5591,7 @@
 
         window.addEventListener('resize', function (e) {
 
-            var $recs = $(dCipher.getDomElement('records'));
+            var $recs = $(dCipher.getDomElement('sessions'));
 
             clearTimeout($recs.data('tid'));
 
