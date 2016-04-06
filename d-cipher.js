@@ -607,33 +607,32 @@
 
                 if (testCaseId == '0') {
 
-                    resolve(this.masterTestEvents.slice());
-
-                } else {
-
-                    $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
-
-                        if (rec.value.testCaseId === testCaseId) {
-
-                            //console.log(r.value);
-                            events.push(rec.value);
-
-                        }
-
-                    }).done(function () {
-
-                        //console.log('--> result: %s, event: %s', r, e);
-                        //console.debug('Records: ', self.records);
-                        resolve(events);
-
-                    }).fail(function (error, msg) {
-
-                        console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
-                        reject(error);
-
-                    });
+                    events = this.masterTestEvents.slice();
 
                 }
+
+                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+
+                    if (rec.value.testCaseId === testCaseId) {
+
+                        //console.log(r.value);
+                        events.push(rec.value);
+
+                    }
+
+                }).done(function () {
+
+                    //console.log('--> result: %s, event: %s', r, e);
+                    //console.debug('Records: ', self.records);
+                    resolve(events);
+
+                }).fail(function (error, msg) {
+
+                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+                    reject(error);
+
+                });
+
             });
 
         };
@@ -800,7 +799,9 @@
                     }).done(function () {
 
                         //console.log('--> result: %s, event: %s', r, e);
-                        resolve(tasks.sort( (task1, task2) => { return task1.step > task2.step }));
+                        resolve(tasks.sort((task1, task2) => {
+                            return task1.step > task2.step
+                        }));
 
                     }).fail(function (error, msg) {
 
@@ -1089,9 +1090,9 @@
                 self.db.getLocationTestCases(path).then((tests) => {
 
                     self.tests = tests;
-                    self.restoreState();
                     self.createTestList();
                     self.createSessionList();
+                    self.restoreState();
 
                 });
 
@@ -1274,8 +1275,10 @@
                 this.currentEvent = {
 
                     type: etype,
-                    treePath: treePath,
-                    tagName: etarget.tagName,
+                    target: {
+                        tagName: etarget.tagName,
+                        treePath: treePath
+                    },
                     location: location
 
                 };
@@ -2270,21 +2273,21 @@
 
         this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
 
-            var rec = this.getSessionById(sId);
+            var session = this.getSessionById(sId);
 
-            if (!rec) {
+            if (!session) {
 
                 return;
 
             }
 
             var cnvh = this.getDomElement('canvasHolder'),
-                cnv = $('#cnvId-' + rec.id, cnvh)[0];
+                cnv = $('#cnvId-' + sId, cnvh)[0];
 
             $(cnvh).show();
             $(cnv).show();
 
-            if (!rec.drawn || start || end) {
+            if (!session.drawn || start || end) {
 
                 this.drawSpiderGraph(sId, start, end);
 
@@ -2294,7 +2297,7 @@
 
             }
 
-            rec.visible = true;
+            session.visible = true;
 
         };
 
@@ -3796,7 +3799,6 @@
 
                 });
 
-
                 // Delete session data
                 promises.push(self.db.deleteSession(id));
 
@@ -3805,12 +3807,9 @@
                     self.db.getTestSessions(self.testCase.id).then((sessions) => {
                         "use strict";
 
-                        self.db.getTestEvents(self.testCase.id).then( (events) => {
+                        self.db.getTestEvents(self.testCase.id).then((events) => {
 
-                            var { testSessions: testSessions } = self.initTestSessions(sessions, events);
-
-                            self.sessions = testSessions;
-                            self.createSessionList();
+                            self.initTestSessions(sessions, events);
                             resolve();
 
                         });
@@ -4294,6 +4293,10 @@
                             description: target.value,
                             step: task.step
 
+                        }).then(() => {
+
+                            self.getTestTasks();
+
                         });
 
                     }
@@ -4306,7 +4309,7 @@
 
                         self.db.getTestTasks(self.testCase.id).then((tasks) => {
 
-                            self.db.getTestEvents(self.testCase.id).then( (events) => {
+                            self.db.getTestEvents(self.testCase.id).then((events) => {
 
                                 self.initTestTasks(tasks, events);
 
@@ -4377,7 +4380,7 @@
 
                 Promise.all(promises).then(() => {
 
-                    self.getTestTasks().then( () => {
+                    self.getTestTasks().then(() => {
 
                         resolve();
 
@@ -4666,22 +4669,23 @@
                 testTasks = this.testTasks,
                 currentTask = this.currentTask,
                 cStep = (currentTask.step + 1),
-                el = e ? this.getElementByTreePath(e.treePath) : null,
-            // evts = this.testEvents;
                 evts = this.currentTask.events;
 
             if (e && evts && evts.length) {
 
+                var eTargetTreePath = e.target.treePath,
+                    el = e ? this.getElementByTreePath(eTargetTreePath) : null;
+
                 for (var i = 0, len = evts.length; i < len; i++) {
 
                     var evt = evts[i],
-                        treePath = e.treePath,
+                        treePath = eTargetTreePath,
                         offset = $(el).offset(),
                         ww = window.innerWidth,
                         wh = window.innerHeight,
                         pX = pageXOffset,
                         pY = pageYOffset,
-                        re = new RegExp('^' + evt.treePath),
+                        re = new RegExp('^' + evt.target.treePath),
                         vis;
 
                     vis = offset.top < (pY + wh) && offset.top > pY
@@ -5203,7 +5207,7 @@
 
             this.db.putTask(task).then(() => {
 
-                self.getTestTasks().then( () => {
+                self.getTestTasks().then(() => {
 
                     self.moveTaskLeft(self.testTasks.findBy('id', id));
                     $('input#taskId-' + task.id).attr('disabled', false).focus();
