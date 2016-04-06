@@ -800,7 +800,7 @@
                     }).done(function () {
 
                         //console.log('--> result: %s, event: %s', r, e);
-                        resolve(tasks);
+                        resolve(tasks.sort( (task1, task2) => { return task1.step > task2.step }));
 
                     }).fail(function (error, msg) {
 
@@ -1061,6 +1061,7 @@
         this.testTasks = [];
         this.testEvents = [];
         this.sessions = [];
+        this.testEventSession = null;
         this.currentTask = null;
         this.currentEvent = null;
 
@@ -4286,7 +4287,7 @@
                         var task = self.testTasks.findBy('id', tid);
 
                         e.target.disabled = true;
-                        self.db.putTask(tid, {
+                        self.db.putTask({
 
                             id: task.id,
                             testCaseId: task.testCaseId,
@@ -4303,10 +4304,13 @@
 
                     self.deleteTask(e.target.dataset.dcipherTaskId).then(() => {
 
-                        self.getTestTaskList(self.testCase.id).then((taskList) => {
+                        self.db.getTestTasks(self.testCase.id).then((tasks) => {
 
-                            self.testTasks = taskList;
-                            self.createTaskList();
+                            self.db.getTestEvents(self.testCase.id).then( (events) => {
+
+                                self.initTestTasks(tasks, events);
+
+                            });
 
                         });
                     });
@@ -4336,19 +4340,30 @@
 
                 var promises = [];
 
+                // Delete task from db and list
                 promises.push(self.db.deleteTask(task.id));
                 testTasks.splice(tIndex, 1);
+
+                // Update step info and save updated tasks
                 testTasks.forEach((task, idx) => {
 
                     task.step = idx;
                     if (idx >= tIndex) {
 
-                        promises.push(self.putTask(task));
+                        promises.push(self.db.putTask({
+
+                            id: task.id,
+                            testCaseId: task.testCaseId,
+                            description: task.description,
+                            step: task.step
+
+                        }));
 
                     }
 
                 });
 
+                // Delete task events
                 task.events.forEach((event) => {
                     "use strict";
 
@@ -4362,7 +4377,11 @@
 
                 Promise.all(promises).then(() => {
 
-                    resolve();
+                    self.getTestTasks().then( () => {
+
+                        resolve();
+
+                    });
 
                 }, (error) => {
 
@@ -4380,7 +4399,6 @@
                 idx = testTasks.indexOf(task),
                 tb = this.getDomElement('taskBar'),
                 div = $('div.d-cipher-task', tb)[idx],
-                $div = $(div),
                 dw = ($('.step-number', div).outerWidth()),
                 ease = 'left 0.2s ease-out 0.15s',
                 i, il, t;
@@ -5005,26 +5023,10 @@
 
                     self.db.getTestSessions(testCaseId).then((sessions) => {
 
-                        var { testSessions, testEventSession } = self.initTestSessions(sessions, events);
-                        self.sessions = testSessions;
-
+                        self.initTestSessions(sessions, events);
                         self.db.getTestTasks(testCaseId).then((tasks) => {
 
-                            tasks.forEach((task) => {
-
-                                task.events = events.filter((event) => {
-
-                                    return event.sessionId === testEventSession.id && event.taskId === task.id;
-
-                                });
-
-                                Array.prototype.push.apply(self.testEvents, task.events);
-
-                            });
-
-                            self.testTasks = tasks;
-                            self.createTaskList();
-                            self.createSessionList();
+                            self.initTestTasks(tasks, events);
                             resolve();
 
                         }, (error, message) => {
@@ -5045,12 +5047,37 @@
 
         };
 
+        this.initTestTasks = (tasks, events) => {
+            "use strict";
+
+            var self = this;
+
+            this.tasks = [];
+
+            tasks.forEach((task) => {
+
+                task.events = events.filter((event) => {
+
+                    return event.sessionId === self.testEventSession.id && event.taskId === task.id;
+
+                });
+
+                Array.prototype.push.apply(self.testEvents, task.events);
+
+            });
+
+            this.testTasks = tasks;
+            this.createTaskList();
+
+        };
+
         this.initTestSessions = (sessions, events) => {
             "use strict";
 
-            var testSessions = [],
-                testEventSession,
+            var self = this,
                 path = window.location.pathname;
+
+            this.sessions = [];
 
             // TODO: sort by location?
             sessions.forEach((session) => {
@@ -5063,17 +5090,17 @@
 
                 if (session.type !== 'testEvents') {
 
-                    testSessions.push(session);
+                    self.sessions.push(session);
 
                 } else if (path.match(session.location)) {
 
-                    testEventSession = session;
+                    self.testEventSession = session;
 
                 }
 
             });
 
-            return { testSessions: testSessions, testEventSession: testEventSession };
+            this.createSessionList();
 
         };
 
@@ -5162,6 +5189,8 @@
         this.createTestTask = () => {
             "use strict";
 
+            var self = this;
+
             var id = $.newGuid(),
                 task = {
 
@@ -5172,59 +5201,51 @@
 
                 };
 
-            this.db.putTask(id, task).then(() => {
+            this.db.putTask(task).then(() => {
 
-                this.createTaskList();
-                this.moveTaskLeft(task);
-                $('input#taskId-' + task.id).attr('disabled', false).focus();
+                self.getTestTasks().then( () => {
+
+                    self.moveTaskLeft(self.testTasks.findBy('id', id));
+                    $('input#taskId-' + task.id).attr('disabled', false).focus();
+
+                });
 
             });
 
         };
 
-        /*
-         this.getTestTasks = (testCaseId) => {
-         "use strict";
+        this.getTestTasks = () => {
+            "use strict";
 
-         var self = this,
-         eventSessionId = this.tests.findBy('id', testCaseId)[0].eventSessionId;
+            var self = this,
+                testCaseId = this.testCase.id;
 
-         return new Promise((resolve, reject) => {
+            return new Promise((resolve, reject) => {
 
-         self.db.getTestTasks(testCaseId).then((tasks) => {
+                self.db.getTestTasks(testCaseId).then((tasks) => {
 
-         self.db.getTestEvents(testCaseId).then((events) => {
+                    self.db.getTestEvents(testCaseId).then((events) => {
 
-         tasks.forEach((task) => {
+                        self.initTestTasks(tasks, events);
+                        resolve();
 
-         task.events = events.filter((event) => {
+                    }, (error, message) => {
 
-         return event.taskId === task.id && event.sessionId === eventSessionId;
+                        console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
+                        reject(error);
 
-         });
+                    });
 
-         });
-         self.testTasks = tasks;
-         resolve(tasks);
+                }, (error, message) => {
 
-         }, (error, message) => {
+                    console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
+                    reject(error);
 
-         console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
-         reject(error);
+                });
 
-         });
+            });
 
-         }, (error, message) => {
-
-         console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
-         reject(error);
-
-         });
-
-         });
-
-         };
-         */
+        };
 
     }; // End of DCipher class
 
