@@ -168,8 +168,10 @@
                 taskId: '0-1',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-2-0-1-2-1-0-0-0",
-                target: {tagName: "A"},
+                target: {
+                    tagName: "A",
+                    treePath: "0-2-0-1-2-1-0-0-0"
+                },
                 location: '/bugaboo/A/index.html',
                 done: false
             },
@@ -178,8 +180,10 @@
                 taskId: '0-1',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-2-0-2-1-0-0-0-1-0-1",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-2-0-2-1-0-0-0-1-0-1",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/A/index.html',
                 done: false
             },
@@ -188,8 +192,10 @@
                 taskId: '0-1',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-3-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/bugaboo-cameleon3.html',
                 done: false
             },
@@ -198,8 +204,10 @@
                 taskId: '0-2',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -208,8 +216,10 @@
                 taskId: '0-2',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                target: {tagName: "path"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                    tagName: "path"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -218,8 +228,10 @@
                 taskId: '0-3',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -228,8 +240,10 @@
                 taskId: '0-3',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -238,8 +252,10 @@
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -248,9 +264,11 @@
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
                 alternate: ['0-4-2'],
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-0-0-1-0-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -259,9 +277,11 @@
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
                 type: 'mousedown',
-                treePath: "0-2-0-1-2-0-0-1-2-0",
                 alternate: ['0-4-1'],
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-2-0-1-2-0-0-1-2-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/create.html',
                 done: false
             },
@@ -270,8 +290,10 @@
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
                 type: 'click',
-                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/A/cart.html',
                 done: false
             },
@@ -280,8 +302,10 @@
                 taskId: '0-1',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-2-0-2-0-0-0-0-0-0",
-                target: {tagName: "A"},
+                target: {
+                    treePath: "0-2-0-2-0-0-0-0-0-0",
+                    tagName: "A"
+                },
                 location: '/bugaboo/B/index.html',
                 done: false
             },
@@ -290,8 +314,10 @@
                 taskId: '0-1',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-2-1-0-0-0-0-0-2-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/bugaboo-cameleon3.html',
                 done: false
             },
@@ -300,8 +326,10 @@
                 taskId: '0-2',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-3-1-1-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/create.html',
                 done: false
             },
@@ -310,8 +338,10 @@
                 taskId: '0-2',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
-                target: {tagName: "path"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-13-2-1-1-0-3",
+                    tagName: "path"
+                },
                 location: '/bugaboo/B/create.html',
                 done: false
             },
@@ -320,8 +350,10 @@
                 taskId: '0-3',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-2-1-2-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/create.html',
                 done: false
             },
@@ -330,8 +362,10 @@
                 taskId: '0-3',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-2-0-1-0-1-0-0-8-1-2-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/create.html',
                 done: false
             },
@@ -340,8 +374,10 @@
                 taskId: '0-4',
                 sessionId: '0-2-0-0',
                 type: 'mousedown',
-                treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-4-0-0-0-0-1-0-5-0-12-2-0-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/create.html',
                 done: false
             },
@@ -350,8 +386,10 @@
                 taskId: '0-4',
                 sessionId: '0-2-0-0',
                 type: 'click',
-                treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
-                target: {tagName: "SPAN"},
+                target: {
+                    treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
+                    tagName: "SPAN"
+                },
                 location: '/bugaboo/B/cart.html',
                 done: false
             }
@@ -531,22 +569,21 @@
 
                 if (testCaseId == '0') {
 
-                    sessions = this.masterTestSessions;
+                    sessions = this.masterTestSessions.slice();
 
                 }
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (r) {
+                $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (session) {
 
-                    if (testCaseId === r.value.testCaseId) {
+                    if (testCaseId === session.value.testCaseId) {
 
-                        //console.log(r.value);
-                        sessions.push(r.value);
+                        // console.log(session.value);
+                        sessions.push(session.value);
 
                     }
 
                 }).done(function () {
 
-                    //console.log('--> result: %s, event: %s', r, e);
-                    //console.debug('Records: ', self.sessions);
+                    console.log(sessions);
                     resolve(sessions)
 
                 }).fail(function (error, msg) {
@@ -570,7 +607,7 @@
 
                 if (testCaseId == '0') {
 
-                    resolve(this.masterTestEvents);
+                    resolve(this.masterTestEvents.slice());
 
                 } else {
 
@@ -609,12 +646,12 @@
 
             return new Promise((resolve, reject) => {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (event) {
 
-                    if (rec.value.sessionId === sessionId && rec.appMode === 'taskRecord') {
+                    if (event.value.sessionId === sessionId && event.appMode === 'taskRecord') {
 
                         //console.log(r.value);
-                        events.push(rec.value);
+                        events.push(event.value);
 
                     }
 
@@ -644,7 +681,7 @@
 
                 $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
 
-                    console.log(test.value);
+                    // console.log(test.value);
                     tests.push(test.value);
 
                 }).done(function () {
@@ -1193,7 +1230,7 @@
 
                         $(self.getDomElement('butList')).show();
                         self.createSessionList();
-                        self.toggleRecList();
+                        self.toggleSessionList();
                         $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
                         self.setActiveSession(self.sessionId, true);
                         self.showSpiderGraph(self.sessionId);
@@ -1608,7 +1645,7 @@
 
         };
 
-        this.calcSC = function calcSC(session) {
+        this.calculateScreenCoords = function (session) {
 
             var self = this;
 
@@ -3205,7 +3242,7 @@
 
         };
 
-        this.getTargetScreenPars = function getTargetScreenPars(e) {
+        this.getTargetScreenPars = function (e) {
 
             var etarget = e.target,
                 winW = window.innerWidth,
@@ -3372,7 +3409,7 @@
 
         };
 
-        this.toggleRecList = function toggleRecList() {
+        this.toggleSessionList = function () {
 
             var rlId = this.domId['sessions'],
                 rbId = this.domId['butList'],
@@ -3451,7 +3488,7 @@
                 r.visible = visRecs[r.id];
                 r.active = actRecs[r.id];
                 r.drawn = false;
-                self.calcSC(r);
+                self.calculateScreenCoords(r);
 
                 // Record canvas
                 cnv = document.createElement('canvas');
@@ -3742,22 +3779,49 @@
 
         this.deleteSession = function (id) {
 
-            var self = this;
+            var self = this,
+                promises = [];
 
-            this.unsetActiveRecord();
-            this.db.deleteSession(id).then(function () {
+            return new Promise((resolve, reject) => {
+                "use strict";
 
-                self.db.getTestSession(self.testCase.id).then((sessions) => {
+                self.unsetActiveRecord();
+
+                // Delete all session events
+                self.sessions.findBy('id', id).events.forEach((event) => {
                     "use strict";
 
-                    self.sessions = sessions;
-                    self.createSessionList();
+                    promises.push(self.db.deleteEvent(event.id));
 
                 });
 
-            }, function (e, msg) {
 
-                console.warn('[WARN] Could not delete record. Error:', msg);
+                // Delete session data
+                promises.push(self.db.deleteSession(id));
+
+                Promise.all(promises).then(() => {
+
+                    self.db.getTestSessions(self.testCase.id).then((sessions) => {
+                        "use strict";
+
+                        self.db.getTestEvents(self.testCase.id).then( (events) => {
+
+                            var { testSessions: testSessions } = self.initTestSessions(sessions, events);
+
+                            self.sessions = testSessions;
+                            self.createSessionList();
+                            resolve();
+
+                        });
+
+                    })
+
+                }, (error, message) => {
+
+                    console.warn('[WARN] Could not delete session. Error:', message);
+                    reject(error);
+
+                });
 
             });
 
@@ -3928,7 +3992,7 @@
 
             var self = this,
                 state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
-            
+
             function initState() {
                 "use strict";
 
@@ -4007,7 +4071,6 @@
                     $(self.getDomElement('butTest')).hide();
 
                 }
-
 
             }
 
@@ -4586,7 +4649,7 @@
                 currentTask = this.currentTask,
                 cStep = (currentTask.step + 1),
                 el = e ? this.getElementByTreePath(e.treePath) : null,
-                // evts = this.testEvents;
+            // evts = this.testEvents;
                 evts = this.currentTask.events;
 
             if (e && evts && evts.length) {
@@ -4928,8 +4991,7 @@
             "use strict";
 
             var self = this,
-                test = self.testCase = self.tests.findBy('id', testCaseId),
-                path = window.location.pathname;
+                test = self.testCase = self.tests.findBy('id', testCaseId);
 
             return new Promise((resolve, reject) => {
 
@@ -4939,32 +5001,13 @@
                 self.db.getTestEvents(testCaseId).then((events) => {
                     "use strict";
 
-                    var testEventSession;
-                    self.sessions = [];
                     self.testEvents = [];
 
-                    // TODO: sort by location?
                     self.db.getTestSessions(testCaseId).then((sessions) => {
 
-                        sessions.forEach((session) => {
+                        var { testSessions, testEventSession } = self.initTestSessions(sessions, events);
+                        self.sessions = testSessions;
 
-                            session.events = events.filter((event) => {
-
-                                return event.sessionId === session.id;
-
-                            });
-
-                            if (session.type !== 'testEvents') {
-
-                                self.sessions.push(session);
-
-                            } else if (path.match(session.location)) {
-
-                                testEventSession = session;
-
-                            }
-
-                        });
                         self.db.getTestTasks(testCaseId).then((tasks) => {
 
                             tasks.forEach((task) => {
@@ -4990,33 +5033,47 @@
 
                         });
 
-                    });
+                    }, (error, message) => {
 
-                    var recList = self.getDomElement('sessions');
-
-                    $(recList).on('mouseout', () => {
-
-                        $(recList).data('tid', setTimeout(() => {
-
-                            $(recList).hide();
-
-                        }, 1000));
+                        reject(error);
 
                     });
-
-                    $(recList).on('mouseover', () => {
-
-                        clearTimeout($(recList).data('tid'));
-
-                    });
-
-                }, (error, message) => {
-
-                    reject(error);
 
                 });
 
             });
+
+        };
+
+        this.initTestSessions = (sessions, events) => {
+            "use strict";
+
+            var testSessions = [],
+                testEventSession,
+                path = window.location.pathname;
+
+            // TODO: sort by location?
+            sessions.forEach((session) => {
+
+                session.events = events.filter((event) => {
+
+                    return event.sessionId === session.id;
+
+                });
+
+                if (session.type !== 'testEvents') {
+
+                    testSessions.push(session);
+
+                } else if (path.match(session.location)) {
+
+                    testEventSession = session;
+
+                }
+
+            });
+
+            return { testSessions: testSessions, testEventSession: testEventSession };
 
         };
 
@@ -5191,7 +5248,7 @@
             addTask = document.createElement('div'),
             butList = document.createElement('div'),
             recs = document.createElement('div'),
-            recList = document.createElement('div'),
+            sessionList = document.createElement('div'),
             click = document.createElement('div'),
             dblclick = document.createElement('div'),
             evtHlt = document.createElement('div'),
@@ -5327,7 +5384,7 @@
         butList.appendChild(recs);
 
         // Record list
-        recList.id = dCipher.domId['sessions'];
+        sessionList.id = dCipher.domId['sessions'];
 
         // Test list
         tests.className = 'tests';
@@ -5347,7 +5404,7 @@
         menu.id = dCipher.domId.menu;
         menu.appendChild(butList);
         dMain.appendChild(menu);
-        dMain.appendChild(recList);
+        dMain.appendChild(sessionList);
         dMain.appendChild(testList);
 
         // Top menu
@@ -5440,6 +5497,46 @@
 
         });
 
+        $(sessionList).on('mouseout', (event) => {
+
+            $(sessionList).data('tid', setTimeout(() => {
+
+                $(sessionList).hide();
+
+            }, 1000));
+
+        });
+
+        $(sessionList).on('mouseover', (event) => {
+
+            if ($('*', sessionList).length) {
+
+                clearTimeout($(sessionList).data('tid'));
+
+            }
+
+        });
+
+        $(testList).on('mouseout', (event) => {
+
+            $(testList).data('tid', setTimeout(() => {
+
+                $(testList).hide();
+
+            }, 1000));
+
+        });
+
+        $(testList).on('mouseover', (event) => {
+
+            if ($('*', testList).length) {
+
+                clearTimeout($(testList).data('tid'));
+
+            }
+
+        });
+
         butRec.addEventListener('mouseup', function (e) {
 
             e.stopPropagation();
@@ -5505,7 +5602,7 @@
 
         butList.addEventListener('click', function () {
 
-            dCipher.toggleRecList(this);
+            dCipher.toggleSessionList(this);
 
         });
 
