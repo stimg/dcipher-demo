@@ -3583,11 +3583,29 @@
 
                     if ($el.prop('checked')) {
 
-                        self.showSpiderGraph($el.attr('data-dcipher-rec-id'));
+                        id = $el.attr('data-dcipher-rec-id');
+                        var session = self.sessions.findBy('id', id);
+
+
+                        if (!session.events) {
+
+                            self.db.getSessionEvents(id).then((events) => {
+                                "use strict";
+
+                                session.events = events;
+                                self.calculateScreenCoords(session);
+                                self.showSpiderGraph(id);
+
+                            });
+
+                        } else {
+
+                            self.showSpiderGraph(id);
+                        }
 
                     } else {
 
-                        var id = $el.attr('data-dcipher-rec-id');
+                        id = $el.attr('data-dcipher-rec-id');
 
                         if (self.activeSession && self.activeSession.id === id) {
 
