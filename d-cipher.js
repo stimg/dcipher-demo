@@ -4942,6 +4942,22 @@
             }
 
         };
+        
+        this.resetTestCase = () => {
+            "use strict";
+
+            this.startEventIndex = undefined;
+            this.endEventIndex = undefined;
+            this.currentTask = null;
+            this.testTasks = [];
+            this.testEvents = [];
+            this.timeBrackets = [];
+            this.currentEvent = null;
+            this.currentEvent = null;
+            this.activeSession = null;
+            this.sessionId = '';
+
+        };
 
         this.createTestList = function () {
 
@@ -4978,7 +4994,14 @@
 
                 tst.addEventListener('click', function () {
 
-                    self.initTestCase(this.dataset.dCipherTestId);
+                    var testCaseId = this.dataset.dCipherTestId;
+                    
+                    if (!self.testCase || self.testCase.id !== testCaseId) {
+
+                        self.resetTestCase();
+                        self.initTestCase(testCaseId);
+
+                    }
 
                 });
 
@@ -5025,7 +5048,7 @@
 
             return new Promise((resolve, reject) => {
 
-                if (self.testTasks.length && self.testTasks[0].testCaseId === testCaseId) {
+                if (self.testTasks.length) {
 
                     var testEvents = self.testEvents = [],
                         currentTaskId = self.currentTaskId,
@@ -5133,13 +5156,21 @@
 
                     });
 
-                    self.db.getSessionEvents(testSessionId).then((events) => {
+                    if (testSessionId) {
 
-                        self.testEvents = events;
-                        self.createSessionList();
+                        self.db.getSessionEvents(testSessionId).then((events) => {
+
+                            self.testEvents = events;
+                            self.createSessionList();
+                            resolve();
+
+                        });
+
+                    } else {
+
                         resolve();
 
-                    });
+                    }
 
                 });
 
