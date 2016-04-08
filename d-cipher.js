@@ -1091,7 +1091,6 @@
 
                     self.tests = tests;
                     self.createTestList();
-                    self.createSessionList();
                     self.restoreState();
 
                 });
@@ -3973,9 +3972,9 @@
                     endEventIndex: this.endEventIndex,
                     testCase: this.testCase,
                     testTasks: this.testTasks,
+                    // testEvents: this.testEvents,
                     sessions: this.sessions,
-                    testEvents: this.testEvents,
-                    currentTask: this.currentTask,
+                    currentTaskId: this.currentTask.id,
                     currentEvent: this.currentEvent,
                     timeBrackets: this.timeBrackets
 
@@ -3996,22 +3995,15 @@
             function initState() {
                 "use strict";
 
-                for (var k in state) {
+                /*
+                 if (self.currentTask) {
 
-                    if (state.hasOwnProperty(k) && state[k]) {
+                 self.createTaskList();
+                 self.testTasks[self.currentTask.step] = self.currentTask;
+                 self.currentTask.events.forEach( () => {});
 
-                        self[k] = state[k];
-
-                    }
-
-                }
-
-                if (self.currentTask) {
-
-                    self.createTaskList();
-                    self.testTasks[self.currentTask.step] = self.currentTask;
-
-                }
+                 }
+                 */
 
                 if (self.appMode === 'record' || self.appMode === 'test') {
 
@@ -4074,7 +4066,17 @@
 
             }
 
-            if (state.testCase && !state.currentTask) {
+            for (var k in state) {
+
+                if (state.hasOwnProperty(k) && state[k]) {
+
+                    self[k] = state[k];
+
+                }
+
+            }
+
+            if (state.testCase) {
 
                 this.initTestCase(state.testCase.id).then(initState);
 
@@ -4295,7 +4297,7 @@
 
                         }).then(() => {
 
-                            self.getTestTasks();
+                            // self.getTestTasks();
 
                         });
 
@@ -5017,21 +5019,57 @@
 
             return new Promise((resolve, reject) => {
 
-                // self.toggleTestList();
-                $(self.getDomElement('testName')).html(test.name).show();
+                if (self.testTasks.length && self.testTasks[0].testCaseId === testCaseId) {
 
-                self.db.getTestEvents(testCaseId).then((events) => {
-                    "use strict";
+                    var testEvents = self.testEvents = [],
+                        currentTaskId = self.currentTaskId,
+                        aSession;
 
-                    self.testEvents = [];
+                    if (self.activeSession) {
 
-                    self.db.getTestSessions(testCaseId).then((sessions) => {
+                        aSession = self.sessions.findBy('id', self.activeSession.id);
 
-                        self.initTestSessions(sessions, events);
-                        self.db.getTestTasks(testCaseId).then((tasks) => {
+                        if (aSession && aSession.length) {
 
-                            self.initTestTasks(tasks, events);
-                            resolve();
+                            aSession[0] = self.activeSession;
+
+                        }
+
+                    }
+                    self.createSessionList();
+                    self.testTasks.forEach((task) => {
+
+                        if (task.id === currentTaskId) {
+                            self.currentTask = task;
+                        }
+                        Array.prototype.push.apply(testEvents, task.events);
+
+                    });
+                    self.createTaskList();
+                    resolve();
+
+                } else {
+
+                    $(self.getDomElement('testName')).html(test.name).show();
+
+                    self.db.getTestEvents(testCaseId).then((events) => {
+                        "use strict";
+
+                        self.testEvents = [];
+
+                        self.db.getTestSessions(testCaseId).then((sessions) => {
+
+                            self.initTestSessions(sessions, events);
+                            self.db.getTestTasks(testCaseId).then((tasks) => {
+
+                                self.initTestTasks(tasks, events);
+                                resolve();
+
+                            }, (error, message) => {
+
+                                reject(error);
+
+                            });
 
                         }, (error, message) => {
 
@@ -5039,13 +5077,9 @@
 
                         });
 
-                    }, (error, message) => {
-
-                        reject(error);
-
                     });
 
-                });
+                }
 
             });
 
@@ -5207,12 +5241,15 @@
 
             this.db.putTask(task).then(() => {
 
-                self.getTestTasks().then(() => {
+                // self.getTestTasks().then(() => {
 
-                    self.moveTaskLeft(self.testTasks.findBy('id', id));
-                    $('input#taskId-' + task.id).attr('disabled', false).focus();
+                self.testTasks.push(task);
+                // self.moveTaskLeft(self.testTasks.findBy('id', id));
+                self.initTestTasks(self.testTasks, self.testEvents);
+                self.moveTaskLeft(task);
+                $('input#taskId-' + task.id).attr('disabled', false).focus();
 
-                });
+                // });
 
             });
 
