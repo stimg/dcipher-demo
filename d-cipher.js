@@ -487,43 +487,21 @@
 
         };
 
-        /*
-         this.getSession = function getRecord(id) {
-
-         return $.indexedDB(this.dbName).objectStore(this.tables.sessions).get(id.toString());
-
-         };
-
-         */
-        this.getLocationTestCases = function (location) {
-
-            return this.getTests();
-
-            /*.filter(function (testCase) {
-
-             return testCase.sessions.map(function (session) {
-
-             return session.location;
-
-             }).filter(function (loc) {
-
-             return location === loc || location === loc + 'index.html';
-
-             });
-
-             });*/
-
-        };
-
         this.putSession = function (session) {
 
             var self = this,
                 data = $.extend({}, session);
 
-            delete data.events;
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).put(data, session.id.toString()).done(function () {
+                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress((t) => {
+                    "use strict";
+
+                    t.objectStore(self.tables.events).put(session.events, session.id);
+                    delete data.events;
+                    t.objectStore(self.tables.sessions).put(data, session.id)
+
+                }).done(function () {
 
                     console.log('[INFO] dbAdapter: session data saved.');
                     resolve();
@@ -545,8 +523,10 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.sessions).delete(id.toString()).done(function () {
+                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress((t) => {
 
+                    t.objectStore(self.tables.events).selete(session.id);
+                    t.objectStore(self.tables.sessions).put(session.id);
                     resolve();
 
                 }).fail(function () {
@@ -597,75 +577,78 @@
 
         };
 
-        this.getTestEvents = (testCaseId) => {
-            "use strict";
+        /*
+         this.getTestEvents = (testCaseId) => {
+         "use strict";
 
-            var self = this,
-                events = [];
+         var self = this,
+         events = [];
 
-            return new Promise((resolve, reject) => {
+         return new Promise((resolve, reject) => {
 
-                if (testCaseId == '0') {
+         if (testCaseId == '0') {
 
-                    events = this.masterTestEvents.slice();
+         events = this.masterTestEvents.slice();
 
-                }
+         }
 
-                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
+         $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
 
-                    if (rec.value.testCaseId === testCaseId) {
+         if (rec.value.testCaseId === testCaseId) {
 
-                        //console.log(r.value);
-                        events.push(rec.value);
+         //console.log(r.value);
+         events.push(rec.value);
 
-                    }
+         }
 
-                }).done(function () {
+         }).done(function () {
 
-                    //console.log('--> result: %s, event: %s', r, e);
-                    //console.debug('Records: ', self.records);
-                    resolve(events);
+         //console.log('--> result: %s, event: %s', r, e);
+         //console.debug('Records: ', self.records);
+         resolve(events/!*.sort( (event1, event2) => { return event1.timeStamp > event2.timeStamp })*!/);
 
-                }).fail(function (error, msg) {
+         }).fail(function (error, msg) {
 
-                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
-                    reject(error);
+         console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+         reject(error);
 
-                });
+         });
 
-            });
+         });
 
-        };
+         };
+         */
 
         this.getSessionEvents = (sessionId) => {
             "use strict";
 
             var self = this,
-                events = [];
+                testEvents = this.masterTestEvents.filter((event) => {
+                    return event.sessionId === sessionId
+                });
 
             return new Promise((resolve, reject) => {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (event) {
+                if (testEvents.length) {
 
-                    if (event.value.sessionId === sessionId && event.appMode === 'taskRecord') {
+                    resolve(testEvents);
 
-                        //console.log(r.value);
-                        events.push(event.value);
+                } else {
 
-                    }
+                    $.indexedDB(self.dbName).objectStore(self.tables.events).get(sessionId).done(function (events) {
 
-                }).done(function () {
+                        //console.log('--> result: %s, event: %s', r, e);
+                        //console.debug('Records: ', self.records);
+                        resolve(events);
 
-                    //console.log('--> result: %s, event: %s', r, e);
-                    //console.debug('Records: ', self.records);
-                    resolve(events);
+                    }).fail(function (error, msg) {
 
-                }).fail(function (error, msg) {
+                        console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
+                        reject(error);
 
-                    console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
-                    reject(error);
+                    });
 
-                });
+                }
 
             });
         };
@@ -918,6 +901,8 @@
         this.deleteEvent = (id) => {
             "use strict";
 
+            var self = this;
+
             return new Promise((resolve, reject) => {
 
                 $.indexedDB(self.dbName).objectStore(self.tables.events).delete(id).done(() => {
@@ -1087,7 +1072,7 @@
 
             self.db.init().done(() => {
 
-                self.db.getLocationTestCases(path).then((tests) => {
+                self.db.getTests(path).then((tests) => {
 
                     self.tests = tests;
                     self.createTestList();
@@ -1166,13 +1151,13 @@
                 $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
                 $('body').on('mousemove', catchEvents);
                 this.hideRecList();
-                this.unsetActiveRecord();
+                this.unsetActiveSession();
                 this.sessionId = ts.toString();
                 this.activeSession = {
 
                     id: this.sessionId,
                     type: this.appMode,
-                    testCaseId: this.testCase.id,
+                    testCaseId: this.testCase ? this.testCase.id : '',
                     name: this.loc._Default_record_name + this.sessions.length,
                     location: location.pathname,
                     description: '',
@@ -1229,6 +1214,7 @@
 
                     this.db.putSession(activeSession).then(function () {
 
+                        self.sessions.push(activeSession);
                         $(self.getDomElement('butList')).show();
                         self.createSessionList();
                         self.toggleSessionList();
@@ -1305,12 +1291,12 @@
                     event = {
                         id: $.newGuid(),
                         taskId: this.currentTask ? this.currentTask.id : '',
+                        testCaseId: this.testCase ? this.testCase.id : '',
                         sessionId: this.sessionId,
                         timeStamp: timeStamp,
                         appMode: this.appMode,
                         index: elen,
                         location: location,
-                        testTaskId: this.currentTask.id,
                         ndc: {
                             x: clientNDC.x,
                             y: clientNDC.y,
@@ -1459,7 +1445,6 @@
                  */
 
                 events.push(event);
-                this.db.putEvent(event);
                 activeSession.mouseMilesTotal = milesTotal;
                 this.updateStatString(e);
 
@@ -2447,7 +2432,8 @@
                 pxs = width / session.duration,
                 posx = offsetLeft,
                 posx0, pe,
-                showTaskNumber = !!session.testCase;
+                showTaskNumber = session.testCaseId !== '',
+                taskNr = 1;
 
             this.timeLineEvents = [];
             cnv.width = cw;
@@ -2501,7 +2487,7 @@
                     });
 
                     // Draw task number
-                    if (showTaskNumber && e.testTask && e.firstInTask) {
+                    if (showTaskNumber && e.testTaskId !== '' && e.firstInTask) {
 
                         //var tx = e.testTask.step ? posx : posx0;
                         var tx = posx;
@@ -2513,7 +2499,7 @@
                         ctx.moveTo(tx, 0);
                         ctx.lineTo(tx, ch);
                         ctx.stroke();
-                        ctx.fillText(e.testTask.step + 1, tx + 5, ch - 10);
+                        ctx.fillText(taskNr++, tx + 5, ch - 10);
                         ctx.restore();
 
                     }
@@ -3491,7 +3477,6 @@
                 r.visible = visRecs[r.id];
                 r.active = actRecs[r.id];
                 r.drawn = false;
-                self.calculateScreenCoords(r);
 
                 // Record canvas
                 cnv = document.createElement('canvas');
@@ -3606,7 +3591,7 @@
 
                         if (self.activeSession && self.activeSession.id === id) {
 
-                            self.unsetActiveRecord();
+                            self.unsetActiveSession();
 
                         } else {
 
@@ -3661,12 +3646,15 @@
 
                     if ($el.attr('type') === 'text') {
 
-                        if (!sessionDiv.events) {
+                        var session = self.sessions.findBy('id', id);
+
+                        if (!session.events) {
 
                             self.db.getSessionEvents(id).then((events) => {
                                 "use strict";
 
-                                sessionDiv.events = events;
+                                session.events = events;
+                                self.calculateScreenCoords(session);
                                 self.showSpiderGraph(id);
                                 self.setActiveSession(id, true);
 
@@ -3758,7 +3746,7 @@
 
         };
 
-        this.unsetActiveRecord = function () {
+        this.unsetActiveSession = function () {
 
             if (this.activeSession) {
 
@@ -3788,7 +3776,7 @@
             return new Promise((resolve, reject) => {
                 "use strict";
 
-                self.unsetActiveRecord();
+                self.unsetActiveSession();
 
                 // Delete all session events
                 self.sessions.findBy('id', id).events.forEach((event) => {
@@ -5052,30 +5040,22 @@
 
                     $(self.getDomElement('testName')).html(test.name).show();
 
-                    self.db.getTestEvents(testCaseId).then((events) => {
-                        "use strict";
+                    self.initTestSessions(testCaseId).then(() => {
 
-                        self.testEvents = [];
+                        self.db.getTestTasks(testCaseId).then((tasks) => {
 
-                        self.db.getTestSessions(testCaseId).then((sessions) => {
-
-                            self.initTestSessions(sessions, events);
-                            self.db.getTestTasks(testCaseId).then((tasks) => {
-
-                                self.initTestTasks(tasks, events);
-                                resolve();
-
-                            }, (error, message) => {
-
-                                reject(error);
-
-                            });
+                            self.initTestTasks(tasks);
+                            resolve();
 
                         }, (error, message) => {
 
                             reject(error);
 
                         });
+
+                    }, (error, message) => {
+
+                        reject(error);
 
                     });
 
@@ -5085,10 +5065,11 @@
 
         };
 
-        this.initTestTasks = (tasks, events) => {
+        this.initTestTasks = (tasks) => {
             "use strict";
 
-            var self = this;
+            var self = this,
+                events = this.testEvents;
 
             this.tasks = [];
 
@@ -5096,11 +5077,9 @@
 
                 task.events = events.filter((event) => {
 
-                    return event.sessionId === self.testEventSession.id && event.taskId === task.id;
+                    return event.taskId === task.id;
 
                 });
-
-                Array.prototype.push.apply(self.testEvents, task.events);
 
             });
 
@@ -5109,37 +5088,44 @@
 
         };
 
-        this.initTestSessions = (sessions, events) => {
+        this.initTestSessions = (testCaseId) => {
             "use strict";
 
             var self = this,
-                path = window.location.pathname;
+                path = window.location.pathname,
+                testSessionId;
 
             this.sessions = [];
 
-            // TODO: sort by location?
-            sessions.forEach((session) => {
+            return new Promise((resolve, reject) => {
 
-                session.events = events.filter((event) => {
+                self.db.getTestSessions(testCaseId).then((sessions) => {
 
-                    return event.sessionId === session.id;
+                    sessions.forEach((session) => {
+
+                        if (session.type !== 'testEvents') {
+
+                            self.sessions.push(session);
+
+                        } else if (path.match(session.location)) {
+
+                            testSessionId = session.id;
+
+                        }
+
+                    });
+
+                    self.db.getSessionEvents(testSessionId).then((events) => {
+
+                        self.testEvents = events;
+                        self.createSessionList();
+                        resolve();
+
+                    });
 
                 });
 
-                if (session.type !== 'testEvents') {
-
-                    self.sessions.push(session);
-
-                } else if (path.match(session.location)) {
-
-                    self.testEventSession = session;
-
-                }
-
             });
-
-            this.createSessionList();
-
         };
 
         this.createTestCase = function () {
