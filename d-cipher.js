@@ -52,7 +52,7 @@
             _Task_description: 'Task',
             _Test_list: 'Test list',
             _Delete_test: 'Delete test',
-            _Select_test: 'No test selected',
+            _Select_test: '',
             _Create_test: 'Create test',
             _Add_test_task: 'Create test task',
             _Task_description_placeholder: 'Enter task name',
@@ -2801,17 +2801,9 @@
 
                 var self = this,
                     session = this.getSessionById(sId),
-                    btn = this.getDomElement('butPlay');
+                    $btnPlay = $('div', self.getDomElement('butPlay'));
 
-                if (btn.className.match(/play/i)) {
-
-                    $(btn).removeClass('play').addClass('stop');
-
-                } else {
-
-                    $(btn).removeClass('stop').addClass('play');
-
-                }
+                $btnPlay.removeClass('play').addClass('stop');
 
                 if (!session) {
 
@@ -3151,7 +3143,7 @@
                         $(mOverElement).removeClass(mOverClass);
                         self.removeMouseOverStyle();
                         $(cnv).css('cursor', 'default');
-                        $(btn).removeClass('stop').addClass('play');
+                        $btnPlay.removeClass('stop').addClass('play');
 
                         if (cnt === sData.length) {
 
@@ -3963,16 +3955,6 @@
                 function initState() {
                     "use strict";
 
-                    /*
-                     if (self.currentTask) {
-
-                     self.createTaskList();
-                     self.testTasks[self.currentTask.step] = self.currentTask;
-                     self.currentTask.events.forEach( () => {});
-
-                     }
-                     */
-
                     if (self.appMode === 'record' || self.appMode === 'test') {
 
                         $('div', self.getDomElement('butRecord')).removeClass('rec').addClass('stop');
@@ -3990,7 +3972,6 @@
 
                     } else if (self.appMode === 'play') {
 
-                        $('div', self.getDomElement('butPlay')).removeClass('play').addClass('stop');
                         self.showSpiderGraph(self.activeSession.id, 0, self.endEventIndex + 1);
                         setTimeout(function () {
 
@@ -4044,15 +4025,15 @@
 
                 }
 
-                if (state.testCase) {
+                // if (state.testCase) {
 
-                    this.initTestCase(state.testCase.id).then(initState);
+                    this.initTestCase(state.testCase ? state.testCase.id : '').then(initState);
 
-                } else {
+                // } else {
 
-                    initState();
+                    // initState();
 
-                }
+                // }
 
             };
 
@@ -5013,20 +4994,8 @@
                     if (self.testTasks.length) {
 
                         var testEvents = self.testEvents = [],
-                            currentTaskId = self.currentTaskId,
-                            aSession;
+                            currentTaskId = self.currentTaskId;
 
-                        if (self.activeSession) {
-
-                            aSession = self.sessions.findBy('id', self.activeSession.id);
-
-                            if (aSession && aSession.length) {
-
-                                aSession[0] = self.activeSession;
-
-                            }
-
-                        }
                         self.createSessionList();
                         self.testTasks.forEach((task) => {
 
@@ -5041,7 +5010,7 @@
 
                     } else {
 
-                        $(self.getDomElement('testName')).html(test.name).show();
+                        $(self.getDomElement('testName')).html(test ? test.name : '').show();
 
                         self.initTestSessions(testCaseId).then(() => {
 
@@ -5096,6 +5065,7 @@
 
                 var self = this,
                     path = window.location.pathname,
+                    activeSession = this.activeSession,
                     testSessionId;
 
                 this.sessions = [];
@@ -5108,6 +5078,11 @@
 
                             if (session.type !== 'testEvents') {
 
+                                if (activeSession && activeSession.id === session.id) {
+
+                                    session = activeSession;
+
+                                }
                                 self.sessions.push(session);
 
                             } else if (path.match(session.location)) {
@@ -5123,7 +5098,6 @@
                             self.db.getSessionEvents(testSessionId).then((events) => {
 
                                 self.testEvents = events;
-                                self.createSessionList();
                                 resolve();
 
                             });
@@ -5133,6 +5107,8 @@
                             resolve();
 
                         }
+
+                        self.createSessionList();
 
                     });
 
