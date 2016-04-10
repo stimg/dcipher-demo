@@ -57,6 +57,7 @@
             _Add_test_task: 'Create test task',
             _Task_description_placeholder: 'Enter task name',
             _Delete_task: 'Delete task',
+            _Test_events: 'Test events recorded',
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -385,7 +386,7 @@
                 id: '1-4-1',
                 taskId: '0-4',
                 sessionId: '0-2-0-0',
-                type: 'click',
+                type: 'mousedown',
                 target: {
                     treePath: "0-10-0-0-0-0-1-0-2-1-0-0-0-0-0",
                     tagName: "SPAN"
@@ -876,25 +877,7 @@
 
         };
 
-        this.putEvent = function (event) {
-
-            var self = this;
-
-            return new Promise((resolve, reject) => {
-
-                $.indexedDB(self.dbName).objectStore(self.tables.events).put(event, event.id).done(() => {
-
-                    console.log('[INFO] dbAdapter: event saved.');
-                    resolve();
-
-                }).fail((e, msg) => {
-
-                    console.warn('[INFO] dbAdapter: Failed to save event. Error: ', msg);
-                    reject();
-
-                });
-
-            });
+        this.deleteTaskEvents = (taskId, sessionId) => {
 
         };
 
@@ -940,6 +923,7 @@
 
                     console.log('[INFO] dbAdapter: Event set deleted.');
                     resolve();
+
 
                 }).error(function () {
 
@@ -1049,6 +1033,7 @@
             this.sessions = [];
             this.testEventSession = null;
             this.currentTask = null;
+            this.editTask = null;
             this.currentEvent = null;
 
             this.db = new IDB();
@@ -1119,7 +1104,7 @@
 
             };
 
-            this.toggleRecMode = function toggleRecMode(e) {
+            this.toggleRecMode = function (e) {
 
                 var self = this,
                     cnvh = this.getDomElement('canvasHolder'),
@@ -1137,33 +1122,24 @@
 
                 }
 
-                if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+                function createNewSession() {
+                    "use strict";
 
-                    // Turn on record mode
-                    //this.resetApp(this.appMode || 'record', window.location.pathname);
-                    this.resetApp(this.appMode || 'record');
+                    var ts = +new Date(),
+                        pathname = location.pathname;
 
-                    var ts = +new Date();
-                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                    $(cnvh).hide();
-                    $(this.getDomElement('0-2-0-0')).hide();
-                    $(this.getDomElement('butList')).hide();
-                    $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
-                    $('body').on('mousemove', catchEvents);
-                    this.hideRecList();
-                    this.unsetActiveSession();
-                    this.sessionId = ts.toString();
-                    this.activeSession = {
+                    self.sessionId = $.newGuid();
+                    self.activeSession = {
 
-                        id: this.sessionId,
-                        type: this.appMode,
-                        testCaseId: this.testCase ? this.testCase.id : '',
-                        name: this.loc._Default_record_name + this.sessions.length,
-                        location: location.pathname,
+                        id: self.sessionId,
+                        type: self.appMode,
+                        testCaseId: self.testCase ? self.testCase.id : '',
+                        name: self.loc._Default_record_name + self.sessions.length,
+                        location: pathname.substring(0, pathname.lastIndexOf('/')),
                         description: '',
                         created: ts,
                         modified: ts,
-                        author: this.user.fullname || this.loc._Anonym,
+                        author: self.user.fullname || self.loc._Anonym,
                         color: 'rgba(255, 0, 255, 1)',
                         duration: 0,
                         mouseMilesTotal: 0,
@@ -1172,28 +1148,98 @@
 
                     };
 
-                    this.saveEvent(new MouseEvent('start', e));
-                    this.db.putSession(this.activeSession);
+                    if (!self.editTask) {
+
+                        self.saveEvent(new MouseEvent('start', e));
+
+                    }
+                    self.db.putSession(self.activeSession);
+
+                }
+
+                if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+
+                    // Turn on record mode
+                    //this.resetApp(this.appMode || 'record', window.location.pathname);
+                    this.resetApp(this.appMode || 'record');
+
+                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                    $(cnvh).hide();
+                    $(this.getDomElement('0-2-0-0')).hide(); // XXX ???
+                    $(this.getDomElement('butList')).hide();
+                    $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
+                    $('body').on('mousemove', catchEvents);
+                    this.hideRecList();
+
+                    if (this.editTask) {
+
+                        var task = self.editTask;
+
+                        this.appMode = 'testEvents';
+
+                        if (!this.activeSession) {
+
+                            this.db.getTestSessions(task.testCaseId).then((sessions) => {
+                                "use strict";
+
+                                var eSession = sessions.findBy('type', 'testEvents');
+
+                                if (eSession) {
+
+                                    if (eSession.events && eSession.events.length) {
+
+                                        eSession.events = eSession.events.filter((event) => {
+                                            return event.taskId !== task.id;
+                                        });
+
+                                    } else {
+
+                                        eSession.events = [];
+
+                                    }
+                                    self.activeSession = eSession;
+                                    self.sessionId = eSession.id;
+
+                                } else {
+
+                                    createNewSession();
+
+                                }
+
+                            });
+
+                        } else {
+
+                            this.activeSession.events = this.activeSession.events.filter((event) => {
+
+                                return event.taskId !== task.id;
+
+                            });
+
+                        }
+
+                    } else {
+
+                        this.unsetActiveSession();
+                        createNewSession();
+                    }
 
                 } else {
 
                     // Turn off record mode
                     this.appMode = '';
                     $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
-
                     $stat.fadeOut();
                     clearInterval($stat.data('tid'));
                     $('body').off('mousemove', catchEvents);
 
-                    if (this.sessions.length) {
-
-                        $(this.getDomElement('butList')).show();
-
-                    }
-
                     var activeSession = this.activeSession;
 
-                    if (activeSession && activeSession.events && activeSession.events.length > 1) {
+                    if (this.editTask) {
+
+                        this.db.putSession(activeSession);
+
+                    } else if (activeSession && activeSession.events && activeSession.events.length > 1) {
 
                         var evt = activeSession.events[activeSession.events.length - 1];
 
@@ -1215,7 +1261,6 @@
                         this.db.putSession(activeSession).then(function () {
 
                             self.sessions.push(activeSession);
-                            $(self.getDomElement('butList')).show();
                             self.createSessionList();
                             self.toggleSessionList();
                             $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
@@ -1245,7 +1290,7 @@
                     treePath = this.getTreePath(etarget),
                     location = document.location.pathname,
                     controls = !!$(this.getDomElement('topMenu')).find(etarget).length,
-                    save = (this.appMode === 'record' || this.appMode === 'test') &&
+                    save = (this.appMode === 'record' || this.appMode === 'test' || this.appMode === 'testEvents') &&
                            this.registerEventList.indexOf(etype) > -1
                            && !($(this.getDomElement('container')).find(etarget).length || controls)
                            && etarget.localName !== 'svg'
@@ -1358,93 +1403,106 @@
 
                         };
 
-                    if (lastEvent && lastEvent.type === etype
-                        && lastEvent.target.treePath === event.target.treePath
-                        && !etype.match(/scroll|wheel/i)) {
+                    // TODO: ?? save / check other events?
+                    if (self.editTask) {
 
-                        return;
+                        if (event.type === 'mousedown') {
 
-                    }
-
-                    event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
-                    event.drag = event.milesLast && etype === 'mouseup';
-                    event.miles = milesTotal + event.milesLast;
-
-                    if (etarget.dataset) {
-
-                        event.target.dcipherName = etarget.dataset.dcipherName;
-                        event.target.dcipherAction = etarget.dataset.dcipherAction;
-
-                    }
-                    if (etype === 'mouseup' && event.milesLast === 0) {
-
-                        event = events.pop();
-                        event.type = etype = 'click';
-                        lastEvent = events[events.length - 1];
-
-                        if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
-
-                            events.pop();
-                            event.type = etype = 'dblclick';
+                            events.push(event);
 
                         }
 
+                    } else {
+
+                        if (lastEvent && lastEvent.type === etype
+                            && lastEvent.target.treePath === event.target.treePath
+                            && !etype.match(/scroll|wheel/i)) {
+
+                            return;
+
+                        }
+
+                        event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
+                        event.drag = event.milesLast && etype === 'mouseup';
+                        event.miles = milesTotal + event.milesLast;
+
+                        if (etarget.dataset) {
+
+                            event.target.dcipherName = etarget.dataset.dcipherName;
+                            event.target.dcipherAction = etarget.dataset.dcipherAction;
+
+                        }
+                        if (etype === 'mouseup' && event.milesLast === 0) {
+
+                            event = events.pop();
+                            event.type = etype = 'click';
+                            lastEvent = events[events.length - 1];
+
+                            if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
+
+                                events.pop();
+                                event.type = etype = 'dblclick';
+
+                            }
+
+                        }
+
+                        if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
+
+                            event.dx = left - lastEvent.target.x;
+                            event.dy = top - lastEvent.target.y;
+
+                        }
+
+                        if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
+
+                            activeSession.eventsStat[etype] = activeSession.eventsStat[etype] ? activeSession.eventsStat[etype] + 1 : 1;
+                            event.eventNo = activeSession.eventsStat[etype];
+
+                        }
+
+                        if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
+
+                            lastEvent.eventNo = activeSession.eventsStat['wheel'];
+
+                        }
+
+                        if (event.drag) {
+
+                            activeSession.eventsStat['drag'] = activeSession.eventsStat['drag'] ? activeSession.eventsStat['drag'] + 1 : 1;
+                            event.eventNo = activeSession.eventsStat['drag'];
+
+                        }
+
+                        if (this.currentTask && (!lastEvent || lastEvent.taskId !== this.currentTask.id)) {
+
+                            event.firstInTask = true;
+
+                        }
+                        /*
+                         var sd = 0;
+                         rec.events.forEach(function (e) {
+
+                         if (e.type === 'wheel') {
+
+                         sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+
+                         }
+
+                         });
+                         */
+                        event.kpi = (event.time / 1000) * (((activeSession.eventsStat['click'] || 0) + (activeSession.eventsStat['drag'] || 0) + (activeSession.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                        //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
+                        event.kpiLast = event.kpi;
+                        /*
+                         event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+
+                         console.debug('-------> event.kpiLast', event.kpiLast);
+                         */
+
+                        events.push(event);
+
                     }
-
-                    if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
-
-                        event.dx = left - lastEvent.target.x;
-                        event.dy = top - lastEvent.target.y;
-
-                    }
-
-                    if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
-
-                        activeSession.eventsStat[etype] = activeSession.eventsStat[etype] ? activeSession.eventsStat[etype] + 1 : 1;
-                        event.eventNo = activeSession.eventsStat[etype];
-
-                    }
-
-                    if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
-
-                        lastEvent.eventNo = activeSession.eventsStat['wheel'];
-
-                    }
-
-                    if (event.drag) {
-
-                        activeSession.eventsStat['drag'] = activeSession.eventsStat['drag'] ? activeSession.eventsStat['drag'] + 1 : 1;
-                        event.eventNo = activeSession.eventsStat['drag'];
-
-                    }
-
-                    if (this.currentTask && (!lastEvent || lastEvent.taskId !== this.currentTask.id)) {
-
-                        event.firstInTask = true;
-
-                    }
-                    /*
-                     var sd = 0;
-                     rec.events.forEach(function (e) {
-
-                     if (e.type === 'wheel') {
-
-                     sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
-
-                     }
-
-                     });
-                     */
-                    event.kpi = (event.time / 1000) * (((activeSession.eventsStat['click'] || 0) + (activeSession.eventsStat['drag'] || 0) + (activeSession.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
-                    //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
-                    event.kpiLast = event.kpi;
-                    /*
-                     event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
-
-                     console.debug('-------> event.kpiLast', event.kpiLast);
-                     */
-
-                    events.push(event);
                     activeSession.mouseMilesTotal = milesTotal;
                     this.updateStatString(e);
 
@@ -2167,24 +2225,32 @@
                 //type = e ? loc[e.type] : '',
                     msg = ''; //loc._Recording + '.';
 
-                msg += /*loc._Time + ': ' +*/ timeString + ' ';
-                msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
-                msg += loc._Clicks + ': ' + clicks + ' | ';
-                msg += loc._Drags + ': ' + drags + ' | ';
-                msg += loc._Wheels + ': ' + wheels + ' | ';
-                if (trg) {
+                if (this.editTask) {
 
-                    msg += loc._Target + ': ' + trg + ' | ';
+                    msg += loc._Test_events + ': ' + activeSession.events.length;
+
+                } else {
+
+                    msg += /*loc._Time + ': ' +*/ timeString + ' ';
+                    msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
+                    msg += loc._Clicks + ': ' + clicks + ' | ';
+                    msg += loc._Drags + ': ' + drags + ' | ';
+                    msg += loc._Wheels + ': ' + wheels + ' | ';
+
+                    if (trg) {
+
+                        msg += loc._Target + ': ' + trg + ' | ';
+
+                    }
+                    msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
+
+                    if (e && e.type === 'keypress') {
+
+                        msg += '; key: ' + String.fromCharCode(e.charCode);
+
+                    }
 
                 }
-                msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
-
-                if (e && e.type === 'keypress') {
-
-                    msg += '; key: ' + String.fromCharCode(e.charCode);
-
-                }
-
                 this.getDomElement('stat').innerText = msg;
                 //console.debug(msg);
                 return this;
@@ -3908,7 +3974,7 @@
 
             this.saveState = function saveState() {
 
-                if (this.appMode) {
+                if (this.appMode || this.editTask) {
 
                     if (this.appMode === 'test') {
 
@@ -3916,12 +3982,15 @@
 
                     }
 
-                    this.activeSession.events.forEach(function (e) {
+                    if (this.activeSession && this.activeSession.events.length) {
 
-                        delete e.target.element;
+                        this.activeSession.events.forEach(function (e) {
 
-                    });
+                            delete e.target.element;
 
+                        });
+
+                    }
                     sessionStorage.setItem('dcipherState', JSON.stringify({
 
                         user: this.user,
@@ -3935,6 +4004,7 @@
                         // testEvents: this.testEvents,
                         sessions: this.sessions,
                         currentTaskId: this.currentTask ? this.currentTask.id : '',
+                        editTaskId: this.editTask ? this.editTask.id : '',
                         currentEvent: this.currentEvent,
                         timeBrackets: this.timeBrackets
 
@@ -3955,7 +4025,7 @@
                 function initState() {
                     "use strict";
 
-                    if (self.appMode === 'record' || self.appMode === 'test') {
+                    if (self.appMode === 'record' || self.appMode === 'test' || self.appMode === 'testEvents') {
 
                         $('div', self.getDomElement('butRecord')).removeClass('rec').addClass('stop');
                         $(self.getDomElement('butList')).hide();
@@ -3999,17 +4069,29 @@
 
                     }
 
-                    if (self.appMode !== 'test') {
+                    /*
+                     if (self.appMode !== 'test') {
 
-                        $(self.getDomElement('0-2-0-0')).show();
+                     // XXX ???
+                     $(self.getDomElement('0-2-0-0')).show();
 
-                    } else if (self.currentTask) {
+                     } else
+                     */
 
-                        self.createTaskList();
+                    if (self.currentTask) {
+
+                        // self.createTaskList();
                         self.activateTask(self.currentTask, true);
                         $(self.getDomElement('testName')).hide();
                         $(self.getDomElement('butStartTest')).hide();
                         $(self.getDomElement('butTest')).hide();
+
+                    } else if (self.editTask) {
+
+                        self.moveTaskLeft(self.editTask);
+                        $(self.getDomElement('butStartTest')).hide();
+                        $(self.getDomElement('butTest')).hide();
+                        $(self.getDomElement('testName')).hide();
 
                     }
 
@@ -4025,19 +4107,11 @@
 
                 }
 
-                // if (state.testCase) {
-
-                    this.initTestCase(state.testCase ? state.testCase.id : '').then(initState);
-
-                // } else {
-
-                    // initState();
-
-                // }
+                this.initTestCase(state.testCase ? state.testCase.id : '').then(initState);
 
             };
 
-            this.resetState = function resetState() {
+            this.resetState = function () {
 
                 sessionStorage.removeItem('dcipherState');
                 if (this.activeSession) {
@@ -4106,15 +4180,27 @@
 
                     } else {
 
-                        var task = testTasks.findBy('id', e.target.dataset.dcipherTaskId);
+                        var id = e.target.dataset.dcipherTaskId,
+                            task = testTasks.findBy('id', id),
+                            idx = testTasks.indexOf(task);
 
                         if (task.left) {
 
                             self.moveTaskRight(task);
+                            if (idx) {
+
+                                self.editTask = testTasks[idx - 1];
+
+                            } else {
+
+                                self.editTask = null;
+
+                            }
 
                         } else {
 
                             self.moveTaskLeft(task);
+                            self.editTask = task;
 
                         }
 
@@ -4236,6 +4322,7 @@
 
                             var task = self.testTasks.findBy('id', tid);
 
+                            task.description = target.value;
                             e.target.disabled = true;
                             self.db.putTask({
 
@@ -4243,10 +4330,6 @@
                                 testCaseId: task.testCaseId,
                                 description: target.value,
                                 step: task.step
-
-                            }).then(() => {
-
-                                // self.getTestTasks();
 
                             });
 
@@ -4256,18 +4339,7 @@
                     del.addEventListener('mouseup', (e) => {
                         "use strict";
 
-                        self.deleteTask(e.target.dataset.dcipherTaskId).then(() => {
-
-                            self.db.getTestTasks(self.testCase.id).then((tasks) => {
-
-                                self.db.getTestEvents(self.testCase.id).then((events) => {
-
-                                    self.initTestTasks(tasks, events);
-
-                                });
-
-                            });
-                        });
+                        self.deleteTask(e.target.dataset.dcipherTaskId);
 
                     })
 
@@ -4296,7 +4368,26 @@
 
                     // Delete task from db and list
                     promises.push(self.db.deleteTask(task.id));
+
+                    // Delete task events
+                    if (task.events && task.events.length) {
+
+                        promises.push(self.db.deleteEventSet(task.events));
+
+                    }
+
+                    // Cut out task from the task list
                     testTasks.splice(tIndex, 1);
+                    self.createTaskList();
+                    testTasks.forEach( (task) => {
+
+                        if (task.left) {
+
+                            self.moveTaskLeft(task);
+
+                        }
+
+                    });
 
                     // Update step info and save updated tasks
                     testTasks.forEach((task, idx) => {
@@ -4317,29 +4408,9 @@
 
                     });
 
-                    // Delete task events
-                    task.events.forEach((event) => {
-                        "use strict";
-
-                        if (event.taskId === id) {
-
-                            promises.push(self.db.deleteEvent(event.id));
-
-                        }
-
-                    });
-
                     Promise.all(promises).then(() => {
 
-                        self.getTestTasks().then(() => {
-
-                            resolve();
-
-                        });
-
-                    }, (error) => {
-
-                        reject(error);
+                        resolve();
 
                     });
 
@@ -4355,7 +4426,7 @@
                     div = $('div.d-cipher-task', tb)[idx],
                     dw = ($('.step-number', div).outerWidth()),
                     ease = 'left 0.2s ease-out 0.15s',
-                    i, il, t;
+                    i, il, t, $sdiv;
 
                 for (i = 0; i < idx; i++) {
 
@@ -4363,7 +4434,9 @@
                     t.left = true;
 
                     // Move previous tasks to the left
-                    $($('div.d-cipher-task', tb)[i]).css({
+                    $sdiv = $($('div.d-cipher-task', tb)[i]);
+                    $('span.step-number', $sdiv).removeClass('active');
+                    $sdiv.css({
 
                         left: dw * (i + 2) + 4,
                         transition: ease
@@ -4372,12 +4445,15 @@
 
                 }
 
-                $($('div.d-cipher-task', tb)[i]).css({
+                // $($('div.d-cipher-task', tb)[i]).css({
+                $(div).css({
 
                     left: dw * (i + 2) + 4,
                     transition: ease
 
                 }).children('.task-description').fadeIn('fast');
+
+                $('span.step-number', div).addClass('active');
 
                 task.left = true;
 
@@ -4393,18 +4469,19 @@
                     testTasks = this.testTasks,
                     step = task.step,
                     div = $('div.d-cipher-task', tb)[step],
-                    $div = $(div),
                     $spn = $('span.step-number', div),
                     w = $spn.outerWidth(),
                     tLen = this.testTasks.length,
                     winWidth = window.innerWidth,
                     left = winWidth - w * (tLen - step),
                     ease = 'left 0.2s ease-out 0.15s',
-                    i = tLen;
+                    i = tLen, $sdiv;
 
                 while (i-- > step) {
 
-                    $($('div.d-cipher-task', tb)[i]).css({
+                    $sdiv = $($('div.d-cipher-task', tb)[i]);
+                    $('span.step-number', $sdiv).removeClass('active');
+                    $sdiv.css({
 
                         left: winWidth - w * (tLen - i),
                         transition: ease
@@ -4415,7 +4492,19 @@
 
                 }
 
-                $($('div.d-cipher-task', tb)[i]).children('.task-description').fadeIn('slow');
+                if (step) {
+
+                    $($('div.d-cipher-task > span.step-number[step=' + (step - 1) + ']', tb)).addClass('active');
+
+                } else {
+
+                    this.editTask = null;
+                    this.appMode = '';
+
+                }
+
+                // $(div).children('.task-description').fadeIn('slow');
+                // $('span.step-number', div).removeClass('active');
 
                 delete task.left;
 
@@ -4571,13 +4660,11 @@
 
             this.startTest = function () {
 
-                var task = this.testTasks[0];
-
                 $(this.getDomElement('testName')).hide();
                 $(this.getDomElement('butStartTest')).hide();
                 $(this.getDomElement('butTest')).hide();
                 $(this.getDomElement('taskProgress')).width(0);
-                this.activateTask(task);
+                this.activateTask(this.testTasks[0]);
                 this.toggleRecMode();
                 this.resetApp('test', this.testEvents[0].location);
 
@@ -4991,16 +5078,30 @@
 
                 return new Promise((resolve, reject) => {
 
+                    if (testCaseId) {
+
+                        $(self.getDomElement('testName')).html(test ? test.name : '').show();
+
+                    }
+
                     if (self.testTasks.length) {
 
                         var testEvents = self.testEvents = [],
-                            currentTaskId = self.currentTaskId;
+                            currentTaskId = self.currentTaskId,
+                            editTaskId = self.editTaskId;
 
                         self.createSessionList();
                         self.testTasks.forEach((task) => {
 
                             if (task.id === currentTaskId) {
+
                                 self.currentTask = task;
+
+                            }
+                            if (task.id === editTaskId) {
+
+                                self.editTask = task;
+
                             }
                             Array.prototype.push.apply(testEvents, task.events);
 
@@ -5009,8 +5110,6 @@
                         resolve();
 
                     } else {
-
-                        $(self.getDomElement('testName')).html(test ? test.name : '').show();
 
                         self.initTestSessions(testCaseId).then(() => {
 
@@ -5040,21 +5139,29 @@
             this.initTestTasks = (tasks) => {
                 "use strict";
 
-                var self = this,
-                    events = this.testEvents;
+                if (!tasks.length && !this.testCase) {
+
+                    return;
+
+                }
+
+                var events = this.testEvents;
 
                 this.tasks = [];
 
-                tasks.forEach((task) => {
+                if (events && events.length) {
 
-                    task.events = events.filter((event) => {
+                    tasks.forEach((task) => {
 
-                        return event.taskId === task.id;
+                        task.events = events.filter((event) => {
+
+                            return event.taskId === task.id;
+
+                        });
 
                     });
 
-                });
-
+                }
                 this.testTasks = tasks;
                 this.createTaskList();
 
@@ -5214,20 +5321,16 @@
 
                 this.db.putTask(task).then(() => {
 
-                    // self.getTestTasks().then(() => {
-
                     self.testTasks.push(task);
-                    // self.moveTaskLeft(self.testTasks.findBy('id', id));
                     self.initTestTasks(self.testTasks, self.testEvents);
                     self.moveTaskLeft(task);
                     $('input#taskId-' + task.id).attr('disabled', false).focus();
-
-                    // });
 
                 });
 
             };
 
+/*
             this.getTestTasks = () => {
                 "use strict";
 
@@ -5260,9 +5363,9 @@
                 });
 
             };
+*/
 
-        }
-        ; // End of DCipher class
+        }; // End of DCipher class
 
     var dCipher = new DCipher();
 
