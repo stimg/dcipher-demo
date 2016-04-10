@@ -1335,7 +1335,7 @@
                         timeStamp = +new Date(),
                         event = {
                             id: $.newGuid(),
-                            taskId: this.currentTask ? this.currentTask.id : '',
+                            taskId: this.currentTask ? this.currentTask.id : this.editTask ? this.editTask.id : '',
                             testCaseId: this.testCase ? this.testCase.id : '',
                             sessionId: this.sessionId,
                             timeStamp: timeStamp,
