@@ -2205,7 +2205,7 @@
 
                     msg += loc._Test_events + ': ' + activeSession.events.length;
 
-                } else {
+                } else if (this.appMode !== '') {
 
                     msg += /*loc._Time + ': ' +*/ timeString + ' ';
                     msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
