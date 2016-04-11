@@ -712,34 +712,7 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.tests, self.tables.tasks], 'rw').progress((t) => {
-
-                    t.objectStore(self.tables.tests).delete(id);
-                    self.tasks.forEach((task) => {
-                        "use strict";
-
-                        if (task.testCaseId === id) {
-
-                            t.objectStore(self.tables.tasks).delete(task.id);
-
-                            self.testEvents.forEach((event) => {
-                                "use strict";
-
-                                if (event.taskId === id) {
-
-                                    t.objectStore(self.tables.events).delete(event.id);
-
-                                }
-
-                            });
-
-                        }
-
-                    });
-
-                    // TODO: delete test record as well?
-
-                }).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(() => {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Test data deleted.');
@@ -869,32 +842,6 @@
                 }).fail(function () {
 
                     console.warn('[INFO] dbAdapter: Failed to delete task data.');
-                    reject();
-
-                });
-
-            });
-
-        };
-
-        this.deleteTaskEvents = (taskId, sessionId) => {
-
-        };
-
-        this.deleteEvent = (id) => {
-            "use strict";
-
-            var self = this;
-
-            return new Promise((resolve, reject) => {
-
-                $.indexedDB(self.dbName).objectStore(self.tables.events).delete(id).done(() => {
-
-                    resolve();
-
-                }).fail((error, message) => {
-
-                    console.log('[ERROR] IDB: fail to delete event. Error: ', message, error.stack);
                     reject();
 
                 });
@@ -1175,9 +1122,13 @@
 
                         var task = self.editTask;
 
+                        this.resetApp();
                         this.appMode = 'testEvents';
+                        this.editTask.events = [];
+                        document.getElementById('taskId-' + this.editTask.id).value =  this.editTask.description + ' [ 0 ]';
+                        $(this.getDomElement('butAddTask')).hide();
 
-                        if (!this.activeSession) {
+                        if (!this.activeSession || this.activeSession.type !== 'testEvents') {
 
                             this.db.getTestSessions(task.testCaseId).then((sessions) => {
                                 "use strict";
@@ -1189,12 +1140,24 @@
                                     if (eSession.events && eSession.events.length) {
 
                                         eSession.events = eSession.events.filter((event) => {
+
                                             return event.taskId !== task.id;
+
                                         });
+                                        window.location.reload();
 
                                     } else {
 
-                                        eSession.events = [];
+                                        self.db.getSessionEvents(eSession.id).then( (events) => {
+
+                                            eSession.events = events.filter((event) => {
+
+                                                return event.taskId !== task.id;
+
+                                            }) || [];
+                                            window.location.reload();
+
+                                        });
 
                                     }
                                     self.activeSession = eSession;
@@ -1203,6 +1166,7 @@
                                 } else {
 
                                     createNewSession();
+                                    window.location.reload();
 
                                 }
 
@@ -1215,12 +1179,17 @@
                                 return event.taskId !== task.id;
 
                             });
+                            window.location.reload();
 
                         }
 
                     } else {
 
-                        this.unsetActiveSession();
+                        if (this.activeSession && this.sessions && this.sessions.length) {
+
+                            this.unsetActiveSession();
+
+                        }
                         createNewSession();
                     }
 
@@ -1300,6 +1269,7 @@
                 //console.debug('TREE PATH: ', treePath);
                 //console.debug('tagName: ', etarget.tagName);
 
+                e.stopPropagation();
                 if (this.appMode === 'test' && !controls) {
 
                     this.currentEvent = {
@@ -1404,11 +1374,17 @@
                         };
 
                     // TODO: ?? save / check other events?
-                    if (self.editTask) {
+                    if (self.appMode === 'testEvents' && self.editTask) {
 
                         if (event.type === 'mousedown') {
 
                             events.push(event);
+                            self.editTask.events.push(event);
+
+                            // Change test name
+                            self.getDomElement('testName').innerText = self.testCase.name + ' [ ' + events.length + ' ]';
+                            // Change task name
+                            document.getElementById('taskId-' + self.editTask.id).value = self.editTask.description + ' [ ' + self.editTask.events.length + ' ]';
 
                         }
 
@@ -1501,9 +1477,9 @@
                          */
 
                         events.push(event);
+                        activeSession.mouseMilesTotal = milesTotal;
 
                     }
-                    activeSession.mouseMilesTotal = milesTotal;
                     this.updateStatString(e);
 
                 }
@@ -4202,6 +4178,20 @@
                             self.moveTaskLeft(task);
                             self.editTask = task;
 
+                            if (self.appMode === 'testEvents') {
+
+                                task.events = [];
+                                self.testEvents = self.testEvents.filter( (event) => {
+                                    "use strict";
+
+                                    return event.taskId !== task.id;
+
+                                });
+                                document.getElementById('taskId-' + task.id).value =  task.description + ' [ 0 ]';
+
+                            }
+
+
                         }
 
                     }
@@ -4210,7 +4200,7 @@
 
                 if (this.testCase && this.testCase.id) {
 
-                    if (this.testTasks.length) {
+                    if (this.testTasks && this.testTasks.length && this.testEvents && this.testEvents.length) {
 
                         if (!this.currentTask) {
 
@@ -4266,6 +4256,12 @@
                     inp.disabled = true;
                     inp.setAttribute('data-dcipher-task-id', t.id);
                     inp.value = t.description;
+
+                    if (self.appMode === 'testEvents') {
+
+                        inp.value += ' [ ' + (t.events ? t.events.length : 0) + ' ] ';
+
+                    }
 
                     // Delete task button
                     del = document.createElement('div');
@@ -4495,6 +4491,7 @@
                 if (step) {
 
                     $($('div.d-cipher-task > span.step-number[step=' + (step - 1) + ']', tb)).addClass('active');
+                    $($('.d-cipher-task > .task-description', this.getDomElement('taskBar'))[step - 1]).fadeIn();
 
                 } else {
 
@@ -4677,6 +4674,9 @@
 
                 function endOfTest() {
 
+                    self.toggleRecMode();
+                    self.resetTasklist();
+
                     $('.d-cipher-task-done', tb).fadeOut();
                     $(self.getDomElement('taskProgress')).hide();
                     $(self.getDomElement('testName')).show();
@@ -4686,8 +4686,6 @@
                 }
 
                 this.appMode = 'record';
-                this.toggleRecMode();
-                this.resetTasklist();
                 if (stop) {
 
                     endOfTest();
@@ -4818,17 +4816,24 @@
 
                 });
 
+                if (this.currentTask) {
+
+                    var tDiv = document.getElementById('taskId-' + this.currentTask.id);
+                    tDiv.value = this.currentTask.description + '  [ ' + ev.done + ' from ' + ev.total + ' ]';
+
+                }
+
+                if (ev.done === ev.total) {
+
+                    this.endOfTest();
+
+                }
+
             };
 
             this.resetApp = function (mode, path, restore) {
 
-                localStorage.removeItem('Stroller.active');
-                localStorage.removeItem('Stroller.name');
-                localStorage.removeItem('Stroller.price');
-                localStorage.removeItem('Stroller.stroller');
-                localStorage.removeItem('Stroller.modules.Base');
-                localStorage.removeItem('Stroller.modules.Frame');
-                localStorage.removeItem('Stroller.modules.TF');
+                localStorage.clear();
                 sessionStorage.removeItem('basket');
                 this.appMode = mode;
                 if (!restore && path /*&& window.location.pathname !== path*/) {
@@ -5045,13 +5050,14 @@
                     inp.addEventListener('change', function (e) {
 
                         var test = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id')),
-                            name = $(this).val();
+                            name = $(this).val(),
+                            len = test.testEvents ? test.testEvents.length : 0;
 
                         if (test && name) {
 
                             test.name = name;
                             test.description = name;
-                            self.getDomElement('testName').innerText = name;
+                            self.getDomElement('testName').innerText = name + ' [ ' + len + ' ]';
                             self.saveTestCase(test);
                             self.createTaskList();
 
@@ -5078,12 +5084,6 @@
 
                 return new Promise((resolve, reject) => {
 
-                    if (testCaseId) {
-
-                        $(self.getDomElement('testName')).html(test ? test.name : '').show();
-
-                    }
-
                     if (self.testTasks.length) {
 
                         var testEvents = self.testEvents = [],
@@ -5105,6 +5105,9 @@
                             }
                             Array.prototype.push.apply(testEvents, task.events);
 
+                            var len = self.testEvents ? self.testEvents.length : 0;
+                            $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
+
                         });
                         self.createTaskList();
                         resolve();
@@ -5115,6 +5118,12 @@
 
                             self.db.getTestTasks(testCaseId).then((tasks) => {
 
+                                if (self.testEvents) {
+
+                                    var len = self.testEvents ? self.testEvents.length : 0;
+                                    $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
+
+                                }
                                 self.initTestTasks(tasks);
                                 resolve();
 
@@ -5139,19 +5148,21 @@
             this.initTestTasks = (tasks) => {
                 "use strict";
 
-                if (!tasks.length && !this.testCase) {
+                if (tasks && !tasks.length && !this.testCase) {
 
                     return;
 
                 }
 
-                var events = this.testEvents;
+                var self = this,
+                    events = this.testEvents,
+                    tDivs = $('.d-cipher-task', this.getDomElement('taskBar'));
 
                 this.tasks = [];
 
                 if (events && events.length) {
 
-                    tasks.forEach((task) => {
+                    tasks.forEach((task, idx) => {
 
                         task.events = events.filter((event) => {
 
@@ -5176,6 +5187,7 @@
                     testSessionId;
 
                 this.sessions = [];
+                path = path.substring(0, path.lastIndexOf('/'));
 
                 return new Promise((resolve, reject) => {
 
@@ -5237,9 +5249,18 @@
 
                     };
 
+                this.testTasks = [];
                 this.tests.push(test);
                 this.testCase = test;
+                this.currentTask = null;
+                this.sessions = [];
+                this.currentEvent = null;
+                this.startEventIndex = '';
+                this.endEventIndex = '';
+                this.timeBrackets = [];
                 this.createTestList();
+                this.createTaskList();
+                this.createSessionList();
                 $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
 
             };
@@ -5268,35 +5289,48 @@
 
                     var promises = [];
 
-                    promises.push(self.db.deleteTest(testCaseId));
-                    promises.push(self.db.getTestTasks(testCaseId).then((tasks) => {
+                    self.db.deleteTest(testCaseId).then( () => {
 
-                        promises.push(self.db.deleteTaskSet(tasks));
+                        self.db.getTestTasks(testCaseId).then((tasks) => {
 
-                    }));
-                    promises.push(self.db.getTestEvents(testCaseId).then((events) => {
+                            self.db.deleteTaskSet(tasks).then( () => {
 
-                        promises.push(self.db.deleteEventSet(events));
+                                self.db.getTestSessions(testCaseId).then((sessions) => {
 
-                    }));
+                                    sessions.forEach( (session) => {
 
-                    Promises.all(promises).then(() => {
+                                        promises.push(self.db.deleteSession(session.id));
 
-                        self.db.getTests().then((tests) => {
-                            "use strict";
+                                    });
 
-                            self.tests = tests;
-                            self.createTestList();
-                            self.testTasks = [];
-                            self.testEvents = [];
-                            resolve();
+                                    Promise.all(promises).then(() => {
+
+                                        self.db.getTests().then((tests) => {
+                                            "use strict";
+
+                                            self.tests = tests;
+                                            self.createTestList();
+                                            self.testTasks = [];
+                                            self.testEvents = [];
+                                            self.createTaskList();
+                                            self.getDomElement('testName').innerHTML = '';
+                                            $(self.getDomElement('butAddTask')).hide();
+                                            resolve();
+
+                                        });
+
+                                    }, () => {
+
+                                        console.error('[ERROR] dCipher: Failed to delete test.');
+                                        reject();
+
+                                    });
+
+                                });
+
+                            });
 
                         });
-
-                    }, (error, message) => {
-
-                        console.error('[ERROR] dCipher: Failed to delete test. Error: ', message);
-                        reject(error);
 
                     });
 
@@ -5322,6 +5356,7 @@
                 this.db.putTask(task).then(() => {
 
                     self.testTasks.push(task);
+                    self.editTask = task;
                     self.initTestTasks(self.testTasks, self.testEvents);
                     self.moveTaskLeft(task);
                     $('input#taskId-' + task.id).attr('disabled', false).focus();
