@@ -402,40 +402,61 @@
             var self = this,
                 tables = self.tables;
 
-            return $.indexedDB(self.dbName).done(function (db) {
+            return new Promise( (resolve, reject) => {
+                "use strict";
 
-                var ok = true,
-                    database = db;
+                $.indexedDB(self.dbName).done(function (db) {
 
-                console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
-                            ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
+                    var ok = true,
+                        database = db;
 
-                // Check if all stores are in the database
-                $.each(tables, function (s) {
+                    console.log('[INFO] dbAdapter: Indexed database opened. Data base name ' + self.dbName +
+                                ' version: ' + db.version + '; storages: ' + db.objectStoreNames.length);
 
-                    if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
+                    // Check if all stores are in the database
+                    $.each(tables, function (s) {
 
-                        ok = false;
+                        if (!db.objectStoreNames.contains(tables[s]) || db.objectStoreNames.length > Object.keys(tables).length) {
+
+                            ok = false;
+
+                        }
+
+                    });
+
+                    if (!ok) {
+
+                        if (db.version) {
+
+                            console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
+
+                        }
+
+                        // setTimeout(function () {
+
+                            self.upgradeDB(database).done( () => {
+
+                                resolve();
+
+                            }).fail( () => {
+
+                                reject();
+
+                            });
+
+                        // }, 10);
+
+                    } else {
+
+                        resolve();
 
                     }
+
+                }).fail( () => {
+
+                    reject();
 
                 });
-
-                if (!ok) {
-
-                    if (db.version) {
-
-                        console.log('[INFO] dbAdapter: Database will be upgraded to new version, object stores will be created.');
-
-                    }
-
-                    setTimeout(function () {
-
-                        self.upgradeDB(database);
-
-                    }, 10);
-
-                }
 
             });
 
@@ -446,7 +467,7 @@
             var ver = 1 + db.version,
                 tables = this.tables;
 
-            $.indexedDB(this.dbName, {
+            return $.indexedDB(this.dbName, {
 
                 'version': ver,
                 'upgrade': function (t) {
@@ -564,7 +585,6 @@
 
                 }).done(function () {
 
-                    console.log(sessions);
                     resolve(sessions)
 
                 }).fail(function (error, msg) {
@@ -1002,7 +1022,7 @@
                 var self = this,
                     path = window.location.pathname;
 
-                self.db.init().done(() => {
+                self.db.init().then( () => {
 
                     self.db.getTests(path).then((tests) => {
 
@@ -6037,8 +6057,7 @@
 
     document.addEventListener('DOMContentLoaded', initDomElements);
 
-})
-(window, document);
+})(window, document);
 
 // jQuery plugins
 function initJQueryPlugins() {
@@ -6062,6 +6081,7 @@ function initJQueryPlugins() {
     });
 
 }
+
 // Indexed DB
 function initIndexedDB() {
 
@@ -6583,6 +6603,7 @@ function initIndexedDB() {
     $.indexedDB.IDBTransaction = IDBTransaction;
     $.idb = $.indexedDB;
 }
+
 // Bootstrap color picker
 /*!
  * Bootstrap Colorpicker
