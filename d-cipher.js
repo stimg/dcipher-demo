@@ -291,7 +291,7 @@
                 id: '0-4-4',
                 taskId: '0-4',
                 sessionId: '0-1-0-0',
-                type: 'click',
+                type: 'mousedown',
                 target: {
                     treePath: "0-10-0-0-0-0-1-0-2-1-0-0-1-1-0",
                     tagName: "A"
@@ -3497,6 +3497,11 @@
                 $(cnvHolder).hide();
 
             }
+            if (self.sessions.length) {
+
+                self.createTaskList();
+
+            }
             $(sessionsDiv).children().remove();
             $(cnvHolder).children('.cnv').remove();
             this.sessions.forEach(function (r, idx) {
@@ -3552,7 +3557,7 @@
                 sessionDiv.appendChild(butShow);
 
                 // Delete Record button
-                if (r.master && sesionsLen === 1) {
+                if (!r.master || r.master && sesionsLen === 1) {
 
                     butDel = document.createElement('div');
                     butDel.setAttribute('data-dcipher-rec-id', r.id);
@@ -3652,7 +3657,7 @@
 
                 });
 
-                if (r.master && sesionsLen === 1) {
+                if (!r.master || r.master && sesionsLen === 1) {
 
                     butDel.addEventListener('click', function () {
 
@@ -3677,7 +3682,7 @@
 
                 });
 
-                if (r.master && sesionsLen === 1) {
+                if (!r.master || r.master && sesionsLen === 1) {
 
                     sessionDiv.addEventListener('dblclick', function () {
 
@@ -3839,6 +3844,12 @@
                         $(self.getDomElement('butRecMaster')).show();
 
                      }
+
+                    if (self.sessions.length === 1) {
+
+                        self.createTaskList();
+
+                    }
                     resolve();
 
                 }, function (error, message) {
@@ -4121,7 +4132,7 @@
             var self = this,
                 $tb = $(this.getDomElement('taskBar')),
                 w = 42,
-                d, sn, sd;
+                d, inv, sn, sd;
 
             function mouseUpHandler(e) {
 
@@ -4252,6 +4263,23 @@
                 d = document.createElement('div');
                 d.className = 'd-cipher-task';
                 d.style.left = rp + w * i + 'px';
+
+                if (!i && self.sessions.length) {
+
+                    // Invite icon
+                    inv = document.createElement('span');
+                    inv.className = 'invite-icon';
+                    d.appendChild(inv);
+                    inv.addEventListener('click', function () {
+                        "use strict";
+
+                        window.location = 'mailto:?subject=Invitation to test&body=Hi,' +
+                                          ' please take a part in our testing @ http://dcipher.eu/bugaboo/A/. ' +
+                                          'It will take just a fiew minute. Thank you in advance! Best regards, UX-FLO Team.';
+
+                    });
+
+                }
 
                 // Task step number span
                 sn = document.createElement('span');
