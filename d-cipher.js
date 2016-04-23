@@ -402,7 +402,7 @@
             var self = this,
                 tables = self.tables;
 
-            return new Promise( (resolve, reject) => {
+            return new Promise( function (resolve, reject) {
                 "use strict";
 
                 $.indexedDB(self.dbName).done(function (db) {
@@ -434,11 +434,11 @@
 
                         // setTimeout(function () {
 
-                            self.upgradeDB(database).done( () => {
+                            self.upgradeDB(database).done( function () {
 
                                 resolve();
 
-                            }).fail( () => {
+                            }).fail( function () {
 
                                 reject();
 
@@ -452,7 +452,7 @@
 
                     }
 
-                }).fail( () => {
+                }).fail( function () {
 
                     reject();
 
@@ -516,7 +516,7 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress((t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress(function (t) {
                     "use strict";
 
                     t.objectStore(self.tables.events).put(session.events, session.id);
@@ -545,7 +545,7 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress((t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.sessions, self.tables.events], 'rw').progress(function (t) {
 
                     t.objectStore(self.tables.events).delete(id);
                     t.objectStore(self.tables.sessions).delete(id);
@@ -567,11 +567,11 @@
             var self = this,
                 sessions = [];
 
-            return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
 
                 if (testCaseId == '0') {
 
-                    sessions = this.masterTestSessions.slice();
+                    sessions = self.masterTestSessions.slice();
 
                 }
                 $.indexedDB(self.dbName).objectStore(self.tables.sessions).each(function (session) {
@@ -599,13 +599,13 @@
         };
 
         /*
-         this.getTestEvents = (testCaseId) => {
+         this.getTestEvents = function (testCaseId) {
          "use strict";
 
          var self = this,
          events = [];
 
-         return new Promise((resolve, reject) => {
+         return new Promise(function (resolve, reject) {
 
          if (testCaseId == '0') {
 
@@ -626,7 +626,7 @@
 
          //console.log('--> result: %s, event: %s', r, e);
          //console.debug('Records: ', self.records);
-         resolve(events/!*.sort( (event1, event2) => { return event1.timeStamp > event2.timeStamp })*!/);
+         resolve(events/!*.sort( function (event1, event2) { return event1.timeStamp > event2.timeStamp })*!/);
 
          }).fail(function (error, msg) {
 
@@ -640,15 +640,15 @@
          };
          */
 
-        this.getSessionEvents = (sessionId) => {
+        this.getSessionEvents = function (sessionId) {
             "use strict";
 
             var self = this,
-                testEvents = this.masterTestEvents.filter((event) => {
+                testEvents = this.masterTestEvents.filter(function (event) {
                     return event.sessionId === sessionId
                 });
 
-            return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
 
                 if (testEvents.length) {
 
@@ -679,7 +679,7 @@
             var self = this,
                 tests = [this.masterTest];
 
-            return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
                 "use strict";
 
                 $.indexedDB(self.dbName).objectStore(self.tables.tests).each(function (test) {
@@ -732,7 +732,7 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tests).delete(id).done(function () {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Test data deleted.');
@@ -754,12 +754,12 @@
             var self = this,
                 tasks = []; // TEST
 
-            return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
                 "use strict";
 
                 if (testCaseId == '0') {
 
-                    tasks = this.masterTestTasks.slice();
+                    tasks = self.masterTestTasks.slice();
                     resolve(tasks)
 
                 } else {
@@ -776,7 +776,7 @@
                     }).done(function () {
 
                         //console.log('--> result: %s, event: %s', r, e);
-                        resolve(tasks.sort((task1, task2) => {
+                        resolve(tasks.sort(function (task1, task2) {
                             return task1.step > task2.step
                         }));
 
@@ -797,14 +797,14 @@
 
             var self = this;
 
-            return new Promise((resolve, reject) => {
+            return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(task, task.id).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).put(task, task.id).done(function () {
 
                     console.log('[INFO] dbAdapter: task data saved.');
                     resolve();
 
-                }).fail((e, msg) => {
+                }).fail(function (e, msg) {
 
                     console.error('[ERROR] dbAdapter: Failed to save task data. Error: ', msg);
                     reject();
@@ -815,22 +815,22 @@
 
         };
 
-        this.deleteTaskSet = (tasks) => {
+        this.deleteTaskSet = function (tasks) {
             "use strict";
 
             var self = this;
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.tasks], 'rw').progress((t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.tasks], 'rw').progress(function (t) {
 
-                    tasks.forEach((task) => {
+                    tasks.forEach(function (task) {
 
                         t.objectStore(self.tables.tasks).delete(task.id);
 
                     });
 
-                }).done(() => {
+                }).done(function () {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Task set deleted.');
@@ -853,7 +853,7 @@
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).objectStore(self.tables.tasks).delete(id).done(() => {
+                $.indexedDB(self.dbName).objectStore(self.tables.tasks).delete(id).done(function () {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Test data deleted.');
@@ -870,22 +870,22 @@
 
         };
 
-        this.deleteEventSet = (events) => {
+        this.deleteEventSet = function (events) {
             "use strict";
 
             var self = this;
 
             return new Promise(function (resolve, reject) {
 
-                $.indexedDB(self.dbName).transaction([self.tables.events], 'rw').progress((t) => {
+                $.indexedDB(self.dbName).transaction([self.tables.events], 'rw').progress(function (t) {
 
-                    events.forEach((event) => {
+                    events.forEach(function (event) {
 
                         t.objectStore(self.tables.events).delete(event.id);
 
                     });
 
-                }).done(() => {
+                }).done(function () {
                     "use strict";
 
                     console.log('[INFO] dbAdapter: Event set deleted.');
@@ -1022,9 +1022,9 @@
                 var self = this,
                     path = window.location.pathname;
 
-                self.db.init().then( () => {
+                self.db.init().then( function () {
 
-                    self.db.getTests(path).then((tests) => {
+                    self.db.getTests(path).then(function (tests) {
 
                         self.tests = tests;
                         self.createTestList();
@@ -1032,7 +1032,7 @@
 
                     });
 
-                    $('document').ready(() => {
+                    $('document').ready(function () {
 
                         self.setupDOMListeners();
 
@@ -1150,7 +1150,7 @@
 
                         if (!this.activeSession || this.activeSession.type !== 'testEvents') {
 
-                            this.db.getTestSessions(task.testCaseId).then((sessions) => {
+                            this.db.getTestSessions(task.testCaseId).then(function (sessions) {
                                 "use strict";
 
                                 var eSession = sessions.findBy('type', 'testEvents');
@@ -1159,7 +1159,7 @@
 
                                     if (eSession.events && eSession.events.length) {
 
-                                        eSession.events = eSession.events.filter((event) => {
+                                        eSession.events = eSession.events.filter(function (event) {
 
                                             return event.taskId !== task.id;
 
@@ -1168,9 +1168,9 @@
 
                                     } else {
 
-                                        self.db.getSessionEvents(eSession.id).then( (events) => {
+                                        self.db.getSessionEvents(eSession.id).then( function (events) {
 
-                                            eSession.events = events.filter((event) => {
+                                            eSession.events = events.filter(function (event) {
 
                                                 return event.taskId !== task.id;
 
@@ -1194,7 +1194,7 @@
 
                         } else {
 
-                            this.activeSession.events = this.activeSession.events.filter((event) => {
+                            this.activeSession.events = this.activeSession.events.filter(function (event) {
 
                                 return event.taskId !== task.id;
 
@@ -3642,7 +3642,7 @@
 
                             if (!session.events) {
 
-                                self.db.getSessionEvents(id).then((events) => {
+                                self.db.getSessionEvents(id).then(function (events) {
                                     "use strict";
 
                                     session.events = events;
@@ -3713,7 +3713,7 @@
 
                             if (!session.events) {
 
-                                self.db.getSessionEvents(id).then((events) => {
+                                self.db.getSessionEvents(id).then(function (events) {
                                     "use strict";
 
                                     session.events = events;
@@ -3837,19 +3837,19 @@
                     session = this.sessions.findBy('id', id),
                     idx = this.sessions.indexOf(session);
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
                     "use strict";
 
                     self.unsetActiveSession();
 
                     // Delete session data
-                    self.db.deleteSession(id).then(() => {
+                    self.db.deleteSession(id).then(function () {
 
                         self.sessions.splice(idx, 1);
                         self.createSessionList();
                         resolve();
 
-                    }, (error, message) => {
+                    }, function (error, message) {
 
                         console.warn('[WARN] Could not delete session. Error:', message);
                         reject(error);
@@ -4201,7 +4201,7 @@
                             if (self.appMode === 'testEvents') {
 
                                 task.events = [];
-                                self.testEvents = self.testEvents.filter( (event) => {
+                                self.testEvents = self.testEvents.filter( function (event) {
                                     "use strict";
 
                                     return event.taskId !== task.id;
@@ -4297,14 +4297,14 @@
                     $tb.append(d);
 
                     // Tsk step button listener
-                    sn.addEventListener('mouseup', (e) => {
+                    sn.addEventListener('mouseup', function (e) {
 
                         mouseUpHandler(e);
 
                     });
 
                     // Task description inout listener
-                    sd.addEventListener('dblclick', (e) => {
+                    sd.addEventListener('dblclick', function (e) {
                         "use strict";
 
                         var target = e.target,
@@ -4320,14 +4320,14 @@
 
                     });
 
-                    inp.addEventListener('blur', (e) => {
+                    inp.addEventListener('blur', function (e) {
                         "use strict";
 
                         e.target.disabled = true;
 
                     });
 
-                    inp.addEventListener('change', (e) => {
+                    inp.addEventListener('change', function (e) {
                         "use strict";
 
                         var target = e.target,
@@ -4352,7 +4352,7 @@
                         }
                     });
 
-                    del.addEventListener('mouseup', (e) => {
+                    del.addEventListener('mouseup', function (e) {
                         "use strict";
 
                         self.deleteTask(e.target.dataset.dcipherTaskId);
@@ -4377,7 +4377,7 @@
                     tIndex = task.step,
                     testTasks = this.testTasks;
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
                     "use strict";
 
                     var promises = [];
@@ -4395,7 +4395,7 @@
                     // Cut out task from the task list
                     testTasks.splice(tIndex, 1);
                     self.createTaskList();
-                    testTasks.forEach( (task) => {
+                    testTasks.forEach( function (task) {
 
                         if (task.left) {
 
@@ -4406,7 +4406,7 @@
                     });
 
                     // Update step info and save updated tasks
-                    testTasks.forEach((task, idx) => {
+                    testTasks.forEach(function (task, idx) {
 
                         task.step = idx;
                         if (idx >= tIndex) {
@@ -4424,7 +4424,7 @@
 
                     });
 
-                    Promise.all(promises).then(() => {
+                    Promise.all(promises).then(function () {
 
                         resolve();
 
@@ -4998,7 +4998,7 @@
 
             };
 
-            this.resetTestCase = () => {
+            this.resetTestCase = function () {
                 "use strict";
 
                 this.startEventIndex = undefined;
@@ -5096,13 +5096,13 @@
 
             };
 
-            this.initTestCase = (testCaseId) => {
+            this.initTestCase = function (testCaseId) {
                 "use strict";
 
                 var self = this,
                     test = self.testCase = self.tests.findBy('id', testCaseId);
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
 
                     if (self.testTasks.length) {
 
@@ -5111,7 +5111,7 @@
                             editTaskId = self.editTaskId;
 
                         self.createSessionList();
-                        self.testTasks.forEach((task) => {
+                        self.testTasks.forEach(function (task) {
 
                             if (task.id === currentTaskId) {
 
@@ -5134,9 +5134,9 @@
 
                     } else {
 
-                        self.initTestSessions(testCaseId).then(() => {
+                        self.initTestSessions(testCaseId).then(function () {
 
-                            self.db.getTestTasks(testCaseId).then((tasks) => {
+                            self.db.getTestTasks(testCaseId).then(function (tasks) {
 
                                 if (self.testEvents) {
 
@@ -5147,13 +5147,13 @@
                                 self.initTestTasks(tasks);
                                 resolve();
 
-                            }, (error, message) => {
+                            }, function (error, message) {
 
                                 reject(error);
 
                             });
 
-                        }, (error, message) => {
+                        }, function (error, message) {
 
                             reject(error);
 
@@ -5165,7 +5165,7 @@
 
             };
 
-            this.initTestTasks = (tasks) => {
+            this.initTestTasks = function (tasks) {
                 "use strict";
 
                 if (tasks && !tasks.length && !this.testCase) {
@@ -5182,9 +5182,9 @@
 
                 if (events && events.length) {
 
-                    tasks.forEach((task, idx) => {
+                    tasks.forEach(function (task, idx) {
 
-                        task.events = events.filter((event) => {
+                        task.events = events.filter(function (event) {
 
                             return event.taskId === task.id;
 
@@ -5198,7 +5198,7 @@
 
             };
 
-            this.initTestSessions = (testCaseId) => {
+            this.initTestSessions = function (testCaseId) {
                 "use strict";
 
                 var self = this,
@@ -5209,11 +5209,11 @@
                 this.sessions = [];
                 path = path.substring(0, path.lastIndexOf('/'));
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
 
-                    self.db.getTestSessions(testCaseId).then((sessions) => {
+                    self.db.getTestSessions(testCaseId).then(function (sessions) {
 
-                        sessions.forEach((session) => {
+                        sessions.forEach(function (session) {
 
                             if (session.type !== 'testEvents') {
 
@@ -5234,7 +5234,7 @@
 
                         if (testSessionId) {
 
-                            self.db.getSessionEvents(testSessionId).then((events) => {
+                            self.db.getSessionEvents(testSessionId).then(function (events) {
 
                                 self.testEvents = events;
                                 resolve();
@@ -5290,7 +5290,7 @@
                 var self = this;
 
                 this.db.putTest(test);
-                this.db.getTests().then((tests) => {
+                this.db.getTests().then(function (tests) {
                     "use strict";
 
                     self.tests = tests;
@@ -5304,28 +5304,28 @@
 
                 var self = this;
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
                     "use strict";
 
                     var promises = [];
 
-                    self.db.deleteTest(testCaseId).then( () => {
+                    self.db.deleteTest(testCaseId).then( function () {
 
-                        self.db.getTestTasks(testCaseId).then((tasks) => {
+                        self.db.getTestTasks(testCaseId).then(function (tasks) {
 
-                            self.db.deleteTaskSet(tasks).then( () => {
+                            self.db.deleteTaskSet(tasks).then( function () {
 
-                                self.db.getTestSessions(testCaseId).then((sessions) => {
+                                self.db.getTestSessions(testCaseId).then(function (sessions) {
 
-                                    sessions.forEach( (session) => {
+                                    sessions.forEach( function (session) {
 
                                         promises.push(self.db.deleteSession(session.id));
 
                                     });
 
-                                    Promise.all(promises).then(() => {
+                                    Promise.all(promises).then(function () {
 
-                                        self.db.getTests().then((tests) => {
+                                        self.db.getTests().then(function (tests) {
                                             "use strict";
 
                                             self.tests = tests;
@@ -5339,7 +5339,7 @@
 
                                         });
 
-                                    }, () => {
+                                    }, function () {
 
                                         console.error('[ERROR] dCipher: Failed to delete test.');
                                         reject();
@@ -5358,7 +5358,7 @@
 
             };
 
-            this.createTestTask = () => {
+            this.createTestTask = function () {
                 "use strict";
 
                 var self = this;
@@ -5373,7 +5373,7 @@
 
                     };
 
-                this.db.putTask(task).then(() => {
+                this.db.putTask(task).then(function () {
 
                     self.testTasks.push(task);
                     self.editTask = task;
@@ -5386,29 +5386,29 @@
             };
 
 /*
-            this.getTestTasks = () => {
+            this.getTestTasks = function () {
                 "use strict";
 
                 var self = this,
                     testCaseId = this.testCase.id;
 
-                return new Promise((resolve, reject) => {
+                return new Promise(function (resolve, reject) {
 
-                    self.db.getTestTasks(testCaseId).then((tasks) => {
+                    self.db.getTestTasks(testCaseId).then(function (tasks) {
 
-                        self.db.getTestEvents(testCaseId).then((events) => {
+                        self.db.getTestEvents(testCaseId).then(function (events) {
 
                             self.initTestTasks(tasks, events);
                             resolve();
 
-                        }, (error, message) => {
+                        }, function (error, message) {
 
                             console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
                             reject(error);
 
                         });
 
-                    }, (error, message) => {
+                    }, function (error, message) {
 
                         console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
                         reject(error);
@@ -5691,9 +5691,9 @@
 
         });
 
-        $(sessionList).on('mouseout', (event) => {
+        $(sessionList).on('mouseout', function (event) {
 
-            $(sessionList).data('tid', setTimeout(() => {
+            $(sessionList).data('tid', setTimeout(function () {
 
                 $(sessionList).hide();
 
@@ -5701,7 +5701,7 @@
 
         });
 
-        $(sessionList).on('mouseover', (event) => {
+        $(sessionList).on('mouseover', function (event) {
 
             if ($('*', sessionList).length) {
 
@@ -5711,9 +5711,9 @@
 
         });
 
-        $(testList).on('mouseout', (event) => {
+        $(testList).on('mouseout', function (event) {
 
-            $(testList).data('tid', setTimeout(() => {
+            $(testList).data('tid', setTimeout(function () {
 
                 $(testList).hide();
 
@@ -5721,7 +5721,7 @@
 
         });
 
-        $(testList).on('mouseover', (event) => {
+        $(testList).on('mouseover', function (event) {
 
             if ($('*', testList).length) {
 
