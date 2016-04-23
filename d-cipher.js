@@ -402,7 +402,7 @@
             var self = this,
                 tables = self.tables;
 
-            return new Promise( function (resolve, reject) {
+            return new Promise(function (resolve, reject) {
                 "use strict";
 
                 $.indexedDB(self.dbName).done(function (db) {
@@ -434,15 +434,15 @@
 
                         // setTimeout(function () {
 
-                            self.upgradeDB(database).done( function () {
+                        self.upgradeDB(database).done(function () {
 
-                                resolve();
+                            resolve();
 
-                            }).fail( function () {
+                        }).fail(function () {
 
-                                reject();
+                            reject();
 
-                            });
+                        });
 
                         // }, 10);
 
@@ -452,7 +452,7 @@
 
                     }
 
-                }).fail( function () {
+                }).fail(function () {
 
                     reject();
 
@@ -891,7 +891,6 @@
                     console.log('[INFO] dbAdapter: Event set deleted.');
                     resolve();
 
-
                 }).error(function () {
 
                     console.error('[ERROR] dbAdapter: Failed to delete event set.');
@@ -908,1235 +907,819 @@
     // DCipher class
     var DCipher = function () {
 
-            //this.baseURL = '/dcipher-demo/';
-            this.baseURL = '/';
-            this.cssURL = 'css/d-cipher.css';
-            this.lang = 'en';
-            this.loc = Strings[this.lang];
-            this.domId = {
+        //this.baseURL = '/dcipher-demo/';
+        this.baseURL = '/';
+        this.cssURL = 'css/d-cipher.css';
+        this.lang = 'en';
+        this.loc = Strings[this.lang];
+        this.domId = {
 
-                container: 'd-cipher-container',
-                mouseOverStyle: 'd-cipher-mouseover-style',
-                mouseOverClass: 'd-cipher-mouseover',
-                cursor: 'd-cipher-cursor',
-                canvasHolder: 'd-cipher-canvas-holder',
-                menu: 'd-cipher-menu',
-                butRecord: 'd-cipher-menu-but-record',
-                butPlay: 'd-cipher-menu-but-play',
-                butTest: 'd-cipher-menu-but-test',
-                butList: 'd-cipher-menu-but-list',
-                stat: 'd-cipher-stat',
-                timeline: 'd-cipher-timeline',
-                timelineTooltip: 'd-cipher-timeline-tooltip',
-                timelineInfo: 'd-cipher-timeline-info',
-                timelineCursor: 'd-cipher-timeline-cursor',
-                timelineCircle: 'd-cipher-timeline-circle',
-                timelineBrackets: 'd-cipher-timeline-brackets',
-                click: 'd-cipher-click',
-                dblClick: 'd-cipher-dblclick',
-                highlightEvent: 'd-cipher-highlight-event',
-                sessions: 'd-cipher-session-list',
-                mTooltip: 'd-cipher-m-tooltip',
-                eventInfo: 'd-cipher-event-info',
-                topMenu: 'd-cipher-topmenu',
-                taskBar: 'd-cipher-taskbar',
-                taskProgress: 'd-cipher-task-progress',
-                butStartTest: 'd-cipher-but-start-task',
-                testName: 'd-cipher-test-name',
-                testList: 'd-cipher-test-list',
-                butAddTask: 'd-cipher-add-task'
+            container: 'd-cipher-container',
+            mouseOverStyle: 'd-cipher-mouseover-style',
+            mouseOverClass: 'd-cipher-mouseover',
+            cursor: 'd-cipher-cursor',
+            canvasHolder: 'd-cipher-canvas-holder',
+            menu: 'd-cipher-menu',
+            butRecord: 'd-cipher-menu-but-record',
+            butPlay: 'd-cipher-menu-but-play',
+            butTest: 'd-cipher-menu-but-test',
+            butList: 'd-cipher-menu-but-list',
+            stat: 'd-cipher-stat',
+            timeline: 'd-cipher-timeline',
+            timelineTooltip: 'd-cipher-timeline-tooltip',
+            timelineInfo: 'd-cipher-timeline-info',
+            timelineCursor: 'd-cipher-timeline-cursor',
+            timelineCircle: 'd-cipher-timeline-circle',
+            timelineBrackets: 'd-cipher-timeline-brackets',
+            click: 'd-cipher-click',
+            dblClick: 'd-cipher-dblclick',
+            highlightEvent: 'd-cipher-highlight-event',
+            sessions: 'd-cipher-session-list',
+            mTooltip: 'd-cipher-m-tooltip',
+            eventInfo: 'd-cipher-event-info',
+            topMenu: 'd-cipher-topmenu',
+            taskBar: 'd-cipher-taskbar',
+            taskProgress: 'd-cipher-task-progress',
+            butStartTest: 'd-cipher-but-start-task',
+            testName: 'd-cipher-test-name',
+            testList: 'd-cipher-test-list',
+            butAddTask: 'd-cipher-add-task'
 
-            };
+        };
 
-            this.registerEventList = [
+        this.registerEventList = [
 
-                'start',
-                'mouseover',
-                'mouseout',
-                'mousedown',
-                'mouseup',
-                //'click',
-                //'dblclick',
-                //'keydown',
-                'wheel',
-                'mousewheel',
-                'DOMMouseScroll'
+            'start',
+            'mouseover',
+            'mouseout',
+            'mousedown',
+            'mouseup',
+            //'click',
+            //'dblclick',
+            //'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
 
-            ];
+        ];
 
-            this.drawEventList = [
+        this.drawEventList = [
 
-                'start',
-                'mouseover',
-                //'mouseout',
-                'mousedown',
-                'mouseup',
-                'click',
-                'dblclick',
-                'keydown',
-                'wheel',
-                'mousewheel',
-                'DOMMouseScroll'
+            'start',
+            'mouseover',
+            //'mouseout',
+            'mousedown',
+            'mouseup',
+            'click',
+            'dblclick',
+            'keydown',
+            'wheel',
+            'mousewheel',
+            'DOMMouseScroll'
 
-            ];
+        ];
 
-            this.elementEventFilters = {
+        this.elementEventFilters = {
 
-                path: ['mouseover', 'mouseout'],
-                circle: this.registerEventList
+            path: ['mouseover', 'mouseout'],
+            circle: this.registerEventList
 
-            };
+        };
 
-            this.mouse = {
+        this.mouse = {
 
-                x: 0,
-                y: 0
+            x: 0,
+            y: 0
 
-            };
+        };
 
-            this.testCase = null;
-            this.testTasks = [];
-            this.testEvents = [];
-            this.sessions = [];
-            this.testEventSession = null;
-            this.currentTask = null;
-            this.editTask = null;
-            this.currentEvent = null;
+        this.testCase = null;
+        this.testTasks = [];
+        this.testEvents = [];
+        this.sessions = [];
+        this.testEventSession = null;
+        this.currentTask = null;
+        this.editTask = null;
+        this.currentEvent = null;
 
-            this.db = new IDB();
-            this.user = {};
-            this.sessionId = '';
-            this.activeSession = null;
-            this.startEventIndex = 0;
-            this.endEventIndex = 0;
-            this.timeBrackets = [0, 0];
-            this.appMode = '';
-            this.eventsUnderMouse = [];
-            this.timeLineEvents = [];
-            this.tlMouse = {x: 0, y: 0, down: false};
-            this.clickDelay = 200;
-            this.timeLineOffsetLeft = 100;
+        this.db = new IDB();
+        this.user = {};
+        this.sessionId = '';
+        this.activeSession = null;
+        this.startEventIndex = 0;
+        this.endEventIndex = 0;
+        this.timeBrackets = [0, 0];
+        this.appMode = '';
+        this.eventsUnderMouse = [];
+        this.timeLineEvents = [];
+        this.tlMouse = {x: 0, y: 0, down: false};
+        this.clickDelay = 200;
+        this.timeLineOffsetLeft = 100;
 
-            this.init = function init() {
+        this.init = function init() {
 
-                var self = this,
-                    path = window.location.pathname;
+            var self = this,
+                path = window.location.pathname;
 
-                self.db.init().then( function () {
+            self.db.init().then(function () {
 
-                    self.db.getTests(path).then(function (tests) {
+                self.db.getTests(path).then(function (tests) {
 
-                        self.tests = tests;
-                        self.createTestList();
-                        self.restoreState();
-
-                    });
-
-                    $('document').ready(function () {
-
-                        self.setupDOMListeners();
-
-                    });
-                    $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
+                    self.tests = tests;
+                    self.createTestList();
+                    self.restoreState();
 
                 });
 
-            };
+                $('document').ready(function () {
 
-            this.catchEvents = function catchEvents(e) {
+                    self.setupDOMListeners();
 
-                var self = this,
-                    el = document.elementFromPoint(e.clientX, e.clientY),
-                    list = self.registerEventList,
-                    type, p;
+                });
+                $('body').on('mousemove', {self: self}, self.mouseMoveHandler);
 
-                for (var i = 0, il = list.length; i < il; i++) {
+            });
 
-                    p = list[i];
-                    type = p;
+        };
 
-                    if (typeof el['on' + p] === 'function'
-                        && (!el.eventListenerList || !el.eventListenerList[type])) {
+        this.catchEvents = function catchEvents(e) {
 
-                        el.addEventListener(type, function (e) {
+            var self = this,
+                el = document.elementFromPoint(e.clientX, e.clientY),
+                list = self.registerEventList,
+                type, p;
 
-                            self.saveEvent(e);
+            for (var i = 0, il = list.length; i < il; i++) {
 
-                        });
-                        el.dispatchEvent(new MouseEvent(type, e));
+                p = list[i];
+                type = p;
 
-                    }
+                if (typeof el['on' + p] === 'function'
+                    && (!el.eventListenerList || !el.eventListenerList[type])) {
 
-                }
+                    el.addEventListener(type, function (e) {
 
-            };
+                        self.saveEvent(e);
 
-            this.toggleRecMode = function (e) {
-
-                var self = this,
-                    cnvh = this.getDomElement('canvasHolder'),
-                    $stat = $(this.getDomElement('stat'));
-
-                function updateStats() {
-
-                    self.updateStatString();
+                    });
+                    el.dispatchEvent(new MouseEvent(type, e));
 
                 }
 
-                function catchEvents(e) {
+            }
 
-                    self.catchEvents(e);
+        };
+
+        this.toggleRecMode = function (e) {
+
+            var self = this,
+                cnvh = this.getDomElement('canvasHolder'),
+                $stat = $(this.getDomElement('stat'));
+
+            function updateStats() {
+
+                self.updateStatString();
+
+            }
+
+            function catchEvents(e) {
+
+                self.catchEvents(e);
+
+            }
+
+            function createNewSession() {
+                "use strict";
+
+                var ts = +new Date(),
+                    pathname = location.pathname;
+
+                self.sessionId = $.newGuid();
+                self.activeSession = {
+
+                    id: self.sessionId,
+                    type: self.appMode,
+                    testCaseId: self.testCase ? self.testCase.id : '',
+                    name: self.loc._Default_record_name + self.sessions.length,
+                    location: pathname.substring(0, pathname.lastIndexOf('/')),
+                    description: '',
+                    created: ts,
+                    modified: ts,
+                    author: self.user.fullname || self.loc._Anonym,
+                    color: 'rgba(255, 0, 255, 1)',
+                    duration: 0,
+                    mouseMilesTotal: 0,
+                    events: [],
+                    eventsStat: {}
+
+                };
+
+                if (!self.editTask) {
+
+                    self.saveEvent(new MouseEvent('start', e));
 
                 }
+                self.db.putSession(self.activeSession);
 
-                function createNewSession() {
-                    "use strict";
+            }
 
-                    var ts = +new Date(),
-                        pathname = location.pathname;
+            if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
 
-                    self.sessionId = $.newGuid();
-                    self.activeSession = {
+                // Turn on record mode
+                //this.resetApp(this.appMode || 'record', window.location.pathname);
+                this.resetApp(this.appMode || 'record');
 
-                        id: self.sessionId,
-                        type: self.appMode,
-                        testCaseId: self.testCase ? self.testCase.id : '',
-                        name: self.loc._Default_record_name + self.sessions.length,
-                        location: pathname.substring(0, pathname.lastIndexOf('/')),
-                        description: '',
-                        created: ts,
-                        modified: ts,
-                        author: self.user.fullname || self.loc._Anonym,
-                        color: 'rgba(255, 0, 255, 1)',
-                        duration: 0,
-                        mouseMilesTotal: 0,
-                        events: [],
-                        eventsStat: {}
+                $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                $(cnvh).hide();
+                $(this.getDomElement('0-2-0-0')).hide(); // XXX ???
+                $(this.getDomElement('butList')).hide();
+                $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
+                $('body').on('mousemove', catchEvents);
+                this.hideRecList();
 
-                    };
+                if (this.editTask) {
 
-                    if (!self.editTask) {
+                    var task = self.editTask;
 
-                        self.saveEvent(new MouseEvent('start', e));
+                    this.resetApp();
+                    this.appMode = 'testEvents';
+                    this.editTask.events = [];
+                    document.getElementById('taskId-' + this.editTask.id).value = this.editTask.description + ' [ 0 ]';
+                    $(this.getDomElement('butAddTask')).hide();
 
-                    }
-                    self.db.putSession(self.activeSession);
+                    if (!this.activeSession || this.activeSession.type !== 'testEvents') {
 
-                }
+                        this.db.getTestSessions(task.testCaseId).then(function (sessions) {
+                            "use strict";
 
-                if (this.appMode !== 'record' && (!e || e && e.target && e.target.className !== 'stop')) {
+                            var eSession = sessions.findBy('type', 'testEvents');
 
-                    // Turn on record mode
-                    //this.resetApp(this.appMode || 'record', window.location.pathname);
-                    this.resetApp(this.appMode || 'record');
+                            if (eSession) {
 
-                    $('div', this.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                    $(cnvh).hide();
-                    $(this.getDomElement('0-2-0-0')).hide(); // XXX ???
-                    $(this.getDomElement('butList')).hide();
-                    $stat.data('tid', setInterval(updateStats, 100)).fadeIn();
-                    $('body').on('mousemove', catchEvents);
-                    this.hideRecList();
+                                if (eSession.events && eSession.events.length) {
 
-                    if (this.editTask) {
+                                    eSession.events = eSession.events.filter(function (event) {
 
-                        var task = self.editTask;
+                                        return event.taskId !== task.id;
 
-                        this.resetApp();
-                        this.appMode = 'testEvents';
-                        this.editTask.events = [];
-                        document.getElementById('taskId-' + this.editTask.id).value =  this.editTask.description + ' [ 0 ]';
-                        $(this.getDomElement('butAddTask')).hide();
+                                    });
+                                    window.location.reload();
 
-                        if (!this.activeSession || this.activeSession.type !== 'testEvents') {
+                                } else {
 
-                            this.db.getTestSessions(task.testCaseId).then(function (sessions) {
-                                "use strict";
+                                    self.db.getSessionEvents(eSession.id).then(function (events) {
 
-                                var eSession = sessions.findBy('type', 'testEvents');
-
-                                if (eSession) {
-
-                                    if (eSession.events && eSession.events.length) {
-
-                                        eSession.events = eSession.events.filter(function (event) {
-
-                                            return event.taskId !== task.id;
-
-                                        });
-                                        window.location.reload();
-
-                                    } else {
-
-                                        self.db.getSessionEvents(eSession.id).then( function (events) {
-
-                                            eSession.events = events.filter(function (event) {
+                                        eSession.events = events.filter(function (event) {
 
                                                 return event.taskId !== task.id;
 
                                             }) || [];
-                                            window.location.reload();
+                                        window.location.reload();
 
-                                        });
-
-                                    }
-                                    self.activeSession = eSession;
-                                    self.sessionId = eSession.id;
-
-                                } else {
-
-                                    createNewSession();
-                                    window.location.reload();
+                                    });
 
                                 }
+                                self.activeSession = eSession;
+                                self.sessionId = eSession.id;
 
-                            });
+                            } else {
 
-                        } else {
-
-                            this.activeSession.events = this.activeSession.events.filter(function (event) {
-
-                                return event.taskId !== task.id;
-
-                            });
-                            window.location.reload();
-
-                        }
-
-                    } else {
-
-                        if (this.activeSession && this.sessions && this.sessions.length) {
-
-                            this.unsetActiveSession();
-
-                        }
-                        createNewSession();
-                    }
-
-                } else {
-
-                    // Turn off record mode
-                    this.appMode = '';
-                    $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
-                    $stat.fadeOut();
-                    clearInterval($stat.data('tid'));
-                    $('body').off('mousemove', catchEvents);
-
-                    var activeSession = this.activeSession;
-
-                    if (this.editTask) {
-
-                        this.db.putSession(activeSession);
-
-                    } else if (activeSession && activeSession.events && activeSession.events.length > 1) {
-
-                        var evt = activeSession.events[activeSession.events.length - 1];
-
-                        activeSession.duration = evt.time;
-                        activeSession.kpi = evt.kpi;
-                        activeSession.mouseMilesTotal = evt.miles;
-                        activeSession.eventsQty = 0;
-
-                        for (var et in activeSession.eventsStat) {
-
-                            if (activeSession.eventsStat.hasOwnProperty(et)) {
-
-                                activeSession.eventsQty += activeSession.eventsStat[et];
+                                createNewSession();
+                                window.location.reload();
 
                             }
-
-                        }
-
-                        this.db.putSession(activeSession).then(function () {
-
-                            self.sessions.push(activeSession);
-                            self.createSessionList();
-                            self.toggleSessionList();
-                            $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
-                            self.setActiveSession(self.sessionId, true);
-                            self.showSpiderGraph(self.sessionId);
 
                         });
 
                     } else {
 
-                        this.activeSession = null;
-                        this.sessionId = null;
+                        this.activeSession.events = this.activeSession.events.filter(function (event) {
+
+                            return event.taskId !== task.id;
+
+                        });
+                        window.location.reload();
 
                     }
 
-                }
+                } else {
 
-                return this;
+                    if (this.activeSession && this.sessions && this.sessions.length) {
 
-            };
-
-            this.saveEvent = function saveEvent(e) {
-
-                var self = this,
-                    etype = e.type,
-                    etarget = e.target || document.getElementsByTagName('body')[0],
-                    treePath = this.getTreePath(etarget),
-                    location = document.location.pathname,
-                    controls = !!$(this.getDomElement('topMenu')).find(etarget).length,
-                    save = (this.appMode === 'record' || this.appMode === 'test' || this.appMode === 'testEvents') &&
-                           this.registerEventList.indexOf(etype) > -1
-                           && !($(this.getDomElement('container')).find(etarget).length || controls)
-                           && etarget.localName !== 'svg'
-                           && etarget.localName !== 'circle';
-
-                console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
-                //console.debug('TREE PATH: ', treePath);
-                //console.debug('tagName: ', etarget.tagName);
-
-                e.stopPropagation();
-                if (this.appMode === 'test' && !controls) {
-
-                    this.currentEvent = {
-
-                        type: etype,
-                        target: {
-                            tagName: etarget.tagName,
-                            treePath: treePath
-                        },
-                        location: location
-
-                    };
-                    this.checkTaskCompletion();
-
-                }
-
-                if (save) {
-
-                    //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
-
-                    var activeSession = this.activeSession,
-                        events = activeSession.events,
-                        elen = events.length,
-                        lastEvent = events[elen - 1] || null,
-                        milesTotal = this.getNDCMousePath(activeSession),
-                        clientNDC = this.getNDC(e.clientX, e.clientY),
-                        pageNDC = this.getNDC(e.pageX, e.pageY),
-                        pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
-                        $el = $(etarget),
-                        offs = $el.offset(),
-                        left = offs.left,
-                        top = offs.top,
-                        timeStamp = +new Date(),
-                        event = {
-                            id: $.newGuid(),
-                            taskId: this.currentTask ? this.currentTask.id : this.editTask ? this.editTask.id : '',
-                            testCaseId: this.testCase ? this.testCase.id : '',
-                            sessionId: this.sessionId,
-                            timeStamp: timeStamp,
-                            appMode: this.appMode,
-                            index: elen,
-                            location: location,
-                            ndc: {
-                                x: clientNDC.x,
-                                y: clientNDC.y,
-                                pageX: pageNDC.x,
-                                pageY: pageNDC.y,
-                                pageXOffset: pageOffsetNDC.x,
-                                pageYOffset: pageOffsetNDC.y
-                            },
-                            bubbles: true,
-                            cancelBubble: e.cancelBubble,
-                            cancelable: e.cancelable,
-                            defaultPrevented: e.defaultPrevented,
-                            returnValue: true,
-                            type: etype,
-                            char: e.char,
-                            shiftKey: e.shiftKey,
-                            altKey: e.altKey,
-                            ctrlKey: e.ctrlKey,
-                            button: e.button,
-                            which: e.which,
-                            charCode: e.charCode,
-                            deltaX: e.deltaX,
-                            deltaY: e.deltaY,
-                            deltaZ: e.deltaZ,
-                            deltaMode: e.deltaMode,
-                            x: e.clientX,
-                            y: e.clientY,
-                            clientX: e.clientX,
-                            clientY: e.clientY,
-                            pageX: e.pageX,
-                            pageY: e.pageY,
-                            winWidth: window.innerWidth,
-                            winHeight: window.innerHeight,
-                            docHeight: document.body.scrollHeight,
-                            docWidth: document.body.scrollWidth,
-                            pageXOffset: pageXOffset,
-                            pageYOffset: pageYOffset,
-                            target: {
-                                treePath: treePath,
-                                tagName: etarget.tagName,
-                                localName: etarget.localName,
-                                name: etarget.name,
-                                title: etarget.title,
-                                id: etarget.id,
-                                className: typeof etarget.className === 'string' ? etarget.className : '',
-                                width: $el.outerWidth(),
-                                height: $el.outerHeight(),
-                                x: left,
-                                y: top,
-                                dx: 0,
-                                dy: 0,
-                                localX: e.pageX - left,
-                                localY: e.pageY - top,
-                                relX: (e.pageX - left) / $el.outerWidth(),
-                                relY: (e.pageY - top) / $el.outerHeight()
-                            },
-                            duration: lastEvent ? timeStamp - lastEvent.timeStamp : 0,
-                            time: timeStamp - activeSession.modified
-
-                        };
-
-                    // TODO: ?? save / check other events?
-                    if (self.appMode === 'testEvents' && self.editTask) {
-
-                        if (event.type === 'mousedown') {
-
-                            events.push(event);
-                            self.editTask.events.push(event);
-
-                            // Change test name
-                            self.getDomElement('testName').innerText = self.testCase.name + ' [ ' + events.length + ' ]';
-                            // Change task name
-                            document.getElementById('taskId-' + self.editTask.id).value = self.editTask.description + ' [ ' + self.editTask.events.length + ' ]';
-
-                        }
-
-                    } else {
-
-                        if (lastEvent && lastEvent.type === etype
-                            && lastEvent.target.treePath === event.target.treePath
-                            && !etype.match(/scroll|wheel/i)) {
-
-                            return;
-
-                        }
-
-                        event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
-                        event.drag = event.milesLast && etype === 'mouseup';
-                        event.miles = milesTotal + event.milesLast;
-
-                        if (etarget.dataset) {
-
-                            event.target.dcipherName = etarget.dataset.dcipherName;
-                            event.target.dcipherAction = etarget.dataset.dcipherAction;
-
-                        }
-                        if (etype === 'mouseup' && event.milesLast === 0) {
-
-                            event = events.pop();
-                            event.type = etype = 'click';
-                            lastEvent = events[events.length - 1];
-
-                            if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
-
-                                events.pop();
-                                event.type = etype = 'dblclick';
-
-                            }
-
-                        }
-
-                        if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
-
-                            event.dx = left - lastEvent.target.x;
-                            event.dy = top - lastEvent.target.y;
-
-                        }
-
-                        if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
-
-                            activeSession.eventsStat[etype] = activeSession.eventsStat[etype] ? activeSession.eventsStat[etype] + 1 : 1;
-                            event.eventNo = activeSession.eventsStat[etype];
-
-                        }
-
-                        if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
-
-                            lastEvent.eventNo = activeSession.eventsStat['wheel'];
-
-                        }
-
-                        if (event.drag) {
-
-                            activeSession.eventsStat['drag'] = activeSession.eventsStat['drag'] ? activeSession.eventsStat['drag'] + 1 : 1;
-                            event.eventNo = activeSession.eventsStat['drag'];
-
-                        }
-
-                        if (this.currentTask && (!lastEvent || lastEvent.taskId !== this.currentTask.id)) {
-
-                            event.firstInTask = true;
-
-                        }
-                        /*
-                         var sd = 0;
-                         rec.events.forEach(function (e) {
-
-                         if (e.type === 'wheel') {
-
-                         sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
-
-                         }
-
-                         });
-                         */
-                        event.kpi = (event.time / 1000) * (((activeSession.eventsStat['click'] || 0) + (activeSession.eventsStat['drag'] || 0) + (activeSession.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
-                        //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
-                        event.kpiLast = event.kpi;
-                        /*
-                         event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
-
-                         console.debug('-------> event.kpiLast', event.kpiLast);
-                         */
-
-                        events.push(event);
-                        activeSession.mouseMilesTotal = milesTotal;
+                        this.unsetActiveSession();
 
                     }
-                    this.updateStatString(e);
-
+                    createNewSession();
                 }
 
-                return this;
+            } else {
 
-            };
+                // Turn off record mode
+                this.appMode = '';
+                $('div', this.getDomElement('butRecord')).removeClass('stop').addClass('rec');
+                $stat.fadeOut();
+                clearInterval($stat.data('tid'));
+                $('body').off('mousemove', catchEvents);
 
-            this.setupDOMListeners = function setupDOMListeners() {
+                var activeSession = this.activeSession;
 
-                var self = this;
+                if (this.editTask) {
 
-                console.log('Setting up DOM listeners...');
+                    this.db.putSession(activeSession);
+                    this.moveTaskRight(this.testTasks[0]);
 
-                function setElementListeners(arr) {
+                } else if (activeSession && activeSession.events && activeSession.events.length > 1) {
 
-                    arr.each(function (i, el) {
+                    var evt = activeSession.events[activeSession.events.length - 1];
 
-                        for (var k in el) {
+                    activeSession.duration = evt.time;
+                    activeSession.kpi = evt.kpi;
+                    activeSession.mouseMilesTotal = evt.miles;
+                    activeSession.eventsQty = 0;
 
-                            if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
+                    for (var et in activeSession.eventsStat) {
 
-                                el.addEventListener(k.substr(2), function (e) {
+                        if (activeSession.eventsStat.hasOwnProperty(et)) {
 
-                                    self.saveEvent(e);
-
-                                });
-                                console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
-
-                            }
+                            activeSession.eventsQty += activeSession.eventsStat[et];
 
                         }
-                        setElementListeners($(el).children());
+
+                    }
+
+                    this.db.putSession(activeSession).then(function () {
+
+                        self.sessions.push(activeSession);
+                        self.createSessionList();
+                        self.toggleSessionList();
+                        $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
+                        self.setActiveSession(self.sessionId, true);
+                        self.showSpiderGraph(self.sessionId);
 
                     });
 
+                } else {
+
+                    this.activeSession = null;
+                    this.sessionId = null;
+
                 }
 
-                setElementListeners($('body').children(":not('#d-cipher-container, script')"));
-                console.log('DOM listeners have been set up...');
+            }
 
-            };
+            return this;
 
-            this.getTreePath = function getTreePath(el) {
+        };
 
-                var path = '',
-                    found = false;
+        this.saveEvent = function saveEvent(e) {
 
-                function parseTree(node, cid) {
+            var self = this,
+                etype = e.type,
+                etarget = e.target || document.getElementsByTagName('body')[0],
+                treePath = this.getTreePath(etarget),
+                location = document.location.pathname,
+                controls = !!$(this.getDomElement('topMenu')).find(etarget).length,
+                save = (this.appMode === 'record' || this.appMode === 'test' || this.appMode === 'testEvents') &&
+                       this.registerEventList.indexOf(etype) > -1
+                       && !($(this.getDomElement('container')).find(etarget).length || controls)
+                       && etarget.localName !== 'svg'
+                       && etarget.localName !== 'circle';
 
-                    if (found) {
+            console.debug('Event type: %s, target: %s; record: %s', etype, etarget, save);
+            //console.debug('TREE PATH: ', treePath);
+            //console.debug('tagName: ', etarget.tagName);
+
+            e.stopPropagation();
+            if (this.appMode === 'test' && !controls && etype === 'mousedown') {
+
+                this.currentEvent = {
+
+                    type: etype,
+                    target: {
+                        tagName: etarget.tagName,
+                        treePath: treePath
+                    },
+                    location: location
+
+                };
+                this.checkTaskCompletion();
+
+            }
+
+            if (save) {
+
+                //console.debug('--> x, %s, y: %s', e.clientX, e.clientY);
+
+                var activeSession = this.activeSession,
+                    events = activeSession.events,
+                    elen = events.length,
+                    lastEvent = events[elen - 1] || null,
+                    milesTotal = this.getNDCMousePath(activeSession),
+                    clientNDC = this.getNDC(e.clientX, e.clientY),
+                    pageNDC = this.getNDC(e.pageX, e.pageY),
+                    pageOffsetNDC = this.getNDC(pageXOffset, pageYOffset),
+                    $el = $(etarget),
+                    offs = $el.offset(),
+                    left = offs.left,
+                    top = offs.top,
+                    timeStamp = +new Date(),
+                    event = {
+                        id: $.newGuid(),
+                        taskId: this.currentTask ? this.currentTask.id : this.editTask ? this.editTask.id : '',
+                        testCaseId: this.testCase ? this.testCase.id : '',
+                        sessionId: this.sessionId,
+                        timeStamp: timeStamp,
+                        appMode: this.appMode,
+                        index: elen,
+                        location: location,
+                        ndc: {
+                            x: clientNDC.x,
+                            y: clientNDC.y,
+                            pageX: pageNDC.x,
+                            pageY: pageNDC.y,
+                            pageXOffset: pageOffsetNDC.x,
+                            pageYOffset: pageOffsetNDC.y
+                        },
+                        bubbles: true,
+                        cancelBubble: e.cancelBubble,
+                        cancelable: e.cancelable,
+                        defaultPrevented: e.defaultPrevented,
+                        returnValue: true,
+                        type: etype,
+                        char: e.char,
+                        shiftKey: e.shiftKey,
+                        altKey: e.altKey,
+                        ctrlKey: e.ctrlKey,
+                        button: e.button,
+                        which: e.which,
+                        charCode: e.charCode,
+                        deltaX: e.deltaX,
+                        deltaY: e.deltaY,
+                        deltaZ: e.deltaZ,
+                        deltaMode: e.deltaMode,
+                        x: e.clientX,
+                        y: e.clientY,
+                        clientX: e.clientX,
+                        clientY: e.clientY,
+                        pageX: e.pageX,
+                        pageY: e.pageY,
+                        winWidth: window.innerWidth,
+                        winHeight: window.innerHeight,
+                        docHeight: document.body.scrollHeight,
+                        docWidth: document.body.scrollWidth,
+                        pageXOffset: pageXOffset,
+                        pageYOffset: pageYOffset,
+                        target: {
+                            treePath: treePath,
+                            tagName: etarget.tagName,
+                            localName: etarget.localName,
+                            name: etarget.name,
+                            title: etarget.title,
+                            id: etarget.id,
+                            className: typeof etarget.className === 'string' ? etarget.className : '',
+                            width: $el.outerWidth(),
+                            height: $el.outerHeight(),
+                            x: left,
+                            y: top,
+                            dx: 0,
+                            dy: 0,
+                            localX: e.pageX - left,
+                            localY: e.pageY - top,
+                            relX: (e.pageX - left) / $el.outerWidth(),
+                            relY: (e.pageY - top) / $el.outerHeight()
+                        },
+                        duration: lastEvent ? timeStamp - lastEvent.timeStamp : 0,
+                        time: timeStamp - activeSession.modified
+
+                    };
+
+                // TODO: ?? save / check other events?
+                if (self.appMode === 'testEvents' && self.editTask) {
+
+                    if (event.type === 'mousedown') {
+
+                        events.push(event);
+                        self.editTask.events.push(event);
+
+                        // Change test name
+                        self.getDomElement('testName').innerText = self.testCase.name + ' [ ' + events.length + ' ]';
+                        // Change task name
+                        document.getElementById('taskId-' + self.editTask.id).value = self.editTask.description + ' [ ' + self.editTask.events.length + ' ]';
+
+                    }
+
+                } else {
+
+                    if (lastEvent && lastEvent.type === etype
+                        && lastEvent.target.treePath === event.target.treePath
+                        && !etype.match(/scroll|wheel/i)) {
 
                         return;
 
                     }
 
-                    var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
+                    event.milesLast = lastEvent ? this.getDistance(lastEvent.ndc, event.ndc) : milesTotal;
+                    event.drag = event.milesLast && etype === 'mouseup';
+                    event.miles = milesTotal + event.milesLast;
 
-                    for (var i = 0, len = ch.length; i < len; i++) {
+                    if (etarget.dataset) {
 
-                        if (ch[i] === el) {
+                        event.target.dcipherName = etarget.dataset.dcipherName;
+                        event.target.dcipherAction = etarget.dataset.dcipherAction;
 
-                            path = cid + '-' + i;
-                            found = true;
-                            break;
+                    }
+                    if (etype === 'mouseup' && event.milesLast === 0) {
 
-                        } else {
+                        event = events.pop();
+                        event.type = etype = 'click';
+                        lastEvent = events[events.length - 1];
 
-                            parseTree(ch[i], cid + '-' + i);
+                        if (lastEvent && lastEvent.type === 'click' && event.milesLast === 0) {
+
+                            events.pop();
+                            event.type = etype = 'dblclick';
 
                         }
 
                     }
 
-                }
+                    if (etype.match(/wheel|scroll/i) && lastEvent && lastEvent.type.match(/wheel|scroll/i)) {
 
-                parseTree($('body')[0], '0');
-                return path;
-
-            };
-
-            this.getElementByTreePath = function getElementByTreePath(path) {
-
-                var pa = path.split('-'),
-                    el = $('body')[0];
-
-                pa.shift();
-
-                pa.forEach(function (p) {
-
-                    if (el) {
-
-                        el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
+                        event.dx = left - lastEvent.target.x;
+                        event.dy = top - lastEvent.target.y;
 
                     }
 
-                });
+                    if (!etype.match(/wheel|scroll/i) || !lastEvent.type.match(/wheel|scroll/i)) {
 
-                //console.debug('--> element: ', el);
-
-                return el || window;
-
-            };
-
-            this.getDistance = function getDistance(p1, p2) {
-
-                var asp = window.innerWidth / window.innerHeight;
-
-                return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
-
-            };
-
-            this.getNDCMousePath = function getNDCMousePath(session) {
-
-                var self = this,
-                    path = 0;
-
-                session.events.forEach(function (e, idx, arr) {
-
-                    if (idx > 0) {
-
-                        path += self.getDistance(arr[idx - 1].ndc, e.ndc);
+                        activeSession.eventsStat[etype] = activeSession.eventsStat[etype] ? activeSession.eventsStat[etype] + 1 : 1;
+                        event.eventNo = activeSession.eventsStat[etype];
 
                     }
 
-                });
+                    if (lastEvent && lastEvent.type.match(/wheel|scroll/i) && !etype.match(/wheel|scroll/i)) {
 
-                return path;
-
-            };
-
-            this.getNDC = function getNDC() {
-
-                var pos;
-
-                if (arguments.length === 1) {
-
-                    pos = arguments[0];
-
-                } else {
-
-                    pos = {
-
-                        x: arguments[0],
-                        y: arguments[1]
+                        lastEvent.eventNo = activeSession.eventsStat['wheel'];
 
                     }
+
+                    if (event.drag) {
+
+                        activeSession.eventsStat['drag'] = activeSession.eventsStat['drag'] ? activeSession.eventsStat['drag'] + 1 : 1;
+                        event.eventNo = activeSession.eventsStat['drag'];
+
+                    }
+
+                    if (this.currentTask && (!lastEvent || lastEvent.taskId !== this.currentTask.id)) {
+
+                        event.firstInTask = true;
+
+                    }
+                    /*
+                     var sd = 0;
+                     rec.events.forEach(function (e) {
+
+                     if (e.type === 'wheel') {
+
+                     sd += self.getDistance({ x: 0, y: 0 }, { x: e.deltaX, y: e.deltaY })
+
+                     }
+
+                     });
+                     */
+                    event.kpi = (event.time / 1000) * (((activeSession.eventsStat['click'] || 0) + (activeSession.eventsStat['drag'] || 0) + (activeSession.eventsStat['wheel'] || 0)) || 1) / (event.miles || 1);
+                    //event.kpi = event.miles * ((rec.eventsStat['click'] + rec.eventsStat['drag']) || 1) / (event.time / 1000);
+                    event.kpiLast = event.kpi;
+                    /*
+                     event.kpiLast = lastEvent ? (event.kpi - lastEvent.kpi) : event.kpi;
+
+                     console.debug('-------> event.kpiLast', event.kpiLast);
+                     */
+
+                    events.push(event);
+                    activeSession.mouseMilesTotal = milesTotal;
 
                 }
+                this.updateStatString(e);
 
-                return {
+            }
 
-                    x: 2 * pos.x / window.innerWidth - 1,
-                    y: 1 - 2 * pos.y / window.innerHeight
+            return this;
 
-                }
+        };
 
-            };
+        this.setupDOMListeners = function setupDOMListeners() {
 
-            this.getSC = function getSC() {
+            var self = this;
 
-                var pos;
+            console.log('Setting up DOM listeners...');
 
-                if (arguments.length === 1) {
+            function setElementListeners(arr) {
 
-                    pos = arguments[0];
+                arr.each(function (i, el) {
 
-                } else {
+                    for (var k in el) {
 
-                    pos = {
+                        if (k.match(/^on/) && typeof el[k] === 'function' && el[k].toString().match(/stopPropagation|preventDefault/)) {
 
-                        x: arguments[0],
-                        y: arguments[1]
+                            el.addEventListener(k.substr(2), function (e) {
 
-                    }
+                                self.saveEvent(e);
 
-                }
-
-                return {
-
-                    x: (pos.x + 1) * window.innerWidth / 2,
-                    y: (1 - pos.y) * window.innerHeight / 2
-
-                }
-
-            };
-
-            this.calculateScreenCoords = function (session) {
-
-                var self = this;
-
-                session.events.forEach(function (e) {
-
-                    self.getTargetScreenPars(e);
-
-                });
-
-            };
-
-            this.showTLTooltip = function showTLTooltip(e) {
-
-                var self = this,
-                    event = this.getTimelineEvent(e),
-                    task = this.getTimelineTask(e),
-                    $tt = $(this.getDomElement('timelineTooltip')),
-                    $he = $(this.getDomElement('highlightEvent')),
-                    $tl = $(this.getDomElement('timeline')),
-                    loc = this.loc,
-                    html = '<table>',
-                    x, y, w, h, top, left;
-
-                function calculateTTPosition() {
-
-                    if (y + 20 + h < window.innerHeight) {
-
-                        top = y + 20;
-
-                    } else {
-
-                        top = y - h - 10;
-
-                    }
-
-                    if (x - w / 2 - 5 < 0) {
-
-                        left = 5;
-
-                    } else if (x + w / 2 + 5 > window.innerWidth) {
-
-                        left = window.innerWidth - w - 5;
-
-                    } else {
-
-                        left = x - w / 2;
-
-                    }
-
-                }
-
-                function getEventInfo(e) {
-
-                    var rId = e.sessionId,
-                        rec = self.getSessionById(rId),
-                        etarget = e.target,
-                        html = '';
-
-                    if (etarget.dcipherName) {
-
-                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                    }
-
-                    if (etarget.dcipherAction) {
-
-                        html += '<tr>' +
-                                '<td class="tt-name">' + loc._Action + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
-                                '</tr><tr>' +
-                                '<td colspan = "2" class = "empty-row"></td>' +
-                                '</tr><br />';
-
-                    }
-
-                    html += '<tr>' +
-                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                            '</tr><tr>' +
-                            '<td colspan = "2" class = "empty-row"></td>' +
-                            '</tr>';
-
-                    html += '<tr>' +
-                            //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._Distance + ':</td>' +
-                            '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._KPI + ':</td>' +
-                            '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
-                            '</tr>';
-
-                    return html;
-                }
-
-                function getTaskInfo(task) {
-
-                    var html = '';
-
-                    html += '<tr><td class="tt-name">' + loc._Test_name + ':</td>' +
-                            '<td class="tt-value">' + (self.testCase.name || 'Test #1') + '</td></tr>';
-
-                    html += '<tr>' +
-                            '<td colspan = "2" class="tt-value">' + task.description + '</td>' +
-                            '</tr><tr>';
-
-                    return html;
-
-                }
-
-                if (event) {
-
-                    x = event.clientX;
-                    y = event.clientY;
-
-                    if (!$tl.data('eiTID')) {
-
-                        $tl.data('eiTID', setTimeout(function () {
-
-                            $tt.hide();
-                            self.showEventsInfo(event);
-
-                        }, 5000));
-
-                    }
-
-                    $tl.css('cursor', 'pointer');
-                    if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
-
-                        $he.css({top: event.event.y, left: event.event.x}).show();
-
-                    } else {
-
-                        $he.hide();
-
-                    }
-                    html += getEventInfo(event.event) + '</table>';
-                    $tt.html(html);
-                    w = $tt.outerWidth();
-                    h = $tt.outerHeight();
-                    calculateTTPosition();
-                    $tt.css('top', top).css('left', left)
-                        .show();
-
-                } else if (task) {
-
-                    x = e.clientX;
-                    y = e.clientY - 10;
-
-                    if (!$tl.data('eiTID')) {
-
-                        $tl.data('eiTID', setTimeout(function () {
-
-                            $tt.hide();
-
-                        }, 5000));
-
-                    }
-
-                    $tl.css('cursor', 'pointer');
-                    html += getTaskInfo(task) + '</table>';
-                    $tt.html(html);
-                    w = $tt.outerWidth();
-                    h = $tt.outerHeight();
-                    calculateTTPosition();
-                    $tt.css('top', top).css('left', left)
-                        .show();
-
-                } else {
-
-                    $tl.css('cursor', 'default');
-                    $tt.hide();
-                    $he.hide();
-                    $(this.getDomElement('eventInfo')).hide();
-                    if ($tl.data('eiTID')) {
-
-                        clearTimeout($tl.data('eiTID'));
-                        $tl.data('eiTID', null);
-
-                    }
-
-                }
-
-            };
-
-            this.showMouseTooltip = function showMouseTooltip(event) {
-
-                var self = this,
-                    loc = self.loc,
-                    $tt = $(self.getDomElement('mTooltip')),
-                    cnvh = self.getDomElement('canvasHolder'),
-                    $cnvh = $(cnvh),
-                    x = event.clientX, y = event.clientY,
-                    evts = self.getEventsUnderMouse(x, y),
-                    html = '<table>', evt, rec,
-                    w, h, top, left;
-
-                function getEventInfo(e) {
-
-                    var rId = e.sessionId,
-                        rec = self.getSessionById(rId),
-                        etarget = e.target,
-                        html = '';
-
-                    if (etarget.dcipherName) {
-
-                        html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
-
-                    }
-
-                    if (etarget.dcipherAction) {
-
-                        html += '<tr>' +
-                                '<td class="tt-name">' + loc._Action + ':</td>' +
-                                '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
-                                '</tr>';
-
-                    }
-
-                    html += '<tr>' +
-                            /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
-                            '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
-                            '</tr><tr>' +
-                            '<td colspan = "2" class = "empty-row"></td>' +
-                            '</tr>';
-
-                    return html;
-                }
-
-                if (evts.length) {
-
-                    $cnvh.css('cursor', 'pointer');
-
-                    if (!$cnvh.data('eiTID')) {
-
-                        $cnvh.data('eiTID', setTimeout(function () {
-
-                            $(self.getDomElement('eventInfo')).hide();
-                            self.showEventsInfo();
-
-                        }, 5000));
-
-                    }
-
-                    evt = evts[0];
-                    rId = evt.sessionId;
-                    html += getEventInfo(evt);
-
-                    evts.forEach(function (e) {
-
-                        rec = self.getSessionById(rId);
-
-                        if (rId !== e.sessionId) {
-
-                            rId = e.sessionId;
-                            html += getEventInfo(e);
+                            });
+                            console.debug('DOM Listeners -> add event: "%s"', k.substr(2));
 
                         }
 
-                        html += '<tr>' +
-                                //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
-                                '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                                '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + loc._Distance + ':</td>' +
-                                '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                                '</tr><tr>' +
-                                '<td class="tt-name">' + loc._KPI + ':</td>' +
-                                '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
-                                '</tr>';
-
-                    });
-
-                    $tt.html(html + '</table>');
-                    w = $tt.outerWidth();
-                    h = $tt.outerHeight();
-
-                    if (y + 20 + h < window.innerHeight) {
-
-                        top = y + 20;
-
-                    } else {
-
-                        top = y - h - 10;
-
                     }
+                    setElementListeners($(el).children());
 
-                    if (x - w / 2 - 5 < 0) {
+                });
 
-                        left = 5;
+            }
 
-                    } else if (x + w / 2 + 5 > window.innerWidth) {
+            setElementListeners($('body').children(":not('#d-cipher-container, script')"));
+            console.log('DOM listeners have been set up...');
 
-                        left = window.innerWidth - w - 5;
+        };
 
-                    } else {
+        this.getTreePath = function getTreePath(el) {
 
-                        left = x - w / 2;
+            var path = '',
+                found = false;
 
-                    }
+            function parseTree(node, cid) {
 
-                    $tt.css({
-                        'top': top,
-                        'left': left
-                    }).show();
-
-                } else if (event.target.parentNode.id !== self.domId['timeline']) {
-
-                    $(self.getDomElement('eventInfo')).hide();
-                    $(self.getDomElement('timelineCircle')).hide();
-                    $cnvh.css('cursor', 'default');
-                    if ($cnvh.data('eiTID')) {
-
-                        clearTimeout($cnvh.data('eiTID'));
-                        $cnvh.data('eiTID', null);
-
-                    }
-                    $tt.hide();
-
-                }
-
-                //console.debug(html);
-
-            };
-
-            this.showEventsInfo = function (event) {
-
-                var self = this,
-                    loc = this.loc,
-                    evts = this.eventsUnderMouse,
-                    $eInf = $(this.getDomElement('eventInfo')),
-                    dx = 0, dy = 0, html = '<table>', rec,
-                    top, left, x, y, w, h, shift = 10;
-
-                evt = evts[0] || event.event;
-
-                if (!evt) {
+                if (found) {
 
                     return;
 
                 }
 
-                function getRecordInfo(rec) {
+                var ch = node.tagName === 'BODY' ? $(node).children(":not('#d-cipher-container, script')") : $(node).children();
 
-                    var clicks = rec.eventsStat['click'],
-                        showEvents = ['click', 'wheel', 'drag'];
+                for (var i = 0, len = ch.length; i < len; i++) {
 
-                    html = '<tr>' +
-                           /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
-                           '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
-                           '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
-                           '</tr><tr>' +
-                           '<td colspan = "2" class = "empty-row"></td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
-                           '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Duration + ': </td>' +
-                           '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
-                           '</tr><tr>' +
-                           '<td class= "tt-name">' + loc._Events + ': </td>' +
-                           '<td class= "tt-value">' + rec.eventsQty + '</td>' +
-                           '</tr><tr>';
+                    if (ch[i] === el) {
 
-                    showEvents.forEach(function (k) {
+                        path = cid + '-' + i;
+                        found = true;
+                        break;
 
-                            if (rec.eventsStat[k]) {
+                    } else {
 
-                                html += '<td class= "tt-name">' + loc[k] + ': </td>' +
-                                        '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
-                                        '</tr><tr>';
-
-                            }
-
-                        }
-                    );
-
-                    html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
-                            '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
-                            '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class= "tt-name">' + loc._KPI + ': </td>' +
-                            '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
-                            '</tr>';
-
-                    return html;
-                }
-
-                rId = evt.sessionId;
-                rec = self.getSessionById(rId);
-
-                html += getRecordInfo(rec);
-
-                evts.forEach(function (e) {
-
-                    dx += e.x;
-                    dy += e.y;
-
-                    if (rId !== e.sessionId) {
-
-                        rId = e.sessionId;
-                        rec = self.getSessionById(rId);
-                        html += '<tr><td></td></tr>' + getRecordInfo(rec);
+                        parseTree(ch[i], cid + '-' + i);
 
                     }
 
-                    /*
-                     html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
-                     + ' #' + e.eventNo
-                     + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
-                     */
+                }
 
-                    html += '<tr>' +
-                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
-                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
-                            '</tr><tr>' +
-                            '<td class="tt-name">' + loc._Distance + ':</td>' +
-                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
-                            '</tr>';
+            }
 
-                });
+            parseTree($('body')[0], '0');
+            return path;
 
-                $eInf.html(html + '</table>');
-                w = $eInf.outerWidth();
-                h = $eInf.outerHeight();
-                x = event ? event.clientX : dx / evts.length;
-                y = event ? event.clientY : dy / evts.length;
+        };
 
-                if (y - h - shift > 5) {
+        this.getElementByTreePath = function getElementByTreePath(path) {
 
-                    top = y - h - shift;
+            var pa = path.split('-'),
+                el = $('body')[0];
 
-                } else /*if ( y + h + shift > window.innerHeight)*/ {
+            pa.shift();
 
-                    top = y + shift;
+            pa.forEach(function (p) {
+
+                if (el) {
+
+                    el = el.tagName === 'BODY' ? $(el).children(":not('#d-cipher-container, script')")[p] : $(el).children()[p];
+
+                }
+
+            });
+
+            //console.debug('--> element: ', el);
+
+            return el || window;
+
+        };
+
+        this.getDistance = function getDistance(p1, p2) {
+
+            var asp = window.innerWidth / window.innerHeight;
+
+            return Math.sqrt(Math.pow(((p2.x - p1.x) * asp), 2) + Math.pow((p2.y - p1.y) / asp, 2));
+
+        };
+
+        this.getNDCMousePath = function getNDCMousePath(session) {
+
+            var self = this,
+                path = 0;
+
+            session.events.forEach(function (e, idx, arr) {
+
+                if (idx > 0) {
+
+                    path += self.getDistance(arr[idx - 1].ndc, e.ndc);
+
+                }
+
+            });
+
+            return path;
+
+        };
+
+        this.getNDC = function getNDC() {
+
+            var pos;
+
+            if (arguments.length === 1) {
+
+                pos = arguments[0];
+
+            } else {
+
+                pos = {
+
+                    x: arguments[0],
+                    y: arguments[1]
+
+                }
+
+            }
+
+            return {
+
+                x: 2 * pos.x / window.innerWidth - 1,
+                y: 1 - 2 * pos.y / window.innerHeight
+
+            }
+
+        };
+
+        this.getSC = function getSC() {
+
+            var pos;
+
+            if (arguments.length === 1) {
+
+                pos = arguments[0];
+
+            } else {
+
+                pos = {
+
+                    x: arguments[0],
+                    y: arguments[1]
+
+                }
+
+            }
+
+            return {
+
+                x: (pos.x + 1) * window.innerWidth / 2,
+                y: (1 - pos.y) * window.innerHeight / 2
+
+            }
+
+        };
+
+        this.calculateScreenCoords = function (session) {
+
+            var self = this;
+
+            session.events.forEach(function (e) {
+
+                self.getTargetScreenPars(e);
+
+            });
+
+        };
+
+        this.showTLTooltip = function showTLTooltip(e) {
+
+            var self = this,
+                event = this.getTimelineEvent(e),
+                task = this.getTimelineTask(e),
+                $tt = $(this.getDomElement('timelineTooltip')),
+                $he = $(this.getDomElement('highlightEvent')),
+                $tl = $(this.getDomElement('timeline')),
+                loc = this.loc,
+                html = '<table>',
+                x, y, w, h, top, left;
+
+            function calculateTTPosition() {
+
+                if (y + 20 + h < window.innerHeight) {
+
+                    top = y + 20;
+
+                } else {
+
+                    top = y - h - 10;
 
                 }
 
@@ -2154,3004 +1737,3416 @@
 
                 }
 
-                $eInf.css('top', top).css('left', left).show();
-                $(this.getDomElement('mTooltip')).hide();
+            }
 
-            };
+            function getEventInfo(e) {
 
-            this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
+                var rId = e.sessionId,
+                    rec = self.getSessionById(rId),
+                    etarget = e.target,
+                    html = '';
 
-                var self = this,
-                    sessions = this.sessions,
-                    abs = Math.abs,
-                    th = 5,
-                    evts = [];
+                if (etarget.dcipherName) {
 
-                sessions.forEach(function (session) {
-
-                    if (session.active && session.visible) {
-
-                        var ea = session.events.filter(function (e, i, arr) {
-
-                            return abs(x - e.x) < th && abs(y - e.y) < th
-                                   && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
-                                   && self.drawEventList.indexOf(e.type) > -1;
-
-                        });
-
-                        if (ea && ea.length) {
-
-                            [].push.apply(evts, ea);
-
-                        }
-
-                    }
-                });
-
-                this.eventsUnderMouse = evts;
-
-                return evts;
-
-            };
-
-            this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
-
-                if (self.eventsUnderMouse.length) {
-
-                    //self.showEventsInfo();
-                    self.showTimelineEvent(self.eventsUnderMouse[0]);
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
                 }
 
-            };
+                if (etarget.dcipherAction) {
 
-            this.updateStatString = function updateStatString(e) {
-
-                var loc = this.loc,
-                    activeSession = this.activeSession,
-                    evt = activeSession.events[activeSession.events.length - 1],
-                    ms = activeSession.modified,
-                    miles = evt ? evt.miles : 0,
-                    timeString = this.getTimeString(+new Date() - ms),
-                    clicks = activeSession.eventsStat.click || 0,
-                    drags = activeSession.eventsStat.drag || 0,
-                    wheels = activeSession.eventsStat.wheel || 0,
-                    el = document.elementFromPoint(this.mouse.x, this.mouse.y),
-                    trg = el.name || el.id || el.className,
-                //type = e ? loc[e.type] : '',
-                    msg = ''; //loc._Recording + '.';
-
-                if (this.editTask) {
-
-                    msg += loc._Test_events + ': ' + activeSession.events.length;
-
-                } else if (this.appMode !== '') {
-
-                    msg += /*loc._Time + ': ' +*/ timeString + ' ';
-                    msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
-                    msg += loc._Clicks + ': ' + clicks + ' | ';
-                    msg += loc._Drags + ': ' + drags + ' | ';
-                    msg += loc._Wheels + ': ' + wheels + ' | ';
-
-                    if (trg) {
-
-                        msg += loc._Target + ': ' + trg + ' | ';
-
-                    }
-                    msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
-
-                    if (e && e.type === 'keypress') {
-
-                        msg += '; key: ' + String.fromCharCode(e.charCode);
-
-                    }
+                    html += '<tr>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</tr><tr>' +
+                            '<td colspan = "2" class = "empty-row"></td>' +
+                            '</tr><br />';
 
                 }
-                this.getDomElement('stat').innerText = msg;
-                //console.debug(msg);
-                return this;
 
-            };
+                html += '<tr>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
+                        '</tr><tr>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
+                        '</tr>';
 
-            this.getTimeString = function getTimeString(ms) {
+                html += '<tr>' +
+                        //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + (e.milesLast || 0).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._KPI + ':</td>' +
+                        '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                        '</tr>';
 
-                var time = ms / 1000,
-                    hours, mins, secs, html = '';
+                return html;
+            }
 
-                hours = Math.floor(time / 3600);
-                mins = Math.floor((time - hours * 3600) / 60);
-                secs = Math.floor(time - hours * 3600 - mins * 60);
-                html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
-                html += mins < 10 ? '0' + mins + ':' : mins + ':';
-                html += secs < 10 ? '0' + secs : secs;
+            function getTaskInfo(task) {
+
+                var html = '';
+
+                html += '<tr><td class="tt-name">' + loc._Test_name + ':</td>' +
+                        '<td class="tt-value">' + (self.testCase.name || 'Test #1') + '</td></tr>';
+
+                html += '<tr>' +
+                        '<td colspan = "2" class="tt-value">' + task.description + '</td>' +
+                        '</tr><tr>';
 
                 return html;
 
-            };
+            }
 
-            this.getSessionById = function getRecordById(id) {
+            if (event) {
 
-                var session = this.sessions,
-                    r = null;
+                x = event.clientX;
+                y = event.clientY;
 
-                for (var i = 0, rl = session.length; i < rl; i++) {
+                if (!$tl.data('eiTID')) {
 
-                    if (session[i].id == id) {
+                    $tl.data('eiTID', setTimeout(function () {
 
-                        r = session[i];
-                        break;
+                        $tt.hide();
+                        self.showEventsInfo(event);
 
-                    }
-
-                }
-
-                return r;
-
-            };
-
-            this.getDomElement = function getDomElement(name) {
-
-                return document.getElementById(this.domId[name]);
-
-            };
-
-            this.hideSpiderGraph = function hideSpiderGraph(sId) {
-
-                var cnvh = this.getDomElement('canvasHolder');
-
-                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
-
-                // Hide canvas holder div if no active session
-                if (!$('canvas.cnv:visible', cnvh).length) {
-
-                    $(cnvh).hide();
+                    }, 5000));
 
                 }
 
-                this.getSessionById(sId).visible = false;
-                if (this.activeSession && this.activeSession.id === sId) {
+                $tl.css('cursor', 'pointer');
+                if (event.event.index >= this.startEventIndex && event.event.index <= this.endEventIndex) {
 
-                    this.clearTimeline();
-
-                }
-
-            };
-
-            this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
-
-                var session = this.getSessionById(sId);
-
-                if (!session) {
-
-                    return;
-
-                }
-
-                var cnvh = this.getDomElement('canvasHolder'),
-                    cnv = $('#cnvId-' + sId, cnvh)[0];
-
-                $(cnvh).show();
-                $(cnv).show();
-
-                if (!session.drawn || start || end) {
-
-                    this.drawSpiderGraph(sId, start, end);
+                    $he.css({top: event.event.y, left: event.event.x}).show();
 
                 } else {
 
-                    $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+                    $he.hide();
+
+                }
+                html += getEventInfo(event.event) + '</table>';
+                $tt.html(html);
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
+                calculateTTPosition();
+                $tt.css('top', top).css('left', left)
+                    .show();
+
+            } else if (task) {
+
+                x = e.clientX;
+                y = e.clientY - 10;
+
+                if (!$tl.data('eiTID')) {
+
+                    $tl.data('eiTID', setTimeout(function () {
+
+                        $tt.hide();
+
+                    }, 5000));
 
                 }
 
-                session.visible = true;
+                $tl.css('cursor', 'pointer');
+                html += getTaskInfo(task) + '</table>';
+                $tt.html(html);
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
+                calculateTTPosition();
+                $tt.css('top', top).css('left', left)
+                    .show();
 
-            };
+            } else {
 
-            this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
+                $tl.css('cursor', 'default');
+                $tt.hide();
+                $he.hide();
+                $(this.getDomElement('eventInfo')).hide();
+                if ($tl.data('eiTID')) {
 
-                var self = this,
-                    session = this.getSessionById(sId);
-
-                if (!session) {
-
-                    return;
+                    clearTimeout($tl.data('eiTID'));
+                    $tl.data('eiTID', null);
 
                 }
 
-                var cnvh = this.getDomElement('canvasHolder'),
-                    data = session.events.slice(start || 0, end || session.events.length),
-                    cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
-                    ctx = cnv.getContext('2d');
+            }
 
-                ctx.clearRect(0, 0, cnv.width, cnv.height);
-                ctx.beginPath();
+        };
 
-                // Draw lines
-                data.forEach(function (e, i, ea) {
+        this.showMouseTooltip = function showMouseTooltip(event) {
 
-                    var pe = ea[i - 1],
-                        pos = self.getTargetScreenPars(e),
-                        ppos = pe ? self.getTargetScreenPars(pe) : {},
-                        ex = pos.x,
-                        ey = pos.y;
+            var self = this,
+                loc = self.loc,
+                $tt = $(self.getDomElement('mTooltip')),
+                cnvh = self.getDomElement('canvasHolder'),
+                $cnvh = $(cnvh),
+                x = event.clientX, y = event.clientY,
+                evts = self.getEventsUnderMouse(x, y),
+                html = '<table>', evt, rec,
+                w, h, top, left;
 
-                    if (e.type === 'start') {
+            function getEventInfo(e) {
 
-                    } else if (e.drag) {
+                var rId = e.sessionId,
+                    rec = self.getSessionById(rId),
+                    etarget = e.target,
+                    html = '';
 
-                        // Draw line to last mouse down position
-                        //ctx.lineTo(pe.x, pe.y);
-                        ctx.stroke();
-                        ctx.save();
+                if (etarget.dcipherName) {
 
-                        // Draw dashed line from last mouse down position
-                        ctx.beginPath();
-                        ctx.setLineDash([5, 5]);
-                        ctx.moveTo(ppos.x, ppos.y);
-                        ctx.lineTo(ex, ey);
-                        ctx.stroke();
-                        ctx.restore();
+                    html += '<tr><td class="tt-name">' + loc._Target + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherName + '</td></tr>';
 
-                        // Begin new path and move start to current mouse position
-                        ctx.beginPath();
-                        ctx.moveTo(ex, ey);
+                }
 
-                    } else if ((pe && !pe.type.match(/wheel|scroll/i)) || !e.type.match(/wheel|scroll/i) || e.index) {
+                if (etarget.dcipherAction) {
 
-                        ctx.lineTo(ex, ey);
+                    html += '<tr>' +
+                            '<td class="tt-name">' + loc._Action + ':</td>' +
+                            '<td class="tt-value">' + etarget.dcipherAction + '</td>' +
+                            '</tr>';
+
+                }
+
+                html += '<tr>' +
+                        /*'<td class="tt-name">' + loc._Session_name + ':</td>' +*/
+                        '<td class="tt-header" colspan="2">' + rec.name + '</td>' +
+                        '</tr><tr>' +
+                        '<td colspan = "2" class = "empty-row"></td>' +
+                        '</tr>';
+
+                return html;
+            }
+
+            if (evts.length) {
+
+                $cnvh.css('cursor', 'pointer');
+
+                if (!$cnvh.data('eiTID')) {
+
+                    $cnvh.data('eiTID', setTimeout(function () {
+
+                        $(self.getDomElement('eventInfo')).hide();
+                        self.showEventsInfo();
+
+                    }, 5000));
+
+                }
+
+                evt = evts[0];
+                rId = evt.sessionId;
+                html += getEventInfo(evt);
+
+                evts.forEach(function (e) {
+
+                    rec = self.getSessionById(rId);
+
+                    if (rId !== e.sessionId) {
+
+                        rId = e.sessionId;
+                        html += getEventInfo(e);
 
                     }
 
+                    html += '<tr>' +
+                            //'<td colspan="2" class="tt-value">' + loc[e.type] + ' (' + e.eventNo + ' ' + loc._from + ' ' + rec.eventsStat[e.type] + ') ' + '</td>' +
+                            '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                            '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._Distance + ':</td>' +
+                            '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                            '</tr><tr>' +
+                            '<td class="tt-name">' + loc._KPI + ':</td>' +
+                            '<td class="tt-value">' + e.kpiLast.toFixed(1) + '</td>' +
+                            '</tr>';
+
                 });
-                ctx.stroke();
 
-                // Draw event pictograms
-                ctx.setLineDash([]);
-                ctx.beginPath();
-                data.forEach(function (e, i, ea) {
+                $tt.html(html + '</table>');
+                w = $tt.outerWidth();
+                h = $tt.outerHeight();
 
-                    var pe = ea[i - 1],
-                        pos = self.getTargetScreenPars(e),
-                        ex = pos.x,
-                        ey = pos.y;
+                if (y + 20 + h < window.innerHeight) {
 
-                    if (!e.type.match(/wheel|scroll/i)) {
+                    top = y + 20;
 
-                        self.drawEventPict(ctx, e.type, ex, ey);
+                } else {
 
-                    } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
+                    top = y - h - 10;
 
-                        self.drawEventPict(ctx, 'wheel', ex, ey);
+                }
+
+                if (x - w / 2 - 5 < 0) {
+
+                    left = 5;
+
+                } else if (x + w / 2 + 5 > window.innerWidth) {
+
+                    left = window.innerWidth - w - 5;
+
+                } else {
+
+                    left = x - w / 2;
+
+                }
+
+                $tt.css({
+                    'top': top,
+                    'left': left
+                }).show();
+
+            } else if (event.target.parentNode.id !== self.domId['timeline']) {
+
+                $(self.getDomElement('eventInfo')).hide();
+                $(self.getDomElement('timelineCircle')).hide();
+                $cnvh.css('cursor', 'default');
+                if ($cnvh.data('eiTID')) {
+
+                    clearTimeout($cnvh.data('eiTID'));
+                    $cnvh.data('eiTID', null);
+
+                }
+                $tt.hide();
+
+            }
+
+            //console.debug(html);
+
+        };
+
+        this.showEventsInfo = function (event) {
+
+            var self = this,
+                loc = this.loc,
+                evts = this.eventsUnderMouse,
+                $eInf = $(this.getDomElement('eventInfo')),
+                dx = 0, dy = 0, html = '<table>', rec,
+                top, left, x, y, w, h, shift = 10;
+
+            evt = evts[0] || event.event;
+
+            if (!evt) {
+
+                return;
+
+            }
+
+            function getRecordInfo(rec) {
+
+                var clicks = rec.eventsStat['click'],
+                    showEvents = ['click', 'wheel', 'drag'];
+
+                html = '<tr>' +
+                       /*'<td class= "tt-name">' + loc._Session_name + ': ' + '</td>' +*/
+                       '<td class= "tt-header" colspan="2">' + rec.name + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + (new Date(rec.created)).toLocaleDateString() + '</td>' +
+                       '<td class= "tt-value">' + (new Date(rec.modified)).toLocaleTimeString() + '</td>' +
+                       '</tr><tr>' +
+                       '<td colspan = "2" class = "empty-row"></td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Mouse_miles + ': </td>' +
+                       '<td class= "tt-value">' + rec.mouseMilesTotal.toFixed(2) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Duration + ': </td>' +
+                       '<td class= "tt-value">' + self.getTimeString(rec.duration) + '</td>' +
+                       '</tr><tr>' +
+                       '<td class= "tt-name">' + loc._Events + ': </td>' +
+                       '<td class= "tt-value">' + rec.eventsQty + '</td>' +
+                       '</tr><tr>';
+
+                showEvents.forEach(function (k) {
+
+                        if (rec.eventsStat[k]) {
+
+                            html += '<td class= "tt-name">' + loc[k] + ': </td>' +
+                                    '<td class= "tt-value">' + rec.eventsStat[k] + '</td>' +
+                                    '</tr><tr>';
+
+                        }
 
                     }
+                );
 
-                });
+                html += '<td class= "tt-name">' + loc._Clicks_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * clicks / rec.duration).toFixed(1) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._Miles_sec + ': </td>' +
+                        '<td class= "tt-value">' + (1000 * rec.mouseMilesTotal / rec.duration).toFixed(2) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class= "tt-name">' + loc._KPI + ': </td>' +
+                        '<td class= "tt-value">' + rec.kpi.toFixed(1) + '</td>' +
+                        '</tr>';
 
-                ctx.stroke();
-                ctx.fill();
+                return html;
+            }
 
-                if (start === undefined && end === undefined) {
+            rId = evt.sessionId;
+            rec = self.getSessionById(rId);
 
-                    /*
-                     $(cnvh).show().on('mousemove', {self: this}, function (e) {
+            html += getRecordInfo(rec);
 
-                     self.showMouseTooltip(e);
-                     self.highlightTimeLineEvent(e);
+            evts.forEach(function (e) {
 
-                     });
-                     */
-                    $(cnv).show();
-                    session.drawn = true;
-                    this.checkRecordCheckbox(sId);
+                dx += e.x;
+                dy += e.y;
 
-                }
+                if (rId !== e.sessionId) {
 
-                return this;
-
-            };
-
-            this.clearTimeline = function clearTimeline() {
-
-                var cw = window.innerWidth,
-                    $tl = $(this.getDomElement('timeline')),
-                    cnv = $('canvas', $tl)[0],
-                    ctx = cnv.getContext('2d'),
-                    tlh = $tl.height();
-
-                ctx.clearRect(0, 0, cw, tlh);
-
-            };
-
-            this.resetTimeline = function () {
-
-                this.timeBrackets = [];
-                this.startEventIndex = 0;
-                this.endEventIndex = this.timeLineEvents.length - 1;
-                if (this.activeSession) {
-
-                    this.drawTimeline(this.activeSession);
+                    rId = e.sessionId;
+                    rec = self.getSessionById(rId);
+                    html += '<tr><td></td></tr>' + getRecordInfo(rec);
 
                 }
 
-            };
-
-            this.drawTimeline = function drawTimeline(session) {
-
-                this.showTimelineStat(session);
-
-                var self = this,
-                    events = session.events,
-                    $tl = $(this.getDomElement('timeline')),
-                    cnv = $('canvas', $tl)[0],
-                    ctx = cnv.getContext('2d'),
-                    cw = window.innerWidth,
-                    ch = $tl.height(),
-                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    offsetLeft = this.timeLineOffsetLeft,
-                    offsetTop = ch / 2,
-                    cy = window.innerHeight - ch + offsetTop,
-                    width = cw - offsetLeft - offsetRight,
-                    pxs = width / session.duration,
-                    posx = offsetLeft,
-                    posx0, pe,
-                    showTaskNumber = session.testCaseId !== '',
-                    taskNr = 1;
-
-                this.timeLineEvents = [];
-                cnv.width = cw;
-                cnv.height = ch;
-                $(cnv).width(cw);
-                $(cnv).height(ch);
-
-                if (this.endEventIndex) {
-
-                    this.drawTLCursor(events[this.endEventIndex].time, session.duration);
-
-                }
-                /*else {
-
-                 this.drawTLCursor(rec.duration, rec.duration);
-
-                 }
+                /*
+                 html += '<br />' + self.getTimeString(e.time) + ' (' + self.getTimeString(e.duration) + ') ' + loc[e.type]
+                 + ' #' + e.eventNo
+                 + ' (' + e.milesLast.toFixed(2) + ' / ' + e.miles.toFixed(2) + ')';
                  */
-                this.drawTLBrackets();
-
-                ctx.lineWidth = 2.0;
-                ctx.fillStyle = 'white';
-                ctx.strokeStyle = session.color;
-                ctx.font = "bold 14px 'Helvetica Neue'";
-                ctx.clearRect(0, 0, cw, ch);
-                ctx.moveTo(offsetLeft, offsetTop);
-                self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
-                ctx.stroke();
 
-                events.forEach(function (e, i, arr) {
+                html += '<tr>' +
+                        '<td colspan="2" class="tt-header">' + loc[e.type] + ' #' + e.eventNo + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + '(' + self.getTimeString(e.time) /*+ ' – ' + self.getTimeString(rec.duration)*/ + ')</td> ' +
+                        '<td class="tt-value">' + self.getTimeString(e.duration) + '</td>' +
+                        '</tr><tr>' +
+                        '<td class="tt-name">' + loc._Distance + ':</td>' +
+                        '<td class="tt-value">' + e.milesLast.toFixed(2) + '</td>' +
+                        '</tr>';
 
-                    //console.debug('---> posx:', posx);
-                    //console.debug('---> e.time:', e.time);
+            });
 
-                    if (e.eventNo) {
+            $eInf.html(html + '</table>');
+            w = $eInf.outerWidth();
+            h = $eInf.outerHeight();
+            x = event ? event.clientX : dx / evts.length;
+            y = event ? event.clientY : dy / evts.length;
 
-                        pe = arr[i - 1];
-                        posx0 = posx;
-                        posx = offsetLeft + pxs * e.time;
+            if (y - h - shift > 5) {
 
-                        self.timeLineEvents.push({
+                top = y - h - shift;
 
-                            type: 'timeline',
-                            clientX: posx,
-                            clientY: cy,
-                            target: $('canvas', '#' + self.domId.timeline)[0],
-                            x: posx,
-                            y: offsetTop,
-                            event: e
+            } else /*if ( y + h + shift > window.innerHeight)*/ {
 
-                        });
+                top = y + shift;
 
-                        // Draw task number
-                        if (showTaskNumber && e.testTaskId !== '' && e.firstInTask) {
+            }
 
-                            //var tx = e.testTask.step ? posx : posx0;
-                            var tx = posx;
-                            ctx.save();
-                            ctx.fillStyle = 'gray';
-                            ctx.strokeStyle = 'gray';
-                            ctx.lineWidth = 1.0;
-                            ctx.beginPath();
-                            ctx.moveTo(tx, 0);
-                            ctx.lineTo(tx, ch);
-                            ctx.stroke();
-                            ctx.fillText(taskNr++, tx + 5, ch - 10);
-                            ctx.restore();
+            if (x - w / 2 - 5 < 0) {
 
-                        }
+                left = 5;
 
-                        ctx.beginPath();
-                        ctx.moveTo(posx0, offsetTop);
-                        if (e.drag) {
+            } else if (x + w / 2 + 5 > window.innerWidth) {
 
-                            ctx.setLineDash([3, 3]);
+                left = window.innerWidth - w - 5;
 
-                        }
-                        if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
+            } else {
 
-                            ctx.setLineDash([1, 2]);
+                left = x - w / 2;
 
-                        }
-                        ctx.lineTo(posx, offsetTop);
-                        ctx.stroke();
-                        ctx.setLineDash([]);
+            }
 
-                        if (i) {
+            $eInf.css('top', top).css('left', left).show();
+            $(this.getDomElement('mTooltip')).hide();
 
-                            ctx.beginPath();
-                            self.drawEventPict(ctx, pe.type, posx0, offsetTop);
-                            ctx.stroke();
-                            ctx.fill();
+        };
 
-                        }
+        this.getEventsUnderMouse = function getEventsUnderMouse(x, y) {
 
-                    }
-                });
+            var self = this,
+                sessions = this.sessions,
+                abs = Math.abs,
+                th = 5,
+                evts = [];
 
-                // Draw last task line
-                ctx.save();
-                ctx.lineWidth = 1.0;
-                ctx.strokeStyle = 'gray';
-                ctx.beginPath();
-                ctx.moveTo(posx, 0);
-                ctx.lineTo(posx, ch);
-                ctx.stroke();
-                ctx.restore();
+            sessions.forEach(function (session) {
 
-                // Draw last event pict
-                ctx.beginPath();
-                self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
-                ctx.stroke();
-                ctx.fill();
+                if (session.active && session.visible) {
 
-                $tl.show();
+                    var ea = session.events.filter(function (e, i, arr) {
 
-            };
-
-            this.drawTLCursor = function (pos, total) {
-
-                var pars = this.getTimeLineCursorPars(pos, total);
-
-                $(this.getDomElement('timelineCursor')).css(pars).show();
-
-            };
-
-            this.drawTLBrackets = function (time1, time2) {
-
-                var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
-                    t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeSession.duration,
-                    pars = this.getTimeLineBracketsPars(t1, t2);
-
-                $(this.getDomElement('timelineBrackets')).css(pars).show();
-
-            };
-
-            this.showTimelineStat = function (session) {
-
-                var loc = this.loc,
-                    html = Math.round(session.duration / 1000) + '<span>' + loc.sec + '</span> '
-                           + ((session.eventsStat.click || 0) + (session.eventsStat.drag || 0) + (session.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
-                           + session.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
-                           + session.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
-
-                $(this.getDomElement('timelineInfo')).html(html);
-
-            };
-
-            this.getTimelineEvent = function getTimelineEvent(e) {
-
-                var te = this.timeLineEvents,
-                    abs = Math.abs,
-                    th = 7, evt, event = null,
-                    i, il = te.length;
-
-                for (i = 0; i < il; i++) {
-
-                    evt = te[i];
-                    if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
-
-                        event = evt;
-                        break;
-
-                    }
-
-                }
-
-                return event;
-
-            };
-
-            this.getTimelineTask = function (e) {
-
-                var te = this.timeLineEvents,
-                    $tl = $(this.getDomElement('timeline')),
-                    x, y = window.innerHeight - 20,
-                    abs = Math.abs,
-                    dx = 5, evt, task = null,
-                    i, il = te.length;
-
-                for (i = 0; i < il; i++) {
-
-                    evt = te[i];
-                    if (evt.event.firstInTask) {
-
-                        // Move hot spot to previous event
-                        //x = i ? te[i - 1].clientX : evt.clientX;
-                        x = evt.clientX;
-
-                        if (abs(x + 10 - e.clientX) < dx && e.clientY > y) {
-
-                            task = this.testTasks.findBy('id', evt.event.taskId);
-                            break;
-                        }
-
-                    }
-
-                    //console.log('e.clientX: ', e.clientX, '; evt.clientX + 10: ', (evt.clientX + 10));
-                    //console.log('e.clientY: ', e.clientY, '; y: ', y);
-
-                }
-
-                if (task) {
-
-                    console.log('Task: ', task.description);
-                    $tl.css('cursor', 'pointer');
-
-                } else {
-
-                    $tl.css('cursor', 'default');
-
-                }
-                return task;
-
-            };
-
-            this.getTaskTLEvents = function (task) {
-
-                if (task && this.timeLineEvents.length) {
-
-                    var id = task.id;
-
-                    return this.timeLineEvents.filter(function (e) {
-
-                        return e.event.taskId === id;
+                        return abs(x - e.x) < th && abs(y - e.y) < th
+                               && (!i || !e.type.match(/wheel|scroll/i) || !arr[i - 1].type.match(/wheel|scroll/i))
+                               && self.drawEventList.indexOf(e.type) > -1;
 
                     });
 
-                } else {
+                    if (ea && ea.length) {
 
-                    return null;
-
-                }
-
-            };
-
-            this.showTLTaskEvents = function (task) {
-
-                var evts = this.getTaskTLEvents(task),
-                    tlEvents = this.timeLineEvents,
-                    idx1 = tlEvents.indexOf(evts[0]),
-                    idx2 = tlEvents.indexOf(evts[evts.length - 1]);
-
-                // Move time bracket to the first event of the next task, just for design sake
-                if (idx2 + 1 < this.timeLineEvents.length) {
-
-                    idx2 += 1;
-                }
-
-                var evt1 = tlEvents[idx1].event,
-                    evt2 = tlEvents[idx2].event;
-
-                this.showSpiderGraph(this.activeSession.id, evt1.index, evt2.index);
-                this.drawTLBrackets(evt1.time, evt2.time);
-
-            };
-
-            this.showTimelineEvent = function showTimelineEvent(event) {
-
-                this.sessionId = event.sessionId;
-                this.activeSession = this.getSessionById(event.sessionId);
-                this.appMode = 'timeline';
-                if (event.time < this.timeBrackets[0]) {
-
-                    this.startEventIndex = event.index;
-                    this.timeBrackets[0] = event.time;
-
-                } else {
-
-                    this.endEventIndex = event.index;
-                    this.timeBrackets[1] = event.time;
-
-                }
-                this.drawTLBrackets.apply(this, this.timeBrackets);
-                this.drawSpiderGraph(event.sessionId, this.startEventIndex, this.endEventIndex + 1);
-                this.drawTLCursor(event.time, this.activeSession.duration);
-
-                if (window.location.pathname !== event.location) {
-
-                    window.location = event.location;
-
-                }
-
-            };
-
-            this.drawEventPict = function (ctx, type, x, y) {
-
-                if (this.drawEventList.indexOf(type) > -1) {
-
-                    var endAngle = 2 * Math.PI, d = 3;
-
-                    if (type === 'start') {
-
-                        ctx.moveTo(x - 1, y - 3);
-                        ctx.lineTo(x - 1, y + 3);
-
-                    } else if (type === 'click') {
-
-                        ctx.moveTo(x + d, y);
-                        ctx.arc(x, y, d, 0, endAngle, true);
-
-                    } else if (type === 'dblclick') {
-
-                        var r = d - 1;
-                        ctx.moveTo(x + 2 * r, y);
-                        ctx.arc(x, y, 2 * r, 0, endAngle, true);
-                        ctx.stroke();
-                        ctx.fill();
-                        ctx.beginPath();
-                        ctx.moveTo(x + r, y);
-                        ctx.arc(x, y, r, 0, endAngle, true);
-
-                    } else if (type === 'mousedown') {
-
-                        ctx.moveTo(x + 3, y - 2);
-                        ctx.lineTo(x, y + 3);
-                        ctx.lineTo(x - 3, y - 2);
-                        ctx.lineTo(x + 3, y - 2);
-
-                    } else if (type === 'mouseup') {
-
-                        ctx.moveTo(x - 3, y + 2);
-                        ctx.lineTo(x, y - 3);
-                        ctx.lineTo(x + 3, y + 2);
-                        ctx.lineTo(x - 3, y + 2);
-
-                    } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
-
-                        ctx.moveTo(x + 1, y);
-                        ctx.arc(x, y, 1, 0, endAngle, true);
-
-                    } else if (type.match(/wheel|scroll/i)) {
-
-                        ctx.moveTo(x - 3, y - 1);
-                        ctx.lineTo(x, y - 4);
-                        ctx.lineTo(x + 3, y - 1);
-                        //ctx.lineTo(x - 3, y - 1);
-                        ctx.closePath();
-
-                        /*
-                         ctx.moveTo(x + 2, y);
-                         ctx.arc(x, y, 2, 0, endAngle, true);
-                         */
-
-                        ctx.moveTo(x - 3, y + 1);
-                        ctx.lineTo(x, y + 4);
-                        ctx.lineTo(x + 3, y + 1);
-                        //ctx.lineTo(x - 3, y + 1);
-                        ctx.closePath();
-
-                        /*
-                         ctx.strokeRect(x - 3, y - 2, 1.5, 4);
-                         ctx.fillRect(x - 3, y - 2, 1.5, 4);
-                         ctx.strokeRect(x, y - 2, 1.5, 4);
-                         ctx.fillRect(x, y - 2, 1.5, 4);
-                         */
+                        [].push.apply(evts, ea);
 
                     }
 
                 }
+            });
 
-            };
+            this.eventsUnderMouse = evts;
 
-            this.playSession = function playSession(sId, eventIndex) {
+            return evts;
 
-                var self = this,
-                    session = this.getSessionById(sId),
-                    $btnPlay = $('div', self.getDomElement('butPlay'));
+        };
 
-                $btnPlay.removeClass('play').addClass('stop');
+        this.canvasHolderClickHandler = function canvasHolderClickHandler(e, self) {
 
-                if (!session) {
+            if (self.eventsUnderMouse.length) {
 
-                    this.resetApp('');
+                //self.showEventsInfo();
+                self.showTimelineEvent(self.eventsUnderMouse[0]);
+
+            }
+
+        };
+
+        this.updateStatString = function updateStatString(e) {
+
+            var loc = this.loc,
+                activeSession = this.activeSession,
+                evt = activeSession.events[activeSession.events.length - 1],
+                ms = activeSession.modified,
+                miles = evt ? evt.miles : 0,
+                timeString = this.getTimeString(+new Date() - ms),
+                clicks = activeSession.eventsStat.click || 0,
+                drags = activeSession.eventsStat.drag || 0,
+                wheels = activeSession.eventsStat.wheel || 0,
+                el = document.elementFromPoint(this.mouse.x, this.mouse.y),
+                trg = el.name || el.id || el.className,
+            //type = e ? loc[e.type] : '',
+                msg = ''; //loc._Recording + '.';
+
+            if (this.editTask) {
+
+                msg += loc._Test_events + ': ' + activeSession.events.length;
+
+            } else if (this.appMode !== '') {
+
+                msg += /*loc._Time + ': ' +*/ timeString + ' ';
+                msg += loc._Mouse_miles + ': ' + miles.toFixed(2) + ' | ';
+                msg += loc._Clicks + ': ' + clicks + ' | ';
+                msg += loc._Drags + ': ' + drags + ' | ';
+                msg += loc._Wheels + ': ' + wheels + ' | ';
+
+                if (trg) {
+
+                    msg += loc._Target + ': ' + trg + ' | ';
+
+                }
+                msg += 'x: ' + this.mouse.x + ', y: ' + this.mouse.y;
+
+                if (e && e.type === 'keypress') {
+
+                    msg += '; key: ' + String.fromCharCode(e.charCode);
+
+                }
+
+            }
+            this.getDomElement('stat').innerText = msg;
+            //console.debug(msg);
+            return this;
+
+        };
+
+        this.getTimeString = function getTimeString(ms) {
+
+            var time = ms / 1000,
+                hours, mins, secs, html = '';
+
+            hours = Math.floor(time / 3600);
+            mins = Math.floor((time - hours * 3600) / 60);
+            secs = Math.floor(time - hours * 3600 - mins * 60);
+            html += hours == 0 ? '' : hours < 10 ? '0' + hours + ':' : hours + ':';
+            html += mins < 10 ? '0' + mins + ':' : mins + ':';
+            html += secs < 10 ? '0' + secs : secs;
+
+            return html;
+
+        };
+
+        this.getSessionById = function getRecordById(id) {
+
+            var session = this.sessions,
+                r = null;
+
+            for (var i = 0, rl = session.length; i < rl; i++) {
+
+                if (session[i].id == id) {
+
+                    r = session[i];
+                    break;
+
+                }
+
+            }
+
+            return r;
+
+        };
+
+        this.getDomElement = function getDomElement(name) {
+
+            return document.getElementById(this.domId[name]);
+
+        };
+
+        this.hideSpiderGraph = function hideSpiderGraph(sId) {
+
+            var cnvh = this.getDomElement('canvasHolder');
+
+            $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).hide();
+
+            // Hide canvas holder div if no active session
+            if (!$('canvas.cnv:visible', cnvh).length) {
+
+                $(cnvh).hide();
+
+            }
+
+            this.getSessionById(sId).visible = false;
+            if (this.activeSession && this.activeSession.id === sId) {
+
+                this.clearTimeline();
+
+            }
+
+        };
+
+        this.showSpiderGraph = function showSpiderGraph(sId, start, end) {
+
+            var session = this.getSessionById(sId);
+
+            if (!session) {
+
+                return;
+
+            }
+
+            var cnvh = this.getDomElement('canvasHolder'),
+                cnv = $('#cnvId-' + sId, cnvh)[0];
+
+            $(cnvh).show();
+            $(cnv).show();
+
+            if (!session.drawn || start || end) {
+
+                this.drawSpiderGraph(sId, start, end);
+
+            } else {
+
+                $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh).show();
+
+            }
+
+            session.visible = true;
+
+        };
+
+        this.drawSpiderGraph = function showSpiderGraph(sId, start, end) {
+
+            var self = this,
+                session = this.getSessionById(sId);
+
+            if (!session) {
+
+                return;
+
+            }
+
+            var cnvh = this.getDomElement('canvasHolder'),
+                data = session.events.slice(start || 0, end || session.events.length),
+                cnv = $('canvas[data-dcipher-rec-id=' + sId + ']', cnvh)[0],
+                ctx = cnv.getContext('2d');
+
+            ctx.clearRect(0, 0, cnv.width, cnv.height);
+            ctx.beginPath();
+
+            // Draw lines
+            data.forEach(function (e, i, ea) {
+
+                var pe = ea[i - 1],
+                    pos = self.getTargetScreenPars(e),
+                    ppos = pe ? self.getTargetScreenPars(pe) : {},
+                    ex = pos.x,
+                    ey = pos.y;
+
+                if (e.type === 'start') {
+
+                } else if (e.drag) {
+
+                    // Draw line to last mouse down position
+                    //ctx.lineTo(pe.x, pe.y);
+                    ctx.stroke();
+                    ctx.save();
+
+                    // Draw dashed line from last mouse down position
+                    ctx.beginPath();
+                    ctx.setLineDash([5, 5]);
+                    ctx.moveTo(ppos.x, ppos.y);
+                    ctx.lineTo(ex, ey);
+                    ctx.stroke();
+                    ctx.restore();
+
+                    // Begin new path and move start to current mouse position
+                    ctx.beginPath();
+                    ctx.moveTo(ex, ey);
+
+                } else if ((pe && !pe.type.match(/wheel|scroll/i)) || !e.type.match(/wheel|scroll/i) || e.index) {
+
+                    ctx.lineTo(ex, ey);
+
+                }
+
+            });
+            ctx.stroke();
+
+            // Draw event pictograms
+            ctx.setLineDash([]);
+            ctx.beginPath();
+            data.forEach(function (e, i, ea) {
+
+                var pe = ea[i - 1],
+                    pos = self.getTargetScreenPars(e),
+                    ex = pos.x,
+                    ey = pos.y;
+
+                if (!e.type.match(/wheel|scroll/i)) {
+
+                    self.drawEventPict(ctx, e.type, ex, ey);
+
+                } else if (!pe || !pe.type.match(/wheel|scroll/i)) {
+
+                    self.drawEventPict(ctx, 'wheel', ex, ey);
+
+                }
+
+            });
+
+            ctx.stroke();
+            ctx.fill();
+
+            if (start === undefined && end === undefined) {
+
+                /*
+                 $(cnvh).show().on('mousemove', {self: this}, function (e) {
+
+                 self.showMouseTooltip(e);
+                 self.highlightTimeLineEvent(e);
+
+                 });
+                 */
+                $(cnv).show();
+                session.drawn = true;
+                this.checkRecordCheckbox(sId);
+
+            }
+
+            return this;
+
+        };
+
+        this.clearTimeline = function clearTimeline() {
+
+            var cw = window.innerWidth,
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
+                ctx = cnv.getContext('2d'),
+                tlh = $tl.height();
+
+            ctx.clearRect(0, 0, cw, tlh);
+
+        };
+
+        this.resetTimeline = function () {
+
+            this.timeBrackets = [];
+            this.startEventIndex = 0;
+            this.endEventIndex = this.timeLineEvents.length - 1;
+            if (this.activeSession) {
+
+                this.drawTimeline(this.activeSession);
+
+            }
+
+        };
+
+        this.drawTimeline = function drawTimeline(session) {
+
+            this.showTimelineStat(session);
+
+            var self = this,
+                events = session.events,
+                $tl = $(this.getDomElement('timeline')),
+                cnv = $('canvas', $tl)[0],
+                ctx = cnv.getContext('2d'),
+                cw = window.innerWidth,
+                ch = $tl.height(),
+                offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                offsetLeft = this.timeLineOffsetLeft,
+                offsetTop = ch / 2,
+                cy = window.innerHeight - ch + offsetTop,
+                width = cw - offsetLeft - offsetRight,
+                pxs = width / session.duration,
+                posx = offsetLeft,
+                posx0, pe,
+                showTaskNumber = session.testCaseId !== '',
+                taskNr = 1;
+
+            this.timeLineEvents = [];
+            cnv.width = cw;
+            cnv.height = ch;
+            $(cnv).width(cw);
+            $(cnv).height(ch);
+
+            if (this.endEventIndex) {
+
+                this.drawTLCursor(events[this.endEventIndex].time, session.duration);
+
+            }
+            /*else {
+
+             this.drawTLCursor(rec.duration, rec.duration);
+
+             }
+             */
+            this.drawTLBrackets();
+
+            ctx.lineWidth = 2.0;
+            ctx.fillStyle = 'white';
+            ctx.strokeStyle = session.color;
+            ctx.font = "bold 14px 'Helvetica Neue'";
+            ctx.clearRect(0, 0, cw, ch);
+            ctx.moveTo(offsetLeft, offsetTop);
+            self.drawEventPict(ctx, 'start', offsetLeft, offsetTop);
+            ctx.stroke();
+
+            events.forEach(function (e, i, arr) {
+
+                //console.debug('---> posx:', posx);
+                //console.debug('---> e.time:', e.time);
+
+                if (e.eventNo) {
+
+                    pe = arr[i - 1];
+                    posx0 = posx;
+                    posx = offsetLeft + pxs * e.time;
+
+                    self.timeLineEvents.push({
+
+                        type: 'timeline',
+                        clientX: posx,
+                        clientY: cy,
+                        target: $('canvas', '#' + self.domId.timeline)[0],
+                        x: posx,
+                        y: offsetTop,
+                        event: e
+
+                    });
+
+                    // Draw task number
+                    if (showTaskNumber && e.testTaskId !== '' && e.firstInTask) {
+
+                        //var tx = e.testTask.step ? posx : posx0;
+                        var tx = posx;
+                        ctx.save();
+                        ctx.fillStyle = 'gray';
+                        ctx.strokeStyle = 'gray';
+                        ctx.lineWidth = 1.0;
+                        ctx.beginPath();
+                        ctx.moveTo(tx, 0);
+                        ctx.lineTo(tx, ch);
+                        ctx.stroke();
+                        ctx.fillText(taskNr++, tx + 5, ch - 10);
+                        ctx.restore();
+
+                    }
+
+                    ctx.beginPath();
+                    ctx.moveTo(posx0, offsetTop);
+                    if (e.drag) {
+
+                        ctx.setLineDash([3, 3]);
+
+                    }
+                    if (i && e.type.match(/wheel|scroll/i) && pe.type.match(/wheel|scroll/i)) {
+
+                        ctx.setLineDash([1, 2]);
+
+                    }
+                    ctx.lineTo(posx, offsetTop);
+                    ctx.stroke();
+                    ctx.setLineDash([]);
+
+                    if (i) {
+
+                        ctx.beginPath();
+                        self.drawEventPict(ctx, pe.type, posx0, offsetTop);
+                        ctx.stroke();
+                        ctx.fill();
+
+                    }
+
+                }
+            });
+
+            // Draw last task line
+            ctx.save();
+            ctx.lineWidth = 1.0;
+            ctx.strokeStyle = 'gray';
+            ctx.beginPath();
+            ctx.moveTo(posx, 0);
+            ctx.lineTo(posx, ch);
+            ctx.stroke();
+            ctx.restore();
+
+            // Draw last event pict
+            ctx.beginPath();
+            self.drawEventPict(ctx, events[events.length - 1].type, posx, offsetTop);
+            ctx.stroke();
+            ctx.fill();
+
+            $tl.show();
+
+        };
+
+        this.drawTLCursor = function (pos, total) {
+
+            var pars = this.getTimeLineCursorPars(pos, total);
+
+            $(this.getDomElement('timelineCursor')).css(pars).show();
+
+        };
+
+        this.drawTLBrackets = function (time1, time2) {
+
+            var t1 = time1 !== undefined ? time1 : this.timeBrackets[0] !== undefined ? this.timeBrackets[0] : 0,
+                t2 = time2 !== undefined ? time2 : this.timeBrackets[1] !== undefined ? this.timeBrackets[1] : this.activeSession.duration,
+                pars = this.getTimeLineBracketsPars(t1, t2);
+
+            $(this.getDomElement('timelineBrackets')).css(pars).show();
+
+        };
+
+        this.showTimelineStat = function (session) {
+
+            var loc = this.loc,
+                html = Math.round(session.duration / 1000) + '<span>' + loc.sec + '</span> '
+                       + ((session.eventsStat.click || 0) + (session.eventsStat.drag || 0) + (session.eventsStat.wheel || 0)) + '<span>' + loc.evs + '</span>'
+                       + session.mouseMilesTotal.toFixed(1) + '<span>' + loc.mm + '</span>'
+                       + session.kpi.toFixed(1) + '<span>' + loc.kpi + '</span>';
+
+            $(this.getDomElement('timelineInfo')).html(html);
+
+        };
+
+        this.getTimelineEvent = function getTimelineEvent(e) {
+
+            var te = this.timeLineEvents,
+                abs = Math.abs,
+                th = 7, evt, event = null,
+                i, il = te.length;
+
+            for (i = 0; i < il; i++) {
+
+                evt = te[i];
+                if (abs(e.clientX - evt.clientX) < th && abs(e.clientY - evt.clientY) < th) {
+
+                    event = evt;
+                    break;
+
+                }
+
+            }
+
+            return event;
+
+        };
+
+        this.getTimelineTask = function (e) {
+
+            var te = this.timeLineEvents,
+                $tl = $(this.getDomElement('timeline')),
+                x, y = window.innerHeight - 20,
+                abs = Math.abs,
+                dx = 5, evt, task = null,
+                i, il = te.length;
+
+            for (i = 0; i < il; i++) {
+
+                evt = te[i];
+                if (evt.event.firstInTask) {
+
+                    // Move hot spot to previous event
+                    //x = i ? te[i - 1].clientX : evt.clientX;
+                    x = evt.clientX;
+
+                    if (abs(x + 10 - e.clientX) < dx && e.clientY > y) {
+
+                        task = this.testTasks.findBy('id', evt.event.taskId);
+                        break;
+                    }
+
+                }
+
+                //console.log('e.clientX: ', e.clientX, '; evt.clientX + 10: ', (evt.clientX + 10));
+                //console.log('e.clientY: ', e.clientY, '; y: ', y);
+
+            }
+
+            if (task) {
+
+                console.log('Task: ', task.description);
+                $tl.css('cursor', 'pointer');
+
+            } else {
+
+                $tl.css('cursor', 'default');
+
+            }
+            return task;
+
+        };
+
+        this.getTaskTLEvents = function (task) {
+
+            if (task && this.timeLineEvents.length) {
+
+                var id = task.id;
+
+                return this.timeLineEvents.filter(function (e) {
+
+                    return e.event.taskId === id;
+
+                });
+
+            } else {
+
+                return null;
+
+            }
+
+        };
+
+        this.showTLTaskEvents = function (task) {
+
+            var evts = this.getTaskTLEvents(task),
+                tlEvents = this.timeLineEvents,
+                idx1 = tlEvents.indexOf(evts[0]),
+                idx2 = tlEvents.indexOf(evts[evts.length - 1]);
+
+            // Move time bracket to the first event of the next task, just for design sake
+            if (idx2 + 1 < this.timeLineEvents.length) {
+
+                idx2 += 1;
+            }
+
+            var evt1 = tlEvents[idx1].event,
+                evt2 = tlEvents[idx2].event;
+
+            this.showSpiderGraph(this.activeSession.id, evt1.index, evt2.index);
+            this.drawTLBrackets(evt1.time, evt2.time);
+
+        };
+
+        this.showTimelineEvent = function showTimelineEvent(event) {
+
+            this.sessionId = event.sessionId;
+            this.activeSession = this.getSessionById(event.sessionId);
+            this.appMode = 'timeline';
+            if (event.time < this.timeBrackets[0]) {
+
+                this.startEventIndex = event.index;
+                this.timeBrackets[0] = event.time;
+
+            } else {
+
+                this.endEventIndex = event.index;
+                this.timeBrackets[1] = event.time;
+
+            }
+            this.drawTLBrackets.apply(this, this.timeBrackets);
+            this.drawSpiderGraph(event.sessionId, this.startEventIndex, this.endEventIndex + 1);
+            this.drawTLCursor(event.time, this.activeSession.duration);
+
+            if (window.location.pathname !== event.location) {
+
+                window.location = event.location;
+
+            }
+
+        };
+
+        this.drawEventPict = function (ctx, type, x, y) {
+
+            if (this.drawEventList.indexOf(type) > -1) {
+
+                var endAngle = 2 * Math.PI, d = 3;
+
+                if (type === 'start') {
+
+                    ctx.moveTo(x - 1, y - 3);
+                    ctx.lineTo(x - 1, y + 3);
+
+                } else if (type === 'click') {
+
+                    ctx.moveTo(x + d, y);
+                    ctx.arc(x, y, d, 0, endAngle, true);
+
+                } else if (type === 'dblclick') {
+
+                    var r = d - 1;
+                    ctx.moveTo(x + 2 * r, y);
+                    ctx.arc(x, y, 2 * r, 0, endAngle, true);
+                    ctx.stroke();
+                    ctx.fill();
+                    ctx.beginPath();
+                    ctx.moveTo(x + r, y);
+                    ctx.arc(x, y, r, 0, endAngle, true);
+
+                } else if (type === 'mousedown') {
+
+                    ctx.moveTo(x + 3, y - 2);
+                    ctx.lineTo(x, y + 3);
+                    ctx.lineTo(x - 3, y - 2);
+                    ctx.lineTo(x + 3, y - 2);
+
+                } else if (type === 'mouseup') {
+
+                    ctx.moveTo(x - 3, y + 2);
+                    ctx.lineTo(x, y - 3);
+                    ctx.lineTo(x + 3, y + 2);
+                    ctx.lineTo(x - 3, y + 2);
+
+                } else if (type === 'mouseover' || type === 'mouseenter'/* || type === 'mouseout' || type === 'mouseleave'*/) {
+
+                    ctx.moveTo(x + 1, y);
+                    ctx.arc(x, y, 1, 0, endAngle, true);
+
+                } else if (type.match(/wheel|scroll/i)) {
+
+                    ctx.moveTo(x - 3, y - 1);
+                    ctx.lineTo(x, y - 4);
+                    ctx.lineTo(x + 3, y - 1);
+                    //ctx.lineTo(x - 3, y - 1);
+                    ctx.closePath();
+
+                    /*
+                     ctx.moveTo(x + 2, y);
+                     ctx.arc(x, y, 2, 0, endAngle, true);
+                     */
+
+                    ctx.moveTo(x - 3, y + 1);
+                    ctx.lineTo(x, y + 4);
+                    ctx.lineTo(x + 3, y + 1);
+                    //ctx.lineTo(x - 3, y + 1);
+                    ctx.closePath();
+
+                    /*
+                     ctx.strokeRect(x - 3, y - 2, 1.5, 4);
+                     ctx.fillRect(x - 3, y - 2, 1.5, 4);
+                     ctx.strokeRect(x, y - 2, 1.5, 4);
+                     ctx.fillRect(x, y - 2, 1.5, 4);
+                     */
+
+                }
+
+            }
+
+        };
+
+        this.playSession = function playSession(sId, eventIndex) {
+
+            var self = this,
+                session = this.getSessionById(sId),
+                $btnPlay = $('div', self.getDomElement('butPlay'));
+
+            $btnPlay.removeClass('play').addClass('stop');
+
+            if (!session) {
+
+                this.resetApp('');
+                return;
+
+            }
+
+            var cnt = eventIndex || this.endEventIndex || 0,
+                delay = 20, speed = 2,
+                sData = session.events,
+                pars = this.getTargetScreenPars(sData[cnt]),
+                el = pars.element,
+                cnvh = this.getDomElement('canvasHolder'),
+                cnv = $('#cnvId-' + session.id, cnvh)[0],
+                ctx = cnv.getContext('2d'),
+                $cur = $(self.getDomElement('cursor')),
+                $tlCursor = $(self.getDomElement('timelineCursor')),
+                clickDelay = this.clickDelay,
+                mOverElement,
+                mOverClass = self.domId['mouseOverClass'];
+
+            function playEvent(pars) {
+
+                if (!self.appMode) {
+
                     return;
 
                 }
 
-                var cnt = eventIndex || this.endEventIndex || 0,
-                    delay = 20, speed = 2,
-                    sData = session.events,
-                    pars = this.getTargetScreenPars(sData[cnt]),
-                    el = pars.element,
-                    cnvh = this.getDomElement('canvasHolder'),
-                    cnv = $('#cnvId-' + session.id, cnvh)[0],
-                    ctx = cnv.getContext('2d'),
-                    $cur = $(self.getDomElement('cursor')),
-                    $tlCursor = $(self.getDomElement('timelineCursor')),
-                    clickDelay = this.clickDelay,
-                    mOverElement,
-                    mOverClass = self.domId['mouseOverClass'];
+                var e = sData[cnt],
+                    etype = e.type;
 
-                function playEvent(pars) {
+                pars = pars || self.getTargetScreenPars(e);
+                el = pars.element;
+                self.endEventIndex = cnt;
 
-                    if (!self.appMode) {
+                console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
+                /*
+                 if (pars.winScrollX || pars.winScrollY) {
 
-                        return;
+                 window.scrollTo(pars.winScrollX, pars.winScrollY);
 
-                    }
+                 }
+                 */
 
-                    var e = sData[cnt],
-                        etype = e.type;
+                if (etype === 'click') {
 
-                    pars = pars || self.getTargetScreenPars(e);
-                    el = pars.element;
-                    self.endEventIndex = cnt;
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
 
-                    console.debug('--> playSession: event No: %s, event type: %s', cnt, etype);
-                    /*
-                     if (pars.winScrollX || pars.winScrollY) {
+                    self.showMouseDown(pars.x, pars.y);
+                    setTimeout(function () {
 
-                     window.scrollTo(pars.winScrollX, pars.winScrollY);
+                        self.hideMouseDown();
 
-                     }
-                     */
+                    }, clickDelay);
 
-                    if (etype === 'click') {
+                } else if (etype === 'dblclick') {
 
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
+                    el.dispatchEvent(new MouseEvent('mousedown', e));
+                    el.dispatchEvent(new MouseEvent('mouseup', e));
+                    el.dispatchEvent(new MouseEvent('click', e));
+                    el.dispatchEvent(new MouseEvent('dblclick', e));
+
+                    self.showDblClick(pars.x, pars.y);
+
+                } else if (etype === 'mousedown' || etype === 'mouseup') {
+
+                    el.dispatchEvent(new MouseEvent(etype, e));
+
+                    if (etype === 'mousedown') {
 
                         self.showMouseDown(pars.x, pars.y);
+
+                    } else if (etype === 'mouseup') {
+
                         setTimeout(function () {
 
                             self.hideMouseDown();
 
                         }, clickDelay);
 
-                    } else if (etype === 'dblclick') {
-
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
-                        el.dispatchEvent(new MouseEvent('mousedown', e));
-                        el.dispatchEvent(new MouseEvent('mouseup', e));
-                        el.dispatchEvent(new MouseEvent('click', e));
-                        el.dispatchEvent(new MouseEvent('dblclick', e));
-
-                        self.showDblClick(pars.x, pars.y);
-
-                    } else if (etype === 'mousedown' || etype === 'mouseup') {
-
-                        el.dispatchEvent(new MouseEvent(etype, e));
-
-                        if (etype === 'mousedown') {
-
-                            self.showMouseDown(pars.x, pars.y);
-
-                        } else if (etype === 'mouseup') {
-
-                            setTimeout(function () {
-
-                                self.hideMouseDown();
-
-                            }, clickDelay);
-
-                        }
-
-                    } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
-
-                        el.dispatchEvent(new MouseEvent(etype, e));
-
-                    } else if (etype.match(/wheel|scroll/i)) {
-
-                        //window.scrollTo(pars.winScrollX, pars.winScrollY);
-                        window.scrollTo(e.pageXOffset, e.pageYOffset);
-                        el.dispatchEvent(new WheelEvent(etype, e));
-                        //$(el).offset({top: pars.top, left: pars.left});
-
                     }
 
-                    $(cnv).css('cursor', 'none');
+                } else if (etype == 'mouseover' || etype == 'mouseout' || etype == 'mouseenter' || etype == 'mouseleave') {
 
-                    setTimeout(function () {
+                    el.dispatchEvent(new MouseEvent(etype, e));
 
-                        moveCursor(pars);
+                } else if (etype.match(/wheel|scroll/i)) {
 
-                    }, 0);
-
-                }
-
-                function moveCursor(pars) {
-
-                    var e1 = sData[cnt],
-                        e2 = sData[++cnt];
-
-                    if (e1 && e2) {
-
-                        var recDuration = session.duration,
-                            etime = e1.time,
-                            dur = e2.timeStamp - e1.timeStamp,
-                            pars1 = pars || self.getTargetScreenPars(e1),
-                            pars2 = self.getTargetScreenPars(e2),
-                            step = 0,
-                            dt = speed * delay,
-                            steps = dur / dt,
-                            dx = pars2.x - pars1.x,
-                            dy = pars2.y - pars1.y,
-                            mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
-
-                        function drawStep() {
-
-                            var x0, y0, x, y, el, dts;
-
-                            x0 = pars1.x + dx * step;
-                            y0 = pars1.y + dy * step;
-                            step++;
-
-                            if (step < steps && self.appMode) {
-
-                                x = pars1.x + dx * step;
-                                y = pars1.y + dy * step;
-                                dts = etime + step * dt;
-                                self.drawTLCursor(dts, recDuration);
-                                self.drawTLBrackets(self.timeBrackets[0], dts);
-                                setTimeout(drawStep, delay);
-
-                            } else {
-
-                                x = pars2.x;
-                                y = pars2.y;
-                                self.drawTLCursor(e2.time, recDuration);
-                                self.drawTLBrackets(self.timeBrackets[0], e2.time);
-                                if (self.appMode) {
-
-                                    setTimeout(function () {
-
-                                        playEvent(pars2);
-
-                                    }, e2.type === 'mouseover' ? 0 : clickDelay);
-
-                                } else {
-
-                                    $cur.hide();
-                                    $(mOverElement).removeClass(mOverClass);
-                                    self.removeMouseOverStyle();
-                                    $(cnv).css('cursor', 'default');
-                                    return;
-
-                                }
-                            }
-
-                            $(cnvh).hide();
-                            el = document.elementFromPoint(x, y);
-                            $(cnvh).show();
-                            $(cnv).css('cursor', 'none');
-
-                            el.dispatchEvent(new MouseEvent('mousemove', {
-
-                                bubbles: true,
-                                cancelable: false,
-                                button: e1.button,
-                                which: e1.which,
-                                clientX: x,
-                                clientY: y,
-                                pageX: x,
-                                pageY: y,
-                                view: window
-
-                            }));
-
-                            if (!mouseDown) {
-
-                                /*
-                                 if (mOverElement !== el) {
-
-                                 if (mOverElement) {
-
-                                 mOverElement.dispatchEvent(new MouseEvent('mouseout'));
-                                 //$(mOverElement).removeClass(mOverClass);
-
-                                 }
-                                 if (self.addMouseOverClass(el, ':hover')) {
-
-                                 $(el).addClass(mOverClass);
-
-                                 }
-
-                                 el.dispatchEvent(new MouseEvent('mouseover', {
-
-                                 clientX: x,
-                                 clientY: y,
-                                 pageX: x,
-                                 pageY: y,
-                                 view: window
-
-                                 }));
-                                 mOverElement = el;
-
-                                 }
-                                 */
-
-                            } else {
-
-                                self.showMouseDown(x, y);
-                                ctx.save();
-                                ctx.setLineDash([3, 5]);
-
-                            }
-
-                            $cur.css('top', y).css('left', x);
-                            ctx.beginPath();
-
-                            ctx.moveTo(x0, y0);
-                            ctx.lineTo(x, y);
-                            ctx.stroke();
-
-                            if (mouseDown) {
-
-                                ctx.restore();
-
-                            }
-
-                            if (step === 1) {
-
-                                ctx.beginPath();
-                                self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
-                                ctx.stroke();
-                                ctx.fill();
-
-                            }
-
-                        }
-
-                        function scrollWindow(x, y, dx, dy) {
-
-                            var wx = window.pageXOffset,
-                                wy = window.pageYOffset,
-                                call = false;
-
-                            dx = dx || (x - wx) / 10;
-                            dy = dy || (y - wy) / 10;
-
-                            if ((dx > 0 && wx < x && wx + dx < x)
-                                || dx < 0 && wx > x && wx + dx > x) {
-
-                                wx += dx;
-                                call = true;
-
-                            } else {
-
-                                wx = x;
-
-                            }
-
-                            if ((dy > 0 && wy < y && wy + dy < y)
-                                || dy < 0 && wy > y && wy + dy > y) {
-
-                                wy += dy;
-                                call = true;
-
-                            } else {
-
-                                wy = y;
-
-                            }
-
-                            window.scrollTo(wx, wy);
-
-                            if (call) {
-
-                                setTimeout(function () {
-
-                                    scrollWindow(x, y, dx, dy);
-
-                                }, 20);
-
-                            }
-
-                        }
-
-                        if (pars2.winScrollX || pars2.winScrollY) {
-
-                            //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
-                            scrollWindow(pars2.winScrollX, pars2.winScrollY);
-
-                        }
-
-                        self.drawTLCursor(etime, recDuration);
-                        self.drawTLBrackets(self.timeBrackets[0], etime);
-                        if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
-
-                            if (steps) {
-
-                                dx = dx / steps;
-                                dy = dy / steps;
-
-                            }
-                            //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
-                            setTimeout(drawStep, delay);
-
-                        } else {
-
-                            //setTimeout(function () {
-
-                            playEvent(pars2);
-
-                            //}, 0);
-
-                        }
-
-                    } else {
-
-                        // End of play
-                        $cur.hide();
-                        $(mOverElement).removeClass(mOverClass);
-                        self.removeMouseOverStyle();
-                        $(cnv).css('cursor', 'default');
-                        $btnPlay.removeClass('stop').addClass('play');
-
-                        if (cnt === sData.length) {
-
-                            self.drawSpiderGraph(session.id, self.startEventIndex);
-
-                        } else {
-
-                            self.drawSpiderGraph(session.id, 0, cnt);
-
-                        }
-                        self.appMode = '';
-                        sessionStorage.removeItem('dcipherState');
-
-                    }
-
-                }
-
-                //this.appMode = 'play';
-                this.sessionId = sId;
-                this.activeSession = session;
-
-                // Reload initial session location on replay start
-                if (!cnt || cnt === sData.length - 1) {
-
-                    this.endEventIndex = 1;
-                    this.resetApp('play', sData[1].location);
-                    return;
-
-                } else {
-
-                    this.appMode = 'play';
+                    //window.scrollTo(pars.winScrollX, pars.winScrollY);
+                    window.scrollTo(e.pageXOffset, e.pageYOffset);
+                    el.dispatchEvent(new WheelEvent(etype, e));
+                    //$(el).offset({top: pars.top, left: pars.left});
 
                 }
 
                 $(cnv).css('cursor', 'none');
-                el.dispatchEvent(new MouseEvent('mousemove', {
-
-                    bubbles: true,
-                    cancelable: false,
-                    clientX: pars.x,
-                    clientY: pars.y,
-                    pageX: pars.x,
-                    pageY: pars.y,
-                    view: window
-
-                }));
-                mOverElement = el;
-                this.addMouseOverClass(el, ':hover');
-                $(el).addClass(mOverClass);
-                $(cnv).show();
-                $cur.show();
-                $tlCursor.show();
-                this.hideRecList();
-                this.setActiveSession(sId);
-                this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
-                ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
-                ctx.strokeStyle = session.color;
-                //if (eventIndex !== undefined) {
-
-                this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
-
-                //}
 
                 setTimeout(function () {
 
-                    //if (cnt) {
+                    moveCursor(pars);
 
-                    playEvent(pars);
+                }, 0);
 
-                    //} else {
+            }
 
-                    //moveCursor(pars);
+            function moveCursor(pars) {
 
-                    //}
+                var e1 = sData[cnt],
+                    e2 = sData[++cnt];
 
-                }, clickDelay);
+                if (e1 && e2) {
 
-            };
+                    var recDuration = session.duration,
+                        etime = e1.time,
+                        dur = e2.timeStamp - e1.timeStamp,
+                        pars1 = pars || self.getTargetScreenPars(e1),
+                        pars2 = self.getTargetScreenPars(e2),
+                        step = 0,
+                        dt = speed * delay,
+                        steps = dur / dt,
+                        dx = pars2.x - pars1.x,
+                        dy = pars2.y - pars1.y,
+                        mouseDown = e1.type === 'mousedown' && e2.type === 'mouseup';
 
-            this.getTargetScreenPars = function (e) {
+                    function drawStep() {
 
-                var etarget = e.target,
-                    winW = window.innerWidth,
-                    winH = window.innerHeight,
-                    winScrollX = 0,
-                    winScrollY = 0,
-                    x = e.x,
-                    y = e.y,
-                    el = null, $el = null;
+                        var x0, y0, x, y, el, dts;
 
-                if (!etarget.element || (etarget.element && etarget.element === window)) {
+                        x0 = pars1.x + dx * step;
+                        y0 = pars1.y + dy * step;
+                        step++;
 
-                    el = this.getElementByTreePath(etarget.treePath);
-                    $el = $(el);
+                        if (step < steps && self.appMode) {
 
-                } else {
-
-                    el = etarget.element;
-                    $el = $(el);
-
-                }
-
-                if ($el && etarget.tagName === el.tagName
-                    && etarget.id === el.id
-                    && etarget.title === el.title
-                    //&& etarget.dcipherName === el.dataset.dcipherName
-                    //&& etarget.dcipherAction === el.dataset.dcipherAction
-                    && $(el).is(':visible')
-                    && !e.type.match(/wheel|scroll/i)
-                ) {
-
-                    var offset = $el.offset(),
-                        elX = offset.left,
-                        elY = offset.top,
-                        elW = $el.outerWidth(),
-                        elH = $el.outerHeight(),
-                        locX = elW * etarget.relX,
-                        locY = elH * etarget.relY,
-                        cpx = 20,
-                        cpy = 20;
-
-                    etarget.element = el;
-                    /*
-                     x = elX + locX;
-                     y = elY + locY;
-                     */
-
-                    if (x + cpx > pageXOffset + winW) {
-
-                        winScrollX = x + cpx - winW;
-                        x -= winScrollX;
-
-                    }
-
-                    if (y + cpy > pageYOffset + winH) {
-
-                        winScrollY = y + cpy - winH;
-                        y -= winScrollY;
-
-                    }
-
-                    /*
-                     e.pageX += x - e.x;
-                     e.pageY += y - e.y;
-                     e.clientX = x;
-                     e.clientY = y;
-                     e.x = x;
-                     e.y = y;
-                     */
-
-                }
-
-                return {
-
-                    element: el,
-                    x: x,
-                    y: y,
-                    left: elX + etarget.dx,
-                    top: elY + etarget.dy,
-                    localX: locX,
-                    localY: locY,
-                    width: elW,
-                    height: elH,
-                    winScrollX: winScrollX,
-                    winScrollY: winScrollY
-
-                }
-
-            };
-
-            this.removeMouseOverStyle = function removeMoverStyle() {
-
-                $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
-
-            };
-            this.addMouseOverClass = function getPseudoClass(el, pclass) {
-
-                var sheets = document.styleSheets,
-                    rules, s, r, selectorText, rule,
-                    selectors = [],
-                    styles = '', styleNode = document.createElement('style'),
-                    mouseOverStyleId = this.domId.mouseOverStyle,
-                    $container = $('#' + this.domId.container);
-
-                if (el.id) {
-
-                    selectors.push('#' + el.id + pclass);
-
-                }
-
-                if (el.className && typeof el.className === 'string') {
-
-                    el.className.split(" ").forEach(function (s) {
-
-                        if (s) {
-
-                            selectors.push('.' + s + pclass);
-
-                        }
-
-                    });
-
-                }
-
-                for (s = 0; s < sheets.length; s++) {
-
-                    rules = sheets[s].rules || sheets[s].cssRules || [];
-
-                    for (r = 0; r < rules.length; r++) {
-
-                        rule = rules[r];
-                        selectorText = rule.selectorText;
-
-                        selectors.forEach(function (c) {
-
-                            if (selectorText && selectorText.match(new RegExp(c))) {
-
-                                var ct = rule.cssText;
-
-                                styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
-
-                                //console.debug('---> cssObj: ', cssObj);
-
-                            }
-
-                        });
-                    }
-
-                }
-
-                $('#' + mouseOverStyleId, $container).remove();
-
-                if (styles) {
-
-                    $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
-                    $container.append(styleNode);
-                    return true;
-
-                } else {
-
-                    return false;
-
-                }
-
-            };
-
-            this.toggleSessionList = function () {
-
-                var rlId = this.domId['sessions'],
-                    rbId = this.domId['butList'],
-                    $rl = $('#' + rlId);
-
-                function hideReclist(e) {
-
-                    if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
-
-                        $rl.hide();
-
-                    }
-
-                }
-
-                if (!$rl.is(':visible') && this.sessions.length) {
-
-                    $rl.show();
-                    $('body').on('click', hideReclist);
-
-                } else {
-
-                    $rl.hide();
-                    $('body').off('click', hideReclist);
-
-                }
-
-            };
-
-            this.createSessionList = function () {
-
-                var self = this,
-                    sessionsDiv = this.getDomElement('sessions'),
-                    cnvHolder = this.getDomElement('canvasHolder'),
-                    visRecs = {}, actRecs = {},
-                    sessionDiv, butShow, butDel, inpName, nChckb,
-                    cnv, ctx, butCp, cpInp, cpSp;
-
-                if (!this.sessions.length) {
-
-                    $(sessionsDiv).hide();
-                    $(cnvHolder).hide();
-                    $(this.getDomElement('butList')).hide();
-                    return;
-
-                } else {
-
-                    $(this.getDomElement('butList')).show();
-
-                }
-
-                // Get all visible records
-                $('input:checkbox', sessionsDiv).each(function () {
-
-                    visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
-
-                });
-
-                // Get all active records
-                $('.rec', sessionsDiv).each(function () {
-
-                    actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
-
-                });
-
-                if (!visRecs.length) {
-
-                    $(cnvHolder).hide();
-
-                }
-                $(sessionsDiv).children().remove();
-                $(cnvHolder).children('.cnv').remove();
-                this.sessions.forEach(function (r, idx) {
-
-                    // Restore visibility and active flags
-                    r.visible = visRecs[r.id];
-                    r.active = actRecs[r.id];
-                    r.drawn = false;
-
-                    // Record canvas
-                    cnv = document.createElement('canvas');
-                    cnv.setAttribute('data-dcipher-rec-id', r.id);
-                    cnv.height = window.innerHeight;
-                    cnv.width = window.innerWidth;
-                    cnv.id = 'cnvId-' + r.id;
-                    cnv.className = 'cnv';
-                    ctx = cnv.getContext('2d');
-                    ctx.lineWidth = 1.5;
-                    ctx.fillStyle = 'white';
-                    ctx.strokeStyle = r.color;
-                    ctx.lineCap = 'square';
-                    ctx.lineJoin = 'miter';
-                    ctx.miterLimit = 4.0;
-                    ctx.shadowOffsetX = 0;
-                    ctx.shadowOffsetY = 3.0;
-                    ctx.shadowBlur = 4.0;
-                    ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
-                    cnvHolder.appendChild(cnv);
-
-                    // Record div
-                    sessionDiv = document.createElement('div');
-                    sessionDiv.id = 'recId-' + r.id;
-                    sessionDiv.className = 'rec' + (actRecs[r.id] ? ' active' : '');
-                    sessionDiv.setAttribute('data-dcipher-rec-id', r.id);
-
-                    // Show record button
-                    nChckb = document.createElement('input');
-                    nChckb.setAttribute('data-dcipher-rec-id', r.id);
-                    nChckb.setAttribute('cnv-id', idx);
-                    nChckb.type = 'checkbox';
-                    nChckb.id = 'showRecId-' + r.id;
-                    nChckb.value = r.id;
-                    nChckb.className = "chckb-show";
-                    nChckb.checked = visRecs[r.id];
-                    sessionDiv.appendChild(nChckb);
-
-                    butShow = document.createElement('label');
-                    butShow.setAttribute('data-dcipher-rec-id', r.id);
-                    butShow.setAttribute('cnv-id', idx);
-                    butShow.htmlFor = 'showRecId-' + r.id;
-                    butShow.className = 'show';
-                    butShow.title = dCipher.loc._Toggle_record;
-                    sessionDiv.appendChild(butShow);
-
-                    // Delete Record button
-                    butDel = document.createElement('div');
-                    butDel.setAttribute('data-dcipher-rec-id', r.id);
-                    butDel.id = 'delRecId-' + r.id;
-                    butDel.className = 'del';
-                    butDel.innerHTML = '&#10005;';
-                    butDel.title = dCipher.loc._Delete_record;
-                    sessionDiv.appendChild(butDel);
-
-                    // Color picker
-                    cpInp = document.createElement('input');
-                    cpInp.type = 'hidden';
-                    cpInp.value = r.color;
-
-                    cpSp = document.createElement('span');
-                    cpSp.className = 'input-group-addon cp-span';
-                    cpi = document.createElement('i');
-                    cpi.className = 'cp-i';
-                    cpi.style.backgroundColor = r.color;
-                    cpi.title = dCipher.loc._Change_color;
-                    cpSp.appendChild(cpi);
-
-                    butCp = document.createElement('div');
-                    butCp.setAttribute('data-dcipher-rec-id', r.id);
-                    butCp.id = 'cpId-' + r.id;
-                    butCp.className = 'cp-container input-group';
-                    butCp.appendChild(cpInp);
-                    butCp.appendChild(cpSp);
-                    sessionDiv.appendChild(butCp);
-
-                    // Play record button
-                    /*
-                     butPlay = document.createElement('div');
-                     butPlay.setAttribute('data-dcipher-rec-id', r.id);
-                     butPlay.id = 'playRecId-' + r.id;
-                     butPlay.className = 'play';
-                     butPlay.title = dCipher.loc._Play_record;
-                     rec.appendChild(butPlay);
-                     */
-
-                    // Edit name field
-                    inpName = document.createElement('input');
-                    inpName.setAttribute('data-dcipher-rec-id', r.id);
-                    inpName.placeholder = self.loc._Name_placeholder;
-                    inpName.type = 'text';
-                    inpName.value = r.name;
-                    inpName.disabled = true;
-                    inpName.id = 'recNameId-' + r.id;
-                    inpName.className = 'rec-name';
-                    sessionDiv.appendChild(inpName);
-
-                    sessionsDiv.appendChild(sessionDiv);
-
-                    // Define listeners
-                    nChckb.addEventListener('change', function () {
-
-                        var $el = $(this);
-
-                        if ($el.prop('checked')) {
-
-                            id = $el.attr('data-dcipher-rec-id');
-                            var session = self.sessions.findBy('id', id);
-
-                            if (!session.events) {
-
-                                self.db.getSessionEvents(id).then(function (events) {
-                                    "use strict";
-
-                                    session.events = events;
-                                    self.calculateScreenCoords(session);
-                                    self.showSpiderGraph(id);
-
-                                });
-
-                            } else {
-
-                                self.showSpiderGraph(id);
-                            }
+                            x = pars1.x + dx * step;
+                            y = pars1.y + dy * step;
+                            dts = etime + step * dt;
+                            self.drawTLCursor(dts, recDuration);
+                            self.drawTLBrackets(self.timeBrackets[0], dts);
+                            setTimeout(drawStep, delay);
 
                         } else {
 
-                            id = $el.attr('data-dcipher-rec-id');
+                            x = pars2.x;
+                            y = pars2.y;
+                            self.drawTLCursor(e2.time, recDuration);
+                            self.drawTLBrackets(self.timeBrackets[0], e2.time);
+                            if (self.appMode) {
 
-                            if (self.activeSession && self.activeSession.id === id) {
+                                setTimeout(function () {
 
-                                self.unsetActiveSession();
+                                    playEvent(pars2);
 
-                            } else {
-
-                                self.hideSpiderGraph(id);
-
-                            }
-
-                        }
-
-                    });
-
-                    butDel.addEventListener('click', function () {
-
-                        self.deleteSession($(this).attr('data-dcipher-rec-id'));
-
-                    });
-
-                    inpName.addEventListener('change', function () {
-
-                        var $el = $(this);
-                        self.updateSessionName($el.attr('data-dcipher-rec-id'), $el.val());
-                        $el.attr('disabled', true);
-
-                    });
-
-                    inpName.addEventListener('blur', function () {
-
-                        var $el = $(this);
-                        $el.attr('disabled', true);
-
-                    });
-
-                    sessionDiv.addEventListener('dblclick', function () {
-
-                        var $el = $('input[type="text"]', this);
-                        $el.attr('disabled', false).focus();
-
-                    });
-
-                    sessionDiv.addEventListener('click', function (e) {
-
-                        var $el = $(e.target),
-                            id = $el.attr('data-dcipher-rec-id');
-
-                        if ($el.attr('type') === 'text') {
-
-                            var session = self.sessions.findBy('id', id);
-
-                            if (!session.events) {
-
-                                self.db.getSessionEvents(id).then(function (events) {
-                                    "use strict";
-
-                                    session.events = events;
-                                    self.calculateScreenCoords(session);
-                                    self.showSpiderGraph(id);
-                                    self.setActiveSession(id, true);
-
-                                });
+                                }, e2.type === 'mouseover' ? 0 : clickDelay);
 
                             } else {
 
-                                self.showSpiderGraph(id);
-                                self.setActiveSession(id, true);
+                                $cur.hide();
+                                $(mOverElement).removeClass(mOverClass);
+                                self.removeMouseOverStyle();
+                                $(cnv).css('cursor', 'default');
+                                return;
+
                             }
+                        }
+
+                        $(cnvh).hide();
+                        el = document.elementFromPoint(x, y);
+                        $(cnvh).show();
+                        $(cnv).css('cursor', 'none');
+
+                        el.dispatchEvent(new MouseEvent('mousemove', {
+
+                            bubbles: true,
+                            cancelable: false,
+                            button: e1.button,
+                            which: e1.which,
+                            clientX: x,
+                            clientY: y,
+                            pageX: x,
+                            pageY: y,
+                            view: window
+
+                        }));
+
+                        if (!mouseDown) {
+
+                            /*
+                             if (mOverElement !== el) {
+
+                             if (mOverElement) {
+
+                             mOverElement.dispatchEvent(new MouseEvent('mouseout'));
+                             //$(mOverElement).removeClass(mOverClass);
+
+                             }
+                             if (self.addMouseOverClass(el, ':hover')) {
+
+                             $(el).addClass(mOverClass);
+
+                             }
+
+                             el.dispatchEvent(new MouseEvent('mouseover', {
+
+                             clientX: x,
+                             clientY: y,
+                             pageX: x,
+                             pageY: y,
+                             view: window
+
+                             }));
+                             mOverElement = el;
+
+                             }
+                             */
+
+                        } else {
+
+                            self.showMouseDown(x, y);
+                            ctx.save();
+                            ctx.setLineDash([3, 5]);
 
                         }
 
-                    });
+                        $cur.css('top', y).css('left', x);
+                        ctx.beginPath();
 
-                    // Draw record spidergraph if active
-                    if (visRecs[r.id]) {
+                        ctx.moveTo(x0, y0);
+                        ctx.lineTo(x, y);
+                        ctx.stroke();
 
-                        self.showSpiderGraph(r.id);
+                        if (mouseDown) {
 
-                        if (actRecs[r.id]) {
+                            ctx.restore();
 
-                            self.drawTimeline(r);
+                        }
+
+                        if (step === 1) {
+
+                            ctx.beginPath();
+                            self.drawEventPict(ctx, e1.type, pars1.x, pars1.y);
+                            ctx.stroke();
+                            ctx.fill();
 
                         }
 
                     }
 
-                    $(butCp).colorpicker({
+                    function scrollWindow(x, y, dx, dy) {
 
-                        format: 'rgba',
-                        container: butCp,
-                        //align: 'right',
-                        customClass: 'cp-pos',
-                        colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
+                        var wx = window.pageXOffset,
+                            wy = window.pageYOffset,
+                            call = false;
 
-                    }).on('hidePicker.bs-colorpicker', function () {
-                        //
-                        var $el = $(this);
+                        dx = dx || (x - wx) / 10;
+                        dy = dy || (y - wy) / 10;
 
-                        self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
+                        if ((dx > 0 && wx < x && wx + dx < x)
+                            || dx < 0 && wx > x && wx + dx > x) {
 
-                    });
+                            wx += dx;
+                            call = true;
 
-                });
+                        } else {
 
-            };
-
-            this.setActiveSession = function setActiveRecord(id, reset) {
-
-                var self = this,
-                    recs = this.getDomElement('sessions'),
-                    $rec = $('#recId-' + id, recs),
-                    $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
-
-                $('.rec', recs).removeClass('active');
-                $rec.addClass('active');
-
-                this.sessions.forEach(function (session) {
-
-                    if (session.id == id) {
-
-                        session.active = true;
-                        session.visible = true;
-                        self.activeSession = session;
-                        self.sessionId = session.id;
-                        if (self.appMode !== 'timeline' || reset) {
-
-                            self.startEventIndex = 0;
-                            self.endEventIndex = session.events.length - 1;
-                            self.timeBrackets = [0, session.duration];
+                            wx = x;
 
                         }
-                        self.drawTimeline(session);
+
+                        if ((dy > 0 && wy < y && wy + dy < y)
+                            || dy < 0 && wy > y && wy + dy > y) {
+
+                            wy += dy;
+                            call = true;
+
+                        } else {
+
+                            wy = y;
+
+                        }
+
+                        window.scrollTo(wx, wy);
+
+                        if (call) {
+
+                            setTimeout(function () {
+
+                                scrollWindow(x, y, dx, dy);
+
+                            }, 20);
+
+                        }
+
+                    }
+
+                    if (pars2.winScrollX || pars2.winScrollY) {
+
+                        //window.scrollTo(pars2.winScrollX, pars2.winScrollY);
+                        scrollWindow(pars2.winScrollX, pars2.winScrollY);
+
+                    }
+
+                    self.drawTLCursor(etime, recDuration);
+                    self.drawTLBrackets(self.timeBrackets[0], etime);
+                    if (dx || dy && (e1.type === e2.type && !e1.type.match(/wheel|scroll/i))) {
+
+                        if (steps) {
+
+                            dx = dx / steps;
+                            dy = dy / steps;
+
+                        }
+                        //console.debug('--> moveCursor->drawStep: dx: %s, dy: %s', dx, dy);
+                        setTimeout(drawStep, delay);
 
                     } else {
 
-                        session.active = false;
+                        //setTimeout(function () {
+
+                        playEvent(pars2);
+
+                        //}, 0);
 
                     }
-
-                });
-
-                if (!$chkb.prop('checked')) {
-
-                    $chkb.prop('checked', true);
-
-                }
-
-            };
-
-            this.unsetActiveSession = function () {
-
-                if (this.activeSession) {
-
-                    var id = this.activeSession.id;
-
-                    $('#recId-' + id, this.getDomElement('sessions')).removeClass('active');
-                    if (this.sessions.length) {
-
-                        this.getSessionById(id).active = false;
-
-                    }
-                    this.hideSpiderGraph(id);
-
-                    this.activeSession = null;
-                    $(this.getDomElement('timelineInfo')).html('');
-                    $(this.getDomElement('timeline')).hide();
-
-                }
-
-            };
-
-            this.deleteSession = function (id) {
-
-                var self = this,
-                    session = this.sessions.findBy('id', id),
-                    idx = this.sessions.indexOf(session);
-
-                return new Promise(function (resolve, reject) {
-                    "use strict";
-
-                    self.unsetActiveSession();
-
-                    // Delete session data
-                    self.db.deleteSession(id).then(function () {
-
-                        self.sessions.splice(idx, 1);
-                        self.createSessionList();
-                        resolve();
-
-                    }, function (error, message) {
-
-                        console.warn('[WARN] Could not delete session. Error:', message);
-                        reject(error);
-
-                    });
-
-                });
-
-            };
-
-            this.updateSessionName = function updateRecordName(id, name) {
-
-                var session = this.getSessionById(id);
-
-                session.name = name;
-                this.db.putSession(session);
-
-            };
-
-            this.updateRecordColor = function updateRecordColor(id, color) {
-
-                var self = this,
-                    session = this.getSessionById(id);
-
-                if (session.color !== color) {
-
-                    session.color = color;
-                    delete session.drawn;
-                    this.db.putSession(session).then(function () {
-
-                        self.createSessionList();
-
-                    }, function (e, msg) {
-
-                        console.warn('[WARN] Could not update record. Error:', msg);
-
-                    });
-
-                }
-
-            };
-
-            this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
-
-                $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('sessions')).prop('checked', true);
-                this.getSessionById(sId).visible = true;
-
-            };
-
-            this.hideRecList = function hideRecList() {
-
-                $(this.getDomElement('sessions')).hide();
-
-            };
-
-            this.showMouseClick = function showMouseClick(x, y) {
-
-                var $el = $(this.getDomElement('click'));
-
-                function showClick() {
-
-                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                        .show().fadeOut();
-
-                }
-
-                setTimeout(showClick, 0);
-
-            };
-
-            this.showDblClick = function showMouseClick(x, y) {
-
-                var self = this,
-                    $el = $(this.getDomElement('dblClick'));
-
-                function showClick() {
-
-                    $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
-                        .show();
-
-                    setTimeout(function () {
-
-                        $el.fadeOut('fast');
-
-                    }, self.clickDelay);
-
-                }
-
-                this.showMouseClick(x, y);
-                setTimeout(showClick, 0);
-
-            };
-
-            this.showMouseDown = function showMouseDown(x, y) {
-
-                var $el = $(this.getDomElement('click'));
-
-                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
-
-            };
-
-            this.hideMouseDown = function hideMouseDown() {
-
-                $(this.getDomElement('click')).fadeOut('fast');
-
-            };
-
-            this.mouseMoveHandler = function mouseMoveHandler(e) {
-
-                e.data.self.mouse = {
-
-                    x: e.clientX,
-                    y: e.clientY
-
-                }
-
-            };
-
-            this.saveState = function saveState() {
-
-                if (this.appMode || this.editTask) {
-
-                    if (this.appMode === 'test') {
-
-                        this.checkTaskCompletion();
-
-                    }
-
-                    if (this.activeSession && this.activeSession.events.length) {
-
-                        this.activeSession.events.forEach(function (e) {
-
-                            delete e.target.element;
-
-                        });
-
-                    }
-                    sessionStorage.setItem('dcipherState', JSON.stringify({
-
-                        user: this.user,
-                        appMode: this.appMode,
-                        activeSession: this.activeSession,
-                        sessionId: this.sessionId,
-                        startEventIndex: this.startEventIndex,
-                        endEventIndex: this.endEventIndex,
-                        testCase: this.testCase,
-                        testTasks: this.testTasks,
-                        // testEvents: this.testEvents,
-                        sessions: this.sessions,
-                        currentTaskId: this.currentTask ? this.currentTask.id : '',
-                        editTaskId: this.editTask ? this.editTask.id : '',
-                        currentEvent: this.currentEvent,
-                        timeBrackets: this.timeBrackets
-
-                    }));
 
                 } else {
 
+                    // End of play
+                    $cur.hide();
+                    $(mOverElement).removeClass(mOverClass);
+                    self.removeMouseOverStyle();
+                    $(cnv).css('cursor', 'default');
+                    $btnPlay.removeClass('stop').addClass('play');
+
+                    if (cnt === sData.length) {
+
+                        self.drawSpiderGraph(session.id, self.startEventIndex);
+
+                    } else {
+
+                        self.drawSpiderGraph(session.id, 0, cnt);
+
+                    }
+                    self.appMode = '';
                     sessionStorage.removeItem('dcipherState');
 
                 }
-            };
 
-            this.restoreState = function () {
+            }
 
-                var self = this,
-                    state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+            //this.appMode = 'play';
+            this.sessionId = sId;
+            this.activeSession = session;
 
-                function initState() {
-                    "use strict";
+            // Reload initial session location on replay start
+            if (!cnt || cnt === sData.length - 1) {
 
-                    if (self.appMode === 'record' || self.appMode === 'test' || self.appMode === 'testEvents') {
+                this.endEventIndex = 1;
+                this.resetApp('play', sData[1].location);
+                return;
 
-                        $('div', self.getDomElement('butRecord')).removeClass('rec').addClass('stop');
-                        $(self.getDomElement('butList')).hide();
-                        $('body').on('mousemove', function (e) {
+            } else {
 
-                            self.catchEvents(e);
+                this.appMode = 'play';
 
-                        });
-                        $(self.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+            }
 
-                            self.updateStatString();
+            $(cnv).css('cursor', 'none');
+            el.dispatchEvent(new MouseEvent('mousemove', {
 
-                        }, 100)).fadeIn();
+                bubbles: true,
+                cancelable: false,
+                clientX: pars.x,
+                clientY: pars.y,
+                pageX: pars.x,
+                pageY: pars.y,
+                view: window
 
-                    } else if (self.appMode === 'play') {
+            }));
+            mOverElement = el;
+            this.addMouseOverClass(el, ':hover');
+            $(el).addClass(mOverClass);
+            $(cnv).show();
+            $cur.show();
+            $tlCursor.show();
+            this.hideRecList();
+            this.setActiveSession(sId);
+            this.drawTLBrackets(this.timeBrackets[0], sData[cnt].time);
+            ctx.clearRect(0, 0, window.innerWidth, window.innerWidth);
+            ctx.strokeStyle = session.color;
+            //if (eventIndex !== undefined) {
 
-                        self.showSpiderGraph(self.activeSession.id, 0, self.endEventIndex + 1);
-                        setTimeout(function () {
+            this.showSpiderGraph(sId, this.startEventIndex, cnt + 1);
 
-                            self.playSession(self.activeSession.id, self.endEventIndex);
+            //}
 
-                        }, 1000);
+            setTimeout(function () {
 
-                    } else if (self.appMode === 'timeline') {
+                //if (cnt) {
 
-                        var event = self.activeSession.events[self.endEventIndex],
-                            tEvt;
+                playEvent(pars);
 
-                        self.setActiveSession(self.activeSession.id);
-                        self.showSpiderGraph(self.activeSession.id, self.startEventIndex, self.endEventIndex + 1);
+                //} else {
 
-                        tEvt = self.timeLineEvents.find(function (e) {
+                //moveCursor(pars);
 
-                            return e.event.index === event.index;
+                //}
 
-                        });
-                        self.showTLTooltip(tEvt);
-                        self.drawTLBrackets();
-                        sessionStorage.removeItem('dcipherState');
-                        self.appMode = '';
+            }, clickDelay);
+
+        };
+
+        this.getTargetScreenPars = function (e) {
+
+            var etarget = e.target,
+                winW = window.innerWidth,
+                winH = window.innerHeight,
+                winScrollX = 0,
+                winScrollY = 0,
+                x = e.x,
+                y = e.y,
+                el = null, $el = null;
+
+            if (!etarget.element || (etarget.element && etarget.element === window)) {
+
+                el = this.getElementByTreePath(etarget.treePath);
+                $el = $(el);
+
+            } else {
+
+                el = etarget.element;
+                $el = $(el);
+
+            }
+
+            if ($el && etarget.tagName === el.tagName
+                && etarget.id === el.id
+                && etarget.title === el.title
+                //&& etarget.dcipherName === el.dataset.dcipherName
+                //&& etarget.dcipherAction === el.dataset.dcipherAction
+                && $(el).is(':visible')
+                && !e.type.match(/wheel|scroll/i)
+            ) {
+
+                var offset = $el.offset(),
+                    elX = offset.left,
+                    elY = offset.top,
+                    elW = $el.outerWidth(),
+                    elH = $el.outerHeight(),
+                    locX = elW * etarget.relX,
+                    locY = elH * etarget.relY,
+                    cpx = 20,
+                    cpy = 20;
+
+                etarget.element = el;
+                /*
+                 x = elX + locX;
+                 y = elY + locY;
+                 */
+
+                if (x + cpx > pageXOffset + winW) {
+
+                    winScrollX = x + cpx - winW;
+                    x -= winScrollX;
+
+                }
+
+                if (y + cpy > pageYOffset + winH) {
+
+                    winScrollY = y + cpy - winH;
+                    y -= winScrollY;
+
+                }
+
+                /*
+                 e.pageX += x - e.x;
+                 e.pageY += y - e.y;
+                 e.clientX = x;
+                 e.clientY = y;
+                 e.x = x;
+                 e.y = y;
+                 */
+
+            }
+
+            return {
+
+                element: el,
+                x: x,
+                y: y,
+                left: elX + etarget.dx,
+                top: elY + etarget.dy,
+                localX: locX,
+                localY: locY,
+                width: elW,
+                height: elH,
+                winScrollX: winScrollX,
+                winScrollY: winScrollY
+
+            }
+
+        };
+
+        this.removeMouseOverStyle = function removeMoverStyle() {
+
+            $('style#' + this.domId.mouseOverStyle, '#' + this.domId.container).remove();
+
+        };
+        this.addMouseOverClass = function getPseudoClass(el, pclass) {
+
+            var sheets = document.styleSheets,
+                rules, s, r, selectorText, rule,
+                selectors = [],
+                styles = '', styleNode = document.createElement('style'),
+                mouseOverStyleId = this.domId.mouseOverStyle,
+                $container = $('#' + this.domId.container);
+
+            if (el.id) {
+
+                selectors.push('#' + el.id + pclass);
+
+            }
+
+            if (el.className && typeof el.className === 'string') {
+
+                el.className.split(" ").forEach(function (s) {
+
+                    if (s) {
+
+                        selectors.push('.' + s + pclass);
 
                     }
 
-                    /*
-                     if (self.appMode !== 'test') {
+                });
 
-                     // XXX ???
-                     $(self.getDomElement('0-2-0-0')).show();
+            }
 
-                     } else
-                     */
+            for (s = 0; s < sheets.length; s++) {
 
-                    if (self.currentTask) {
+                rules = sheets[s].rules || sheets[s].cssRules || [];
 
-                        // self.createTaskList();
-                        self.activateTask(self.currentTask, true);
-                        $(self.getDomElement('testName')).hide();
-                        $(self.getDomElement('butStartTest')).hide();
-                        $(self.getDomElement('butTest')).hide();
+                for (r = 0; r < rules.length; r++) {
 
-                    } else if (self.editTask) {
+                    rule = rules[r];
+                    selectorText = rule.selectorText;
 
-                        self.moveTaskLeft(self.editTask);
-                        $(self.getDomElement('butStartTest')).hide();
-                        $(self.getDomElement('butTest')).hide();
-                        $(self.getDomElement('testName')).hide();
+                    selectors.forEach(function (c) {
+
+                        if (selectorText && selectorText.match(new RegExp(c))) {
+
+                            var ct = rule.cssText;
+
+                            styles += ct.substring(ct.indexOf('{') + 1, ct.indexOf('}'));
+
+                            //console.debug('---> cssObj: ', cssObj);
+
+                        }
+
+                    });
+                }
+
+            }
+
+            $('#' + mouseOverStyleId, $container).remove();
+
+            if (styles) {
+
+                $(styleNode).attr('id', mouseOverStyleId).text('.' + this.domId.mouseOverClass + ' {' + styles + '}');
+                $container.append(styleNode);
+                return true;
+
+            } else {
+
+                return false;
+
+            }
+
+        };
+
+        this.toggleSessionList = function () {
+
+            var rlId = this.domId['sessions'],
+                rbId = this.domId['butList'],
+                $rl = $('#' + rlId);
+
+            function hideReclist(e) {
+
+                if ($rl.is(':visible') && !$rl.find(e.target).length && e.target.id !== rbId && !$('#' + rbId).find(e.target).length) {
+
+                    $rl.hide();
+
+                }
+
+            }
+
+            if (!$rl.is(':visible') && this.sessions.length) {
+
+                $rl.show();
+                $('body').on('click', hideReclist);
+
+            } else {
+
+                $rl.hide();
+                $('body').off('click', hideReclist);
+
+            }
+
+        };
+
+        this.createSessionList = function () {
+
+            var self = this,
+                sessionsDiv = this.getDomElement('sessions'),
+                cnvHolder = this.getDomElement('canvasHolder'),
+                visRecs = {}, actRecs = {},
+                sessionDiv, butShow, butDel, inpName, nChckb,
+                cnv, ctx, butCp, cpInp, cpSp;
+
+            if (!this.sessions.length) {
+
+                $(sessionsDiv).hide();
+                $(cnvHolder).hide();
+                $(this.getDomElement('butList')).hide();
+                return;
+
+            } else {
+
+                $(this.getDomElement('butList')).show();
+
+            }
+
+            // Get all visible records
+            $('input:checkbox', sessionsDiv).each(function () {
+
+                visRecs[$(this).attr('data-dcipher-rec-id')] = $(this).prop('checked');
+
+            });
+
+            // Get all active records
+            $('.rec', sessionsDiv).each(function () {
+
+                actRecs[$(this).attr('data-dcipher-rec-id')] = $(this).hasClass('active');
+
+            });
+
+            if (!visRecs.length) {
+
+                $(cnvHolder).hide();
+
+            }
+            $(sessionsDiv).children().remove();
+            $(cnvHolder).children('.cnv').remove();
+            this.sessions.forEach(function (r, idx) {
+
+                // Restore visibility and active flags
+                r.visible = visRecs[r.id];
+                r.active = actRecs[r.id];
+                r.drawn = false;
+
+                // Record canvas
+                cnv = document.createElement('canvas');
+                cnv.setAttribute('data-dcipher-rec-id', r.id);
+                cnv.height = window.innerHeight;
+                cnv.width = window.innerWidth;
+                cnv.id = 'cnvId-' + r.id;
+                cnv.className = 'cnv';
+                ctx = cnv.getContext('2d');
+                ctx.lineWidth = 1.5;
+                ctx.fillStyle = 'white';
+                ctx.strokeStyle = r.color;
+                ctx.lineCap = 'square';
+                ctx.lineJoin = 'miter';
+                ctx.miterLimit = 4.0;
+                ctx.shadowOffsetX = 0;
+                ctx.shadowOffsetY = 3.0;
+                ctx.shadowBlur = 4.0;
+                ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+                cnvHolder.appendChild(cnv);
+
+                // Record div
+                sessionDiv = document.createElement('div');
+                sessionDiv.id = 'recId-' + r.id;
+                sessionDiv.className = 'rec' + (actRecs[r.id] ? ' active' : '');
+                sessionDiv.setAttribute('data-dcipher-rec-id', r.id);
+
+                // Show record button
+                nChckb = document.createElement('input');
+                nChckb.setAttribute('data-dcipher-rec-id', r.id);
+                nChckb.setAttribute('cnv-id', idx);
+                nChckb.type = 'checkbox';
+                nChckb.id = 'showRecId-' + r.id;
+                nChckb.value = r.id;
+                nChckb.className = "chckb-show";
+                nChckb.checked = visRecs[r.id];
+                sessionDiv.appendChild(nChckb);
+
+                butShow = document.createElement('label');
+                butShow.setAttribute('data-dcipher-rec-id', r.id);
+                butShow.setAttribute('cnv-id', idx);
+                butShow.htmlFor = 'showRecId-' + r.id;
+                butShow.className = 'show';
+                butShow.title = dCipher.loc._Toggle_record;
+                sessionDiv.appendChild(butShow);
+
+                // Delete Record button
+                butDel = document.createElement('div');
+                butDel.setAttribute('data-dcipher-rec-id', r.id);
+                butDel.id = 'delRecId-' + r.id;
+                butDel.className = 'del';
+                butDel.innerHTML = '&#10005;';
+                butDel.title = dCipher.loc._Delete_record;
+                sessionDiv.appendChild(butDel);
+
+                // Color picker
+                cpInp = document.createElement('input');
+                cpInp.type = 'hidden';
+                cpInp.value = r.color;
+
+                cpSp = document.createElement('span');
+                cpSp.className = 'input-group-addon cp-span';
+                cpi = document.createElement('i');
+                cpi.className = 'cp-i';
+                cpi.style.backgroundColor = r.color;
+                cpi.title = dCipher.loc._Change_color;
+                cpSp.appendChild(cpi);
+
+                butCp = document.createElement('div');
+                butCp.setAttribute('data-dcipher-rec-id', r.id);
+                butCp.id = 'cpId-' + r.id;
+                butCp.className = 'cp-container input-group';
+                butCp.appendChild(cpInp);
+                butCp.appendChild(cpSp);
+                sessionDiv.appendChild(butCp);
+
+                // Play record button
+                /*
+                 butPlay = document.createElement('div');
+                 butPlay.setAttribute('data-dcipher-rec-id', r.id);
+                 butPlay.id = 'playRecId-' + r.id;
+                 butPlay.className = 'play';
+                 butPlay.title = dCipher.loc._Play_record;
+                 rec.appendChild(butPlay);
+                 */
+
+                // Edit name field
+                inpName = document.createElement('input');
+                inpName.setAttribute('data-dcipher-rec-id', r.id);
+                inpName.placeholder = self.loc._Name_placeholder;
+                inpName.type = 'text';
+                inpName.value = r.name;
+                inpName.disabled = true;
+                inpName.id = 'recNameId-' + r.id;
+                inpName.className = 'rec-name';
+                sessionDiv.appendChild(inpName);
+
+                sessionsDiv.appendChild(sessionDiv);
+
+                // Define listeners
+                nChckb.addEventListener('change', function () {
+
+                    var $el = $(this);
+
+                    if ($el.prop('checked')) {
+
+                        id = $el.attr('data-dcipher-rec-id');
+                        var session = self.sessions.findBy('id', id);
+
+                        if (!session.events) {
+
+                            self.db.getSessionEvents(id).then(function (events) {
+                                "use strict";
+
+                                session.events = events;
+                                self.calculateScreenCoords(session);
+                                self.showSpiderGraph(id);
+
+                            });
+
+                        } else {
+
+                            self.showSpiderGraph(id);
+                        }
+
+                    } else {
+
+                        id = $el.attr('data-dcipher-rec-id');
+
+                        if (self.activeSession && self.activeSession.id === id) {
+
+                            self.unsetActiveSession();
+
+                        } else {
+
+                            self.hideSpiderGraph(id);
+
+                        }
+
+                    }
+
+                });
+
+                butDel.addEventListener('click', function () {
+
+                    self.deleteSession($(this).attr('data-dcipher-rec-id'));
+
+                });
+
+                inpName.addEventListener('change', function () {
+
+                    var $el = $(this);
+                    self.updateSessionName($el.attr('data-dcipher-rec-id'), $el.val());
+                    $el.attr('disabled', true);
+
+                });
+
+                inpName.addEventListener('blur', function () {
+
+                    var $el = $(this);
+                    $el.attr('disabled', true);
+
+                });
+
+                sessionDiv.addEventListener('dblclick', function () {
+
+                    var $el = $('input[type="text"]', this);
+                    $el.attr('disabled', false).focus();
+
+                });
+
+                sessionDiv.addEventListener('click', function (e) {
+
+                    var $el = $(e.target),
+                        id = $el.attr('data-dcipher-rec-id');
+
+                    if ($el.attr('type') === 'text') {
+
+                        var session = self.sessions.findBy('id', id);
+
+                        if (!session.events) {
+
+                            self.db.getSessionEvents(id).then(function (events) {
+                                "use strict";
+
+                                session.events = events;
+                                self.calculateScreenCoords(session);
+                                self.showSpiderGraph(id);
+                                self.setActiveSession(id, true);
+
+                            });
+
+                        } else {
+
+                            self.showSpiderGraph(id);
+                            self.setActiveSession(id, true);
+                        }
+
+                    }
+
+                });
+
+                // Draw record spidergraph if active
+                if (visRecs[r.id]) {
+
+                    self.showSpiderGraph(r.id);
+
+                    if (actRecs[r.id]) {
+
+                        self.drawTimeline(r);
 
                     }
 
                 }
 
-                for (var k in state) {
+                $(butCp).colorpicker({
 
-                    if (state.hasOwnProperty(k) && state[k]) {
+                    format: 'rgba',
+                    container: butCp,
+                    //align: 'right',
+                    customClass: 'cp-pos',
+                    colorSelectors: ['magenta', 'red', 'orange', 'yellow', 'limegreen', 'aqua', 'lightseagreen', 'royalblue', 'silver', 'gray', 'black']
 
-                        self[k] = state[k];
+                }).on('hidePicker.bs-colorpicker', function () {
+                    //
+                    var $el = $(this);
+
+                    self.updateRecordColor($el.attr('data-dcipher-rec-id'), $el.colorpicker('getValue'));
+
+                });
+
+            });
+
+        };
+
+        this.setActiveSession = function setActiveRecord(id, reset) {
+
+            var self = this,
+                recs = this.getDomElement('sessions'),
+                $rec = $('#recId-' + id, recs),
+                $chkb = $('input[type="checkbox"]#showRecId-' + id, $rec);
+
+            $('.rec', recs).removeClass('active');
+            $rec.addClass('active');
+
+            this.sessions.forEach(function (session) {
+
+                if (session.id == id) {
+
+                    session.active = true;
+                    session.visible = true;
+                    self.activeSession = session;
+                    self.sessionId = session.id;
+                    if (self.appMode !== 'timeline' || reset) {
+
+                        self.startEventIndex = 0;
+                        self.endEventIndex = session.events.length - 1;
+                        self.timeBrackets = [0, session.duration];
 
                     }
+                    self.drawTimeline(session);
+
+                } else {
+
+                    session.active = false;
 
                 }
 
-                this.initTestCase(state.testCase ? state.testCase.id : '').then(initState);
+            });
 
-            };
+            if (!$chkb.prop('checked')) {
 
-            this.resetState = function () {
+                $chkb.prop('checked', true);
+
+            }
+
+        };
+
+        this.unsetActiveSession = function () {
+
+            if (this.activeSession) {
+
+                var id = this.activeSession.id;
+
+                $('#recId-' + id, this.getDomElement('sessions')).removeClass('active');
+                if (this.sessions.length) {
+
+                    this.getSessionById(id).active = false;
+
+                }
+                this.hideSpiderGraph(id);
+
+                this.activeSession = null;
+                $(this.getDomElement('timelineInfo')).html('');
+                $(this.getDomElement('timeline')).hide();
+
+            }
+
+        };
+
+        this.deleteSession = function (id) {
+
+            var self = this,
+                session = this.sessions.findBy('id', id),
+                idx = this.sessions.indexOf(session);
+
+            return new Promise(function (resolve, reject) {
+                "use strict";
+
+                self.unsetActiveSession();
+
+                // Delete session data
+                self.db.deleteSession(id).then(function () {
+
+                    self.sessions.splice(idx, 1);
+                    self.createSessionList();
+                    resolve();
+
+                }, function (error, message) {
+
+                    console.warn('[WARN] Could not delete session. Error:', message);
+                    reject(error);
+
+                });
+
+            });
+
+        };
+
+        this.updateSessionName = function updateRecordName(id, name) {
+
+            var session = this.getSessionById(id);
+
+            session.name = name;
+            this.db.putSession(session);
+
+        };
+
+        this.updateRecordColor = function updateRecordColor(id, color) {
+
+            var self = this,
+                session = this.getSessionById(id);
+
+            if (session.color !== color) {
+
+                session.color = color;
+                delete session.drawn;
+                this.db.putSession(session).then(function () {
+
+                    self.createSessionList();
+
+                }, function (e, msg) {
+
+                    console.warn('[WARN] Could not update record. Error:', msg);
+
+                });
+
+            }
+
+        };
+
+        this.checkRecordCheckbox = function checkRecordCheckbox(sId) {
+
+            $('input:checkbox[data-dcipher-rec-id=' + sId + ']', this.getDomElement('sessions')).prop('checked', true);
+            this.getSessionById(sId).visible = true;
+
+        };
+
+        this.hideRecList = function hideRecList() {
+
+            $(this.getDomElement('sessions')).hide();
+
+        };
+
+        this.showMouseClick = function showMouseClick(x, y) {
+
+            var $el = $(this.getDomElement('click'));
+
+            function showClick() {
+
+                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                    .show().fadeOut();
+
+            }
+
+            setTimeout(showClick, 0);
+
+        };
+
+        this.showDblClick = function showMouseClick(x, y) {
+
+            var self = this,
+                $el = $(this.getDomElement('dblClick'));
+
+            function showClick() {
+
+                $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2)
+                    .show();
+
+                setTimeout(function () {
+
+                    $el.fadeOut('fast');
+
+                }, self.clickDelay);
+
+            }
+
+            this.showMouseClick(x, y);
+            setTimeout(showClick, 0);
+
+        };
+
+        this.showMouseDown = function showMouseDown(x, y) {
+
+            var $el = $(this.getDomElement('click'));
+
+            $el.css('left', x - $el.outerWidth() / 2).css('top', y - $el.outerHeight() / 2).show();
+
+        };
+
+        this.hideMouseDown = function hideMouseDown() {
+
+            $(this.getDomElement('click')).fadeOut('fast');
+
+        };
+
+        this.mouseMoveHandler = function mouseMoveHandler(e) {
+
+            e.data.self.mouse = {
+
+                x: e.clientX,
+                y: e.clientY
+
+            }
+
+        };
+
+        this.saveState = function saveState() {
+
+            if (this.appMode || this.editTask) {
+
+                if (this.appMode === 'test') {
+
+                    this.checkTaskCompletion();
+
+                }
+
+                if (this.activeSession && this.activeSession.events.length) {
+
+                    this.activeSession.events.forEach(function (e) {
+
+                        delete e.target.element;
+
+                    });
+
+                }
+                sessionStorage.setItem('dcipherState', JSON.stringify({
+
+                    user: this.user,
+                    appMode: this.appMode,
+                    activeSession: this.activeSession,
+                    sessionId: this.sessionId,
+                    startEventIndex: this.startEventIndex,
+                    endEventIndex: this.endEventIndex,
+                    testCase: this.testCase,
+                    testTasks: this.testTasks,
+                    // testEvents: this.testEvents,
+                    sessions: this.sessions,
+                    currentTaskId: this.currentTask ? this.currentTask.id : '',
+                    editTaskId: this.editTask ? this.editTask.id : '',
+                    currentEvent: this.currentEvent,
+                    timeBrackets: this.timeBrackets
+
+                }));
+
+            } else {
 
                 sessionStorage.removeItem('dcipherState');
-                if (this.activeSession) {
 
-                    var loc = this.activeSession.events[0].location;
+            }
+        };
 
-                    this.activeSession = null;
-                    this.appMode = '';
-                    this.endEventIndex = 0;
-                    window.location = loc;
+        this.restoreState = function () {
+
+            var self = this,
+                state = JSON.parse(sessionStorage.getItem('dcipherState') || '{}');
+
+            function initState() {
+                "use strict";
+
+                if (self.appMode === 'record' || self.appMode === 'test' || self.appMode === 'testEvents') {
+
+                    $('div', self.getDomElement('butRecord')).removeClass('rec').addClass('stop');
+                    $(self.getDomElement('butList')).hide();
+                    $('body').on('mousemove', function (e) {
+
+                        self.catchEvents(e);
+
+                    });
+                    $(self.getDomElement('stat')).data('tid', setInterval(function updateStats() {
+
+                        self.updateStatString();
+
+                    }, 100)).fadeIn();
+
+                } else if (self.appMode === 'play') {
+
+                    self.showSpiderGraph(self.activeSession.id, 0, self.endEventIndex + 1);
+                    setTimeout(function () {
+
+                        self.playSession(self.activeSession.id, self.endEventIndex);
+
+                    }, 1000);
+
+                } else if (self.appMode === 'timeline') {
+
+                    var event = self.activeSession.events[self.endEventIndex],
+                        tEvt;
+
+                    self.setActiveSession(self.activeSession.id);
+                    self.showSpiderGraph(self.activeSession.id, self.startEventIndex, self.endEventIndex + 1);
+
+                    tEvt = self.timeLineEvents.find(function (e) {
+
+                        return e.event.index === event.index;
+
+                    });
+                    self.showTLTooltip(tEvt);
+                    self.drawTLBrackets();
+                    sessionStorage.removeItem('dcipherState');
+                    self.appMode = '';
 
                 }
 
-            };
+                /*
+                 if (self.appMode !== 'test') {
 
-            this.createTaskList = function () {
+                 // XXX ???
+                 $(self.getDomElement('0-2-0-0')).show();
 
-                var self = this,
-                    $tb = $(this.getDomElement('taskBar')),
-                    w = 42,
-                    d, sn, sd;
+                 } else
+                 */
 
-                function mouseUpHandler(e) {
+                if (self.currentTask) {
 
-                    var testTasks = self.testTasks,
-                        step = 1 * $(e.target).attr('step'),
-                        clickedTask = testTasks[step],
-                        nextStep = step + 1;
+                    // self.createTaskList();
+                    self.activateTask(self.currentTask, true);
+                    $(self.getDomElement('testName')).hide();
+                    $(self.getDomElement('butStartTest')).hide();
+                    $(self.getDomElement('butTest')).hide();
 
-                    e.stopPropagation();
+                } else if (self.editTask) {
 
-                    if (self.appMode === 'test') {
+                    self.moveTaskLeft(self.editTask);
+                    $(self.getDomElement('butStartTest')).hide();
+                    $(self.getDomElement('butTest')).hide();
+                    $(self.getDomElement('testName')).hide();
 
-                        if (clickedTask.done) {
+                }
 
-                            //self.setTaskUndone(clickedTask);
-                            self.activateTask(clickedTask);
+            }
 
-                        } else if (clickedTask.active) {
+            for (var k in state) {
 
-                            self.setTaskDone(clickedTask);
-                            if (nextStep < testTasks.length) {
+                if (state.hasOwnProperty(k) && state[k]) {
 
-                                self.activateTask(testTasks[nextStep]);
+                    self[k] = state[k];
 
-                            } else {
+                }
 
-                                self.endOfTest();
+            }
 
-                            }
+            this.initTestCase(state.testCase ? state.testCase.id : '').then(initState);
+
+        };
+
+        this.resetState = function () {
+
+            sessionStorage.removeItem('dcipherState');
+            if (this.activeSession) {
+
+                var loc = this.activeSession.events[0].location;
+
+                this.activeSession = null;
+                this.appMode = '';
+                this.endEventIndex = 0;
+                window.location = loc;
+
+            }
+
+        };
+
+        this.createTaskList = function () {
+
+            var self = this,
+                $tb = $(this.getDomElement('taskBar')),
+                w = 42,
+                d, sn, sd;
+
+            function mouseUpHandler(e) {
+
+                var testTasks = self.testTasks,
+                    step = 1 * $(e.target).attr('step'),
+                    clickedTask = testTasks[step],
+                    nextStep = step + 1;
+
+                e.stopPropagation();
+
+                if (self.appMode === 'test') {
+
+                    if (clickedTask.done) {
+
+                        //self.setTaskUndone(clickedTask);
+                        self.activateTask(clickedTask);
+
+                    } else if (clickedTask.active) {
+
+                        self.setTaskDone(clickedTask);
+                        if (nextStep < testTasks.length) {
+
+                            self.activateTask(testTasks[nextStep]);
 
                         } else {
 
-                            if (/*!step && */!self.appMode) {
-
-                                self.startTest();
-
-                            }
-                            /* else {
-
-                             self.activateTask(clickedTask);
-
-                             }*/
+                            self.endOfTest();
 
                         }
 
                     } else {
 
-                        var id = e.target.dataset.dcipherTaskId,
-                            task = testTasks.findBy('id', id),
-                            idx = testTasks.indexOf(task);
+                        if (/*!step && */!self.appMode) {
 
-                        if (task.left) {
-
-                            self.moveTaskRight(task);
-                            if (idx) {
-
-                                self.editTask = testTasks[idx - 1];
-
-                            } else {
-
-                                self.editTask = null;
-
-                            }
-
-                        } else {
-
-                            self.moveTaskLeft(task);
-                            self.editTask = task;
-
-                            if (self.appMode === 'testEvents') {
-
-                                task.events = [];
-                                self.testEvents = self.testEvents.filter( function (event) {
-                                    "use strict";
-
-                                    return event.taskId !== task.id;
-
-                                });
-                                document.getElementById('taskId-' + task.id).value =  task.description + ' [ 0 ]';
-
-                            }
-
+                            self.startTest();
 
                         }
+                        /* else {
 
-                    }
+                         self.activateTask(clickedTask);
 
-                }
-
-                if (this.testCase && this.testCase.id) {
-
-                    if (this.testTasks && this.testTasks.length && this.testEvents && this.testEvents.length) {
-
-                        if (!this.currentTask) {
-
-                            $(this.getDomElement('butStartTest')).show();
-
-                        }
-
-                    } else {
-
-                        $(this.getDomElement('butStartTest')).hide();
+                         }*/
 
                     }
 
                 } else {
 
-                    this.testTasks = [];
+                    var id = e.target.dataset.dcipherTaskId,
+                        task = testTasks.findBy('id', id),
+                        idx = testTasks.indexOf(task);
 
-                }
+                    if (task.left) {
 
-                var winWidth = window.innerWidth,
-                    rp = winWidth - w * (this.testTasks.length),
-                    tqty = this.testTasks.length,
-                    inpWidth = winWidth - (tqty + 3) * w;
+                        self.moveTaskRight(task);
+                        if (idx) {
 
-                $('.d-cipher-task', $tb).remove();
+                            self.editTask = testTasks[idx - 1];
 
-                this.testTasks.forEach(function (t, i) {
+                        } else {
 
-                    // Task container
-                    t.done = false;
-                    d = document.createElement('div');
-                    d.className = 'd-cipher-task';
-                    d.style.left = rp + w * i + 'px';
-
-                    // Task step number span
-                    sn = document.createElement('span');
-                    sn.className = 'step-number';
-                    sn.innerHTML = i + 1;
-                    sn.setAttribute('step', i);
-                    sn.setAttribute('data-dcipher-task-id', t.id);
-                    d.appendChild(sn);
-
-                    // Tsk description input container
-                    sd = document.createElement('span');
-                    sd.className = 'task-description';
-                    sd.style.width = inpWidth + 'px';
-
-                    // Task description input
-                    inp = document.createElement('input');
-                    inp.type = 'text';
-                    inp.id = 'taskId-' + t.id;
-                    inp.className = 'task-description-input';
-                    inp.disabled = true;
-                    inp.setAttribute('data-dcipher-task-id', t.id);
-                    inp.value = t.description;
-
-                    if (self.appMode === 'testEvents') {
-
-                        inp.value += ' [ ' + (t.events ? t.events.length : 0) + ' ] ';
-
-                    }
-
-                    // Delete task button
-                    del = document.createElement('div');
-                    del.id = 'btnDelTask-' + t.id;
-                    del.className = 'del';
-                    del.innerHTML = '&#10005;';
-                    del.title = dCipher.loc._Delete_task;
-                    del.setAttribute('data-dcipher-task-id', t.id);
-
-                    sd.appendChild(inp);
-                    sd.appendChild(del);
-                    d.appendChild(sd);
-                    $tb.append(d);
-
-                    // Tsk step button listener
-                    sn.addEventListener('mouseup', function (e) {
-
-                        mouseUpHandler(e);
-
-                    });
-
-                    // Task description inout listener
-                    sd.addEventListener('dblclick', function (e) {
-                        "use strict";
-
-                        var target = e.target,
-                            ds = target.dataset;
-
-                        if (self.appMode !== 'test' && ds && ds.dcipherTaskId) {
-
-                            e.stopPropagation();
-                            target.disabled = false;
-                            target.focus();
+                            self.editTask = null;
 
                         }
 
-                    });
+                    } else {
 
-                    inp.addEventListener('blur', function (e) {
-                        "use strict";
+                        self.moveTaskLeft(task);
+                        self.editTask = task;
 
-                        e.target.disabled = true;
+                        if (self.appMode === 'testEvents') {
 
-                    });
+                            task.events = [];
+                            self.testEvents = self.testEvents.filter(function (event) {
+                                "use strict";
 
-                    inp.addEventListener('change', function (e) {
-                        "use strict";
-
-                        var target = e.target,
-                            ds = target.dataset,
-                            tid;
-
-                        if (ds && (tid = ds.dcipherTaskId)) {
-
-                            var task = self.testTasks.findBy('id', tid);
-
-                            task.description = target.value;
-                            e.target.disabled = true;
-                            self.db.putTask({
-
-                                id: task.id,
-                                testCaseId: task.testCaseId,
-                                description: target.value,
-                                step: task.step
+                                return event.taskId !== task.id;
 
                             });
+                            document.getElementById('taskId-' + task.id).value = task.description + ' [ 0 ]';
 
                         }
-                    });
-
-                    del.addEventListener('mouseup', function (e) {
-                        "use strict";
-
-                        self.deleteTask(e.target.dataset.dcipherTaskId);
-
-                    })
-
-                });
-
-                $(this.getDomElement('butAddTask')).show();
-                if (!this.testTasks.length) {
-
-                    $(this.getDomElement('testName')).show();
-                    $(this.getDomElement('butTest')).show();
-
-                }
-            };
-
-            this.deleteTask = function (id) {
-
-                var self = this,
-                    task = this.testTasks.findBy('id', id),
-                    tIndex = task.step,
-                    testTasks = this.testTasks;
-
-                return new Promise(function (resolve, reject) {
-                    "use strict";
-
-                    var promises = [];
-
-                    // Delete task from db and list
-                    promises.push(self.db.deleteTask(task.id));
-
-                    // Delete task events
-                    if (task.events && task.events.length) {
-
-                        promises.push(self.db.deleteEventSet(task.events));
 
                     }
 
-                    // Cut out task from the task list
-                    testTasks.splice(tIndex, 1);
-                    self.createTaskList();
-                    testTasks.forEach( function (task) {
+                }
 
-                        if (task.left) {
+            }
 
-                            self.moveTaskLeft(task);
+            if (this.testCase && this.testCase.id) {
 
-                        }
+                if (this.testTasks && this.testTasks.length && this.testEvents && this.testEvents.length) {
 
-                    });
+                    if (!this.currentTask) {
 
-                    // Update step info and save updated tasks
-                    testTasks.forEach(function (task, idx) {
+                        $(this.getDomElement('butStartTest')).show();
 
-                        task.step = idx;
-                        if (idx >= tIndex) {
+                    }
 
-                            promises.push(self.db.putTask({
+                } else {
 
-                                id: task.id,
-                                testCaseId: task.testCaseId,
-                                description: task.description,
-                                step: task.step
-
-                            }));
-
-                        }
-
-                    });
-
-                    Promise.all(promises).then(function () {
-
-                        resolve();
-
-                    });
-
-                });
-
-            };
-
-            this.moveTaskLeft = function (task) {
-
-                var testTasks = this.testTasks,
-                    idx = testTasks.indexOf(task),
-                    tb = this.getDomElement('taskBar'),
-                    div = $('div.d-cipher-task', tb)[idx],
-                    dw = ($('.step-number', div).outerWidth()),
-                    ease = 'left 0.2s ease-out 0.15s',
-                    i, il, t, $sdiv;
-
-                for (i = 0; i < idx; i++) {
-
-                    t = testTasks[i];
-                    t.left = true;
-
-                    // Move previous tasks to the left
-                    $sdiv = $($('div.d-cipher-task', tb)[i]);
-                    $('span.step-number', $sdiv).removeClass('active');
-                    $sdiv.css({
-
-                        left: dw * (i + 2) + 4,
-                        transition: ease
-
-                    }).children('.task-description').fadeOut('fast');
+                    $(this.getDomElement('butStartTest')).hide();
 
                 }
 
-                // $($('div.d-cipher-task', tb)[i]).css({
-                $(div).css({
+            } else {
+
+                this.testTasks = [];
+
+            }
+
+            var winWidth = window.innerWidth,
+                rp = winWidth - w * (this.testTasks.length),
+                tqty = this.testTasks.length,
+                inpWidth = winWidth - (tqty + 3) * w;
+
+            $('.d-cipher-task', $tb).remove();
+
+            this.testTasks.forEach(function (t, i) {
+
+                // Task container
+                t.done = false;
+                d = document.createElement('div');
+                d.className = 'd-cipher-task';
+                d.style.left = rp + w * i + 'px';
+
+                // Task step number span
+                sn = document.createElement('span');
+                sn.className = 'step-number';
+                sn.innerHTML = i + 1;
+                sn.setAttribute('step', i);
+                sn.setAttribute('data-dcipher-task-id', t.id);
+                d.appendChild(sn);
+
+                // Tsk description input container
+                sd = document.createElement('span');
+                sd.className = 'task-description';
+                sd.style.width = inpWidth + 'px';
+
+                // Task description input
+                inp = document.createElement('input');
+                inp.type = 'text';
+                inp.id = 'taskId-' + t.id;
+                inp.className = 'task-description-input';
+                inp.disabled = true;
+                inp.setAttribute('data-dcipher-task-id', t.id);
+                inp.value = t.description;
+
+                if (self.appMode === 'testEvents') {
+
+                    inp.value += ' [ ' + (t.events ? t.events.length : 0) + ' ] ';
+
+                }
+
+                // Delete task button
+                del = document.createElement('div');
+                del.id = 'btnDelTask-' + t.id;
+                del.className = 'del';
+                del.innerHTML = '&#10005;';
+                del.title = dCipher.loc._Delete_task;
+                del.setAttribute('data-dcipher-task-id', t.id);
+
+                sd.appendChild(inp);
+                sd.appendChild(del);
+                d.appendChild(sd);
+                $tb.append(d);
+
+                // Tsk step button listener
+                sn.addEventListener('mouseup', function (e) {
+
+                    mouseUpHandler(e);
+
+                });
+
+                // Task description inout listener
+                sd.addEventListener('dblclick', function (e) {
+                    "use strict";
+
+                    var target = e.target,
+                        ds = target.dataset;
+
+                    if (self.appMode !== 'test' && ds && ds.dcipherTaskId) {
+
+                        e.stopPropagation();
+                        target.disabled = false;
+                        target.focus();
+
+                    }
+
+                });
+
+                inp.addEventListener('blur', function (e) {
+                    "use strict";
+
+                    e.target.disabled = true;
+
+                });
+
+                inp.addEventListener('change', function (e) {
+                    "use strict";
+
+                    var target = e.target,
+                        ds = target.dataset,
+                        tid;
+
+                    if (ds && (tid = ds.dcipherTaskId)) {
+
+                        var task = self.testTasks.findBy('id', tid);
+
+                        task.description = target.value;
+                        e.target.disabled = true;
+                        self.db.putTask({
+
+                            id: task.id,
+                            testCaseId: task.testCaseId,
+                            description: target.value,
+                            step: task.step
+
+                        });
+
+                    }
+                });
+
+                del.addEventListener('mouseup', function (e) {
+                    "use strict";
+
+                    self.deleteTask(e.target.dataset.dcipherTaskId);
+
+                })
+
+            });
+
+            $(this.getDomElement('butAddTask')).show();
+            if (!this.testTasks.length) {
+
+                $(this.getDomElement('testName')).show();
+                $(this.getDomElement('butTest')).show();
+
+            }
+        };
+
+        this.deleteTask = function (id) {
+
+            var self = this,
+                task = this.testTasks.findBy('id', id),
+                tIndex = task.step,
+                testTasks = this.testTasks;
+
+            return new Promise(function (resolve, reject) {
+                "use strict";
+
+                var promises = [];
+
+                // Delete task from db and list
+                promises.push(self.db.deleteTask(task.id));
+
+                // Delete task events
+                if (task.events && task.events.length) {
+
+                    promises.push(self.db.deleteEventSet(task.events));
+
+                }
+
+                // Cut out task from the task list
+                testTasks.splice(tIndex, 1);
+                self.createTaskList();
+                testTasks.forEach(function (task) {
+
+                    if (task.left) {
+
+                        self.moveTaskLeft(task);
+
+                    }
+
+                });
+
+                // Update step info and save updated tasks
+                testTasks.forEach(function (task, idx) {
+
+                    task.step = idx;
+                    if (idx >= tIndex) {
+
+                        promises.push(self.db.putTask({
+
+                            id: task.id,
+                            testCaseId: task.testCaseId,
+                            description: task.description,
+                            step: task.step
+
+                        }));
+
+                    }
+
+                });
+
+                Promise.all(promises).then(function () {
+
+                    resolve();
+
+                });
+
+            });
+
+        };
+
+        this.moveTaskLeft = function (task) {
+
+            var testTasks = this.testTasks,
+                idx = testTasks.indexOf(task),
+                tb = this.getDomElement('taskBar'),
+                div = $('div.d-cipher-task', tb)[idx],
+                dw = ($('.step-number', div).outerWidth()),
+                ease = 'left 0.2s ease-out 0.15s',
+                i, il, t, $sdiv;
+
+            for (i = 0; i < idx; i++) {
+
+                t = testTasks[i];
+                t.left = true;
+
+                // Move previous tasks to the left
+                $sdiv = $($('div.d-cipher-task', tb)[i]);
+                $('span.step-number', $sdiv).removeClass('active');
+                $sdiv.css({
 
                     left: dw * (i + 2) + 4,
                     transition: ease
 
-                }).children('.task-description').fadeIn('fast');
+                }).children('.task-description').fadeOut('fast');
 
-                $('span.step-number', div).addClass('active');
+            }
 
-                task.left = true;
+            // $($('div.d-cipher-task', tb)[i]).css({
+            $(div).css({
 
-                $(this.getDomElement('testName')).hide();
-                $(this.getDomElement('butStartTest')).hide();
-                $(this.getDomElement('butTest')).hide();
+                left: dw * (i + 2) + 4,
+                transition: ease
 
-            };
+            }).children('.task-description').fadeIn('fast');
 
-            this.moveTaskRight = function (task) {
+            $('span.step-number', div).addClass('active');
 
-                var tb = this.getDomElement('taskBar'),
+            task.left = true;
+
+            $(this.getDomElement('testName')).hide();
+            $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butTest')).hide();
+
+        };
+
+        this.moveTaskRight = function (task) {
+
+            var tb = this.getDomElement('taskBar'),
+                testTasks = this.testTasks,
+                step = task.step,
+                div = $('div.d-cipher-task', tb)[step],
+                $spn = $('span.step-number', div),
+                w = $spn.outerWidth(),
+                tLen = this.testTasks.length,
+                winWidth = window.innerWidth,
+                left = winWidth - w * (tLen - step),
+                ease = 'left 0.2s ease-out 0.15s',
+                i = tLen, $sdiv;
+
+            while (i-- > step) {
+
+                $sdiv = $($('div.d-cipher-task', tb)[i]);
+                $('span.step-number', $sdiv).removeClass('active');
+                $sdiv.css({
+
+                    left: winWidth - w * (tLen - i),
+                    transition: ease
+
+                }).children('.task-description').fadeIn('slow');
+
+                delete testTasks[i].left;
+
+            }
+
+            if (step) {
+
+                $($('div.d-cipher-task > span.step-number[step=' + (step - 1) + ']', tb)).addClass('active');
+                $($('.d-cipher-task > .task-description', this.getDomElement('taskBar'))[step - 1]).fadeIn();
+
+            } else {
+
+                this.editTask = null;
+                this.appMode = '';
+
+            }
+
+            // $(div).children('.task-description').fadeIn('slow');
+            // $('span.step-number', div).removeClass('active');
+
+            delete task.left;
+
+            if (!task.step) {
+
+                $(this.getDomElement('testName')).fadeIn();
+                $(this.getDomElement('butStartTest')).fadeIn();
+                $(this.getDomElement('butTest')).fadeIn();
+
+            }
+
+        };
+
+        this.activateTask = function (task, force) {
+
+            if (task && (!task.active) || force) {
+
+                var self = this,
                     testTasks = this.testTasks,
                     step = task.step,
-                    div = $('div.d-cipher-task', tb)[step],
-                    $spn = $('span.step-number', div),
-                    w = $spn.outerWidth(),
-                    tLen = this.testTasks.length,
-                    winWidth = window.innerWidth,
-                    left = winWidth - w * (tLen - step),
-                    ease = 'left 0.2s ease-out 0.15s',
-                    i = tLen, $sdiv;
-
-                while (i-- > step) {
-
-                    $sdiv = $($('div.d-cipher-task', tb)[i]);
-                    $('span.step-number', $sdiv).removeClass('active');
-                    $sdiv.css({
-
-                        left: winWidth - w * (tLen - i),
-                        transition: ease
-
-                    }).children('.task-description').fadeIn('slow');
-
-                    delete testTasks[i].left;
-
-                }
-
-                if (step) {
-
-                    $($('div.d-cipher-task > span.step-number[step=' + (step - 1) + ']', tb)).addClass('active');
-                    $($('.d-cipher-task > .task-description', this.getDomElement('taskBar'))[step - 1]).fadeIn();
-
-                } else {
-
-                    this.editTask = null;
-                    this.appMode = '';
-
-                }
-
-                // $(div).children('.task-description').fadeIn('slow');
-                // $('span.step-number', div).removeClass('active');
-
-                delete task.left;
-
-                if (!task.step) {
-
-                    $(this.getDomElement('testName')).fadeIn();
-                    $(this.getDomElement('butStartTest')).fadeIn();
-                    $(this.getDomElement('butTest')).fadeIn();
-
-                }
-
-            };
-
-            this.activateTask = function (task, force) {
-
-                if (task && (!task.active) || force) {
-
-                    var self = this,
-                        testTasks = this.testTasks,
-                        step = task.step,
-                        tb = this.getDomElement('taskBar'),
-                        div = $('div.d-cipher-task', tb)[step],
-                        $div = $(div),
-                        dw = ($('.step-number', div).outerWidth()),
-                        ease = 'left 0.2s ease-out 0.15s',
-                        i, il, t;
-
-                    for (i = 0; i < step; i++) {
-
-                        t = testTasks[i];
-
-                        this.setTaskDone(t, force);
-                        t.active = false;
-
-                        // Move previous tasks to the left
-                        $($('div.d-cipher-task', tb)[i]).css({
-
-                            left: dw * (i + 2) + 4,
-                            transition: force ? '' : ease
-
-                        }).children('.step-number').removeClass('active');
-
-                    }
-
-                    i++;
-                    for (il = testTasks.length; i < il; i++) {
-
-                        if (testTasks[i].active) {
-
-                            this.deactivateTask(testTasks[i]);
-
-                        }
-
-                    }
-
-                    $div.css({
-
-                        left: dw * (step + 2) + 4,
-                        transition: force ? '' : ease
-
-                    });
-
-                    task.active = true;
-                    self.currentTask = task;
-                    setTimeout(function () {
-
-                        $('span.step-number', div).addClass('active');
-                        self.setTaskUndone(task, force);
-                        self.setTestProgressBar();
-
-                    }, 200);
-
-                }
-
-            };
-
-            this.deactivateTask = function (task) {
-
-                var tb = this.getDomElement('taskBar'),
-                    step = task.step,
+                    tb = this.getDomElement('taskBar'),
                     div = $('div.d-cipher-task', tb)[step],
                     $div = $(div),
-                    $spn = $('span.step-number', div),
-                    left = window.innerWidth - $spn.outerWidth() * (this.testTasks.length - step);
+                    dw = ($('.step-number', div).outerWidth()),
+                    ease = 'left 0.2s ease-out 0.15s',
+                    i, il, t;
 
-                task.active = false;
-                this.setTaskUndone(task);
-                $spn.removeClass('active').trigger('mouseout');
+                for (i = 0; i < step; i++) {
+
+                    t = testTasks[i];
+
+                    this.setTaskDone(t, force);
+                    t.active = false;
+
+                    // Move previous tasks to the left
+                    $($('div.d-cipher-task', tb)[i]).css({
+
+                        left: dw * (i + 2) + 4,
+                        transition: force ? '' : ease
+
+                    }).children('.step-number').removeClass('active');
+
+                }
+
+                this.deactivateTask(testTasks[i]);
+
                 $div.css({
 
-                    left: left,
-                    transition: 'left 0.2s ease-out 0.15s'
+                    left: dw * (step + 2) + 4,
+                    transition: force ? '' : ease
 
                 });
 
-            };
+                task.active = true;
+                self.currentTask = task;
+                setTimeout(function () {
 
-            this.syncTaskEvents = function (task) {
+                    $('span.step-number', div).addClass('active');
+                    self.setTaskUndone(task, force);
+                    self.setTestProgressBar();
 
-                var done = task.done;
+                }, 200);
 
-                this.testEvents.forEach(function (e) {
+            }
 
-                    if (e.taskId === task.id) {
+        };
 
-                        e.done = done;
+        this.deactivateTask = function (task) {
 
-                    }
+            var tb = this.getDomElement('taskBar'),
+                testTasks = this.testTasks,
+                tLen = testTasks.length,
+                div, $spn, left, i;
 
-                });
+            for (i = task.step; i < tLen; i++) {
 
-            };
+                if (testTasks[i].active || testTasks[i].done) {
 
-            this.setTaskDone = function (task, force) {
+                    testTasks[i].active = false;
+                    this.setTaskUndone(testTasks[i]);
 
-                if (task && (!task.done || force)) {
+                    div = $('div.d-cipher-task', tb)[i];
+                    $spn = $('span.step-number', div);
+                    left = window.innerWidth - $spn.outerWidth() * (tLen - i);
+                    $spn.removeClass('active').trigger('mouseout');
+                    $(div).css({
 
-                    var tb = this.getDomElement('taskBar'),
-                        div = $('div.d-cipher-task', tb)[task.step];
-
-                    task.done = true;
-                    if (!force) {
-
-                        this.syncTaskEvents(task);
-
-                    }
-                    $('span.step-number', div).html('✓');
-                    $('span.task-description', div).hide();
-
-                }
-
-            };
-
-            this.setTaskUndone = function (task, force) {
-
-                if (task && (task.done || force)) {
-
-                    var tb = this.getDomElement('taskBar'),
-                        div = $('div.d-cipher-task', tb)[task.step];
-
-                    task.done = false;
-                    if (!force) {
-
-                        this.syncTaskEvents(task);
-
-                    }
-                    $('span.step-number', div).html(task.step + 1);
-                    $('span.task-description', div).show();
-
-                }
-
-            };
-
-            this.startTest = function () {
-
-                $(this.getDomElement('testName')).hide();
-                $(this.getDomElement('butStartTest')).hide();
-                $(this.getDomElement('butTest')).hide();
-                $(this.getDomElement('taskProgress')).width(0);
-                this.activateTask(this.testTasks[0]);
-                this.toggleRecMode();
-                this.resetApp('test', this.testEvents[0].location);
-
-            };
-
-            this.endOfTest = function (stop) {
-
-                var self = this,
-                    tb = this.getDomElement('taskBar');
-
-                function endOfTest() {
-
-                    self.toggleRecMode();
-                    self.resetTasklist();
-
-                    $('.d-cipher-task-done', tb).fadeOut();
-                    $(self.getDomElement('taskProgress')).hide();
-                    $(self.getDomElement('testName')).show();
-                    $(self.getDomElement('butStartTest')).show();
-                    $(self.getDomElement('butTest')).show();
-
-                }
-
-                this.appMode = 'record';
-                if (stop) {
-
-                    endOfTest();
-
-                } else {
-
-                    $('.d-cipher-task-done', tb).fadeIn();
-                    setTimeout(endOfTest, 2000);
-
-                }
-
-            };
-
-            this.checkTaskCompletion = function () {
-
-                var e = this.currentEvent,
-                    testTasks = this.testTasks,
-                    currentTask = this.currentTask,
-                    cStep = (currentTask.step + 1),
-                    evts = this.currentTask.events;
-
-                if (e && evts && evts.length) {
-
-                    var eTargetTreePath = e.target.treePath,
-                        el = e ? this.getElementByTreePath(eTargetTreePath) : null;
-
-                    for (var i = 0, len = evts.length; i < len; i++) {
-
-                        var evt = evts[i],
-                            treePath = eTargetTreePath,
-                            offset = $(el).offset(),
-                            ww = window.innerWidth,
-                            wh = window.innerHeight,
-                            pX = pageXOffset,
-                            pY = pageYOffset,
-                            re = new RegExp('^' + evt.target.treePath),
-                            vis;
-
-                        vis = offset.top < (pY + wh) && offset.top > pY
-                              && offset.left < pX + ww && offset.left > pX;
-
-                        if (vis && evt.type === e.type
-                            && treePath.match(re)
-                            && evt.location === e.location) {
-
-                            evt.done = true;
-
-                            // Set alternative scenario events to done
-                            this.checkAlternativeEvents(evt);
-                            break;
-
-                        }
-
-                    }
-
-                    if (!evts.filter(function (e) {
-
-                            return !e.done;
-
-                        }).length) {
-
-                        if (cStep < testTasks.length) {
-
-                            this.activateTask(testTasks[cStep]);
-
-                        } else {
-
-                            this.setTaskDone(currentTask);
-                            this.endOfTest();
-
-                        }
-
-                    } else {
-
-                        this.setTestProgressBar();
-
-                    }
-
-                }
-
-            };
-
-            this.checkAlternativeEvents = function (event) {
-
-                var evts = this.testEvents,
-                    id = event.id;
-
-                // Check events in the reference list of the given event
-                if (event.alternate && event.alternate.length) {
-
-                    event.alternate.forEach(function (id) {
-
-                        evts.findBy('id', id).done = true;
+                        left: left,
+                        transition: 'left 0.2s ease-out 0.15s'
 
                     });
 
                 }
 
-            };
+            }
 
-            this.setTestProgressBar = function () {
+        };
 
-                var testEvents = this.testEvents,
-                    winW = window.innerWidth,
-                    butW = $('.step-number', this.getDomElement('taskBar')).outerWidth(),
-                    finW = winW - butW * (2 + this.testTasks.length);
+        this.syncTaskEvents = function (task) {
 
-                function getEventsInfo() {
+            var done = task.done;
 
-                    var total = testEvents.length,
-                        dl = testEvents.filter(function (e) {
-                            return e.done
-                        });
+            this.testEvents.forEach(function (e) {
 
-                    return {total: total, done: dl ? dl.length : 0};
+                if (e.taskId === task.id) {
+
+                    e.done = done;
 
                 }
 
-                var ev = getEventsInfo(),
-                    ct = this.currentTask ? (3 + this.currentTask.step) : 0;
+            });
 
-                $(this.getDomElement('taskProgress')).css({
+        };
 
-                    width: finW * ev.done / ev.total + 2,
-                    left: butW * (ct),
-                    transition: 'width 0.2s ease-out 0.1s',
-                    display: 'block'
+        this.setTaskDone = function (task, force) {
 
-                });
+            if (task && (!task.done || force)) {
 
-                if (this.currentTask) {
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
 
-                    var tDiv = document.getElementById('taskId-' + this.currentTask.id);
-                    tDiv.value = this.currentTask.description + '  [ ' + ev.done + ' from ' + ev.total + ' ]';
+                task.done = true;
+                if (!force) {
 
-                }
-
-                if (ev.done === ev.total) {
-
-                    this.endOfTest();
+                    this.syncTaskEvents(task);
 
                 }
+                $('span.step-number', div).html('✓');
+                $('span.task-description', div).hide();
 
-            };
+            }
 
-            this.resetApp = function (mode, path, restore) {
+        };
 
-                localStorage.clear();
-                sessionStorage.removeItem('basket');
-                this.appMode = mode;
-                if (!restore && path /*&& window.location.pathname !== path*/) {
+        this.setTaskUndone = function (task, force) {
 
-                    window.location.pathname = path;
+            if (task && (task.done || force)) {
 
-                }
+                var tb = this.getDomElement('taskBar'),
+                    div = $('div.d-cipher-task', tb)[task.step];
 
-            };
+                task.done = false;
+                if (!force) {
 
-            this.resetTasklist = function () {
-
-                var self = this;
-
-                this.testTasks.forEach(function (task) {
-                    self.deactivateTask(task)
-                });
-                this.currentTask = null;
-                this.currentEvent = null;
-                this.setTestProgressBar();
-                sessionStorage.removeItem('dcipherState');
-
-            };
-
-            this.highlightTimeLineEvent = function (e) {
-
-                var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
-                    evt = evts ? evts[0] : null,
-                    rec = evt ? this.getSessionById(evt.sessionId) : null,
-                    tl = this.getDomElement('timeline'),
-                    $tlc = $(this.getDomElement('timelineCircle'));
-
-                if (rec && rec.active) {
-
-                    $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
-
-                } else if (e.target === tl) {
-
-                    $tlc.hide();
+                    this.syncTaskEvents(task);
 
                 }
+                $('span.step-number', div).html(task.step + 1);
+                $('span.task-description', div).show();
 
-            };
+            }
 
-            this.getTimeLineCursorPars = function (time, duration) {
+        };
 
-                var offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    tl = this.getDomElement('timeline'),
-                    width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
-                    pxs = width / duration,
-                    top = $(tl).height() / 2,
-                    left = this.timeLineOffsetLeft + pxs * time;
+        this.startTest = function () {
 
-                return {
+            $(this.getDomElement('testName')).hide();
+            $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butTest')).hide();
+            $(this.getDomElement('taskProgress')).width(0);
+            this.activateTask(this.testTasks[0]);
+            this.toggleRecMode();
+            this.resetApp('test', this.testEvents[0].location);
 
-                    top: top,
-                    left: left
-                }
+        };
 
-            };
+        this.endOfTest = function (stop) {
 
-            this.getTimeLineBracketsPars = function (time1, time2) {
+            var self = this,
+                tb = this.getDomElement('taskBar');
 
-                var activeSession = this.activeSession,
-                    duration = activeSession ? activeSession.duration : 0,
-                    offsetRight = $(this.getDomElement('timelineInfo')).width(),
-                    pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
-                    left = this.timeLineOffsetLeft + pxs * time1,
-                    width = this.timeLineOffsetLeft + pxs * time2 - left;
+            function endOfTest() {
 
-                this.timeBrackets = [time1, time2];
-                this.startEventIndex = activeSession.events.find(function (e) {
-                    return e.time >= time1;
-                }).index;
-                this.endEventIndex = activeSession.events.find(function (e) {
-                    return e.time >= time2;
-                }).index;
-                return {width: width, left: left};
-            };
+                self.toggleRecMode();
+                self.resetTasklist();
 
-            this.modifyTimelineFrame = function (e) {
+                $('.d-cipher-task-done', tb).fadeOut();
+                $(self.getDomElement('taskProgress')).hide();
+                $(self.getDomElement('testName')).show();
+                $(self.getDomElement('butStartTest')).show();
+                $(self.getDomElement('butTest')).show();
 
-                var $tb = $('#' + this.domId.timelineBrackets),
-                    t1 = this.timeBrackets[0],
-                    t2 = this.timeBrackets[1],
-                    tframe = t2 - t1,
-                    tppx = tframe / $tb.width(),
-                    dt = (e.clientX - this.tlMouse.x) * tppx;
+            }
 
-                if (this.tlMouse.target === 'left-bracket' && t1 + dt >= 0) {
+            this.appMode = 'record';
+            if (stop) {
 
-                    t1 += dt;
+                endOfTest();
 
-                } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeSession.duration) {
+            } else {
 
-                    t2 += dt;
+                $('.d-cipher-task-done', tb).fadeIn();
+                setTimeout(endOfTest, 2000);
 
-                } else if (this.tlMouse.target === 'brackets') {
+            }
 
-                    t1 += dt;
-                    t2 += dt;
+        };
 
-                }
+        this.checkTaskCompletion = function () {
 
-                if (t1 >= 0 && t2 <= this.activeSession.duration) {
+            var e = this.currentEvent,
+                testTasks = this.testTasks,
+                currentTask = this.currentTask,
+                cStep = (currentTask.step + 1),
+                evts = this.currentTask.events;
 
-                    this.drawTLBrackets(t1, t2);
+            if (e && evts && evts.length) {
 
-                }
-                this.tlMouse.x = e.clientX;
-                this.tlMouse.y = e.clientY;
+                var eTargetTreePath = e.target.treePath,
+                    el = e ? this.getElementByTreePath(eTargetTreePath) : null;
 
-            };
+                for (var i = 0, len = evts.length; i < len; i++) {
 
-            this.toggleTestList = function () {
+                    var evt = evts[i],
+                        tTargetTreePath = evt.target.treePath,
+                        offset = $(el).offset(),
+                        ww = window.innerWidth,
+                        wh = window.innerHeight,
+                        pX = pageXOffset,
+                        pY = pageYOffset,
+                        eReg = new RegExp('^' + eTargetTreePath),
+                        tReg = new RegExp('^' + tTargetTreePath),
+                        eLoc = e.location,
+                        tLoc = evt.location,
+                        vis;
 
-                var tlId = this.domId['testList'],
-                    tlbId = this.domId['butTest'],
-                    $tl = $('#' + tlId);
+                    vis = offset.top < (pY + wh) && offset.top > pY
+                          && offset.left < pX + ww && offset.left > pX;
 
-                function hideTestList(e) {
+                    if (vis && evt.type === e.type
+                        && (eTargetTreePath.match(tReg) || tTargetTreePath.match(eReg))
+                        && (tLoc === eLoc // XXX index.html check
+                            || (eLoc.match('index.htm') && eLoc.match(tLoc))
+                            || (tLoc.match('index.htm') && tLoc.match(eLoc)))) {
 
-                    if ($tl.is(':visible') && !$tl.find(e.target).length && e.target.id !== tlbId && !$('#' + tlbId).find(e.target).length) {
+                        evt.done = true;
 
-                        $tl.hide();
+                        // Set alternative scenario events to done
+                        this.checkAlternativeEvents(evt);
+                        break;
 
                     }
 
                 }
 
-                if (!$tl.is(':visible') && this.tests) {
+                if (!evts.filter(function (e) {
 
-                    $tl.show();
-                    $('body').on('click', hideTestList);
+                        return !e.done;
+
+                    }).length) {
+
+                    if (cStep < testTasks.length) {
+
+                        this.activateTask(testTasks[cStep]);
+
+                    } else {
+
+                        this.setTaskDone(currentTask);
+                        this.endOfTest();
+
+                    }
 
                 } else {
+
+                    this.setTestProgressBar();
+
+                }
+
+            }
+
+        };
+
+        this.checkAlternativeEvents = function (event) {
+
+            var evts = this.testEvents,
+                id = event.id;
+
+            // Check events in the reference list of the given event
+            if (event.alternate && event.alternate.length) {
+
+                event.alternate.forEach(function (id) {
+
+                    evts.findBy('id', id).done = true;
+
+                });
+
+            }
+
+        };
+
+        this.setTestProgressBar = function () {
+
+            var testEvents = this.testEvents,
+                winW = window.innerWidth,
+                butW = $('.step-number', this.getDomElement('taskBar')).outerWidth(),
+                finW = winW - butW * (2 + this.testTasks.length);
+
+            function getEventsInfo() {
+
+                var total = testEvents.length,
+                    dl = testEvents.filter(function (e) {
+                        return e.done
+                    });
+
+                return {total: total, done: dl ? dl.length : 0};
+
+            }
+
+            var ev = getEventsInfo(),
+                ct = this.currentTask ? (3 + this.currentTask.step) : 0;
+
+            $(this.getDomElement('taskProgress')).css({
+
+                width: finW * ev.done / ev.total + 2,
+                left: butW * (ct),
+                transition: 'width 0.2s ease-out 0.1s',
+                display: 'block'
+
+            });
+
+            if (this.currentTask) {
+
+                var tDiv = document.getElementById('taskId-' + this.currentTask.id);
+                tDiv.value = this.currentTask.description + '  [ ' + ev.done + ' from ' + ev.total + ' ]';
+
+            }
+
+            if (ev.done === ev.total) {
+
+                this.endOfTest();
+
+            }
+
+        };
+
+        this.resetApp = function (mode, path, restore) {
+
+            localStorage.clear();
+            sessionStorage.removeItem('basket');
+            this.appMode = mode;
+            if (!restore && path /*&& window.location.pathname !== path*/) {
+
+                window.location.pathname = path;
+
+            }
+
+        };
+
+        this.resetTasklist = function () {
+
+            this.deactivateTask(this.testTasks[0]);
+            this.currentTask = null;
+            this.currentEvent = null;
+            this.setTestProgressBar();
+            sessionStorage.removeItem('dcipherState');
+
+        };
+
+        this.highlightTimeLineEvent = function (e) {
+
+            var evts = this.eventsUnderMouse || this.getEventsUnderMouse(e.clientX, e.clientY),
+                evt = evts ? evts[0] : null,
+                rec = evt ? this.getSessionById(evt.sessionId) : null,
+                tl = this.getDomElement('timeline'),
+                $tlc = $(this.getDomElement('timelineCircle'));
+
+            if (rec && rec.active) {
+
+                $tlc.css(this.getTimeLineCursorPars(evt.time, rec.duration)).show();
+
+            } else if (e.target === tl) {
+
+                $tlc.hide();
+
+            }
+
+        };
+
+        this.getTimeLineCursorPars = function (time, duration) {
+
+            var offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                tl = this.getDomElement('timeline'),
+                width = window.innerWidth - this.timeLineOffsetLeft - offsetRight,
+                pxs = width / duration,
+                top = $(tl).height() / 2,
+                left = this.timeLineOffsetLeft + pxs * time;
+
+            return {
+
+                top: top,
+                left: left
+            }
+
+        };
+
+        this.getTimeLineBracketsPars = function (time1, time2) {
+
+            var activeSession = this.activeSession,
+                duration = activeSession ? activeSession.duration : 0,
+                offsetRight = $(this.getDomElement('timelineInfo')).width(),
+                pxs = (window.innerWidth - this.timeLineOffsetLeft - offsetRight) / duration,
+                left = this.timeLineOffsetLeft + pxs * time1,
+                width = this.timeLineOffsetLeft + pxs * time2 - left;
+
+            this.timeBrackets = [time1, time2];
+            this.startEventIndex = activeSession.events.find(function (e) {
+                return e.time >= time1;
+            }).index;
+            this.endEventIndex = activeSession.events.find(function (e) {
+                return e.time >= time2;
+            }).index;
+            return {width: width, left: left};
+        };
+
+        this.modifyTimelineFrame = function (e) {
+
+            var $tb = $('#' + this.domId.timelineBrackets),
+                t1 = this.timeBrackets[0],
+                t2 = this.timeBrackets[1],
+                tframe = t2 - t1,
+                tppx = tframe / $tb.width(),
+                dt = (e.clientX - this.tlMouse.x) * tppx;
+
+            if (this.tlMouse.target === 'left-bracket' && t1 + dt >= 0) {
+
+                t1 += dt;
+
+            } else if (this.tlMouse.target === 'right-bracket' && t2 + dt <= this.activeSession.duration) {
+
+                t2 += dt;
+
+            } else if (this.tlMouse.target === 'brackets') {
+
+                t1 += dt;
+                t2 += dt;
+
+            }
+
+            if (t1 >= 0 && t2 <= this.activeSession.duration) {
+
+                this.drawTLBrackets(t1, t2);
+
+            }
+            this.tlMouse.x = e.clientX;
+            this.tlMouse.y = e.clientY;
+
+        };
+
+        this.toggleTestList = function () {
+
+            var tlId = this.domId['testList'],
+                tlbId = this.domId['butTest'],
+                $tl = $('#' + tlId);
+
+            function hideTestList(e) {
+
+                if ($tl.is(':visible') && !$tl.find(e.target).length && e.target.id !== tlbId && !$('#' + tlbId).find(e.target).length) {
 
                     $tl.hide();
-                    $('body').off('click', hideTestList);
 
                 }
 
-            };
+            }
 
-            this.resetTestCase = function () {
-                "use strict";
+            if (!$tl.is(':visible') && this.tests) {
 
-                this.startEventIndex = undefined;
-                this.endEventIndex = undefined;
-                this.currentTask = null;
-                this.testTasks = [];
-                this.testEvents = [];
-                this.timeBrackets = [];
-                this.currentEvent = null;
-                this.currentEvent = null;
-                this.activeSession = null;
-                this.sessionId = '';
+                $tl.show();
+                $('body').on('click', hideTestList);
 
-            };
+            } else {
 
-            this.createTestList = function () {
+                $tl.hide();
+                $('body').off('click', hideTestList);
 
-                var self = this,
-                    $div = $('.tests', this.getDomElement('testList')),
-                    tst, inp, del;
+            }
 
-                $div.children().remove();
-                this.tests.forEach(function (test) {
+        };
 
-                    tst = document.createElement('div');
-                    tst.className = 'test';
-                    tst.setAttribute('data-d-cipher-test-id', test.id);
+        this.resetTestCase = function () {
+            "use strict";
 
-                    inp = document.createElement('input');
-                    inp.id = 'inpTestId-' + test.id;
-                    inp.type = 'text';
-                    inp.name = 'testName';
-                    inp.className = 'test-name';
-                    inp.value = test.name;
-                    inp.disabled = true;
-                    inp.setAttribute('data-d-cipher-test-id', test.id);
-                    tst.appendChild(inp);
+            this.startEventIndex = undefined;
+            this.endEventIndex = undefined;
+            this.currentTask = null;
+            this.testTasks = [];
+            this.testEvents = [];
+            this.timeBrackets = [];
+            this.currentEvent = null;
+            this.currentEvent = null;
+            this.activeSession = null;
+            this.sessionId = '';
 
-                    del = document.createElement('div');
-                    del.id = 'btnDelTest-' + test.id;
-                    del.className = 'del';
-                    del.innerHTML = '&#10005;';
-                    del.title = dCipher.loc._Delete_test;
-                    del.setAttribute('data-d-cipher-test-id', test.id);
-                    tst.appendChild(del);
+        };
 
-                    $div.append(tst);
+        this.createTestList = function () {
 
-                    tst.addEventListener('click', function () {
+            var self = this,
+                $div = $('.tests', this.getDomElement('testList')),
+                tst, inp, del;
 
-                        var testCaseId = this.dataset.dCipherTestId;
+            $div.children().remove();
+            this.tests.forEach(function (test) {
 
-                        if (!self.testCase || self.testCase.id !== testCaseId) {
+                tst = document.createElement('div');
+                tst.className = 'test';
+                tst.setAttribute('data-d-cipher-test-id', test.id);
 
-                            self.resetTestCase();
-                            self.initTestCase(testCaseId);
+                inp = document.createElement('input');
+                inp.id = 'inpTestId-' + test.id;
+                inp.type = 'text';
+                inp.name = 'testName';
+                inp.className = 'test-name';
+                inp.value = test.name;
+                inp.disabled = true;
+                inp.setAttribute('data-d-cipher-test-id', test.id);
+                tst.appendChild(inp);
 
-                        }
+                del = document.createElement('div');
+                del.id = 'btnDelTest-' + test.id;
+                del.className = 'del';
+                del.innerHTML = '&#10005;';
+                del.title = dCipher.loc._Delete_test;
+                del.setAttribute('data-d-cipher-test-id', test.id);
+                tst.appendChild(del);
 
-                    });
+                $div.append(tst);
 
-                    tst.addEventListener('dblclick', function (e) {
+                tst.addEventListener('click', function () {
 
-                        e.stopPropagation();
-                        $('input[type="text"]', this).attr('disabled', false).focus();
+                    var testCaseId = this.dataset.dCipherTestId;
 
-                    });
+                    if (!self.testCase || self.testCase.id !== testCaseId) {
 
-                    inp.addEventListener('change', function (e) {
+                        self.resetTestCase();
+                        self.initTestCase(testCaseId);
 
-                        var test = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id')),
-                            name = $(this).val(),
-                            len = test.testEvents ? test.testEvents.length : 0;
-
-                        if (test && name) {
-
-                            test.name = name;
-                            test.description = name;
-                            self.getDomElement('testName').innerText = name + ' [ ' + len + ' ]';
-                            self.saveTestCase(test);
-                            self.createTaskList();
-
-                        }
-
-                    });
-
-                    del.addEventListener('click', function (e) {
-
-                        e.stopImmediatePropagation();
-                        self.deleteTest($(this).attr('data-d-cipher-test-id'));
-
-                    });
+                    }
 
                 });
 
-            };
+                tst.addEventListener('dblclick', function (e) {
 
-            this.initTestCase = function (testCaseId) {
-                "use strict";
+                    e.stopPropagation();
+                    $('input[type="text"]', this).attr('disabled', false).focus();
 
-                var self = this,
-                    test = self.testCase = self.tests.findBy('id', testCaseId);
+                });
 
-                return new Promise(function (resolve, reject) {
+                inp.addEventListener('change', function (e) {
 
-                    if (self.testTasks.length) {
+                    var test = self.tests.findBy('id', $(this).attr('data-d-cipher-test-id')),
+                        name = $(this).val(),
+                        len = test.testEvents ? test.testEvents.length : 0;
 
-                        var testEvents = self.testEvents = [],
-                            currentTaskId = self.currentTaskId,
-                            editTaskId = self.editTaskId;
+                    if (test && name) {
 
-                        self.createSessionList();
-                        self.testTasks.forEach(function (task) {
-
-                            if (task.id === currentTaskId) {
-
-                                self.currentTask = task;
-
-                            }
-                            if (task.id === editTaskId) {
-
-                                self.editTask = task;
-
-                            }
-                            Array.prototype.push.apply(testEvents, task.events);
-
-                            var len = self.testEvents ? self.testEvents.length : 0;
-                            $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
-
-                        });
+                        test.name = name;
+                        test.description = name;
+                        self.getDomElement('testName').innerText = name + ' [ ' + len + ' ]';
+                        self.saveTestCase(test);
                         self.createTaskList();
-                        resolve();
 
-                    } else {
+                    }
 
-                        self.initTestSessions(testCaseId).then(function () {
+                });
 
-                            self.db.getTestTasks(testCaseId).then(function (tasks) {
+                del.addEventListener('click', function (e) {
 
-                                if (self.testEvents) {
+                    e.stopImmediatePropagation();
+                    self.deleteTest($(this).attr('data-d-cipher-test-id'));
 
-                                    var len = self.testEvents ? self.testEvents.length : 0;
-                                    $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
+                });
 
-                                }
-                                self.initTestTasks(tasks);
-                                resolve();
+            });
 
-                            }, function (error, message) {
+        };
 
-                                reject(error);
+        this.initTestCase = function (testCaseId) {
+            "use strict";
 
-                            });
+            var self = this,
+                test = self.testCase = self.tests.findBy('id', testCaseId);
+
+            return new Promise(function (resolve, reject) {
+
+                if (self.testTasks.length) {
+
+                    var testEvents = self.testEvents = [],
+                        currentTaskId = self.currentTaskId,
+                        editTaskId = self.editTaskId;
+
+                    self.createSessionList();
+                    self.testTasks.forEach(function (task) {
+
+                        if (task.id === currentTaskId) {
+
+                            self.currentTask = task;
+
+                        }
+                        if (task.id === editTaskId) {
+
+                            self.editTask = task;
+
+                        }
+                        Array.prototype.push.apply(testEvents, task.events);
+
+                        var len = self.testEvents ? self.testEvents.length : 0;
+                        $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
+
+                    });
+                    self.createTaskList();
+                    resolve();
+
+                } else {
+
+                    self.initTestSessions(testCaseId).then(function () {
+
+                        self.db.getTestTasks(testCaseId).then(function (tasks) {
+
+                            if (self.testEvents) {
+
+                                var len = self.testEvents ? self.testEvents.length : 0;
+                                $(self.getDomElement('testName')).html(test ? test.name + ' [ ' + len + ' ]' : '').show();
+
+                            }
+                            self.initTestTasks(tasks);
+                            resolve();
 
                         }, function (error, message) {
 
@@ -5159,192 +5154,196 @@
 
                         });
 
-                    }
+                    }, function (error, message) {
 
-                });
-
-            };
-
-            this.initTestTasks = function (tasks) {
-                "use strict";
-
-                if (tasks && !tasks.length && !this.testCase) {
-
-                    return;
-
-                }
-
-                var self = this,
-                    events = this.testEvents,
-                    tDivs = $('.d-cipher-task', this.getDomElement('taskBar'));
-
-                this.tasks = [];
-
-                if (events && events.length) {
-
-                    tasks.forEach(function (task, idx) {
-
-                        task.events = events.filter(function (event) {
-
-                            return event.taskId === task.id;
-
-                        });
+                        reject(error);
 
                     });
 
                 }
-                this.testTasks = tasks;
-                this.createTaskList();
 
-            };
+            });
 
-            this.initTestSessions = function (testCaseId) {
-                "use strict";
+        };
 
-                var self = this,
-                    path = window.location.pathname,
-                    activeSession = this.activeSession,
-                    testSessionId;
+        this.initTestTasks = function (tasks) {
+            "use strict";
 
-                this.sessions = [];
-                path = path.substring(0, path.lastIndexOf('/'));
+            if (tasks && !tasks.length && !this.testCase) {
 
-                return new Promise(function (resolve, reject) {
+                return;
 
-                    self.db.getTestSessions(testCaseId).then(function (sessions) {
+            }
 
-                        sessions.forEach(function (session) {
+            var self = this,
+                events = this.testEvents,
+                tDivs = $('.d-cipher-task', this.getDomElement('taskBar'));
 
-                            if (session.type !== 'testEvents') {
+            this.tasks = [];
 
-                                if (activeSession && activeSession.id === session.id) {
+            if (events && events.length) {
 
-                                    session = activeSession;
+                tasks.forEach(function (task, idx) {
 
-                                }
-                                self.sessions.push(session);
+                    task.events = events.filter(function (event) {
 
-                            } else if (path.match(session.location)) {
+                        return event.taskId === task.id;
 
-                                testSessionId = session.id;
+                    });
+
+                });
+
+            }
+            this.testTasks = tasks;
+            this.createTaskList();
+
+        };
+
+        this.initTestSessions = function (testCaseId) {
+            "use strict";
+
+            var self = this,
+                path = window.location.pathname,
+                activeSession = this.activeSession,
+                testSessionId;
+
+            this.sessions = [];
+            path = path.substring(0, path.lastIndexOf('/'));
+
+            return new Promise(function (resolve, reject) {
+
+                self.db.getTestSessions(testCaseId).then(function (sessions) {
+
+                    sessions.forEach(function (session) {
+
+                        if (session.type !== 'testEvents') {
+
+                            if (activeSession && activeSession.id === session.id) {
+
+                                session = activeSession;
 
                             }
+                            self.sessions.push(session);
 
-                        });
+                        } else if (path.match(session.location)) {
 
-                        if (testSessionId) {
-
-                            self.db.getSessionEvents(testSessionId).then(function (events) {
-
-                                self.testEvents = events;
-                                resolve();
-
-                            });
-
-                        } else {
-
-                            resolve();
+                            testSessionId = session.id;
 
                         }
 
-                        self.createSessionList();
-
                     });
 
-                });
-            };
+                    if (testSessionId) {
 
-            this.createTestCase = function () {
+                        self.db.getSessionEvents(testSessionId).then(function (events) {
 
-                var id = $.newGuid(),
-                    test = {
+                            self.testEvents = events;
+                            resolve();
 
-                        id: id,
-                        name: '',
-                        description: '',
-                        author: 'Gray Holland',
-                        created: +new Date(),
-                        modified: '',
-                        sessions: []
+                        });
 
-                    };
+                    } else {
 
-                this.testTasks = [];
-                this.tests.push(test);
-                this.testCase = test;
-                this.currentTask = null;
-                this.sessions = [];
-                this.currentEvent = null;
-                this.startEventIndex = '';
-                this.endEventIndex = '';
-                this.timeBrackets = [];
-                this.createTestList();
-                this.createTaskList();
-                this.createSessionList();
-                $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
+                        resolve();
 
-            };
+                    }
 
-            this.saveTestCase = function (test) {
-
-                var self = this;
-
-                this.db.putTest(test);
-                this.db.getTests().then(function (tests) {
-                    "use strict";
-
-                    self.tests = tests;
-                    self.createTestList();
+                    self.createSessionList();
 
                 });
 
-            };
+            });
+        };
 
-            this.deleteTest = function (testCaseId) {
+        this.createTestCase = function () {
 
-                var self = this;
+            var id = $.newGuid(),
+                test = {
 
-                return new Promise(function (resolve, reject) {
-                    "use strict";
+                    id: id,
+                    name: '',
+                    description: '',
+                    author: 'Gray Holland',
+                    created: +new Date(),
+                    modified: '',
+                    sessions: []
 
-                    var promises = [];
+                };
 
-                    self.db.deleteTest(testCaseId).then( function () {
+            this.testTasks = [];
+            this.tests.push(test);
+            this.testCase = test;
+            this.currentTask = null;
+            this.sessions = [];
+            this.currentEvent = null;
+            this.startEventIndex = '';
+            this.endEventIndex = '';
+            this.timeBrackets = [];
+            this.createTestList();
+            this.createTaskList();
+            this.createSessionList();
+            $('input#inpTestId-' + id, this.getDomElement('testList')).attr('disabled', false).focus();
 
-                        self.db.getTestTasks(testCaseId).then(function (tasks) {
+        };
 
-                            self.db.deleteTaskSet(tasks).then( function () {
+        this.saveTestCase = function (test) {
 
-                                self.db.getTestSessions(testCaseId).then(function (sessions) {
+            var self = this;
 
-                                    sessions.forEach( function (session) {
+            this.db.putTest(test);
+            this.db.getTests().then(function (tests) {
+                "use strict";
 
-                                        promises.push(self.db.deleteSession(session.id));
+                self.tests = tests;
+                self.createTestList();
+
+            });
+
+        };
+
+        this.deleteTest = function (testCaseId) {
+
+            var self = this;
+
+            return new Promise(function (resolve, reject) {
+                "use strict";
+
+                var promises = [];
+
+                self.db.deleteTest(testCaseId).then(function () {
+
+                    self.db.getTestTasks(testCaseId).then(function (tasks) {
+
+                        self.db.deleteTaskSet(tasks).then(function () {
+
+                            self.db.getTestSessions(testCaseId).then(function (sessions) {
+
+                                sessions.forEach(function (session) {
+
+                                    promises.push(self.db.deleteSession(session.id));
+
+                                });
+
+                                Promise.all(promises).then(function () {
+
+                                    self.db.getTests().then(function (tests) {
+                                        "use strict";
+
+                                        self.tests = tests;
+                                        self.createTestList();
+                                        self.testTasks = [];
+                                        self.testEvents = [];
+                                        self.createTaskList();
+                                        self.getDomElement('testName').innerHTML = '';
+                                        $(self.getDomElement('butAddTask')).hide();
+                                        resolve();
 
                                     });
 
-                                    Promise.all(promises).then(function () {
+                                }, function () {
 
-                                        self.db.getTests().then(function (tests) {
-                                            "use strict";
-
-                                            self.tests = tests;
-                                            self.createTestList();
-                                            self.testTasks = [];
-                                            self.testEvents = [];
-                                            self.createTaskList();
-                                            self.getDomElement('testName').innerHTML = '';
-                                            $(self.getDomElement('butAddTask')).hide();
-                                            resolve();
-
-                                        });
-
-                                    }, function () {
-
-                                        console.error('[ERROR] dCipher: Failed to delete test.');
-                                        reject();
-
-                                    });
+                                    console.error('[ERROR] dCipher: Failed to delete test.');
+                                    reject();
 
                                 });
 
@@ -5356,71 +5355,73 @@
 
                 });
 
-            };
+            });
 
-            this.createTestTask = function () {
-                "use strict";
+        };
 
-                var self = this;
+        this.createTestTask = function () {
+            "use strict";
 
-                var id = $.newGuid(),
-                    task = {
+            var self = this;
 
-                        id: id,
-                        testCaseId: this.testCase.id,
-                        description: '',
-                        step: this.testTasks.length
+            var id = $.newGuid(),
+                task = {
 
-                    };
+                    id: id,
+                    testCaseId: this.testCase.id,
+                    description: '',
+                    step: this.testTasks.length
 
-                this.db.putTask(task).then(function () {
+                };
 
-                    self.testTasks.push(task);
-                    self.editTask = task;
-                    self.initTestTasks(self.testTasks, self.testEvents);
-                    self.moveTaskLeft(task);
-                    $('input#taskId-' + task.id).attr('disabled', false).focus();
+            this.db.putTask(task).then(function () {
 
-                });
+                self.testTasks.push(task);
+                self.editTask = task;
+                self.initTestTasks(self.testTasks, self.testEvents);
+                self.moveTaskLeft(task);
+                $('input#taskId-' + task.id).attr('disabled', false).focus();
 
-            };
+            });
 
-/*
-            this.getTestTasks = function () {
-                "use strict";
+        };
 
-                var self = this,
-                    testCaseId = this.testCase.id;
+        /*
+         this.getTestTasks = function () {
+         "use strict";
 
-                return new Promise(function (resolve, reject) {
+         var self = this,
+         testCaseId = this.testCase.id;
 
-                    self.db.getTestTasks(testCaseId).then(function (tasks) {
+         return new Promise(function (resolve, reject) {
 
-                        self.db.getTestEvents(testCaseId).then(function (events) {
+         self.db.getTestTasks(testCaseId).then(function (tasks) {
 
-                            self.initTestTasks(tasks, events);
-                            resolve();
+         self.db.getTestEvents(testCaseId).then(function (events) {
 
-                        }, function (error, message) {
+         self.initTestTasks(tasks, events);
+         resolve();
 
-                            console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
-                            reject(error);
+         }, function (error, message) {
 
-                        });
+         console.log('[ERROR] dCipher: fail to get test events. Error: ', message);
+         reject(error);
 
-                    }, function (error, message) {
+         });
 
-                        console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
-                        reject(error);
+         }, function (error, message) {
 
-                    });
+         console.log('[ERROR] dCipher: fail to get test tasks. Error: ', message);
+         reject(error);
 
-                });
+         });
 
-            };
-*/
+         });
 
-        }; // End of DCipher class
+         };
+         */
+
+    }; // End of DCipher class
 
     var dCipher = new DCipher();
 
