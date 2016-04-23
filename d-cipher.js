@@ -58,6 +58,7 @@
             _Task_description_placeholder: 'Enter task name',
             _Delete_task: 'Delete task',
             _Test_events: 'Test events recorded',
+            _Record_master: "Record master",
 
             start: 'Start',
             mouseover: 'Mouse over',
@@ -598,48 +599,6 @@
 
         };
 
-        /*
-         this.getTestEvents = function (testCaseId) {
-         "use strict";
-
-         var self = this,
-         events = [];
-
-         return new Promise(function (resolve, reject) {
-
-         if (testCaseId == '0') {
-
-         events = this.masterTestEvents.slice();
-
-         }
-
-         $.indexedDB(self.dbName).objectStore(self.tables.events).each(function (rec) {
-
-         if (rec.value.testCaseId === testCaseId) {
-
-         //console.log(r.value);
-         events.push(rec.value);
-
-         }
-
-         }).done(function () {
-
-         //console.log('--> result: %s, event: %s', r, e);
-         //console.debug('Records: ', self.records);
-         resolve(events/!*.sort( function (event1, event2) { return event1.timeStamp > event2.timeStamp })*!/);
-
-         }).fail(function (error, msg) {
-
-         console.warn('[WARNING] dbAdapter: Failed to get test events. Error: ', msg);
-         reject(error);
-
-         });
-
-         });
-
-         };
-         */
-
         this.getSessionEvents = function (sessionId) {
             "use strict";
 
@@ -941,6 +900,7 @@
             taskBar: 'd-cipher-taskbar',
             taskProgress: 'd-cipher-task-progress',
             butStartTest: 'd-cipher-but-start-task',
+            butRecMaster: 'd-cipher-but-rec-master',
             testName: 'd-cipher-test-name',
             testList: 'd-cipher-test-list',
             butAddTask: 'd-cipher-add-task'
@@ -1225,8 +1185,12 @@
 
                 if (this.editTask) {
 
-                    this.db.putSession(activeSession);
-                    this.moveTaskRight(this.testTasks[0]);
+                    this.db.putSession(activeSession).then(function () {
+                        "use strict";
+
+                        self.moveTaskRight(self.testTasks[0]);
+
+                    });
 
                 } else if (activeSession && activeSession.events && activeSession.events.length > 1) {
 
@@ -1236,6 +1200,11 @@
                     activeSession.kpi = evt.kpi;
                     activeSession.mouseMilesTotal = evt.miles;
                     activeSession.eventsQty = 0;
+                    if (activeSession.master) {
+
+                        activeSession.name = 'Master';
+
+                    }
 
                     for (var et in activeSession.eventsStat) {
 
@@ -1252,7 +1221,11 @@
                         self.sessions.push(activeSession);
                         self.createSessionList();
                         self.toggleSessionList();
-                        $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
+                        if (!activeSession.master) {
+
+                            $(':last-child > input', self.getDomElement('sessions')).attr('disabled', false).focus();
+
+                        }
                         self.setActiveSession(self.sessionId, true);
                         self.showSpiderGraph(self.sessionId);
 
@@ -3970,7 +3943,7 @@
 
         this.saveState = function saveState() {
 
-            if (this.appMode || this.editTask) {
+            if (this.appMode || this.editTask || this.testCase) {
 
                 if (this.appMode === 'test') {
 
@@ -4076,18 +4049,19 @@
 
                 if (self.currentTask) {
 
-                    // self.createTaskList();
                     self.activateTask(self.currentTask, true);
                     $(self.getDomElement('testName')).hide();
                     $(self.getDomElement('butStartTest')).hide();
+                    $(self.getDomElement('butRecMaster')).hide();
                     $(self.getDomElement('butTest')).hide();
 
                 } else if (self.editTask) {
 
                     self.moveTaskLeft(self.editTask);
-                    $(self.getDomElement('butStartTest')).hide();
-                    $(self.getDomElement('butTest')).hide();
                     $(self.getDomElement('testName')).hide();
+                    $(self.getDomElement('butStartTest')).hide();
+                    $(self.getDomElement('butRecMaster')).hide();
+                    $(self.getDomElement('butTest')).hide();
 
                 }
 
@@ -4221,9 +4195,15 @@
 
                 if (this.testTasks && this.testTasks.length && this.testEvents && this.testEvents.length) {
 
-                    if (!this.currentTask) {
+                    if (!this.currentTask && this.sessions.length) {
 
+                        $(this.getDomElement('butRecMaster')).hide();
                         $(this.getDomElement('butStartTest')).show();
+
+                    } else {
+
+                        $(this.getDomElement('butStartTest')).hide();
+                        $(this.getDomElement('butRecMaster')).show();
 
                     }
 
@@ -4474,6 +4454,7 @@
 
             $(this.getDomElement('testName')).hide();
             $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butRecMaster')).hide();
             $(this.getDomElement('butTest')).hide();
 
         };
@@ -4507,6 +4488,8 @@
 
             }
 
+            delete task.left;
+
             if (step) {
 
                 $($('div.d-cipher-task > span.step-number[step=' + (step - 1) + ']', tb)).addClass('active');
@@ -4514,21 +4497,20 @@
 
             } else {
 
-                this.editTask = null;
-                this.appMode = '';
-
-            }
-
-            // $(div).children('.task-description').fadeIn('slow');
-            // $('span.step-number', div).removeClass('active');
-
-            delete task.left;
-
-            if (!task.step) {
-
                 $(this.getDomElement('testName')).fadeIn();
-                $(this.getDomElement('butStartTest')).fadeIn();
+                if (!this.editTask) {
+
+                    $(this.getDomElement('butStartTest')).fadeIn();
+
+                } else if (this.testEvents.length) {
+
+                    $(this.getDomElement('butRecMaster')).fadeIn();
+
+                }
                 $(this.getDomElement('butTest')).fadeIn();
+                this.editTask = null;
+                this.editTaskId = '';
+                this.appMode = '';
 
             }
 
@@ -4675,14 +4657,16 @@
 
         };
 
-        this.startTest = function () {
+        this.startTest = function (master) {
 
             $(this.getDomElement('testName')).hide();
             $(this.getDomElement('butStartTest')).hide();
+            $(this.getDomElement('butRecMaster')).hide();
             $(this.getDomElement('butTest')).hide();
             $(this.getDomElement('taskProgress')).width(0);
             this.activateTask(this.testTasks[0]);
             this.toggleRecMode();
+            this.activeSession.master = true;
             this.resetApp('test', this.testEvents[0].location);
 
         };
@@ -5175,15 +5159,13 @@
 
             }
 
-            var self = this,
-                events = this.testEvents,
-                tDivs = $('.d-cipher-task', this.getDomElement('taskBar'));
+            var events = this.testEvents;
 
             this.tasks = [];
 
             if (events && events.length) {
 
-                tasks.forEach(function (task, idx) {
+                tasks.forEach(function (task) {
 
                     task.events = events.filter(function (event) {
 
@@ -5463,6 +5445,7 @@
             taskBar = document.createElement('div'),
             taskProgress = document.createElement('span'),
             startTest = document.createElement('div'),
+            recMaster = document.createElement('div'),
             testList = document.createElement('div'),
             butCreateTest = document.createElement('div'),
             testsCtrls = document.createElement('div'),
@@ -5610,8 +5593,12 @@
         startTest.id = dCipher.domId.butStartTest;
         startTest.className = 'start-test';
         startTest.innerHTML = dCipher.loc._Start_test;
+        recMaster.id = dCipher.domId.butRecMaster;
+        recMaster.className = 'record-master';
+        recMaster.innerHTML = dCipher.loc._Record_master;
         taskBar.appendChild(taskProgress);
         taskBar.appendChild(startTest);
+        taskBar.appendChild(recMaster);
         taskBar.appendChild(testName);
         topMenu.appendChild(taskBar);
         taskBar.appendChild(testDone);
@@ -5804,6 +5791,12 @@
         startTest.addEventListener('click', function () {
 
             dCipher.startTest();
+
+        });
+
+        recMaster.addEventListener('click', function () {
+
+            dCipher.startTest(true);
 
         });
 
