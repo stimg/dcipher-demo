@@ -3458,6 +3458,7 @@
         this.createSessionList = function () {
 
             var self = this,
+                sesionsLen = this.sessions.length,
                 sessionsDiv = this.getDomElement('sessions'),
                 cnvHolder = this.getDomElement('canvasHolder'),
                 visRecs = {}, actRecs = {},
@@ -3551,13 +3552,17 @@
                 sessionDiv.appendChild(butShow);
 
                 // Delete Record button
-                butDel = document.createElement('div');
-                butDel.setAttribute('data-dcipher-rec-id', r.id);
-                butDel.id = 'delRecId-' + r.id;
-                butDel.className = 'del';
-                butDel.innerHTML = '&#10005;';
-                butDel.title = dCipher.loc._Delete_record;
-                sessionDiv.appendChild(butDel);
+                if (r.master && sesionsLen === 1) {
+
+                    butDel = document.createElement('div');
+                    butDel.setAttribute('data-dcipher-rec-id', r.id);
+                    butDel.id = 'delRecId-' + r.id;
+                    butDel.className = 'del';
+                    butDel.innerHTML = '&#10005;';
+                    butDel.title = dCipher.loc._Delete_record;
+                    sessionDiv.appendChild(butDel);
+
+                }
 
                 // Color picker
                 cpInp = document.createElement('input');
@@ -3647,11 +3652,15 @@
 
                 });
 
-                butDel.addEventListener('click', function () {
+                if (r.master && sesionsLen === 1) {
 
-                    self.deleteSession($(this).attr('data-dcipher-rec-id'));
+                    butDel.addEventListener('click', function () {
 
-                });
+                        self.deleteSession($(this).attr('data-dcipher-rec-id'));
+
+                    });
+
+                }
 
                 inpName.addEventListener('change', function () {
 
@@ -3668,12 +3677,16 @@
 
                 });
 
-                sessionDiv.addEventListener('dblclick', function () {
+                if (r.master && sesionsLen === 1) {
 
-                    var $el = $('input[type="text"]', this);
-                    $el.attr('disabled', false).focus();
+                    sessionDiv.addEventListener('dblclick', function () {
 
-                });
+                        var $el = $('input[type="text"]', this);
+                        $el.attr('disabled', false).focus();
+
+                    });
+
+                }
 
                 sessionDiv.addEventListener('click', function (e) {
 
@@ -3820,6 +3833,12 @@
 
                     self.sessions.splice(idx, 1);
                     self.createSessionList();
+                    if (!self.sessions.length) {
+
+                        $(self.getDomElement('butStartTest')).hide();
+                        $(self.getDomElement('butRecMaster')).show();
+
+                     }
                     resolve();
 
                 }, function (error, message) {
@@ -4666,7 +4685,7 @@
             $(this.getDomElement('taskProgress')).width(0);
             this.activateTask(this.testTasks[0]);
             this.toggleRecMode();
-            this.activeSession.master = true;
+            this.activeSession.master = master;
             this.resetApp('test', this.testEvents[0].location);
 
         };
@@ -4679,7 +4698,7 @@
             function endOfTest() {
 
                 self.toggleRecMode();
-                self.resetTasklist();
+                self.resetTaskList();
 
                 $('.d-cipher-task-done', tb).fadeOut();
                 $(self.getDomElement('taskProgress')).hide();
@@ -4853,7 +4872,7 @@
 
         };
 
-        this.resetTasklist = function () {
+        this.resetTaskList = function () {
 
             this.deactivateTask(this.testTasks[0]);
             this.currentTask = null;
