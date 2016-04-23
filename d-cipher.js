@@ -4274,7 +4274,7 @@
                         "use strict";
 
                         window.location = 'mailto:?subject=Invitation to test&body=Hi,' +
-                                          ' please take a part in our testing @ http://dcipher.eu/bugaboo/A/. ' +
+                                          ' please take part in our testing @ http://dcipher.eu/bugaboo/A/. ' +
                                           'It will take just a fiew minute. Thank you in advance! Best regards, UX-FLO Team.';
 
                     });
